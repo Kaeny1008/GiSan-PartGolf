@@ -8,15 +8,17 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using System.Web.Configuration;
+using System.Web.UI.WebControls;
+using System.Xml.Linq;
 
-namespace GiSanParkGolf.Repositories
+namespace GiSanParkGolf.Class
 {
-    public class UserRepository
+    public class DB_Management
     {
         // 공통으로 사용될 커넥션 개체
         private OleDbConnection con;
 
-        public UserRepository()
+        public DB_Management()
         {
             con = new OleDbConnection();
             con.ConnectionString = WebConfigurationManager.ConnectionStrings["MDB_ConnectionString"].ConnectionString;
@@ -77,24 +79,88 @@ namespace GiSanParkGolf.Repositories
         //    con.Close();
         //}
 
-        public bool IsCorrectUser(string userID, string password)
+        public string IsCorrectUser(string userID, string password)
         {
-            bool result = false;
+            string result = string.Empty;
 
             con.Open();
 
-            string strSql = "SELECT * FROM User_Information WHERE UserID = @UserId AND UserPassword = @Password";
-            OleDbCommand cmd = new OleDbCommand();
-            cmd.Connection = con;
-            cmd.CommandText = strSql;
-            cmd.CommandType = CommandType.Text;
+            string strSql = "SELECT UserWClass FROM User_Information WHERE UserID = @UserId AND UserPassword = @Password";
+            OleDbCommand cmd = new OleDbCommand
+            {
+                Connection = con,
+                CommandText = strSql,
+                CommandType = CommandType.Text
+            };
 
             cmd.Parameters.AddWithValue("@UserID", userID);
             cmd.Parameters.AddWithValue("@Password", password);
 
+            OleDbDataReader sqlDR = cmd.ExecuteReader();
+            if (sqlDR.Read())
+            {
+                if (sqlDR.GetString(0).Equals("승인"))
+                {
+                    result = "OK";
+                } else if (sqlDR.GetString(0).Equals("승인대기"))
+                {
+                    result = "Ready";
+                } else
+                {
+                    result = string.Empty;
+                }
+            }
+            sqlDR.Close();
+            con.Close();
+
+            return result;
+        }
+
+        public string DB_Write(string strSQL)
+        {
+            try
+            {
+                con = new OleDbConnection();
+                con.ConnectionString = WebConfigurationManager.ConnectionStrings["MDB_ConnectionString"].ConnectionString;
+                con.Open();
+
+                OleDbCommand cmd = new OleDbCommand
+                {
+                    Connection = con,
+                    CommandText = strSQL,
+                    CommandType = System.Data.CommandType.Text
+                };
+                cmd.ExecuteNonQuery();
+
+                con.Close();
+            }
+            catch (OleDbException ex)
+            {
+                return ex.ToString();
+            }
+
+            return "Success";
+        }
+
+        public Boolean ID_DuplicateCheck(string userID)
+        {
+            bool result = true;
+
+            con.Open();
+
+            string strSql = "SELECT * FROM User_Information WHERE UserID = @UserId";
+            OleDbCommand cmd = new OleDbCommand
+            {
+                Connection = con,
+                CommandText = strSql,
+                CommandType = CommandType.Text
+            };
+
+            cmd.Parameters.AddWithValue("@UserID", userID);
+
             OleDbDataReader dr = cmd.ExecuteReader();
             if (dr.Read())
-                result = true;
+                result = false;
 
             dr.Close();
             con.Close();

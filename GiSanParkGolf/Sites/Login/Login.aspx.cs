@@ -1,5 +1,4 @@
 ﻿using GiSanParkGolf.Models;
-using GiSanParkGolf.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data.OleDb;
@@ -12,6 +11,7 @@ using System.Web.Configuration;
 using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using GiSanParkGolf.Class;
 
 namespace GiSanParkGolf
 {
@@ -22,10 +22,10 @@ namespace GiSanParkGolf
 
         }
 
-        protected void btnLogin_Click(object sender, EventArgs e)
+        protected void BtnLogin_Click(object sender, EventArgs e)
         {
-            UserRepository userRepo = new UserRepository();
-            if (userRepo.IsCorrectUser(txtUserID.Text, txtPassword.Text))
+            DB_Management userRepo = new DB_Management();
+            if (userRepo.IsCorrectUser(txtUserID.Text, txtPassword.Text).Equals("OK"))
             {
                 // [!] 인증 부여
                 if (!String.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
@@ -40,9 +40,16 @@ namespace GiSanParkGolf
                     FormsAuthentication.SetAuthCookie(txtUserID.Text, false);
                     Response.Redirect("~/Default.aspx");
                 }
-            }
-            else
-                Page.ClientScript.RegisterStartupScript(this.GetType(), "showMsg", "<script>alert('잘못된 사용자입니다.');</script>");
+            } else if (userRepo.IsCorrectUser(txtUserID.Text, txtPassword.Text).Equals("Ready"))
+            {
+                Page.ClientScript.RegisterStartupScript(this.GetType(), "showMsg", "<script>alert('승인 대기중입니다.');</script>");
+            } else
+                Page.ClientScript.RegisterStartupScript(this.GetType(), "showMsg", "<script>alert('아이디 또는 비밀번호가 틀렸습니다.');</script>");
+        }
+
+        protected void BtnRegister_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("~/Sites/UserManagement/UserRepositories.aspx");
         }
     }
 }

@@ -48,36 +48,33 @@
                 <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/">홈</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Sites/Player Management">선수정보(관리자)</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Sites/Admin/Player Management">선수정보</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
         <div class="container">
-            <asp:Label ID="lblName" runat="server" Text="Label"></asp:Label>
+            <asp:Label ID="lblName" runat="server" Text="손님"></asp:Label>
             <asp:Label ID="Label1" runat="server" Text="님, 반갑습니다."></asp:Label>
             <asp:LoginView ID="LoginView1" runat="server">
                 <AnonymousTemplate>
                     <!-- 로그인 전 -->
-                    <asp:LoginStatus ID="LoginStatus1" runat="server" LoginText="로그인" Visible="false"/>
-                    <a href="/Sites/Login/Login">로그인</a> <%--둘중아무거나 써도 될듯--%>
-                    <%--<asp:HyperLink ID="HyperLink1" runat="server" NavigateUrl="~/Register.aspx">회원가입</asp:HyperLink>--%>
+                    <a href="/Sites/Login/Login">로그인</a>
                 </AnonymousTemplate>
                 <LoggedInTemplate>
                     <!-- 로그인 후 -->
-                    <asp:LoginStatus ID="LoginStatus2" runat="server" LogoutText="로그아웃" Visible="false" />
-                    <a href="/Sites/Login/Logout">로그아웃</a> <%--둘중아무거나 써도 될듯--%>
-    <%--                <asp:HyperLink ID="HyperLink2" runat="server" NavigateUrl="~/UserInfo.aspx">
-                        <asp:LoginName ID="LoginName1" runat="server" />
-                    </asp:HyperLink>--%>
+                    <a href="/Sites/Login/Logout">로그아웃</a>
                 </LoggedInTemplate>
             </asp:LoginView>
         </div>
-        <%--<p><a href="http://www.asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>--%>
         <div class="container body-content">
-            <asp:ContentPlaceHolder ID="MainContent" runat="server">
-            </asp:ContentPlaceHolder>
+            <div class="column">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                </asp:ContentPlaceHolder>
+            </div>
             <hr />
+        </div>
+        <div class="container body-content">
             <footer>
                 <p>&copy; <%: DateTime.Now.Year %> - 기산 파크골프</p>
             </footer>

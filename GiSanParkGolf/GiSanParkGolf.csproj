@@ -43,6 +43,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AspNet.ScriptManager.jQuery, Version=3.7.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AspNet.ScriptManager.jQuery.3.7.1\lib\net45\AspNet.ScriptManager.jQuery.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=4.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\lib\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
@@ -96,11 +99,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Class\StyleSheet.css" />
     <Content Include="Database\Database.accdb" />
     <Content Include="Sites\Login\Login.aspx" />
     <Content Include="Sites\Login\Logout.aspx" />
     <Content Include="Sites\HtmlPage1.html" />
-    <Content Include="Sites\Player Management.aspx" />
+    <Content Include="Sites\Admin\Player Management.aspx" />
     <Content Include="Contact.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -156,7 +160,7 @@
     <Content Include="Scripts\WebForms\WebParts.js" />
     <Content Include="Scripts\WebForms\WebUIValidation.js" />
     <Content Include="Site.Master" />
-    <Content Include="Sites\Player Register.aspx" />
+    <Content Include="Sites\UserManagement\UserRepositories.aspx" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -179,12 +183,12 @@
       <DependentUpon>Logout.aspx</DependentUpon>
     </Compile>
     <Compile Include="Models\UserViewModel.cs" />
-    <Compile Include="Repositories\UserRepository.cs" />
-    <Compile Include="Sites\Player Management.aspx.cs">
+    <Compile Include="Class\DB_Management.cs" />
+    <Compile Include="Sites\Admin\Player Management.aspx.cs">
       <DependentUpon>Player Management.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Sites\Player Management.aspx.designer.cs">
+    <Compile Include="Sites\Admin\Player Management.aspx.designer.cs">
       <DependentUpon>Player Management.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -220,12 +224,12 @@
     <Compile Include="Site.Mobile.Master.designer.cs">
       <DependentUpon>Site.Mobile.Master</DependentUpon>
     </Compile>
-    <Compile Include="Sites\Player Register.aspx.cs">
-      <DependentUpon>Player Register.aspx</DependentUpon>
+    <Compile Include="Sites\UserManagement\UserRepositories.aspx.cs">
+      <DependentUpon>UserRepositories.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Sites\Player Register.aspx.designer.cs">
-      <DependentUpon>Player Register.aspx</DependentUpon>
+    <Compile Include="Sites\UserManagement\UserRepositories.aspx.designer.cs">
+      <DependentUpon>UserRepositories.aspx</DependentUpon>
     </Compile>
     <Compile Include="ViewSwitcher.ascx.cs">
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>

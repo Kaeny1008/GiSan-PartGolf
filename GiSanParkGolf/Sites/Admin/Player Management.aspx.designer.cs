@@ -7,7 +7,7 @@
 // </자동 생성됨>
 //------------------------------------------------------------------------------
 
-namespace GiSanParkGolf
+namespace GiSanParkGolf.Sites.Admin
 {
 
 

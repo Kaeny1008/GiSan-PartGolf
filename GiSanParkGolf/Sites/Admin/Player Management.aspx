@@ -1,5 +1,5 @@
 ﻿<%@ Page Title="선수정보(관리자)" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Player Management.aspx.cs" 
-    Inherits="GiSanParkGolf.Player_Management" EnableEventValidation="false" %>
+    Inherits="GiSanParkGolf.Sites.Admin.Player_Management" EnableEventValidation="false" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
      <link href="/Content/Site.css" rel="stylesheet"/>

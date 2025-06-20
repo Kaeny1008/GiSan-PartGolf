@@ -50,3 +50,16 @@ textarea {
     background-color: cornflowerblue;
     text-align: center;
 }
+
+.NormalButton {
+    width: 90px;
+    height: 30px;
+    text-align: center;
+}
+
+.NormalLabel {
+    width: 70px;
+    height: 200px;
+    background-color: white;
+    text-align: center;
+}

@@ -1,5 +1,5 @@
 ﻿using GiSanParkGolf.Models;
-using GiSanParkGolf.Repositories;
+using GiSanParkGolf.Class;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace GiSanParkGolf
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            UserRepository userRepo = new UserRepository();
+            DB_Management userRepo = new DB_Management();
             UserViewModel uvm = userRepo.GetUserByUserID(Page.User.Identity.Name);
             //인증 정보 저장
             

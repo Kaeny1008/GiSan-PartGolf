@@ -1,26 +1,12 @@
-﻿using GiSanParkGolf.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿using System;
 using System.Data;
 using System.Data.OleDb;
-using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Drawing;
-using System.EnterpriseServices;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Security.Policy;
-using System.Web;
 using System.Web.Configuration;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Xml.Linq;
 
-namespace GiSanParkGolf
+namespace GiSanParkGolf.Sites.Admin
 {
     public partial class Player_Management : Page
     {
@@ -63,10 +49,6 @@ namespace GiSanParkGolf
             con.Close();
         }
 
-        protected void Button1_Click(object sender, EventArgs e)
-        {
-            Response.Redirect("~/Sites/Player Register.aspx");
-        }
         protected void grdList_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             GridView1.PageIndex = e.NewPageIndex;
@@ -84,13 +66,6 @@ namespace GiSanParkGolf
 
             //grd_List.DataSource = ds1.Tables[0];
             //grd_List.DataBind();
-        }
-
-        protected void PlayerButton_Click(object sender, EventArgs e)
-        {
-            //int ssn = Convert.ToInt32(grd_List.DataKeys[e.RowIndex].Value);
-           
-            LabelResult.Text = GridView1.SelectedDataKey.Value.ToString();
         }
         protected void MyButtonClick(object sender, System.EventArgs e)
         {
