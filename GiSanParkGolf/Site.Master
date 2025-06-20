@@ -83,6 +83,5 @@
     <asp:PlaceHolder runat="server">
         <%: Scripts.Render("~/Scripts/bootstrap.js") %>
     </asp:PlaceHolder>
-    <%--테스트--%>
 </body>
 </html>

@@ -5,6 +5,13 @@
      <link href="/Content/Site.css" rel="stylesheet"/>
     <div>
         <div id="PlayList">
+            <div>
+                <asp:Label ID="LB_Search" runat="server" Text="이름" Width="60px" Height="17px"></asp:Label>
+                <asp:TextBox ID="TB_Search" runat="server" placeholder="이름을 입력하여 검색"></asp:TextBox>
+                <asp:Button ID="BTN_Search" runat="server" Text="검색" />
+                <br />
+            </div>           
+
             <asp:Label ID="LabelResult" runat="server" Text="선택정보" Visible="false"></asp:Label>
             <h12>(선수이름을 클릭하여 수정)</h12><br />
             <asp:GridView ID="GridView1" runat="server" BorderWidth="1" Width="100%" BorderStyle="Solid"
