@@ -2,12 +2,23 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <link href="/Class/StyleSheet.css?after2" rel="stylesheet" type="text/css"/>
-    <script language="javascript"> 
+    <script language="javascript">
         function GenderValidate(source, arguments) {
             if (arguments.Value == "선택") {
                 arguments.IsValid = false;
             } else {
                 arguments.IsValid = true;
+            }
+        }
+        function functionx(evt) {
+            if (evt.charCode > 31 && (evt.charCode < 48 || evt.charCode > 57)) {
+                alert("숫자만 입력하여 주십시오.");
+                return false;
+            }
+        }
+        function BirthDayValidate(source, arguments) {
+            if (arguments.Value.Length != 6) {
+                arguments.IsValid = false;
             }
         }
     </script>
@@ -38,9 +49,13 @@
                 <asp:ListItem>여자</asp:ListItem>
             </asp:DropDownList><br />
 
-            <asp:Label ID="label3" runat="server" Text ="생년월인"></asp:Label><br />
-            <asp:TextBox ID="TextBox1" runat="server" TextMode="Date" Width="430px"></asp:TextBox><br />
-            
+            <asp:Label ID="label3" runat="server" Text ="주민등록 번호"></asp:Label><br />
+            <asp:TextBox ID="txtBirthDay" runat="server" Width="150px" onkeypress="return functionx(event)" MaxLength="6"></asp:TextBox>
+            <asp:Label ID="label11" runat="server" Text ="-"></asp:Label>
+            <asp:TextBox ID="txtGender" runat="server" Width="30px" onkeypress="return functionx(event)" MaxLength="1"></asp:TextBox>
+            <asp:Label ID="label12" runat="server" Text ="******"></asp:Label>
+            <br />
+
             <asp:Label ID="label4" runat="server" Text="주소"></asp:Label><br />
             <asp:TextBox ID="txtAddress" runat="server" ValidationGroup="NewUser" Width="430px"></asp:TextBox><br />
 
@@ -130,6 +145,14 @@
             ClientValidationFunction="GenderValidate"
             Display="None"
             ErrorMessage="성별은 필수로 선택하여야 합니다."
+            ForeColor="red"
+            runat="server" 
+            ValidationGroup="NewUser"/><br />
+        <asp:CustomValidator id="CustomValidator1"
+            ControlToValidate="txtBirthDay"
+            ClientValidationFunction="BirthDayValidate"
+            Display="None"
+            ErrorMessage="생년월일이 올바르지 않습니다."
             ForeColor="red"
             runat="server" 
             ValidationGroup="NewUser"/>

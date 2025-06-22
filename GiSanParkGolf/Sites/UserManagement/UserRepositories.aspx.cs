@@ -14,62 +14,49 @@ namespace GiSanParkGolf.Sites.UserManagement
 {
     public partial class UserRepositories : System.Web.UI.Page
     {
-        private OleDbConnection con;
         protected void Page_Load(object sender, EventArgs e)
         {
-            TextBox1.Text = DateTime.Now.ToString("yyyy-MM-dd");
+            
         }
 
         protected void BTN_Register_Click(object sender, EventArgs e)
         {
-            //if (DropDownList1.Text.Trim().Equals("선택"))
-            //{
-            //    label6.Text = "성별은 필수로 선택하여야 합니다.";
-            //    return;
-            //}
-
-            if (TextBox1.Text.Equals(DateTime.Now.ToString("yyyy-MM-dd")))
-            {
-                label6.Text = "생년월일이 오늘과 같을 수 없습니다.";
-                return;
-            }
-
             if (Page.IsValid)
             {
                 // 데이터 저장
-                string strSQL = "INSERT INTO USER_INFORMATION(UserName, UserGender, UserBirthOfDate, UserAddress, UserAddress2" +
-                    ", UserRegistrationDate, UserNote, UserId, UserPassword, UserWClass" +
-                    ") VALUES(" +
-                    "'" + txtName.Text + "'" +
-                    ",'" + DropDownList1.Text + "'" +
-                    ",'" + String.Format("{0:yyyy-MM-dd}", DateTime.Parse(TextBox1.Text)) + "'" +
-                    ",'" + txtAddress.Text + "'" +
-                    ",'" + txtAddress2.Text + "'" +
-                    ",'" + DateTime.Now.ToString("yyyy-MM-dd") + "'" +
-                    ",'" + txtMemo.Text + "'" +
-                    ",'" + txtID.Text + "'" +
-                    ",'" + txtPassword.Text + "'" +
-                    ",'승인대기'" +
-                    ");";
+                //    string strSQL = "INSERT INTO USER_INFORMATION(UserName, UserGender, UserBirthOfDate, UserAddress, UserAddress2" +
+                //        ", UserRegistrationDate, UserNote, UserId, UserPassword, UserWClass" +
+                //        ") VALUES(" +
+                //        "'" + txtName.Text + "'" +
+                //        ",'" + DropDownList1.Text + "'" +
+                //        ",'" + String.Format("{0:yyyy-MM-dd}", DateTime.Parse(TextBox1.Text)) + "'" +
+                //        ",'" + txtAddress.Text + "'" +
+                //        ",'" + txtAddress2.Text + "'" +
+                //        ",'" + DateTime.Now.ToString("yyyy-MM-dd") + "'" +
+                //        ",'" + txtMemo.Text + "'" +
+                //        ",'" + txtID.Text + "'" +
+                //        ",'" + txtPassword.Text + "'" +
+                //        ",'승인대기'" +
+                //        ");";
 
-                DB_Management dbWrite = new DB_Management();
-                string writeResult = dbWrite.DB_Write(strSQL);
+                //    DB_Management dbWrite = new DB_Management();
+                //    string writeResult = dbWrite.DB_Write(strSQL);
 
-                if (writeResult.Equals("Success"))
-                {
-                    string strJs = "<script>alert('가입 승인대기 되었습니다.'); location.href='/Default.aspx';</script>";
-                    Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
-                }
-                else
-                {
-                    string strAlarm = @"<script language='JavaScript'>window.alert('";
-                    strAlarm += writeResult;
-                    strAlarm += "');</script>";
-                    Response.Write(strAlarm);
-                }
-            }
-            else
-            {
+                //    if (writeResult.Equals("Success"))
+                //    {
+                //        string strJs = "<script>alert('가입 승인대기 되었습니다.'); location.href='/Default.aspx';</script>";
+                //        Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
+                //    }
+                //    else
+                //    {
+                //        string strAlarm = @"<script language='JavaScript'>window.alert('";
+                //        strAlarm += writeResult;
+                //        strAlarm += "');</script>";
+                //        Response.Write(strAlarm);
+                //    }
+                //}
+                //else
+                //{
 
             }
         }
@@ -97,6 +84,19 @@ namespace GiSanParkGolf.Sites.UserManagement
                 TextBox2.Text = "OK";
                 txtID.Enabled = false;
             }
+        }
+
+        protected void valDateRange_ServerValidate(object source, ServerValidateEventArgs args)
+        {
+            Console.WriteLine("abcd : " + args.Value.ToString());
+            Debug.WriteLine("abcd : " + args.Value.ToString());
+            //DateTime minDate = DateTime.Parse("1000/12/28");
+            //DateTime maxDate = DateTime.Parse("9999/12/28");
+            //DateTime dt;
+
+            //args.IsValid = (DateTime.TryParse(args.Value, out dt)
+            //                && dt <= maxDate
+            //                && dt >= minDate);
         }
     }
 }
