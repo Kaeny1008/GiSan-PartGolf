@@ -4,7 +4,7 @@
     <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
     
     <div class="Center_Container">
-        <div class="Center_Container.Content">
+        <div class="Center_Container_Content">
             <h2>로그인</h2>
             <asp:Label runat="server" CssClass="NormalLabel">아이디</asp:Label><br />
             <asp:TextBox ID="txtUserID" runat="server" placeholder="사용자 ID 입력"></asp:TextBox><br />
