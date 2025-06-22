@@ -19,52 +19,20 @@ namespace GiSanParkGolf.Sites.UserManagement
         {
             TextBox1.Text = DateTime.Now.ToString("yyyy-MM-dd");
         }
-        protected void BTN_Cancel_Click(object sender, EventArgs e)
-        {
-            txtID.Text = string.Empty;
-            txtPassword.Text = string.Empty;
-            txtReCheck.Text = string.Empty;
-            txtName.Text = string.Empty;
-            txtAddress.Text = string.Empty;
-            txtAddress2.Text = string.Empty;
-            txtID.Enabled = true;
-        }
+
         protected void BTN_Register_Click(object sender, EventArgs e)
         {
-            //if (txtID.Text.Trim().Equals(string.Empty))
-            //{
-            //    label6.Text = "아이디는 필수로 입력하여야 합니다.";
-            //    return;
-            //}
-
-            //if (txtPassword.Text.Trim().Equals(string.Empty))
-            //{
-            //    label6.Text = "암호는 필수로 입력하여야 합니다.";
-            //    return;
-            //}
-
-            //if (txtName.Text.Trim().Equals(string.Empty))
-            //{
-            //    label6.Text = "성명은 필수로 입력하여야 합니다.";
-            //    return;
-            //}
-
             //if (DropDownList1.Text.Trim().Equals("선택"))
             //{
             //    label6.Text = "성별은 필수로 선택하여야 합니다.";
             //    return;
             //}
-            //if (TextBox1.Text.Trim().Equals(string.Empty))
-            //{
-            //    label6.Text = "생년월일은 필수로 입력하여야 합니다.";
-            //    return;
-            //}
 
-            //if (txtAddress.Text.Trim().Equals(string.Empty))
-            //{
-            //    label6.Text = "주소는 필수로 입력하여야 합니다.";
-            //    return;
-            //}
+            if (TextBox1.Text.Equals(DateTime.Now.ToString("yyyy-MM-dd")))
+            {
+                label6.Text = "생년월일이 오늘과 같을 수 없습니다.";
+                return;
+            }
 
             if (Page.IsValid)
             {
@@ -99,7 +67,8 @@ namespace GiSanParkGolf.Sites.UserManagement
                     strAlarm += "');</script>";
                     Response.Write(strAlarm);
                 }
-            } else
+            }
+            else
             {
 
             }

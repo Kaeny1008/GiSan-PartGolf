@@ -24,15 +24,6 @@ namespace GiSanParkGolf.Sites.UserManagement
         protected global::System.Web.UI.WebControls.Label label8;
 
         /// <summary>
-        /// txtID 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtID;
-
-        /// <summary>
         /// TextBox2 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -40,6 +31,15 @@ namespace GiSanParkGolf.Sites.UserManagement
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox TextBox2;
+
+        /// <summary>
+        /// txtID 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtID;
 
         /// <summary>
         /// Btn_IDCheck 컨트롤입니다.
@@ -222,15 +222,6 @@ namespace GiSanParkGolf.Sites.UserManagement
         protected global::System.Web.UI.WebControls.Button btnRegister;
 
         /// <summary>
-        /// btnCancel 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnCancel;
-
-        /// <summary>
         /// RequiredFieldValidator1 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -301,6 +292,15 @@ namespace GiSanParkGolf.Sites.UserManagement
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.CompareValidator CompareValidator1;
+
+        /// <summary>
+        /// CustomValidator2 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CustomValidator CustomValidator2;
 
         /// <summary>
         /// ValidationSummary_SignupForm 컨트롤입니다.
