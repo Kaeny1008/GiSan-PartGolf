@@ -85,18 +85,5 @@ namespace GiSanParkGolf.Sites.UserManagement
                 txtID.Enabled = false;
             }
         }
-
-        protected void valDateRange_ServerValidate(object source, ServerValidateEventArgs args)
-        {
-            Console.WriteLine("abcd : " + args.Value.ToString());
-            Debug.WriteLine("abcd : " + args.Value.ToString());
-            //DateTime minDate = DateTime.Parse("1000/12/28");
-            //DateTime maxDate = DateTime.Parse("9999/12/28");
-            //DateTime dt;
-
-            //args.IsValid = (DateTime.TryParse(args.Value, out dt)
-            //                && dt <= maxDate
-            //                && dt >= minDate);
-        }
     }
 }

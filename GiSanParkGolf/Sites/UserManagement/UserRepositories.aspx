@@ -3,22 +3,40 @@
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <link href="/Class/StyleSheet.css?after2" rel="stylesheet" type="text/css"/>
     <script language="javascript">
-        function GenderValidate(source, arguments) {
-            if (arguments.Value == "선택") {
-                arguments.IsValid = false;
-            } else {
-                arguments.IsValid = true;
-            }
-        }
+        //function GenderValidate(source, arguments) {
+        //    if (arguments.Value == "선택") {
+        //        arguments.IsValid = false;
+        //    } else {
+        //        arguments.IsValid = true;
+        //    }
+        //}
         function functionx(evt) {
             if (evt.charCode > 31 && (evt.charCode < 48 || evt.charCode > 57)) {
                 alert("숫자만 입력하여 주십시오.");
                 return false;
             }
         }
-        function BirthDayValidate(source, arguments) {
-            if (arguments.Value.Length != 6) {
+        function MonthValidate(source, arguments) {
+            var varage = arguments.Value;
+            var varmonth = varage.substring(2, 4);
+            console.log("현재 월 : " + varmonth);
+
+            if (parseInt(varmonth) < 1 || parseInt(varmonth) > 12) {
                 arguments.IsValid = false;
+            } else {
+                arguments.IsValid = true;
+            }
+        }
+
+        function DayValidate(source, arguments) {
+            var varage = arguments.Value;
+            var vayday = varage.substring(4, 6);
+            console.log("현재 일 : " + vayday);
+
+            if (parseInt(vayday) < 1 || parseInt(vayday) > 31) {
+                arguments.IsValid = false;
+            } else {
+                arguments.IsValid = true;
             }
         }
     </script>
@@ -41,13 +59,6 @@
 
             <asp:Label ID="label1" runat="server" Text ="이름"></asp:Label><br />
             <asp:TextBox ID="txtName" runat="server" ValidationGroup="NewUser" Width="430px"></asp:TextBox><br />
-
-            <asp:Label ID="label2" runat="server" Text ="성별"></asp:Label><br />
-            <asp:DropDownList ID="DropDownList1" runat="server" Width="430px">
-                <asp:ListItem>선택</asp:ListItem>
-                <asp:ListItem>남자</asp:ListItem>
-                <asp:ListItem>여자</asp:ListItem>
-            </asp:DropDownList><br />
 
             <asp:Label ID="label3" runat="server" Text ="주민등록 번호"></asp:Label><br />
             <asp:TextBox ID="txtBirthDay" runat="server" Width="150px" onkeypress="return functionx(event)" MaxLength="6"></asp:TextBox>
@@ -140,19 +151,34 @@
             ErrorMessage="비밀번호가 일치하지 않습니다." 
             Display="None" ForeColor="red" 
             ValidationGroup="NewUser"/><br />
-        <asp:CustomValidator id="CustomValidator2"
-            ControlToValidate="DropDownList1"
-            ClientValidationFunction="GenderValidate"
+        <asp:RequiredFieldValidator ID="RequiredFieldValidator3" 
+            runat="server"
+            ErrorMessage="생년월일은 필 수 입력 항목입니다." 
+            ControlToValidate="txtBirthDay"
+            Display="None" 
+            ForeColor="red" 
+            ValidationGroup="NewUser"/><br />
+        <asp:RegularExpressionValidator ID="RegularExpressionValidator6" 
+            runat="server" 
+            ControlToValidate="txtBirthDay" 
+            ValidationExpression="[0-9]{6}" 
+            ErrorMessage="생년월일은 6자리로 입력하여 주십시오." 
+            Display="None" 
+            ForeColor="red" 
+            ValidationGroup="NewUser"/><br />
+        <asp:CustomValidator id="CustomValidator3"
+            ControlToValidate="txtBirthDay"
+            ClientValidationFunction="MonthValidate"
             Display="None"
-            ErrorMessage="성별은 필수로 선택하여야 합니다."
+            ErrorMessage="주민등록번호 월 입력이 잘못되었습니다."
             ForeColor="red"
             runat="server" 
-            ValidationGroup="NewUser"/><br />
+            ValidationGroup="NewUser"/>
         <asp:CustomValidator id="CustomValidator1"
             ControlToValidate="txtBirthDay"
-            ClientValidationFunction="BirthDayValidate"
+            ClientValidationFunction="DayValidate"
             Display="None"
-            ErrorMessage="생년월일이 올바르지 않습니다."
+            ErrorMessage="주민등록번호 일 입력이 잘못되었습니다."
             ForeColor="red"
             runat="server" 
             ValidationGroup="NewUser"/>
