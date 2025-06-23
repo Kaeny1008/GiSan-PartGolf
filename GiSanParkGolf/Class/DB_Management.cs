@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Configuration;
@@ -43,7 +44,11 @@ namespace GiSanParkGolf.Class
         public UserViewModel GetUserByUserID(string userID)
         {
 
-            string strSQL = "SELECT UserId, UserPassword, UserName, UserWClass FROM User_Information WHERE UserId = @UserID";
+            string strSQL = "SELECT UserId, UserPassword, UserName, UserWClass";
+            strSQL += " FROM User_Information";
+            strSQL += " WHERE UserId = @UserID";
+            strSQL += ";";
+
             OleDbCommand sqlCmd = new OleDbCommand(strSQL, con);
             sqlCmd.CommandType = CommandType.Text;
             
@@ -64,21 +69,78 @@ namespace GiSanParkGolf.Class
             return Global.uvm;
         }
 
-        //public void ModifyUser(int UID, string userID, string password)
-        //{
-        //    SqlCommand cmd = new SqlCommand();
-        //    cmd.Connection = con;
-        //    cmd.CommandText = "ModifyUsers";
-        //    cmd.CommandType = CommandType.StoredProcedure;
+        public SelectUserViewModel GetSelectUserByUserID(string userID)
+        {
 
-        //    cmd.Parameters.AddWithValue("@UserID", userID);
-        //    cmd.Parameters.AddWithValue("@Password", password);
-        //    cmd.Parameters.AddWithValue("@UID", UID);
+            string strSQL = "SELECT UserId, UserName, UserPassword, UserNumber";
+            strSQL += ", UserGender, UserAddress, UserAddress2";
+            strSQL += ", UserRegistrationDate, UserNote, UserWClass";
+            strSQL += " FROM User_Information";
+            strSQL += " WHERE UserId = @UserID";
+            strSQL += ";";
 
-        //    con.Open();
-        //    cmd.ExecuteNonQuery();
-        //    con.Close();
-        //}
+            OleDbCommand sqlCmd = new OleDbCommand(strSQL, con);
+            sqlCmd.CommandType = CommandType.Text;
+
+            sqlCmd.Parameters.AddWithValue("@UserID", userID);
+
+            con.Open();
+
+            OleDbDataReader sqlDR = sqlCmd.ExecuteReader();
+            while (sqlDR.Read())
+            {
+                Global.suvm.UserID = sqlDR.GetString(0);
+                Global.suvm.UserName = sqlDR.GetString(1);
+                Global.suvm.UserPassword = sqlDR.GetString(2);
+                Global.suvm.UserNumber = sqlDR.GetInt32(3);
+                Global.suvm.UserGender = sqlDR.GetInt32(4);
+                Global.suvm.UserAddress = sqlDR.GetString(5);
+                Global.suvm.UserAddress2 = sqlDR.GetString(6);
+                Global.suvm.UserRegistrationDate = sqlDR.GetDateTime(7);
+                Global.suvm.UserNote = sqlDR.GetString(8);
+                Global.suvm.UserWClass = sqlDR.GetString(9);
+            }
+            con.Close();
+
+            return Global.suvm;
+        }
+
+        public string GetSelectUserByUserID2(string userID)
+        {
+            string result = string.Empty;
+
+            string strSQL = "SELECT UserId, UserName, UserPassword, UserNumber";
+            strSQL += ", UserGender, UserAddress, UserAddress2";
+            strSQL += ", UserRegistrationDate, UserNote, UserWClass";
+            strSQL += " FROM User_Information";
+            strSQL += " WHERE UserId = @UserID";
+            strSQL += ";";
+
+            OleDbCommand sqlCmd = new OleDbCommand(strSQL, con);
+            sqlCmd.CommandType = CommandType.Text;
+
+            sqlCmd.Parameters.AddWithValue("@UserID", userID);
+
+            con.Open();
+
+            OleDbDataReader sqlDR = sqlCmd.ExecuteReader();
+            while (sqlDR.Read())
+            {
+                result = sqlDR.GetString(0);
+                result += '!' + sqlDR.GetString(1);
+                result += '!' + sqlDR.GetString(2);
+                result += '!' + sqlDR.GetInt32(3).ToString();
+                result += '!' + sqlDR.GetInt32(4).ToString();
+                result += '!' + sqlDR.GetString(5);
+                result += '!' + sqlDR.GetString(6);
+                result += '!' + sqlDR.GetDateTime(7).ToString();
+                result += '!' + sqlDR.GetString(8);
+                result += '!' + sqlDR.GetString(9);
+            }
+            con.Close();
+
+            return result;
+        }
 
         public string IsCorrectUser(string userID, string password)
         {

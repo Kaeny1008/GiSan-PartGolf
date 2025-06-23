@@ -14,6 +14,7 @@ namespace GiSanParkGolf
     public class Global : HttpApplication
     {
         public static UserViewModel uvm = new UserViewModel();
+        public static SelectUserViewModel suvm = new SelectUserViewModel();
 
         void Application_Start(object sender, EventArgs e)
         {

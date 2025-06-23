@@ -74,7 +74,7 @@
             <asp:TextBox ID="txtAddress2" runat="server" Width="430px"></asp:TextBox><br />
 
             <asp:Label ID="label7" runat="server" Text="비고" ></asp:Label><br />
-            <asp:TextBox ID="txtMemo" runat="server" TextMode="MultiLine" Columns="1" Rows="8" Width="430px"></asp:TextBox><br /><br />
+            <asp:TextBox ID="txtMemo" runat="server" TextMode="MultiLine" Width="430px" Height="200px"></asp:TextBox><br /><br />
 
             <asp:Label ID="label6" runat="server" ForeColor="#FF3300"></asp:Label><br />
 
