@@ -30,7 +30,7 @@ namespace GiSanParkGolf
                 // [!] 인증 부여
                 if (!String.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
                 {
-                    Debug.WriteLine(Request.QueryString["ReturnUrl"].ToString());
+                    Debug.WriteLine("abcd: " + Request.QueryString["ReturnUrl"].ToString());
                     // 인증 쿠키값 부여
                     FormsAuthentication.RedirectFromLoginPage(txtUserID.Text, false);
                 }

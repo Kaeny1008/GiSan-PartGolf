@@ -17,7 +17,7 @@ namespace GiSanParkGolf
             // [!] 인증 여부 확인 : 로그인했으면 참, 그렇지 않으면 거짓을 반환
             if (!Page.User.Identity.IsAuthenticated)
             {
-                Response.Redirect("~/Sites/Login/Login.aspx"); // 로그인 페이지로 이동
+                Response.Redirect("~/Sites/Login/Login.aspx?ReturnUrl=%2fDefault.aspx"); // 로그인 페이지로 이동
             } else
             {
                 // [!] 인증 이름 출력

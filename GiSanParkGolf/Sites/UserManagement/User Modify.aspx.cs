@@ -13,13 +13,13 @@ namespace GiSanParkGolf.Sites.UserManagement
 {
     public partial class User_Modify : System.Web.UI.Page
     {
-        string prePage;
+        static string prePage;
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!Page.IsPostBack)
             {
                 prePage = Request.ServerVariables["HTTP_REFERER"];
-                Debug.WriteLine(prePage);
+                Debug.WriteLine("이전 위치 : " + prePage);
                 UserInformationLoad(Global.uvm.UserID);
             }
         }
@@ -83,6 +83,7 @@ namespace GiSanParkGolf.Sites.UserManagement
 
             if (writeResult.Equals("Success"))
             {
+                Debug.WriteLine("이전 위치로 이동한다. : " + prePage);
                 Response.Redirect(prePage);
                 //string strJs = "<script>alert('수정 되었습니다.'); location.href='/Default';</script>";
                 //Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);

@@ -14,6 +14,7 @@ namespace GiSanParkGolf
         {
             // [!] 로그아웃
             FormsAuthentication.SignOut();
+            Global.uvm.UserName = null;
 
             Response.Redirect("~/Default.aspx");
         }

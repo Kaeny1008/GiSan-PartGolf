@@ -37,7 +37,7 @@
                 <%--Site Scripts--%>
             </Scripts>
         </asp:ScriptManager>
-
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script type="text/javascript" language="javascript">
             function go_loginpage() {
                 location.href = "/Sites/Login/Login";
@@ -51,9 +51,36 @@
                 location.href = "/Sites/UserManagement/User Modify";
                 return false;
             }
+            $(document).ready(function () {
+                $('nav > div > ul > li').mouseover(function () {
+                    $(this).children('.drop-menu-wrap').stop().slideDown(350);
+                });
+                $('nav > div > ul > li').mouseleave(function () {
+                    $(this).children('.drop-menu-wrap').stop().slideUp(0);
+                });
+            });
         </script>
+        <link href="/Sites/Admin/StyleSheet.css?after1" rel="stylesheet" type="text/css"/>
 
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+            <div class="container">
+            <a class="navbar-brand" runat="server" href="/" style="color: cornflowerblue">기산 파크골프 매니저</a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="탐색 토글" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <ul class="ul_dropdown">
+                <li class="li_dropdown"><a href="/Default" style="color:white">홈</a></li>
+                <li class="li_dropdown"><a style="color:white">관리자 페이지</a>
+                    <div class="drop-menu-wrap"><a href="/Sites/Admin/Player Management" style="color:white">선수정보 관리</a></div>
+                </li>
+                <li class="li_dropdown">menu3
+                    <div class="drop-menu-wrap">drop3</div>
+                </li>
+            </ul>
+                </div>
+        </nav>
+<%--        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" runat="server" href="/" style="color: cornflowerblue">기산 파크골프 매니저</a>
                 <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="탐색 토글" aria-controls="navbarSupportedContent"
@@ -63,11 +90,12 @@
                 <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/">홈</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Sites/Admin/Player Management">선수정보</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Sites/Admin/New Contest">관리자 페이지</a></li>
                     </ul>
                 </div>
             </div>
-        </nav>
+        </nav>--%>
+
         <div class="container">
             <asp:Label ID="lblName" runat="server" Text="손님"></asp:Label>
             <asp:Label ID="Label1" runat="server" Text="님, 반갑습니다."></asp:Label>

@@ -105,7 +105,9 @@
   <ItemGroup>
     <Content Include="Class\StyleSheet.css" />
     <Content Include="Database\Database.accdb" />
+    <Content Include="Sites\Admin\New Contest.aspx" />
     <Content Include="Sites\Admin\Player Information.aspx" />
+    <Content Include="Sites\Admin\StyleSheet.css" />
     <Content Include="Sites\Login\Login.aspx" />
     <Content Include="Sites\Login\Logout.aspx" />
     <Content Include="Sites\Admin\Player Management.aspx" />
@@ -173,6 +175,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="Sites\Admin\Admin.master.cs">
+      <DependentUpon>Admin.master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Sites\Admin\Admin.master.designer.cs">
+      <DependentUpon>Admin.master</DependentUpon>
+    </Compile>
+    <Compile Include="Sites\Admin\New Contest.aspx.cs">
+      <DependentUpon>New Contest.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Sites\Admin\New Contest.aspx.designer.cs">
+      <DependentUpon>New Contest.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Sites\Admin\Player Information.aspx.cs">
       <DependentUpon>Player Information.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -288,6 +304,7 @@
     <Content Include="Scripts\jquery-3.7.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.1.min.map" />
     <Content Include="Sites\Admin\Web.config" />
+    <Content Include="Sites\Admin\Admin.master" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

@@ -41,7 +41,7 @@
 
     <div class="Center_Container">
         <div class="Center_Container_Content">
-            <h12>정보를 입력하여 주십시오.</h12><br /><br />
+            <h12>선수의 정보를 수정합니다.</h12><br /><br />
             
             <asp:Label ID="label8" runat="server" Text ="ID"></asp:Label>
             <asp:TextBox ID="TextBox2" runat="server" ValidationGroup="NewUser" Text="Ready" Enabled="false" Width="60px" BorderStyle="None" ForeColor="white" BackColor="white" /><br />

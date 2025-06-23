@@ -23,6 +23,7 @@ namespace GiSanParkGolf
             } else
             {
                 lblName.Text = Global.uvm.UserName;
+                
             }
         }
     }
