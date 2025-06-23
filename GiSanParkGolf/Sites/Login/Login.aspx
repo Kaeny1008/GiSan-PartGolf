@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="Login" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="GiSanParkGolf.Login" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <link href="/Class/StyleSheet.css?after2" rel="stylesheet"/>
+    <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
     
     <div class="Center_Container">
         <div class="Center_Container_Content">

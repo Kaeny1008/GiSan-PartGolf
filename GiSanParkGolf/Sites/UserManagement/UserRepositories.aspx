@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="신규등록" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="UserRepositories.aspx.cs" Inherits="GiSanParkGolf.Sites.UserManagement.UserRepositories" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <link href="/Class/StyleSheet.css?after2" rel="stylesheet" type="text/css"/>
+    <link href="/Class/StyleSheet.css?after" rel="stylesheet" type="text/css"/>
     <script language="javascript">
         //function GenderValidate(source, arguments) {
         //    if (arguments.Value == "선택") {

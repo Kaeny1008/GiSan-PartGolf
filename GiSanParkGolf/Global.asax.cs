@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GiSanParkGolf.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -12,6 +13,8 @@ namespace GiSanParkGolf
 {
     public class Global : HttpApplication
     {
+        public static UserViewModel uvm = new UserViewModel();
+
         void Application_Start(object sender, EventArgs e)
         {
             // 애플리케이션 시작 시 실행되는 코드

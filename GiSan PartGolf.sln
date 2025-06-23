@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36203.30
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GiSanParkGolf", "GiSanParkGolf\GiSanParkGolf.csproj", "{B0C143BB-FF53-4F6B-928D-211C60DE4837}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T-Engine", "T-Engine\T-Engine.csproj", "{4465CFD0-13BE-4BE2-B8DB-A685B9C8B022}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B0C143BB-FF53-4F6B-928D-211C60DE4837}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0C143BB-FF53-4F6B-928D-211C60DE4837}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0C143BB-FF53-4F6B-928D-211C60DE4837}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4465CFD0-13BE-4BE2-B8DB-A685B9C8B022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4465CFD0-13BE-4BE2-B8DB-A685B9C8B022}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4465CFD0-13BE-4BE2-B8DB-A685B9C8B022}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4465CFD0-13BE-4BE2-B8DB-A685B9C8B022}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

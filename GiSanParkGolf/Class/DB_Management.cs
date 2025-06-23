@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.Configuration;
 using System.Web.UI.WebControls;
 using System.Xml.Linq;
+using T_Engine;
 
 namespace GiSanParkGolf.Class
 {
@@ -41,9 +42,8 @@ namespace GiSanParkGolf.Class
 
         public UserViewModel GetUserByUserID(string userID)
         {
-            UserViewModel r = new UserViewModel();
 
-            string strSQL = "SELECT UserId, UserPassword, UserName FROM User_Information WHERE UserId = @UserID";
+            string strSQL = "SELECT UserId, UserPassword, UserName, UserWClass FROM User_Information WHERE UserId = @UserID";
             OleDbCommand sqlCmd = new OleDbCommand(strSQL, con);
             sqlCmd.CommandType = CommandType.Text;
             
@@ -54,13 +54,14 @@ namespace GiSanParkGolf.Class
             OleDbDataReader sqlDR = sqlCmd.ExecuteReader();
             while (sqlDR.Read())
             {
-                r.UserID = sqlDR.GetString(0);
-                r.Password = sqlDR.GetString(1);
-                r.UserName = sqlDR.GetString(2);
+                Global.uvm.UserID = sqlDR.GetString(0);
+                Global.uvm.Password = sqlDR.GetString(1);
+                Global.uvm.UserName = sqlDR.GetString(2);
+                Global.uvm.UserWClass = sqlDR.GetString(3);
             }
             con.Close();
 
-            return r;
+            return Global.uvm;
         }
 
         //public void ModifyUser(int UID, string userID, string password)
@@ -83,6 +84,9 @@ namespace GiSanParkGolf.Class
         {
             string result = string.Empty;
 
+            Cryptography newCrypt = new Cryptography();
+            String cryptPassword = newCrypt.GetEncoding("ParkGolf", password);
+
             con.Open();
 
             string strSql = "SELECT UserWClass FROM User_Information WHERE UserID = @UserId AND UserPassword = @Password";
@@ -94,7 +98,7 @@ namespace GiSanParkGolf.Class
             };
 
             cmd.Parameters.AddWithValue("@UserID", userID);
-            cmd.Parameters.AddWithValue("@Password", password);
+            cmd.Parameters.AddWithValue("@Password", cryptPassword);
 
             OleDbDataReader sqlDR = cmd.ExecuteReader();
             if (sqlDR.Read())

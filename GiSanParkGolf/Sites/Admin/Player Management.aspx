@@ -8,7 +8,7 @@
             <div>
                 <asp:Label ID="LB_Search" runat="server" Text="이름" Width="60px" Height="17px"></asp:Label>
                 <asp:TextBox ID="TB_Search" runat="server" placeholder="이름을 입력하여 검색"></asp:TextBox>
-                <asp:Button ID="BTN_Search" runat="server" Text="검색" />
+                <asp:Button ID="BTN_Search" runat="server" Text="검색" OnClick="BTN_Search_Click" />
                 <br />
             </div>           
 
@@ -22,7 +22,11 @@
                 <HeaderStyle Width="80px" Height="75px" HorizontalAlign="center" BackColor="LightSlateGray" ForeColor="white" />
                 <RowStyle Height="34px" HorizontalAlign="Center"/>
                 <AlternatingRowStyle  />                            
-                    <Columns>                                                   
+                    <Columns>       
+                        <asp:BoundField DataField="UserWClass" HeaderText="상태">
+                            <HeaderStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
+                            <ItemStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
+                        </asp:BoundField>    
                         <asp:BoundField DataField="UserId" HeaderText="ID">
                             <HeaderStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
                             <ItemStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
@@ -33,16 +37,16 @@
                                     Text='<%# Eval("UserName") %>' 
                                     OnClick="MyButtonClick" CssClass="RowButton"/>
                             </ItemTemplate>
-                            <HeaderStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
+                            <HeaderStyle Width="15%" BorderStyle="Solid" BorderWidth="1px"/>
                             <ItemStyle Width="15%" BorderStyle="Solid" BorderWidth="1px"/>
                         </asp:TemplateField>    
-                        <asp:BoundField DataField="UserBirthOfDate" HeaderText="생년월일" DataFormatString="{0:d}">
+                        <asp:BoundField DataField="UserNumber" HeaderText="생년월일" DataFormatString="{0:d}">
                             <HeaderStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
-                            <ItemStyle Width="30%" BorderStyle="Solid" BorderWidth="1px"/>
+                            <ItemStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
                         </asp:BoundField> 
                         <asp:BoundField DataField="UserNote" HeaderText="비고">
-                            <HeaderStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
-                            <ItemStyle Width="45%" BorderStyle="Solid" BorderWidth="1px" HorizontalAlign="left"/>
+                            <HeaderStyle Width="55%" BorderStyle="Solid" BorderWidth="1px"/>
+                            <ItemStyle Width="55%" BorderStyle="Solid" BorderWidth="1px" HorizontalAlign="left"/>
                         </asp:BoundField> 
                     </Columns>
             </asp:GridView>

@@ -14,15 +14,15 @@ namespace GiSanParkGolf
         protected void Page_Load(object sender, EventArgs e)
         {
             DB_Management userRepo = new DB_Management();
-            UserViewModel uvm = userRepo.GetUserByUserID(Page.User.Identity.Name);
+            Global.uvm = userRepo.GetUserByUserID(Page.User.Identity.Name);
             //인증 정보 저장
             
-            if (uvm.UserName == null)
+            if (Global.uvm.UserName == null)
             {
                 lblName.Text = "손님";
             } else
             {
-                lblName.Text = uvm.UserName;
+                lblName.Text = Global.uvm.UserName;
             }
         }
     }

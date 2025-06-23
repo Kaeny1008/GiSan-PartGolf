@@ -1,6 +1,8 @@
-﻿using System;
+﻿using GiSanParkGolf.Models;
+using System;
 using System.Data;
 using System.Data.OleDb;
+using System.Diagnostics;
 using System.Drawing;
 using System.Web.Configuration;
 using System.Web.UI;
@@ -19,16 +21,18 @@ namespace GiSanParkGolf.Sites.Admin
                 return;
             }
 
-            PlayerList();
+            PlayerList(string.Empty);
 
             //알림창 띄우는거임
             //string strJs = @"<script language='JavaScript'>window.alert('안녕');</script>";
             //Response.Write(strJs);
         }
 
-        private void PlayerList()
+        private void PlayerList(string userName)
         {
-            string strSQL = "SELECT UserId, UserName, UserBirthOfDate, UserNote FROM User_Information";
+            string strSQL = "SELECT UserWClass, UserId, UserName, UserNumber, UserNote FROM User_Information";
+            strSQL += " where UserName like '%' + '" + userName + "' + '%'";
+            strSQL += ";";
             OleDbCommand sqlCmd = new OleDbCommand();
             con = new OleDbConnection();
             con.ConnectionString = WebConfigurationManager.ConnectionStrings["MDB_ConnectionString"].ConnectionString;
@@ -74,7 +78,17 @@ namespace GiSanParkGolf.Sites.Admin
             GridViewRow gvr = (GridViewRow)btn.NamingContainer;
             int x = gvr.RowIndex;
             GridView1.Rows[x].BackColor = Color.AliceBlue;
-            LabelResult.Text = "선택된 ID : " + GridView1.Rows[x].Cells[0].Text;
+
+
+            Global.uvm.SelectID = GridView1.Rows[x].Cells[1].Text;
+
+            Debug.WriteLine("선택된 ID : " + Global.uvm.SelectID);
+            Response.Redirect("~/Sites/Admin/Player Information.aspx");
+        }
+
+        protected void BTN_Search_Click(object sender, EventArgs e)
+        {
+            PlayerList(TB_Search.Text);
         }
     }
 }
