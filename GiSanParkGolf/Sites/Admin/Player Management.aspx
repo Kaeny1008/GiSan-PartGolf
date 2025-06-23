@@ -1,16 +1,25 @@
-﻿<%@ Page Title="선수정보(관리자)" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Player Management.aspx.cs" 
+﻿<%@ Page Title="선수정보" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Player Management.aspx.cs" 
     Inherits="GiSanParkGolf.Sites.Admin.Player_Management" EnableEventValidation="false" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
      <link href="/Content/Site.css" rel="stylesheet"/>
+<%--    <script runat="server">
+        void Check_Clicked(Object sender, EventArgs e) 
+            {
+                
+            }
+    </script>--%>
+
     <div>
         <div id="PlayList">
             <div>
-                <asp:Label ID="LB_Search" runat="server" Text="이름" Width="60px" Height="17px"></asp:Label>
+                <asp:CheckBox ID="CheckBox1" runat="server" Text="승인대기만 보기" OnCheckedChanged="CheckBox_CheckedChanged" AutoPostBack="true" />
+                <a>&emsp;&emsp;&emsp;&emsp;</a>
                 <asp:TextBox ID="TB_Search" runat="server" placeholder="이름을 입력하여 검색"></asp:TextBox>
                 <asp:Button ID="BTN_Search" runat="server" Text="검색" OnClick="BTN_Search_Click" />
-                <br />
-            </div>           
+            </div>      
+            
+            <hr />
 
             <asp:Label ID="LabelResult" runat="server" Text="선택정보" Visible="false"></asp:Label>
             <h12>(선수이름을 클릭하여 수정)</h12><br />

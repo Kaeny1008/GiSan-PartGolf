@@ -164,6 +164,7 @@
     <Content Include="Scripts\WebForms\WebParts.js" />
     <Content Include="Scripts\WebForms\WebUIValidation.js" />
     <Content Include="Site.Master" />
+    <Content Include="Sites\UserManagement\User Modify.aspx" />
     <Content Include="Sites\UserManagement\UserRepositories.aspx" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
@@ -234,6 +235,13 @@
     </Compile>
     <Compile Include="Site.Mobile.Master.designer.cs">
       <DependentUpon>Site.Mobile.Master</DependentUpon>
+    </Compile>
+    <Compile Include="Sites\UserManagement\User Modify.aspx.cs">
+      <DependentUpon>User Modify.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Sites\UserManagement\User Modify.aspx.designer.cs">
+      <DependentUpon>User Modify.aspx</DependentUpon>
     </Compile>
     <Compile Include="Sites\UserManagement\UserRepositories.aspx.cs">
       <DependentUpon>UserRepositories.aspx</DependentUpon>

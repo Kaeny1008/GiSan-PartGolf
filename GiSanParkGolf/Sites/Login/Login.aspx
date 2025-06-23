@@ -11,6 +11,7 @@
             <br />
             <br />
             <h2>로그인</h2>
+            <h4>로그인 후 이용할 수 있습니다.</h4>
             <asp:Label runat="server" CssClass="NormalLabel">ID</asp:Label><br />
             <asp:TextBox ID="txtUserID" runat="server" placeholder="사용자 ID 입력"></asp:TextBox><br />
             <asp:Label runat="server" CssClass="NormalLabel">암호</asp:Label><br />

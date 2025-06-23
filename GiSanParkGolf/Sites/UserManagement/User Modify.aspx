@@ -1,15 +1,8 @@
-﻿<%@ Page Title="회원가입" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="UserRepositories.aspx.cs" Inherits="GiSanParkGolf.Sites.UserManagement.UserRepositories" %>
+﻿<%@ Page Title="정보수정" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="User Modify.aspx.cs" Inherits="GiSanParkGolf.Sites.UserManagement.User_Modify" %>
 
-<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <link href="/Class/StyleSheet.css?after" rel="stylesheet" type="text/css"/>
     <script language="javascript">
-        //function GenderValidate(source, arguments) {
-        //    if (arguments.Value == "선택") {
-        //        arguments.IsValid = false;
-        //    } else {
-        //        arguments.IsValid = true;
-        //    }
-        //}
         function functionx(evt) {
             if (evt.charCode > 31 && (evt.charCode < 48 || evt.charCode > 57)) {
                 alert("숫자만 입력하여 주십시오.");
@@ -41,14 +34,17 @@
         }
     </script>
 
+    <script runat="server"> 
+
+    </script>
+
     <div class="Center_Container">
         <div class="Center_Container_Content">
             <h12>정보를 입력하여 주십시오.</h12><br /><br />
+        
             <asp:Label ID="label8" runat="server" Text ="ID"></asp:Label>
             <asp:TextBox ID="TextBox2" runat="server" ValidationGroup="NewUser" Text="Ready" Enabled="false" Width="60px" BorderStyle="None" ForeColor="white" BackColor="white" /><br />
-            <asp:TextBox ID="txtID" runat="server" placeholder="아이디를 입력하십시오." ValidationGroup="IDCheck" Width="430px" /><br />
-            <asp:Button ID="Btn_IDCheck" runat="server" Text="Check" OnClick="Btn_IDCheck_Click" ValidationGroup="IDCheck" />
-            <asp:Label ID="Label13" runat="server" Text=""></asp:Label><br />
+            <asp:TextBox ID="txtID" runat="server" placeholder="아이디를 입력하십시오." Width="430px" Enabled="false" /><br />
 
             <asp:Label ID="label9" runat="server" Text ="암호"></asp:Label><br />
             <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" placeholder="암호를 입력하십시오." ValidationGroup="NewUser" Width="430px"></asp:TextBox><br />
@@ -74,60 +70,24 @@
             <asp:TextBox ID="txtAddress2" runat="server" Width="430px"></asp:TextBox><br />
 
             <asp:Label ID="label7" runat="server" Text="비고" ></asp:Label><br />
-            <asp:TextBox ID="txtMemo" runat="server" TextMode="MultiLine" Width="430px" Height="200px"></asp:TextBox><br /><br />
-
+            <asp:TextBox ID="txtMemo"
+                TextMode="MultiLine"
+                height="200px"
+                width="430px"
+                runat="server"/>
+            <br /><br />
             <asp:Label ID="label6" runat="server" ForeColor="#FF3300"></asp:Label><br />
-
             <asp:Button ID="btnRegister" 
                 Width="430px" 
                 Height="40px" 
                 Font-Bold="true" 
                 runat="server" 
-                Text="회원가입" 
+                Text="수정하기" 
                 OnClick="BTN_Register_Click"
                 ValidationGroup="NewUser">
             </asp:Button>
         </div>
 
-        <asp:RequiredFieldValidator ID="RequiredFieldValidator1" 
-            runat="server"
-            ErrorMessage="아이디는 필 수 입력 항목입니다." 
-            ControlToValidate="txtID"
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
-        <asp:RegularExpressionValidator ID="RegularExpressionValidator1" 
-            runat="server" 
-            ControlToValidate="txtID" 
-            ValidationExpression="[0-9a-zA-Z]{4,15}" 
-            ErrorMessage="4~15자리의 문자, 숫자로 이루어져야 합니다." 
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="IDCheck"/><br />
-        <asp:RegularExpressionValidator ID="RegularExpressionValidator5" 
-            runat="server" 
-            ControlToValidate="txtID" 
-            ValidationExpression="[a-zA-Z].*" 
-            ErrorMessage="문자로 시작해야합니다." 
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="IDCheck"/><br />
-        <%--아래 항목은 아이디 유효성 검사를 했는지 확인하기 위해 있음--%>
-        <asp:RegularExpressionValidator ID="RegularExpressionValidator4" 
-            runat="server" 
-            ControlToValidate="TextBox2"
-            ValidationExpression="OK"
-            ErrorMessage="아이디를 검사하지 않았습니다." 
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
-        <asp:RequiredFieldValidator ID="RequiredFieldValidator2" 
-            runat="server"
-            ErrorMessage="암호는 필 수 입력 항목입니다." 
-            ControlToValidate="txtPassword"
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
         <asp:RegularExpressionValidator ID="RegularExpressionValidator2" 
             runat="server" 
             ControlToValidate="txtPassword" 
@@ -188,10 +148,5 @@
             ShowSummary="false"
             HeaderText="다음 사항을 확인하여 주십시오."
             runat="server" ValidationGroup="NewUser" />
-        <asp:ValidationSummary ID="ValidationSummary1"
-            ShowMessageBox="true" 
-            ShowSummary="false"
-            HeaderText="다음 사항을 확인하여 주십시오."
-            runat="server" ValidationGroup="IDCheck" />
     </div>
 </asp:Content>

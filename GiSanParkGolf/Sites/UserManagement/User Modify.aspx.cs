@@ -1,30 +1,29 @@
 ﻿using GiSanParkGolf.Class;
-using GiSanParkGolf.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Policy;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using T_Engine;
 
-namespace GiSanParkGolf.Sites.Admin
+namespace GiSanParkGolf.Sites.UserManagement
 {
-    public partial class Player_Information : System.Web.UI.Page
+    public partial class User_Modify : System.Web.UI.Page
     {
-        private string selectID = Global.uvm.SelectID;
+        string prePage;
         protected void Page_Load(object sender, EventArgs e)
         {
-            //string strJs = @"<script language='JavaScript'>window.alert('" + Global.uvm.SelectID + "');</script>";
-            //Response.Write(strJs);
-
             if (!Page.IsPostBack)
             {
-                UserInformationLoad(Global.uvm.SelectID);
+                prePage = Request.ServerVariables["HTTP_REFERER"];
+                Debug.WriteLine(prePage);
+                UserInformationLoad(Global.uvm.UserID);
             }
-            
         }
+
         protected void UserInformationLoad(string userID)
         {
             DB_Management userRepo = new DB_Management();
@@ -37,15 +36,6 @@ namespace GiSanParkGolf.Sites.Admin
             txtAddress.Text = Global.suvm.UserAddress2;
             txtAddress2.Text = Global.suvm.UserAddress2;
             txtMemo.Text = Global.suvm.UserNote;
-            if (Global.suvm.UserWClass.Equals("승인"))
-            {
-                CheckBox1.Checked = true;
-
-            } else
-            {
-                CheckBox1.Checked = false;
-            }
-            //txtID.Text = Global.suvm.UserWClass;
 
         }
 
@@ -82,14 +72,8 @@ namespace GiSanParkGolf.Sites.Admin
             {
                 strSQL += ", UserPassword = '" + txtPassword.Text + "'";
             }
-            if (CheckBox1.Checked)
-            {
-                strSQL += ", UserWClass = '승인'";
-            } else
-            {
-                strSQL += ", UserWClass = '승인대기'";
-            }
-                strSQL += " WHERE UserId = '" + txtID.Text + "'";
+
+            strSQL += " WHERE UserId = '" + txtID.Text + "'";
             strSQL += ";";
 
             Debug.WriteLine(strSQL);
@@ -99,8 +83,9 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (writeResult.Equals("Success"))
             {
-                string strJs = "<script>alert('수정 되었습니다.'); location.href='/Sites/Admin/Player Management.aspx';</script>";
-                Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
+                Response.Redirect(prePage);
+                //string strJs = "<script>alert('수정 되었습니다.'); location.href='/Default';</script>";
+                //Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
             }
             else
             {

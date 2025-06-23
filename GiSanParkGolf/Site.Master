@@ -38,6 +38,21 @@
             </Scripts>
         </asp:ScriptManager>
 
+        <script type="text/javascript" language="javascript">
+            function go_loginpage() {
+                location.href = "/Sites/Login/Login";
+                return false;
+            }
+            function go_logoutpage() {
+                location.href = "/Sites/Login/Logout";
+                return false;
+            }
+            function go_usermodify() {
+                location.href = "/Sites/UserManagement/User Modify";
+                return false;
+            }
+        </script>
+
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
             <div class="container">
                 <a class="navbar-brand" runat="server" href="/" style="color: cornflowerblue">기산 파크골프 매니저</a>
@@ -56,18 +71,25 @@
         <div class="container">
             <asp:Label ID="lblName" runat="server" Text="손님"></asp:Label>
             <asp:Label ID="Label1" runat="server" Text="님, 반갑습니다."></asp:Label>
+            <br />
             <asp:LoginView ID="LoginView1" runat="server">
                 <AnonymousTemplate>
                     <!-- 로그인 전 -->
-                    <a href="/Sites/Login/Login">로그인</a>
+                    <%--<a href="/Sites/Login/Login">로그인</a>--%>
+                    <asp:Button ID="Login" runat="server" OnClientClick="return go_loginpage();" Text="로그인" />
                 </AnonymousTemplate>
                 <LoggedInTemplate>
                     <!-- 로그인 후 -->
-                    <a href="/Sites/Login/Logout">로그아웃</a>
+                    <%--<a href="/Sites/Login/Logout">로그아웃</a>--%>
+                    <asp:Button ID="LogOut" runat="server" OnClientClick="return go_logoutpage();" Text="로그아웃" />
+                    <asp:Button ID="UserInformation" runat="server" OnClientClick="return go_usermodify();" Text="정보수정" />
+                    <%--<asp:HyperLink ID="HyperLink2" runat="server" NavigateUrl="~/UserInfo.aspx" Text ="정보수정" />--%>
                 </LoggedInTemplate>
             </asp:LoginView>
         </div>
+        
         <div class="container body-content">
+            <hr />
             <div class="column">
                 <asp:ContentPlaceHolder ID="MainContent" runat="server">
                 </asp:ContentPlaceHolder>

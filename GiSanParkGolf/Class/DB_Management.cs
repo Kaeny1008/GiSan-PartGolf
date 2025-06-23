@@ -105,43 +105,6 @@ namespace GiSanParkGolf.Class
             return Global.suvm;
         }
 
-        public string GetSelectUserByUserID2(string userID)
-        {
-            string result = string.Empty;
-
-            string strSQL = "SELECT UserId, UserName, UserPassword, UserNumber";
-            strSQL += ", UserGender, UserAddress, UserAddress2";
-            strSQL += ", UserRegistrationDate, UserNote, UserWClass";
-            strSQL += " FROM User_Information";
-            strSQL += " WHERE UserId = @UserID";
-            strSQL += ";";
-
-            OleDbCommand sqlCmd = new OleDbCommand(strSQL, con);
-            sqlCmd.CommandType = CommandType.Text;
-
-            sqlCmd.Parameters.AddWithValue("@UserID", userID);
-
-            con.Open();
-
-            OleDbDataReader sqlDR = sqlCmd.ExecuteReader();
-            while (sqlDR.Read())
-            {
-                result = sqlDR.GetString(0);
-                result += '!' + sqlDR.GetString(1);
-                result += '!' + sqlDR.GetString(2);
-                result += '!' + sqlDR.GetInt32(3).ToString();
-                result += '!' + sqlDR.GetInt32(4).ToString();
-                result += '!' + sqlDR.GetString(5);
-                result += '!' + sqlDR.GetString(6);
-                result += '!' + sqlDR.GetDateTime(7).ToString();
-                result += '!' + sqlDR.GetString(8);
-                result += '!' + sqlDR.GetString(9);
-            }
-            con.Close();
-
-            return result;
-        }
-
         public string IsCorrectUser(string userID, string password)
         {
             string result = string.Empty;

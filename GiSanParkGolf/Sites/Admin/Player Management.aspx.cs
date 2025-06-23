@@ -15,23 +15,30 @@ namespace GiSanParkGolf.Sites.Admin
         private OleDbConnection con;
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!Page.User.Identity.IsAuthenticated)
+            if (!Page.IsPostBack)
             {
-                Response.Redirect("~/Sites/Login/Login.aspx");
-                return;
-            }
+                if (!Page.User.Identity.IsAuthenticated)
+                {
+                    Response.Redirect("~/Sites/Login/Login.aspx");
+                    return;
+                }
 
-            PlayerList(string.Empty);
+                PlayerList(string.Empty, false);
+            }
 
             //알림창 띄우는거임
             //string strJs = @"<script language='JavaScript'>window.alert('안녕');</script>";
             //Response.Write(strJs);
         }
 
-        private void PlayerList(string userName)
+        private void PlayerList(string userName, Boolean readyUser)
         {
             string strSQL = "SELECT UserWClass, UserId, UserName, UserNumber, UserNote FROM User_Information";
             strSQL += " where UserName like '%' + '" + userName + "' + '%'";
+            if (readyUser)
+            {
+                strSQL += " and UserWClass = '승인대기'";
+            }
             strSQL += ";";
             OleDbCommand sqlCmd = new OleDbCommand();
             con = new OleDbConnection();
@@ -88,7 +95,26 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_Search_Click(object sender, EventArgs e)
         {
-            PlayerList(TB_Search.Text);
+            if (CheckBox1.Checked)
+            {
+                PlayerList(TB_Search.Text, true);
+            } else
+            {
+                PlayerList(TB_Search.Text, false);
+            }
+                
+        }
+
+        protected void CheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (CheckBox1.Checked)
+            {
+                PlayerList(TB_Search.Text, true);
+            }
+            else
+            {
+                PlayerList(TB_Search.Text, false);
+            }
         }
     }
 }
