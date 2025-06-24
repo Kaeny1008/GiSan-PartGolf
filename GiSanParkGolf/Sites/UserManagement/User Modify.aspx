@@ -39,56 +39,123 @@
     </script>
 
     <div class="Center_Container">
-        <div>
-            <h12>정보를 입력하여 주십시오.</h12><br /><br />
-        
-            <asp:Label ID="label8" runat="server" Text ="ID"></asp:Label>
-            <asp:TextBox ID="TextBox2" runat="server" ValidationGroup="NewUser" Text="Ready" Enabled="false" Width="60px" BorderStyle="None" ForeColor="white" BackColor="white" /><br />
-            <asp:TextBox ID="txtID" runat="server" placeholder="아이디를 입력하십시오." Width="430px" Enabled="false" /><br />
+        <div class="Login_Container_Content">
+            <div>
+                <div class="alert alert-success d-flex align-items-center" role="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="50" height="50" 
+                        fill="currentColor" 
+                        class="bi bi-check-circle-fill flex-shrink-0 me-2" 
+                        viewBox="0 0 16 16" 
+                        role="img" 
+                        aria-label="Success:">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                    </svg>
+                    <div>
+                        <strong>회원가입</strong><br />
+                        아래 정보를 입력하여 주십시오.
+                    </div>
+                </div>
+    
+                <asp:TextBox ID="TextBox2" runat="server" ValidationGroup="NewUser" Text="Ready" Enabled="false" Width="150px" BorderStyle="None" ForeColor="white" BackColor="white" /><br />
+                <asp:Label ID="IDResult" runat="server" Text=""></asp:Label><br />
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">ID</span>
+                    <asp:TextBox ID="txtID" runat="server" class="form-control" ValidationGroup="IDCheck" ReadOnly="true"></asp:TextBox>
+                    <asp:button class="btn btn-outline-secondary" runat="server" ID="Btn_IDCheck" ValidationGroup="IDCheck" Text="Check" Enabled="false"/>
+                </div>
 
-            <asp:Label ID="label9" runat="server" Text ="암호"></asp:Label><br />
-            <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" placeholder="암호를 입력하십시오." ValidationGroup="NewUser" Width="430px"></asp:TextBox><br />
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon2">암호</span>
+                    <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" class="form-control" placeholder="수정시에만 입력 하세요." ValidationGroup="NewUser"/>
+                </div>
 
-            <asp:Label ID="label10" runat="server" Text ="확인"></asp:Label><br />
-            <asp:TextBox ID="txtReCheck" runat="server" TextMode="Password" placeholder="암호를 재입력 하십시오." ValidationGroup="NewUser" Width="430px"></asp:TextBox><br />
-            <br /><br />
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon3">암호확인</span>
+                    <asp:TextBox ID="txtReCheck" runat="server" TextMode="Password" class="form-control" placeholder="수정시에만 입력 하세요." ValidationGroup="NewUser"/>
+                </div>
 
-            <asp:Label ID="label1" runat="server" Text ="이름"></asp:Label><br />
-            <asp:TextBox ID="txtName" runat="server" ValidationGroup="NewUser" Width="430px"></asp:TextBox><br />
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon4">이름</span>
+                    <asp:TextBox ID="txtName" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser"/>
+                </div>
 
-            <asp:Label ID="label3" runat="server" Text ="주민등록 번호"></asp:Label><br />
-            <asp:TextBox ID="txtBirthDay" runat="server" Width="150px" onkeypress="return functionx(event)" MaxLength="6"></asp:TextBox>
-            <asp:Label ID="label11" runat="server" Text ="-"></asp:Label>
-            <asp:TextBox ID="txtGender" runat="server" Width="30px" onkeypress="return functionx(event)" MaxLength="1"></asp:TextBox>
-            <asp:Label ID="label12" runat="server" Text ="******"></asp:Label>
-            <br />
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon5">주민번호</span>
+                    <asp:TextBox ID="txtBirthDay" runat="server" Width="150px" onkeypress="return functionx(event)" class="form-control" MaxLength="6" ValidationGroup="NewUser"></asp:TextBox>
+                    <span class="input-group-text" style="width:15px">-</span>
+                    <asp:TextBox ID="txtGender" runat="server" Width="30px" onkeypress="return functionx(event)" class="form-control" MaxLength="1" ValidationGroup="NewUser"></asp:TextBox>
+                    <span class="input-group-text" style="width:60px">******</span>
+                </div>
 
-            <asp:Label ID="label4" runat="server" Text="주소"></asp:Label><br />
-            <asp:TextBox ID="txtAddress" runat="server" ValidationGroup="NewUser" Width="430px"></asp:TextBox><br />
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon6">주소</span>
+                    <asp:TextBox ID="txtAddress" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser"/>
+                    <asp:button class="btn btn-outline-secondary" runat="server" ID="Button1" Text="검색" OnClientClick="return readyAlarm(event)" />
+                </div>
 
-            <asp:Label ID="label5" runat="server" Text="상세주소"></asp:Label><br />
-            <asp:TextBox ID="txtAddress2" runat="server" Width="430px"></asp:TextBox><br />
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon7">상세주소</span>
+                    <asp:TextBox ID="txtAddress2" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser"/>
+                </div>
 
-            <asp:Label ID="label7" runat="server" Text="비고" ></asp:Label><br />
-            <asp:TextBox ID="txtMemo"
-                TextMode="MultiLine"
-                height="200px"
-                width="430px"
-                runat="server"/>
-            <br /><br />
-            <asp:Label ID="label6" runat="server" ForeColor="#FF3300"></asp:Label><br />
-            <asp:Button ID="btnRegister" 
-                Width="430px" 
-                Height="40px" 
-                Font-Bold="true" 
-                runat="server" 
-                Text="수정하기" 
-                OnClick="BTN_Register_Click"
-                class="btn btn-primary"
-                ValidationGroup="NewUser">
-            </asp:Button>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon8">비고</span>
+                    <asp:TextBox ID="txtMemo" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser" TextMode="MultiLine" Height="200px"/>
+                </div>
+
+                <asp:Label ID="label6" runat="server" ForeColor="#FF3300"></asp:Label><br />
+
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" Width="100%" Height="40px">
+                    수정하기
+                </button>
+<%--                <asp:Button ID="Button3" 
+                    Font-Bold="true" 
+                    runat="server" 
+                    Text="수정하기" 
+                    class="btn btn-primary" 
+                    ValidationGroup="NewUser"
+                    data-bs-toggle="modal" 
+                    data-bs-target="#exampleModal"
+                    width="100%"
+                    height="40px">
+                </asp:Button>--%>
+            </div>
         </div>
 
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered"> <%--modal-dialog-centered 를 옆에 넣으면 화면 중앙에 나타난다.--%>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">저장확인</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        수정내용을 저장 하시겠습니까?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
+                        <asp:Button ID="Button2" 
+                            runat="server" 
+                            OnClick="BTN_Register_Click" 
+                            class="btn btn-primary" 
+                            Text="예" 
+                            ValidationGroup="NewUser"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#exampleModal"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <asp:RequiredFieldValidator ID="RequiredFieldValidator2" 
+            runat="server"
+            ErrorMessage="암호는 필 수 입력 항목입니다." 
+            ControlToValidate="txtPassword"
+            Display="None" 
+            ForeColor="red" 
+            ValidationGroup="NewUser"/><br />
         <asp:RegularExpressionValidator ID="RegularExpressionValidator2" 
             runat="server" 
             ControlToValidate="txtPassword" 
@@ -111,6 +178,13 @@
             ControlToCompare="txtReCheck" 
             ErrorMessage="비밀번호가 일치하지 않습니다." 
             Display="None" ForeColor="red" 
+            ValidationGroup="NewUser"/><br />
+        <asp:RequiredFieldValidator ID="RequiredFieldValidator5" 
+            runat="server"
+            ErrorMessage="이름은 필 수 입력 항목입니다." 
+            ControlToValidate="txtName"
+            Display="None"
+            ForeColor="red" 
             ValidationGroup="NewUser"/><br />
         <asp:RequiredFieldValidator ID="RequiredFieldValidator3" 
             runat="server"
@@ -143,11 +217,34 @@
             ForeColor="red"
             runat="server" 
             ValidationGroup="NewUser"/>
-
+        <asp:RequiredFieldValidator ID="RequiredFieldValidator1" 
+            runat="server"
+            ErrorMessage="성별은 필 수 입력 항목입니다." 
+            ControlToValidate="txtGender"
+            Display="None" 
+            ForeColor="red" 
+            ValidationGroup="NewUser"/><br />
         <asp:ValidationSummary ID="ValidationSummary_SignupForm"
             ShowMessageBox="true" 
             ShowSummary="false"
             HeaderText="다음 사항을 확인하여 주십시오."
-            runat="server" ValidationGroup="NewUser" />
+            runat="server"
+            ValidationGroup="NewUser"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </div>
 </asp:Content>

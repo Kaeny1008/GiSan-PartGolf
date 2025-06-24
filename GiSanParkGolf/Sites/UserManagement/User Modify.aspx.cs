@@ -21,7 +21,7 @@ namespace GiSanParkGolf.Sites.UserManagement
                 prePage = Request.ServerVariables["HTTP_REFERER"];
                 Debug.WriteLine("이전 위치 : " + prePage);
                 UserInformationLoad(Global.uvm.UserID);
-            }
+            }               
         }
 
         protected void UserInformationLoad(string userID)
@@ -70,7 +70,7 @@ namespace GiSanParkGolf.Sites.UserManagement
 
             if (!userPassword.Equals(string.Empty))
             {
-                strSQL += ", UserPassword = '" + txtPassword.Text + "'";
+                strSQL += ", UserPassword = '" + userPassword + "'";
             }
 
             strSQL += " WHERE UserId = '" + txtID.Text + "'";

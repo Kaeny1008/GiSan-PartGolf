@@ -74,10 +74,8 @@ namespace GiSanParkGolf.Sites.UserManagement
 
         protected void Btn_IDCheck_Click(object sender, EventArgs e)
         {
-            //if (txtID.Text.Equals(string.Empty))
-            //{
-            //    return;
-            //}
+            txtPassword.Attributes.Add("value", txtPassword.Text);
+            txtReCheck.Attributes.Add("value", txtReCheck.Text);
 
             DB_Management IDCheck = new DB_Management();
             Boolean checkResult = IDCheck.ID_DuplicateCheck(txtID.Text);
@@ -93,7 +91,6 @@ namespace GiSanParkGolf.Sites.UserManagement
                 IDResult.Text = "ID를 사용 할 수 있습니다.";
                 IDResult.ForeColor = Color.Black;
                 TextBox2.Text = "OK";
-                //txtID.Enabled = false;
             }
         }
     }

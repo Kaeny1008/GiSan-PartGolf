@@ -141,13 +141,13 @@ namespace GiSanParkGolf.Sites.UserManagement
         protected global::System.Web.UI.WebControls.Label label6;
 
         /// <summary>
-        /// btnRegister 컨트롤입니다.
+        /// Button2 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnRegister;
+        protected global::System.Web.UI.WebControls.Button Button2;
 
         /// <summary>
         /// RequiredFieldValidator4 컨트롤입니다.
@@ -231,6 +231,15 @@ namespace GiSanParkGolf.Sites.UserManagement
         protected global::System.Web.UI.WebControls.CompareValidator CompareValidator1;
 
         /// <summary>
+        /// RequiredFieldValidator5 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator RequiredFieldValidator5;
+
+        /// <summary>
         /// RequiredFieldValidator3 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -265,6 +274,15 @@ namespace GiSanParkGolf.Sites.UserManagement
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.CustomValidator CustomValidator1;
+
+        /// <summary>
+        /// RequiredFieldValidator6 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator RequiredFieldValidator6;
 
         /// <summary>
         /// ValidationSummary_SignupForm 컨트롤입니다.
