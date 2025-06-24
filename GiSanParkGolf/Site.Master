@@ -3,136 +3,136 @@
 <!DOCTYPE html>
 
 <html lang="ko">
-<head runat="server">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%: Page.Title %> - 25. 06. 19</title>
+    <head runat="server">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title><%: Page.Title %> - 25. 06. 19</title>
 
-    <asp:PlaceHolder runat="server">
-        <%: Scripts.Render("~/bundles/modernizr") %>
-    </asp:PlaceHolder>
+        <asp:PlaceHolder runat="server">
+            <%: Scripts.Render("~/bundles/modernizr") %>
+            <%: Styles.Render("~/Content/bootstrap.min.css") %>    
+            <%: Scripts.Render("~/Scripts/bootstrap.bundle.min.js") %>
+        </asp:PlaceHolder>        
 
-    <webopt:bundlereference runat="server" path="~/Content/css" />
-    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        <webopt:bundlereference runat="server" path="~/Content/css" />
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    </head>
 
-</head>
-<body>
-    <form runat="server">
-        <asp:ScriptManager runat="server">
-            <Scripts>
-                <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
-                <%--Framework Scripts--%>
-                <asp:ScriptReference Name="MsAjaxBundle" />
-                <asp:ScriptReference Name="Jquery" />
-                <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
-                <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
-                <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
-                <asp:ScriptReference Name="GridView.js" Assembly="System.Web" Path="~/Scripts/WebForms/GridView.js" />
-                <asp:ScriptReference Name="DetailsView.js" Assembly="System.Web" Path="~/Scripts/WebForms/DetailsView.js" />
-                <asp:ScriptReference Name="TreeView.js" Assembly="System.Web" Path="~/Scripts/WebForms/TreeView.js" />
-                <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
-                <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
-                <asp:ScriptReference Name="WebFormsBundle" />
-                <%--Site Scripts--%>
-            </Scripts>
-        </asp:ScriptManager>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script type="text/javascript" language="javascript">
-            function go_loginpage() {
-                location.href = "/Sites/Login/Login";
-                return false;
-            }
-            function go_logoutpage() {
-                location.href = "/Sites/Login/Logout";
-                return false;
-            }
-            function go_usermodify() {
-                location.href = "/Sites/UserManagement/User Modify";
-                return false;
-            }
-            $(document).ready(function () {
-                $('nav > div > ul > li').mouseover(function () {
-                    $(this).children('.drop-menu-wrap').stop().slideDown(350);
-                });
-                $('nav > div > ul > li').mouseleave(function () {
-                    $(this).children('.drop-menu-wrap').stop().slideUp(0);
-                });
-            });
-        </script>
-        <link href="/Class/StyleSheet.css?after2" rel="stylesheet" type="text/css"/>
-
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
-            <div class="container">
-            <a class="navbar-brand" runat="server" href="/" style="color: cornflowerblue">기산 파크골프 매니저</a>
-            <ul class="ul_dropdown">
-                <li class="li_dropdown" style="width:50px"><a href="/Default" style="color:white">홈</a></li>
-                <li class="li_dropdown" style="width:150px"><a style="color:white">대회참가 신청</a>
-                    <div class="drop-menu-wrap"><a href="/" style="color:white">신청서 작성</a></div>
-                    <div class="drop-menu-wrap"><a href="/" style="color:white">신청 확인</a></div>
-                    <div class="drop-menu-wrap"><a href="/" style="color:white">결과 확인</a></div>
-                </li>
-                <li class="li_dropdown" style="width:150px"><a style="color:yellowgreen">관리자 페이지</a>
-                    <div class="drop-menu-wrap"><a href="/Sites/Admin/Player Management" style="color:white">선수정보 관리</a></div>
-                    <div class="drop-menu-wrap"><a href="/" style="color:white">대회개최 설정</a></div>
-                    <div class="drop-menu-wrap"><a href="/" style="color:white">인원 코스 및 배치</a></div>
-                    <div class="drop-menu-wrap"><a href="/" style="color:white">대회결과 입력</a></div>
-                </li>
-            </ul>
-                </div>
-        </nav>
-<%--        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" runat="server" href="/" style="color: cornflowerblue">기산 파크골프 매니저</a>
-                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="탐색 토글" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/">홈</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Sites/Admin/New Contest">관리자 페이지</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>--%>
-
-        <div class="container">
-            <asp:Label ID="lblName" runat="server" Text="손님"></asp:Label>
-            <asp:Label ID="Label1" runat="server" Text="님, 반갑습니다."></asp:Label>
-            <br />
-            <asp:LoginView ID="LoginView1" runat="server">
-                <AnonymousTemplate>
-                    <!-- 로그인 전 -->
-                    <%--<a href="/Sites/Login/Login">로그인</a>--%>
-                    <asp:Button ID="Login" runat="server" OnClientClick="return go_loginpage();" Text="로그인" />
-                </AnonymousTemplate>
-                <LoggedInTemplate>
-                    <!-- 로그인 후 -->
-                    <%--<a href="/Sites/Login/Logout">로그아웃</a>--%>
-                    <asp:Button ID="LogOut" runat="server" OnClientClick="return go_logoutpage();" Text="로그아웃" />
-                    <asp:Button ID="UserInformation" runat="server" OnClientClick="return go_usermodify();" Text="정보수정" />
-                    <%--<asp:HyperLink ID="HyperLink2" runat="server" NavigateUrl="~/UserInfo.aspx" Text ="정보수정" />--%>
-                </LoggedInTemplate>
-            </asp:LoginView>
-        </div>
+    <body>
+        <form runat="server">
+            <asp:ScriptManager runat="server">
+                <Scripts>
+                    <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
+                    <%--Framework Scripts--%>
+                    <asp:ScriptReference Name="MsAjaxBundle" />
+                    <asp:ScriptReference Name="jquery" />
+                    <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
+                    <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
+                    <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
+                    <asp:ScriptReference Name="GridView.js" Assembly="System.Web" Path="~/Scripts/WebForms/GridView.js" />
+                    <asp:ScriptReference Name="DetailsView.js" Assembly="System.Web" Path="~/Scripts/WebForms/DetailsView.js" />
+                    <asp:ScriptReference Name="TreeView.js" Assembly="System.Web" Path="~/Scripts/WebForms/TreeView.js" />
+                    <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
+                    <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
+                    <asp:ScriptReference Name="WebFormsBundle" />
+                    <%--Site Scripts--%>
+                </Scripts>
+            </asp:ScriptManager>
         
-        <div class="container body-content">
-            <hr />
-            <div class="column">
-                <asp:ContentPlaceHolder ID="MainContent" runat="server">
-                </asp:ContentPlaceHolder>
+            <script type="text/javascript" language="javascript">
+                function go_loginpage() {
+                    location.href = "/Sites/Login/Login";
+                    return false;
+                }
+                function go_logoutpage() {
+                    location.href = "/Sites/Login/Logout";
+                    return false;
+                }
+                function go_usermodify() {
+                    location.href = "/Sites/UserManagement/User Modify";
+                    return false;
+                }
+            </script>
+
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <div class="container">
+                    <a class="navbar-brand" href="/">기산 파크골프</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/">홈</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    관리자 페이지
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="/">대회개최 설정</a></li>
+                                    <li><a class="dropdown-item" href="/">인원 코스 및 배치</a></li>
+                                    <li><a class="dropdown-item" href="/">대회결과 입력</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    대회참가 신청
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="/">신청서 작성</a></li>
+                                    <li><a class="dropdown-item" href="/">신청 확인</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="/">경기결과 확인</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+    <%--                    <form class="d-flex">
+                            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                            <button class="btn btn-outline-success" type="submit">Search</button>
+                        </form>--%>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container">
+                <br />
+                <asp:Label ID="lblName" runat="server" Text="손님"></asp:Label>
+                <asp:Label ID="Label1" runat="server" Text="님, 반갑습니다."></asp:Label>
+              
+                <asp:LoginView ID="LoginView1" runat="server">
+                    <AnonymousTemplate>
+                        <!-- 로그인 전 -->
+                        <%--<asp:Button ID="Login" runat="server" class="btn btn-primary btn-sm" OnClientClick="return go_loginpage();" Text="로그인" />--%>
+                    </AnonymousTemplate>
+                    <LoggedInTemplate>
+                        <!-- 로그인 후 -->
+                        <%--<a href="/Sites/Login/Logout">로그아웃</a>--%>
+                        <asp:Button ID="LogOut" runat="server" class="btn btn-warning btn-sm" OnClientClick="return go_logoutpage();" Text="로그아웃" />
+                        <asp:Button ID="UserInformation" runat="server" class="btn btn-secondary btn-sm" OnClientClick="return go_usermodify();" Text="정보수정" />
+                    </LoggedInTemplate>
+                </asp:LoginView>
             </div>
-            <hr />
-        </div>
-        <div class="container body-content">
-            <footer>
-                <p>&copy; <%: DateTime.Now.Year %> - 기산 파크골프</p>
-            </footer>
-        </div>
-    </form>
-    <asp:PlaceHolder runat="server">
-        <%: Scripts.Render("~/Scripts/bootstrap.js") %>
-    </asp:PlaceHolder>
-</body>
+        
+            <div class="container body-content">
+                <hr />
+                <div class="column">
+                    <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                    </asp:ContentPlaceHolder>
+                </div>
+                <hr />
+            </div>
+            <div class="container body-content">
+                <footer>
+                    <p>&copy; <%: DateTime.Now.Year %> - 기산 파크골프</p>
+                </footer>
+            </div>
+        </form>
+        <asp:PlaceHolder runat="server">
+            <%: Scripts.Render("~/Scripts/bootstrap.js") %>
+        </asp:PlaceHolder>
+    </body>
 </html>

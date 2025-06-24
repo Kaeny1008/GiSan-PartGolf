@@ -1,22 +1,16 @@
 ﻿using GiSanParkGolf.Class;
-using GiSanParkGolf.Models;
 using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Security.Cryptography.X509Certificates;
 using System.Web;
-using System.Web.Configuration;
 using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace GiSanParkGolf
+namespace GiSanParkGolf.Sites.Login
 {
-    public partial class Login : System.Web.UI.Page
+    public partial class Admin_Alert : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -41,10 +35,12 @@ namespace GiSanParkGolf
                     FormsAuthentication.SetAuthCookie(txtUserID.Text, false);
                     Response.Redirect("~/Default.aspx");
                 }
-            } else if (userRepo.IsCorrectUser(txtUserID.Text, txtPassword.Text).Equals("Ready"))
+            }
+            else if (userRepo.IsCorrectUser(txtUserID.Text, txtPassword.Text).Equals("Ready"))
             {
                 Page.ClientScript.RegisterStartupScript(this.GetType(), "showMsg", "<script>alert('승인 대기중입니다.');</script>");
-            } else
+            }
+            else
                 Page.ClientScript.RegisterStartupScript(this.GetType(), "showMsg", "<script>alert('아이디 또는 비밀번호가 틀렸습니다.');</script>");
         }
 

@@ -39,7 +39,7 @@
     </script>
 
     <div class="Center_Container">
-        <div class="Center_Container_Content">
+        <div>
             <h12>정보를 입력하여 주십시오.</h12><br /><br />
         
             <asp:Label ID="label8" runat="server" Text ="ID"></asp:Label>
@@ -84,6 +84,7 @@
                 runat="server" 
                 Text="수정하기" 
                 OnClick="BTN_Register_Click"
+                class="btn btn-primary"
                 ValidationGroup="NewUser">
             </asp:Button>
         </div>

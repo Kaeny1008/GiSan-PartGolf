@@ -1,6 +1,6 @@
-﻿<%@ Page Title="Login" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="GiSanParkGolf.Login" %>
+﻿<%@ Page Title="Login" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Admin Alert.aspx.cs" Inherits="GiSanParkGolf.Sites.Login.Admin_Alert" %>
 
-<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
     
     <div class="Center_Container">
@@ -16,7 +16,7 @@
                 </svg>
                 <div>
                     <strong>로그인</strong><br />
-                    로그인 후 이용 할 수 있습니다.
+                    관리자 전용 페이지 입니다.
                 </div>
             </div>
             <br />

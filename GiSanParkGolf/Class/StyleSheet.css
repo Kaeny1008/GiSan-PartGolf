@@ -6,24 +6,23 @@
     justify-content: center; /*가로*/
 }
 
-.Center_Container_Content {
+.Login_Container_Content {
     /*background-color: aliceblue;*/
-    /*height: 100vh;*/
-}
-
-.Center_Container_Content_Center {
-    height: 100vh;
     text-align: center;
 }
 
+.input-group-text {
+    width: 100px;
+}
+
+
 .ul_dropdown {
     display: flex;
-    gap: 10px;
+    gap: 0px;
 }
 
 .li_dropdown {
     position: relative;
-    /*    width: 150px;*/
     list-style: none;
     /*background: DarkSlateGray;*/
     text-align: center;
@@ -38,6 +37,9 @@
     /*background: LightSlateGray;*/
     text-align: center;
     border-radius: 0px 0px 0px 0px;
+}
+.container{
+    
 }
 
 a {

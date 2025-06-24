@@ -7,11 +7,11 @@
 // </자동 생성됨>
 //------------------------------------------------------------------------------
 
-namespace GiSanParkGolf
+namespace GiSanParkGolf.Sites.Login
 {
 
 
-    public partial class Login
+    public partial class Admin_Alert
     {
 
         /// <summary>
