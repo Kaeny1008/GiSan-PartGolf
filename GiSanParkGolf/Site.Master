@@ -67,7 +67,7 @@
                                 <a class="nav-link active" aria-current="page" href="/">홈</a>
                             </li>
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle" id="navbarDropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     관리자 페이지
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -131,8 +131,5 @@
                 </footer>
             </div>
         </form>
-        <asp:PlaceHolder runat="server">
-            <%: Scripts.Render("~/Scripts/bootstrap.js") %>
-        </asp:PlaceHolder>
     </body>
 </html>
