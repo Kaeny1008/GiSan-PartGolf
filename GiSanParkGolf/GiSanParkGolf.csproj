@@ -94,10 +94,6 @@
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="T-Engine, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\T-Engine\bin\Debug\T-Engine.dll</HintPath>
-    </Reference>
     <Reference Include="WebGrease">
       <Private>True</Private>
       <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
@@ -133,22 +129,22 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Database\Database.accdb" />
-    <Content Include="DotNetNote\BoardCommentDelete.aspx" />
-    <Content Include="DotNetNote\BoardDelete.aspx" />
-    <Content Include="DotNetNote\BoardDown.aspx" />
-    <Content Include="DotNetNote\BoardList.aspx" />
-    <Content Include="DotNetNote\BoardModify.aspx" />
-    <Content Include="DotNetNote\BoardReply.aspx" />
-    <Content Include="DotNetNote\BoardView.aspx" />
-    <Content Include="DotNetNote\BoardWrite.aspx" />
-    <Content Include="DotNetNote\Controls\AdvancedPagingSingleWithBootstrap.ascx" />
-    <Content Include="DotNetNote\Controls\BoardCommentControl.ascx" />
-    <Content Include="DotNetNote\Controls\BoardEditorFormControl.ascx" />
-    <Content Include="DotNetNote\Controls\BoardSearchFormSingleControl.ascx" />
-    <Content Include="DotNetNote\Default.aspx" />
-    <Content Include="DotNetNote\ImageDown.aspx" />
-    <Content Include="DotNetNote\ImageText.aspx" />
-    <Content Include="DotNetNote\ThumbNail.aspx" />
+    <Content Include="BBS\BoardCommentDelete.aspx" />
+    <Content Include="BBS\BoardDelete.aspx" />
+    <Content Include="BBS\BoardDown.aspx" />
+    <Content Include="BBS\BoardList.aspx" />
+    <Content Include="BBS\BoardModify.aspx" />
+    <Content Include="BBS\BoardReply.aspx" />
+    <Content Include="BBS\BoardView.aspx" />
+    <Content Include="BBS\BoardWrite.aspx" />
+    <Content Include="BBS\Controls\AdvancedPagingSingleWithBootstrap.ascx" />
+    <Content Include="BBS\Controls\BoardCommentControl.ascx" />
+    <Content Include="BBS\Controls\BoardEditorFormControl.ascx" />
+    <Content Include="BBS\Controls\BoardSearchFormSingleControl.ascx" />
+    <Content Include="BBS\Default.aspx" />
+    <Content Include="BBS\ImageDown.aspx" />
+    <Content Include="BBS\ImageText.aspx" />
+    <Content Include="BBS\ThumbNail.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -232,122 +228,122 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
-    <Compile Include="DotNetNote\BoardCommentDelete.aspx.cs">
+    <Compile Include="BBS\BoardCommentDelete.aspx.cs">
       <DependentUpon>BoardCommentDelete.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\BoardCommentDelete.aspx.designer.cs">
+    <Compile Include="BBS\BoardCommentDelete.aspx.designer.cs">
       <DependentUpon>BoardCommentDelete.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\BoardDelete.aspx.cs">
+    <Compile Include="BBS\BoardDelete.aspx.cs">
       <DependentUpon>BoardDelete.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\BoardDelete.aspx.designer.cs">
+    <Compile Include="BBS\BoardDelete.aspx.designer.cs">
       <DependentUpon>BoardDelete.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\BoardDown.aspx.cs">
+    <Compile Include="BBS\BoardDown.aspx.cs">
       <DependentUpon>BoardDown.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\BoardDown.aspx.designer.cs">
+    <Compile Include="BBS\BoardDown.aspx.designer.cs">
       <DependentUpon>BoardDown.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\BoardList.aspx.cs">
+    <Compile Include="BBS\BoardList.aspx.cs">
       <DependentUpon>BoardList.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\BoardList.aspx.designer.cs">
+    <Compile Include="BBS\BoardList.aspx.designer.cs">
       <DependentUpon>BoardList.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\BoardModify.aspx.cs">
+    <Compile Include="BBS\BoardModify.aspx.cs">
       <DependentUpon>BoardModify.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\BoardModify.aspx.designer.cs">
+    <Compile Include="BBS\BoardModify.aspx.designer.cs">
       <DependentUpon>BoardModify.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\BoardReply.aspx.cs">
+    <Compile Include="BBS\BoardReply.aspx.cs">
       <DependentUpon>BoardReply.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\BoardReply.aspx.designer.cs">
+    <Compile Include="BBS\BoardReply.aspx.designer.cs">
       <DependentUpon>BoardReply.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\BoardView.aspx.cs">
+    <Compile Include="BBS\BoardView.aspx.cs">
       <DependentUpon>BoardView.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\BoardView.aspx.designer.cs">
+    <Compile Include="BBS\BoardView.aspx.designer.cs">
       <DependentUpon>BoardView.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\BoardWrite.aspx.cs">
+    <Compile Include="BBS\BoardWrite.aspx.cs">
       <DependentUpon>BoardWrite.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\BoardWrite.aspx.designer.cs">
+    <Compile Include="BBS\BoardWrite.aspx.designer.cs">
       <DependentUpon>BoardWrite.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\Controls\AdvancedPagingSingleWithBootstrap.ascx.cs">
+    <Compile Include="BBS\Controls\AdvancedPagingSingleWithBootstrap.ascx.cs">
       <DependentUpon>AdvancedPagingSingleWithBootstrap.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\Controls\AdvancedPagingSingleWithBootstrap.ascx.designer.cs">
+    <Compile Include="BBS\Controls\AdvancedPagingSingleWithBootstrap.ascx.designer.cs">
       <DependentUpon>AdvancedPagingSingleWithBootstrap.ascx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\Controls\BoardCommentControl.ascx.cs">
+    <Compile Include="BBS\Controls\BoardCommentControl.ascx.cs">
       <DependentUpon>BoardCommentControl.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\Controls\BoardCommentControl.ascx.designer.cs">
+    <Compile Include="BBS\Controls\BoardCommentControl.ascx.designer.cs">
       <DependentUpon>BoardCommentControl.ascx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\Controls\BoardEditorFormControl.ascx.cs">
+    <Compile Include="BBS\Controls\BoardEditorFormControl.ascx.cs">
       <DependentUpon>BoardEditorFormControl.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\Controls\BoardEditorFormControl.ascx.designer.cs">
+    <Compile Include="BBS\Controls\BoardEditorFormControl.ascx.designer.cs">
       <DependentUpon>BoardEditorFormControl.ascx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\Controls\BoardSearchFormSingleControl.ascx.cs">
+    <Compile Include="BBS\Controls\BoardSearchFormSingleControl.ascx.cs">
       <DependentUpon>BoardSearchFormSingleControl.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\Controls\BoardSearchFormSingleControl.ascx.designer.cs">
+    <Compile Include="BBS\Controls\BoardSearchFormSingleControl.ascx.designer.cs">
       <DependentUpon>BoardSearchFormSingleControl.ascx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\Default.aspx.cs">
+    <Compile Include="BBS\Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\Default.aspx.designer.cs">
+    <Compile Include="BBS\Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\ImageDown.aspx.cs">
+    <Compile Include="BBS\ImageDown.aspx.cs">
       <DependentUpon>ImageDown.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\ImageDown.aspx.designer.cs">
+    <Compile Include="BBS\ImageDown.aspx.designer.cs">
       <DependentUpon>ImageDown.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\ImageText.aspx.cs">
+    <Compile Include="BBS\ImageText.aspx.cs">
       <DependentUpon>ImageText.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\ImageText.aspx.designer.cs">
+    <Compile Include="BBS\ImageText.aspx.designer.cs">
       <DependentUpon>ImageText.aspx</DependentUpon>
     </Compile>
-    <Compile Include="DotNetNote\Models\BoardWriteFormType.cs" />
-    <Compile Include="DotNetNote\Models\ContentEncodingType.cs" />
-    <Compile Include="DotNetNote\Models\Note.cs" />
-    <Compile Include="DotNetNote\Models\NoteComment.cs" />
-    <Compile Include="DotNetNote\Models\NoteCommentRepository.cs" />
-    <Compile Include="DotNetNote\Models\NoteRepository.cs" />
-    <Compile Include="DotNetNote\ThumbNail.aspx.cs">
+    <Compile Include="BBS\Models\BoardWriteFormType.cs" />
+    <Compile Include="BBS\Models\ContentEncodingType.cs" />
+    <Compile Include="BBS\Models\Note.cs" />
+    <Compile Include="BBS\Models\NoteComment.cs" />
+    <Compile Include="BBS\Models\NoteCommentRepository.cs" />
+    <Compile Include="BBS\Models\NoteRepository.cs" />
+    <Compile Include="BBS\ThumbNail.aspx.cs">
       <DependentUpon>ThumbNail.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="DotNetNote\ThumbNail.aspx.designer.cs">
+    <Compile Include="BBS\ThumbNail.aspx.designer.cs">
       <DependentUpon>ThumbNail.aspx</DependentUpon>
     </Compile>
     <Compile Include="Sites\Login\Admin Alert.aspx.cs">
@@ -437,9 +433,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="DotNetNote\Documents\" />
-    <Folder Include="DotNetNote\images\" />
-    <Folder Include="DotNetNote\MyFiles\" />
+    <Folder Include="BBS\Documents\" />
+    <Folder Include="BBS\images\" />
+    <Folder Include="BBS\MyFiles\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -457,6 +453,10 @@
     <ProjectReference Include="..\Dul\Dul.csproj">
       <Project>{6f97aa47-27ba-488f-908b-fb7084756b80}</Project>
       <Name>Dul</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\T-Engine\T-Engine.csproj">
+      <Project>{4465cfd0-13be-4be2-b8db-a685b9c8b022}</Project>
+      <Name>T-Engine</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
