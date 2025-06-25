@@ -2,6 +2,7 @@
 using Dul;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -15,6 +16,8 @@ namespace GiSanParkGolf.BBS.Controls
         /// <summary>
         /// 공통 속성
         /// </summary>
+        /// 
+        private string bbsID;
         public BoardWriteFormType FormType { get; set; }
 
         private string _Id;// 앞(리스트)에서 넘어 온 번호 저장
@@ -25,8 +28,13 @@ namespace GiSanParkGolf.BBS.Controls
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!String.IsNullOrEmpty(Request.QueryString["BBSSelect"]))
+            {
+                bbsID = Request.QueryString["BBSSelect"].ToString();
+            }
+            
             _Id = Request.QueryString["Id"];
-
+            
             if (!Page.IsPostBack) // 처음 로드할 때만 바인딩
             {
                 switch (FormType)
@@ -130,7 +138,8 @@ namespace GiSanParkGolf.BBS.Controls
                 {
                     case BoardWriteFormType.Write:
                         repository.Add(note);
-                        Response.Redirect("BoardList.aspx");
+                        Response.Redirect(string.Format("BoardList.aspx?BBSSelect={0}", bbsID));
+                        //Response.Redirect("BoardList.aspx");
                         break;
                     case BoardWriteFormType.Modify:
                         note.ModifyIp = Request.UserHostAddress;
@@ -139,7 +148,9 @@ namespace GiSanParkGolf.BBS.Controls
                         int r = repository.UpdateNote(note);
                         if (r > 0) // 업데이트 완료
                         {
-                            Response.Redirect($"BoardView.aspx?Id={_Id}");
+                            //Response.Redirect($"BoardView.aspx?Id={_Id}");
+                            string url = string.Format("BoardList.aspx?BBSSelect={0}&Id={1}", bbsID, _Id);
+                            Response.Redirect(url);
                         }
                         else
                         {
@@ -150,11 +161,13 @@ namespace GiSanParkGolf.BBS.Controls
                     case BoardWriteFormType.Reply:
                         note.ParentNum = Convert.ToInt32(_Id);
                         repository.ReplyNote(note);
-                        Response.Redirect("BoardList.aspx");
+                        //Response.Redirect("BoardList.aspx");
+                        Response.Redirect(string.Format("BoardList.aspx?BBSSelect={0}", bbsID));
                         break;
                     default:
                         repository.Add(note);
-                        Response.Redirect("BoardList.aspx");
+                        //Response.Redirect("BoardList.aspx");
+                        Response.Redirect(string.Format("BoardList.aspx?BBSSelect={0}", bbsID));
                         break;
                 }
             }

@@ -8,16 +8,15 @@
         <asp:ListItem Value="Content">내용</asp:ListItem>
     </asp:DropDownList>&nbsp;
     <asp:TextBox ID="SearchQuery" runat="server" Width="200px" 
-        CssClass="form-control" Style="display: inline-block;">
-    </asp:TextBox>&nbsp;
+        CssClass="form-control" Style="display: inline-block;" ValidationGroup="Group1"></asp:TextBox>&nbsp;
     <asp:RequiredFieldValidator ID="valSearchQuery" runat="server" 
         ControlToValidate="SearchQuery" Display="None" 
-        ErrorMessage="검색할 단어를 입력하세요."></asp:RequiredFieldValidator>
+        ErrorMessage="검색할 단어를 입력하세요." ValidationGroup="Group1"></asp:RequiredFieldValidator>
     <asp:ValidationSummary ID="valSummary" runat="server" 
-        ShowSummary="False" ShowMessageBox="True"></asp:ValidationSummary>
+        ShowSummary="False" ShowMessageBox="True" ValidationGroup="Group1"></asp:ValidationSummary>
     <asp:Button ID="btnSearch" runat="server" Text="검 색" 
         CssClass="form-control" Width="100px" 
-        Style="display: inline-block;" OnClick="btnSearch_Click"></asp:Button>
+        Style="display: inline-block;" OnClick="btnSearch_Click" ValidationGroup="Group1"></asp:Button>
 </div>
 <br />
 <% if (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) 

@@ -44,7 +44,7 @@ namespace GiSanParkGolf.Class
         public UserViewModel GetUserByUserID(string userID)
         {
 
-            string strSQL = "SELECT UserId, UserPassword, UserName, UserWClass";
+            string strSQL = "SELECT UserId, UserPassword, UserName, UserWClass, UserClass";
             strSQL += " FROM SYS_Users";
             strSQL += " WHERE UserId = @UserID";
             strSQL += ";";
@@ -63,6 +63,7 @@ namespace GiSanParkGolf.Class
                 Global.uvm.Password = sqlDR.GetString(1);
                 Global.uvm.UserName = sqlDR.GetString(2);
                 Global.uvm.UserWClass = sqlDR.GetString(3);
+                Global.uvm.UserClass = sqlDR.GetString(4);
             }
             con.Close();
 

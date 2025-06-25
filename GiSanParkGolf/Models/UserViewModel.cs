@@ -12,6 +12,7 @@ namespace GiSanParkGolf.Models
         public string UserName { get; set; }
         public string UserWClass { get; set; }
         public string SelectID { get; set; }
+        public string UserClass { get; set; }
     }
 
     public class SelectUserViewModel

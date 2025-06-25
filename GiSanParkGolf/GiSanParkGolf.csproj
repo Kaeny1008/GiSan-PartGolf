@@ -346,6 +346,7 @@
     <Compile Include="BBS\ThumbNail.aspx.designer.cs">
       <DependentUpon>ThumbNail.aspx</DependentUpon>
     </Compile>
+    <Compile Include="UpdateHistory.cs" />
     <Compile Include="Sites\Login\Admin Alert.aspx.cs">
       <DependentUpon>Admin Alert.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

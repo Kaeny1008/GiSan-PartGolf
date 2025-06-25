@@ -90,7 +90,8 @@
         </tr>
         <tr>
             <td style="text-align: right;">
-                <a href="BoardWrite.aspx" class="btn btn-primary">글쓰기</a>
+                <%--<a href="BoardWrite.aspx" class="btn btn-primary">글쓰기</a>--%>
+                <asp:Button ID="BTN_Write" runat="server" class="btn btn-primary" Text="글쓰기" OnClick="BTN_Write_Click" />
             </td>
         </tr>
     </table>

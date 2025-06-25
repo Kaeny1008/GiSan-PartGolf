@@ -1,6 +1,7 @@
 ﻿using BBS.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -25,10 +26,37 @@ namespace GiSanParkGolf.BBS
             _repository = new NoteRepository();
         }
 
+        private string bbsID;
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            // 검색 모드 결정
-            SearchMode =
+            if (!String.IsNullOrEmpty(Request.QueryString["BBSSelect"]))
+            {
+                //어떤 BBS로 온지 확인후 변수 저장
+                Debug.WriteLine("BBSSelect : " + Request.QueryString["BBSSelect"].ToString());
+                bbsID = Request.QueryString["BBSSelect"].ToString();
+
+                //BBS가 게시판일때 관리자만 글쓰기 버튼 활성화
+                if (bbsID.Equals("notice"))
+                {
+                    if (!String.IsNullOrEmpty(Global.uvm.UserClass))
+                    {
+                        if (Global.uvm.UserClass.Equals("Administrator") || Global.uvm.UserClass.Equals("Manager"))
+                        {
+                            BTN_Write.Visible = true;
+                        }
+                        else
+                        {
+                            BTN_Write.Visible = false;
+                        }
+                    } else
+                    {
+                        BTN_Write.Visible = false;
+                    }
+                }
+            }
+                // 검색 모드 결정
+                SearchMode =
                 (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
                     !string.IsNullOrEmpty(Request.QueryString["SearchQuery"]));
             if (SearchMode)
@@ -102,6 +130,12 @@ namespace GiSanParkGolf.BBS
             }
 
             ctlBoardList.DataBind();
+        }
+
+        protected void BTN_Write_Click(object sender, EventArgs e)
+        {
+            string strQuery = string.Format("BoardWrite.aspx?BBSSelect={0}", bbsID);
+            Response.Redirect(strQuery);
         }
     }
 }
