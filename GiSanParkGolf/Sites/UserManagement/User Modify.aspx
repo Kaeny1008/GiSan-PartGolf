@@ -2,7 +2,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <link href="/Class/StyleSheet.css?after" rel="stylesheet" type="text/css"/>
-    <script language="javascript">
+    <script language="javascript" type="text/javascript">
         function functionx(evt) {
             if (evt.charCode > 31 && (evt.charCode < 48 || evt.charCode > 57)) {
                 alert("숫자만 입력하여 주십시오.");
@@ -31,11 +31,26 @@
             } else {
                 arguments.IsValid = true;
             }
+        }    
+
+        function ValidateCheck() {
+            var isValid = false;
+            isValid = Page_ClientValidate('NewUser');
+            if (isValid) {
+                isValid = Page_ClientValidate('NewUser');
+            }
+
+            if (isValid) {
+                ShowModal();
+            }
         }
-    </script>
 
-    <script runat="server"> 
-
+        function CloseModal() {
+            $("#SaveModal").modal("hide");
+        }
+        function ShowModal() {
+            $("#SaveModal").modal("show");
+        }
     </script>
 
     <div class="Center_Container">
@@ -67,12 +82,12 @@
 
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon2">암호</span>
-                    <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" class="form-control" placeholder="수정시에만 입력 하세요." ValidationGroup="NewUser"/>
+                    <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" class="form-control" placeholder="수정시에만 입력 하세요." ValidationGroup="NewUser" ReadOnly="true"/>
                 </div>
 
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon3">암호확인</span>
-                    <asp:TextBox ID="txtReCheck" runat="server" TextMode="Password" class="form-control" placeholder="수정시에만 입력 하세요." ValidationGroup="NewUser"/>
+                    <asp:TextBox ID="txtReCheck" runat="server" TextMode="Password" class="form-control" placeholder="수정시에만 입력 하세요." ValidationGroup="NewUser" ReadOnly="true"/>
                 </div>
 
                 <div class="input-group mb-3">
@@ -106,26 +121,24 @@
 
                 <asp:Label ID="label6" runat="server" ForeColor="#FF3300"></asp:Label><br />
 
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" Width="100%" Height="40px">
+                <%--<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#SaveModal" Width="100%" Height="40px">
                     수정하기
-                </button>
-<%--                <asp:Button ID="Button3" 
+                </button>--%>
+                <asp:Button ID="BTN_Modify" 
                     Font-Bold="true" 
                     runat="server" 
                     Text="수정하기" 
                     class="btn btn-primary" 
                     ValidationGroup="NewUser"
-                    data-bs-toggle="modal" 
-                    data-bs-target="#exampleModal"
                     width="100%"
-                    height="40px">
-                </asp:Button>--%>
+                    height="40px"
+                    OnClientClick="ValidateCheck();return false;" />
             </div>
         </div>
 
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered"> <%--modal-dialog-centered 를 옆에 넣으면 화면 중앙에 나타난다.--%>
+        <!-- Modal Popup -->
+        <div class="modal fade" id="SaveModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="exampleModalLabel">저장확인</h1>
@@ -136,20 +149,19 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
-                        <asp:Button ID="Button2" 
+                        <asp:Button ID="BTN_Save" 
                             runat="server" 
                             OnClick="BTN_Register_Click" 
                             class="btn btn-primary" 
-                            Text="예" 
-                            ValidationGroup="NewUser"
-                            data-bs-toggle="modal" 
-                            data-bs-target="#exampleModal"/>
+                            Text="예" />
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Modal Popup -->
+        
 
-        <asp:RequiredFieldValidator ID="RequiredFieldValidator2" 
+        <%--<asp:RequiredFieldValidator ID="RequiredFieldValidator2" 
             runat="server"
             ErrorMessage="암호는 필 수 입력 항목입니다." 
             ControlToValidate="txtPassword"
@@ -178,7 +190,7 @@
             ControlToCompare="txtReCheck" 
             ErrorMessage="비밀번호가 일치하지 않습니다." 
             Display="None" ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
+            ValidationGroup="NewUser"/><br />--%>
         <asp:RequiredFieldValidator ID="RequiredFieldValidator5" 
             runat="server"
             ErrorMessage="이름은 필 수 입력 항목입니다." 

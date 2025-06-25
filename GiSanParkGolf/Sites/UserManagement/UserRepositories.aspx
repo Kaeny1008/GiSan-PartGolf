@@ -50,6 +50,25 @@
                 arguments.IsValid = true;
             }
         }
+
+        function ValidateCheck() {
+            var isValid = false;
+            isValid = Page_ClientValidate('NewUser');
+            //if (isValid) {
+            //    isValid = Page_ClientValidate('NewUser');
+            //}
+
+            if (isValid) {
+                ShowModal();
+            }
+        }
+
+        function CloseModal() {
+            $("#SaveModal").modal("hide");
+        }
+        function ShowModal() {
+            $("#SaveModal").modal("show");
+        }
     </script>
 
     <div class="Center_Container">
@@ -120,14 +139,23 @@
 
                 <asp:Label ID="label6" runat="server" ForeColor="#FF3300"></asp:Label><br />
 
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" Width="100%" Height="40px">
+<%--                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" Width="100%" Height="40px">
                     가입하기
-                </button>
+                </button>--%>
+                <asp:Button ID="BTN_Modify" 
+                    Font-Bold="true" 
+                    runat="server" 
+                    Text="가입하기" 
+                    class="btn btn-primary" 
+                    ValidationGroup="NewUser"
+                    width="100%"
+                    height="40px"
+                    OnClientClick="ValidateCheck();return false;" />
             </div>
         </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="SaveModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered"> <%--modal-dialog-centered 를 옆에 넣으면 화면 중앙에 나타난다.--%>
                 <div class="modal-content">
                     <div class="modal-header">
@@ -144,10 +172,7 @@
                             runat="server" 
                             OnClick="BTN_Register_Click" 
                             class="btn btn-primary" 
-                            Text="예" 
-                            ValidationGroup="NewUser"
-                            data-bs-toggle="modal" 
-                            data-bs-target="#exampleModal"/>
+                            Text="예" />
                     </div>
                 </div>
             </div>

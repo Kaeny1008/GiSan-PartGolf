@@ -40,15 +40,14 @@ namespace GiSanParkGolf.Sites.UserManagement
         {
             //String.Format("{0:yyyy-MM-dd}", DateTime.Parse(TextBox1.Text))
             //데이터 저장
-            string strSQL = "INSERT INTO USER_INFORMATION(UserName, UserGender, UserNumber, UserAddress, UserAddress2" +
-                    ", UserRegistrationDate, UserNote, UserId, UserPassword, UserWClass" +
+            string strSQL = "INSERT INTO SYS_Users(UserName, UserGender, UserNumber, UserAddress, UserAddress2" +
+                    ", UserNote, UserId, UserPassword, UserWClass" +
                     ") VALUES(" +
                     "'" + txtName.Text + "'" +
                     ",'" + txtGender.Text + "'" +
                     ",'" + txtBirthDay.Text + "'" +
                     ",'" + txtAddress.Text + "'" +
                     ",'" + txtAddress2.Text + "'" +
-                    ",'" + DateTime.Now.ToString("yyyy-MM-dd") + "'" +
                     ",'" + txtMemo.Text + "'" +
                     ",'" + txtID.Text + "'" +
                     ",'" + userPassword + "'" +

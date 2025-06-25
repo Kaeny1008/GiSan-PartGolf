@@ -60,7 +60,7 @@ namespace GiSanParkGolf.Sites.UserManagement
         private void UserModify(string userPassword)
         {
             //String.Format("{0:yyyy-MM-dd}", DateTime.Parse(TextBox1.Text))
-            string strSQL = "UPDATE User_Information SET";
+            string strSQL = "UPDATE SYS_Users SET";
             strSQL += " UserName = '" + txtName.Text + "'";
             strSQL += ", UserNumber = '" + txtBirthDay.Text + "'";
             strSQL += ", UserGender = '" + txtGender.Text + "'";
@@ -83,6 +83,8 @@ namespace GiSanParkGolf.Sites.UserManagement
 
             if (writeResult.Equals("Success"))
             {
+                //모달을 닫을때 사용(근데 자동으로 닫히는데?)
+                //ClientScript.RegisterStartupScript(this.GetType(), "alert", "CloseModal();", true);
                 Debug.WriteLine("이전 위치로 이동한다. : " + prePage);
                 Response.Redirect(prePage);
                 //string strJs = "<script>alert('수정 되었습니다.'); location.href='/Default';</script>";

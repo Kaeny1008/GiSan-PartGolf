@@ -2,6 +2,7 @@
 using System;
 using System.Data;
 using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
 using System.Web.Configuration;
@@ -12,7 +13,7 @@ namespace GiSanParkGolf.Sites.Admin
 {
     public partial class Player_Management : Page
     {
-        private OleDbConnection con;
+        private SqlConnection con;
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!Page.IsPostBack)
@@ -33,16 +34,16 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void PlayerList(string userName, Boolean readyUser)
         {
-            string strSQL = "SELECT UserWClass, UserId, UserName, UserNumber, UserNote FROM User_Information";
+            string strSQL = "SELECT UserWClass, UserId, UserName, UserNumber, UserNote FROM SYS_Users";
             strSQL += " where UserName like '%' + '" + userName + "' + '%'";
             if (readyUser)
             {
                 strSQL += " and UserWClass = '승인대기'";
             }
             strSQL += ";";
-            OleDbCommand sqlCmd = new OleDbCommand();
-            con = new OleDbConnection();
-            con.ConnectionString = WebConfigurationManager.ConnectionStrings["MDB_ConnectionString"].ConnectionString;
+            SqlCommand sqlCmd = new SqlCommand();
+            con = new SqlConnection();
+            con.ConnectionString = WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString;
 
             sqlCmd.Connection = con;
             sqlCmd.CommandText = strSQL;
@@ -50,7 +51,7 @@ namespace GiSanParkGolf.Sites.Admin
 
             con.Open();
             DataSet ds = new DataSet();
-            OleDbDataAdapter da = new OleDbDataAdapter(sqlCmd);
+            SqlDataAdapter da = new SqlDataAdapter(sqlCmd);
 
             da.Fill(ds);
             GridView1.DataSourceID = "";         //그리드 뷰 데이터 초기화

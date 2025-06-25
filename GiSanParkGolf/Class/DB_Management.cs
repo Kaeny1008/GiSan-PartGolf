@@ -18,12 +18,12 @@ namespace GiSanParkGolf.Class
     public class DB_Management
     {
         // 공통으로 사용될 커넥션 개체
-        private OleDbConnection con;
+        private SqlConnection con;
 
         public DB_Management()
         {
-            con = new OleDbConnection();
-            con.ConnectionString = WebConfigurationManager.ConnectionStrings["MDB_ConnectionString"].ConnectionString;
+            con = new SqlConnection();
+            con.ConnectionString = WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString;
         }
 
         //public void AddUser(string userID, string password)
@@ -45,18 +45,18 @@ namespace GiSanParkGolf.Class
         {
 
             string strSQL = "SELECT UserId, UserPassword, UserName, UserWClass";
-            strSQL += " FROM User_Information";
+            strSQL += " FROM SYS_Users";
             strSQL += " WHERE UserId = @UserID";
             strSQL += ";";
 
-            OleDbCommand sqlCmd = new OleDbCommand(strSQL, con);
+            SqlCommand sqlCmd = new SqlCommand(strSQL, con);
             sqlCmd.CommandType = CommandType.Text;
             
             sqlCmd.Parameters.AddWithValue("@UserID", userID);
 
             con.Open();
 
-            OleDbDataReader sqlDR = sqlCmd.ExecuteReader();
+            SqlDataReader sqlDR = sqlCmd.ExecuteReader();
             while (sqlDR.Read())
             {
                 Global.uvm.UserID = sqlDR.GetString(0);
@@ -75,18 +75,18 @@ namespace GiSanParkGolf.Class
             string strSQL = "SELECT UserId, UserName, UserPassword, UserNumber";
             strSQL += ", UserGender, UserAddress, UserAddress2";
             strSQL += ", UserRegistrationDate, UserNote, UserWClass";
-            strSQL += " FROM User_Information";
+            strSQL += " FROM SYS_Users";
             strSQL += " WHERE UserId = @UserID";
             strSQL += ";";
 
-            OleDbCommand sqlCmd = new OleDbCommand(strSQL, con);
+            SqlCommand sqlCmd = new SqlCommand(strSQL, con);
             sqlCmd.CommandType = CommandType.Text;
 
             sqlCmd.Parameters.AddWithValue("@UserID", userID);
 
             con.Open();
 
-            OleDbDataReader sqlDR = sqlCmd.ExecuteReader();
+            SqlDataReader sqlDR = sqlCmd.ExecuteReader();
             while (sqlDR.Read())
             {
                 Global.suvm.UserID = sqlDR.GetString(0);
@@ -114,8 +114,8 @@ namespace GiSanParkGolf.Class
 
             con.Open();
 
-            string strSql = "SELECT UserWClass FROM User_Information WHERE UserID = @UserId AND UserPassword = @Password";
-            OleDbCommand cmd = new OleDbCommand
+            string strSql = "SELECT UserWClass FROM SYS_Users WHERE UserID = @UserId AND UserPassword = @Password";
+            SqlCommand cmd = new SqlCommand
             {
                 Connection = con,
                 CommandText = strSql,
@@ -125,7 +125,7 @@ namespace GiSanParkGolf.Class
             cmd.Parameters.AddWithValue("@UserID", userID);
             cmd.Parameters.AddWithValue("@Password", cryptPassword);
 
-            OleDbDataReader sqlDR = cmd.ExecuteReader();
+            SqlDataReader sqlDR = cmd.ExecuteReader();
             if (sqlDR.Read())
             {
                 if (sqlDR.GetString(0).Equals("승인"))
@@ -149,11 +149,11 @@ namespace GiSanParkGolf.Class
         {
             try
             {
-                con = new OleDbConnection();
-                con.ConnectionString = WebConfigurationManager.ConnectionStrings["MDB_ConnectionString"].ConnectionString;
+                con = new SqlConnection();
+                con.ConnectionString = WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString;
                 con.Open();
 
-                OleDbCommand cmd = new OleDbCommand
+                SqlCommand cmd = new SqlCommand
                 {
                     Connection = con,
                     CommandText = strSQL,
@@ -177,8 +177,8 @@ namespace GiSanParkGolf.Class
 
             con.Open();
 
-            string strSql = "SELECT * FROM User_Information WHERE UserID = @UserId";
-            OleDbCommand cmd = new OleDbCommand
+            string strSql = "SELECT * FROM SYS_Users WHERE UserID = @UserId";
+            SqlCommand cmd = new SqlCommand
             {
                 Connection = con,
                 CommandText = strSql,
@@ -187,7 +187,7 @@ namespace GiSanParkGolf.Class
 
             cmd.Parameters.AddWithValue("@UserID", userID);
 
-            OleDbDataReader dr = cmd.ExecuteReader();
+            SqlDataReader dr = cmd.ExecuteReader();
             if (dr.Read())
                 result = false;
 
