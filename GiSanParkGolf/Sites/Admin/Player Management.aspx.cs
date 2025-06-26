@@ -87,11 +87,9 @@ namespace GiSanParkGolf.Sites.Admin
             int x = gvr.RowIndex;
             GridView1.Rows[x].BackColor = Color.AliceBlue;
 
-
-            Global.uvm.SelectID = GridView1.Rows[x].Cells[1].Text;
-
-            Debug.WriteLine("선택된 ID : " + Global.uvm.SelectID);
-            Response.Redirect("~/Sites/Admin/Player Information.aspx");
+            string userid = GridView1.Rows[x].Cells[1].Text;
+            
+            Response.Redirect("~/Sites/Admin/Player Information.aspx?UserId=" + userid);
         }
 
         protected void BTN_Search_Click(object sender, EventArgs e)

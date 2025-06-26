@@ -13,15 +13,14 @@ namespace GiSanParkGolf.Sites.Admin
 {
     public partial class Player_Information : System.Web.UI.Page
     {
-        private string selectID = Global.uvm.SelectID;
         protected void Page_Load(object sender, EventArgs e)
         {
-            //string strJs = @"<script language='JavaScript'>window.alert('" + Global.uvm.SelectID + "');</script>";
-            //Response.Write(strJs);
-
             if (!Page.IsPostBack)
             {
-                UserInformationLoad(Global.uvm.SelectID);
+                if (!String.IsNullOrEmpty(Request.QueryString["UserId"]))
+                {
+                    UserInformationLoad(Request.QueryString["UserId"]);
+                }
             }
             
         }
@@ -34,7 +33,7 @@ namespace GiSanParkGolf.Sites.Admin
             txtName.Text = Global.suvm.UserName;
             txtBirthDay.Text = Global.suvm.UserNumber.ToString();
             txtGender.Text = Global.suvm.UserGender.ToString();
-            txtAddress.Text = Global.suvm.UserAddress2;
+            txtAddress.Text = Global.suvm.UserAddress;
             txtAddress2.Text = Global.suvm.UserAddress2;
             txtMemo.Text = Global.suvm.UserNote;
             if (Global.suvm.UserWClass.Equals("승인"))
@@ -46,7 +45,6 @@ namespace GiSanParkGolf.Sites.Admin
                 CheckBox1.Checked = false;
             }
             //txtID.Text = Global.suvm.UserWClass;
-
         }
 
         protected void BTN_Register_Click(object sender, EventArgs e)
@@ -99,8 +97,9 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (writeResult.Equals("Success"))
             {
-                string strJs = "<script>alert('수정 되었습니다.'); location.href='/Sites/Admin/Player Management.aspx';</script>";
-                Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
+                //string strJs = "<script>alert('수정 되었습니다.'); location.href='/Sites/Admin/Player Management.aspx';</script>";
+                //Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
+                Response.Redirect("/Sites/Admin/Player Management.aspx");
             }
             else
             {

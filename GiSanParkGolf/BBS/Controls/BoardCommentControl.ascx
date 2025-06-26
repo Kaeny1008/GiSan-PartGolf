@@ -1,5 +1,10 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="BoardCommentControl.ascx.cs" Inherits="GiSanParkGolf.BBS.Controls.BoardCommentControl" %>
 
+<style>
+    .form-control { 
+        min-width: 100%;
+    }
+</style>
 <%--<h3>댓글 리스트</h3>--%>
 <asp:Repeater ID="ctlCommentList" runat="server">
     <HeaderTemplate>
@@ -33,7 +38,24 @@
 </asp:Repeater>
  
 <%--<h3>댓글 입력</h3>--%>
-<table style="width: 500px; margin-left: auto;">
+<table style="width: 500px; margin-left: auto; margin-right: auto; background-color:aliceblue">
+    <tr><td></td></tr>
+    <tr>
+        <td style="width: 64px; text-align: right;">댓글 
+        </td>
+        <td colspan="4" style="width: 448px;">
+            <asp:TextBox ID="txtOpinion" runat="server" 
+                TextMode="MultiLine" Height="75px"
+                Width="100%" CssClass="form-control" 
+                Style="display: inline-block;"></asp:TextBox>
+        </td>
+    </tr>
+    
+    <%--로그인 중일때는 표시하지 않는 부분--%>
+    <% 
+        if (!Page.User.Identity.IsAuthenticated)
+        {
+    %>
     <tr>
         <td style="width: 64px; text-align: right;">이 름 : 
         </td>
@@ -42,32 +64,36 @@
                 CssClass="form-control"
                 Style="display: inline-block;"></asp:TextBox>
         </td>
+    </tr>
+    <tr>
         <td style="width: 64px; text-align: right;">암 호 : 
         </td>
         <td style="width: 128px;">
-            <asp:TextBox ID="txtPassword" runat="server" 
+            <%--<asp:TextBox ID="txtPassword" runat="server" 
                 TextMode="Password" Width="128px"
                 CssClass="form-control" Style="display: inline-block;">
-            </asp:TextBox>
-        </td>
-        <td style="width: 128px; text-align: right;">
-            <asp:Button ID="btnWriteComment" runat="server" 
-                Text="의견남기기" Width="96px"
-                CssClass="form-control btn btn-primary" 
-                Style="display: inline-block;"
-                OnClick="btnWriteComment_Click" />
+            </asp:TextBox>--%>
+            <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" 
+                style="display:inline-block;" MaxLength="20" Width="150px" 
+                TextMode="Password" EnableViewState="False"></asp:TextBox>
         </td>
     </tr>
+    <%
+        }
+    %>
     <tr>
-        <td style="width: 64px; text-align: right;">의 견 : 
-        </td>
-        <td colspan="4" style="width: 448px;">
-            <asp:TextBox ID="txtOpinion" runat="server" 
-                TextMode="MultiLine" Rows="3" Columns="70"
-                Width="448px" CssClass="form-control" 
-                Style="display: inline-block;"></asp:TextBox>
+        <td></td>
+        <td style="text-align:left;">
+            <%--<asp:Button ID="btnWriteComment1" runat="server" 
+            Text="등록" Width="96px"
+            CssClass="form-control btn btn-primary" 
+            Style="display: inline-block;"
+            OnClick="btnWriteComment_Click" />--%>
+            <asp:Button ID="btnWriteComment" runat="server" Text="등록" CssClass="btn btn-primary" Width="96px" Style="display: inline-block;" OnClick="btnWriteComment_Click" />
         </td>
     </tr>
+
+    
 </table>
  
 <hr />

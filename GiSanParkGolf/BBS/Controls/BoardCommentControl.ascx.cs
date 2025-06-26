@@ -1,10 +1,12 @@
 ﻿using BBS.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using T_Engine;
 
 namespace GiSanParkGolf.BBS.Controls
 {
@@ -21,16 +23,16 @@ namespace GiSanParkGolf.BBS.Controls
         private string userId = string.Empty;
         protected void Page_Load(object sender, EventArgs e)
         {
+            txtName.Text = Global.uvm.UserName;
+            //암호는 눈에 보이게 되면 자동입력이 사라진다.
+            txtPassword.Text = Global.uvm.Password;
+            userId = Global.uvm.UserID;
             if (!Page.IsPostBack)
             {
                 // 데이터 출력(현재 게시글의 번호(Id)에 해당하는 댓글 리스트)
                 ctlCommentList.DataSource =
                     _repository.GetNoteComments(Convert.ToInt32(Request["Id"]));
                 ctlCommentList.DataBind();
-
-                txtName.Text = Global.uvm.UserName;
-                txtPassword.Text = Global.uvm.Password;
-                userId = Global.uvm.UserID;
             }
         }
 

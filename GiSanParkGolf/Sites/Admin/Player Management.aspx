@@ -2,13 +2,29 @@
     Inherits="GiSanParkGolf.Sites.Admin.Player_Management" EnableEventValidation="false" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-     <link href="/Content/Site.css" rel="stylesheet"/>
-<%--    <script runat="server">
-        void Check_Clicked(Object sender, EventArgs e) 
-            {
-                
-            }
-    </script>--%>
+    <style>
+        /*클릭한적 없는*/
+        .HyperLink:link {
+	        color:blue; 
+            text-decoration:none;
+        }
+        /*한번이상 클릭*/
+        .HyperLink:visited {
+	        color:blue; 
+            text-decoration:none;
+        }
+        /*마우스 오버*/
+        .HyperLink:hover {
+	        color:blue; 
+            text-decoration:underline;
+        }
+        /*클릭순간*/
+        .HyperLink:active {
+	        color:blue; 
+            text-decoration:none;
+        }
+    </style>
+     <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
 
     <div>
         <div id="PlayList">
@@ -42,9 +58,16 @@
                         </asp:BoundField>    
                         <asp:TemplateField HeaderText="이름">
                             <ItemTemplate>
-                                <asp:Button ID="PlayerButton" runat="server" 
+                                <%--<asp:Button ID="PlayerButton" runat="server" 
                                     Text='<%# Eval("UserName") %>' 
-                                    OnClick="MyButtonClick" CssClass="RowButton"/>
+                                    OnClick="MyButtonClick" CssClass="RowButton"/>--%>
+
+                                <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
+                                    NavigateUrl='<%# "~/Sites/Admin/Player Information.aspx?UserId=" + Eval("UserId") %>'>
+                                    <%# Dul.StringLibrary.CutStringUnicode(Eval("UserName").ToString(), 30) %>
+                                </asp:HyperLink>
+
+
                             </ItemTemplate>
                             <HeaderStyle Width="15%" BorderStyle="Solid" BorderWidth="1px"/>
                             <ItemStyle Width="15%" BorderStyle="Solid" BorderWidth="1px"/>

@@ -31,7 +31,8 @@ namespace GiSanParkGolf.BBS.Controls
         protected void Page_Load(object sender, EventArgs e)
         {
             txtName.Text = Global.uvm.UserName;
-            txtPassword.Text = Global.uvm.Password;
+            //암호는 눈에 보이게 되면 자동입력이 사라진다.
+            txtPassword.Text = Global.uvm.Password; 
             userId = Global.uvm.UserID;
 
             if (!String.IsNullOrEmpty(Request.QueryString["bbsId"]))
