@@ -94,7 +94,7 @@
                                     게시판
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="/BBS/Default.aspx?BBSSelect=notice">공지사항</a></li>
+                                    <li><a class="dropdown-item" href="/BBS/Default.aspx?bbsId=notice">공지사항</a></li>
                                 </ul>
                             </li>
                         </ul>
@@ -114,7 +114,7 @@
                 <asp:LoginView ID="LoginView1" runat="server">
                     <AnonymousTemplate>
                         <!-- 로그인 전 -->
-                        <%--<asp:Button ID="Login" runat="server" class="btn btn-primary btn-sm" OnClientClick="return go_loginpage();" Text="로그인" />--%>
+                        <asp:Button ID="Login" runat="server" class="btn btn-primary btn-sm" OnClientClick="return go_loginpage();" Text="로그인" />
                     </AnonymousTemplate>
                     <LoggedInTemplate>
                         <!-- 로그인 후 -->

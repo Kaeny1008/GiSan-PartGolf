@@ -17,7 +17,7 @@ namespace GiSanParkGolf.BBS.Controls
         /// 공통 속성
         /// </summary>
         /// 
-        private string bbsID;
+        
         public BoardWriteFormType FormType { get; set; }
 
         private string _Id;// 앞(리스트)에서 넘어 온 번호 저장
@@ -25,16 +25,27 @@ namespace GiSanParkGolf.BBS.Controls
         private string _BaseDir = String.Empty;// 파일 업로드 폴더
         private string _FileName = String.Empty;// 파일명 저장 필드
         private int _FileSize = 0;// 파일 크기 저장 필드
+        private string userId = string.Empty;
+        private string bbsID;
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(Request.QueryString["BBSSelect"]))
+            txtName.Text = Global.uvm.UserName;
+            txtPassword.Text = Global.uvm.Password;
+            userId = Global.uvm.UserID;
+
+            if (!String.IsNullOrEmpty(Request.QueryString["bbsId"]))
             {
-                bbsID = Request.QueryString["BBSSelect"].ToString();
+                bbsID = Request.QueryString["bbsId"].ToString();
+                if (bbsID.Equals("notice"))
+                {
+                    LBMainTitle.Text = "공지사항";
+
+                }
             }
-            
+
             _Id = Request.QueryString["Id"];
-            
+
             if (!Page.IsPostBack) // 처음 로드할 때만 바인딩
             {
                 switch (FormType)
@@ -131,25 +142,27 @@ namespace GiSanParkGolf.BBS.Controls
                 note.Password = txtPassword.Text;
                 note.PostIp = Request.UserHostAddress;
                 note.Encoding = rdoEncoding.SelectedValue;
+                note.Category = bbsID;
+                note.UserID = userId;
 
                 NoteRepository repository = new NoteRepository();
 
                 switch (FormType)
                 {
                     case BoardWriteFormType.Write:
-                        repository.Add(note);
-                        Response.Redirect(string.Format("BoardList.aspx?BBSSelect={0}", bbsID));
+                        repository.Add(note, bbsID);
+                        Response.Redirect(string.Format("BoardList.aspx?bbsId={0}", bbsID));
                         //Response.Redirect("BoardList.aspx");
                         break;
                     case BoardWriteFormType.Modify:
                         note.ModifyIp = Request.UserHostAddress;
                         note.FileName = ViewState["FileName"].ToString();
                         note.FileSize = Convert.ToInt32(ViewState["FileSize"]);
-                        int r = repository.UpdateNote(note);
+                        int r = repository.UpdateNote(note, bbsID);
                         if (r > 0) // 업데이트 완료
                         {
                             //Response.Redirect($"BoardView.aspx?Id={_Id}");
-                            string url = string.Format("BoardList.aspx?BBSSelect={0}&Id={1}", bbsID, _Id);
+                            string url = string.Format("BoardList.aspx?bbsId={0}&Id={1}", bbsID, _Id);
                             Response.Redirect(url);
                         }
                         else
@@ -160,14 +173,14 @@ namespace GiSanParkGolf.BBS.Controls
                         break;
                     case BoardWriteFormType.Reply:
                         note.ParentNum = Convert.ToInt32(_Id);
-                        repository.ReplyNote(note);
+                        repository.ReplyNote(note, bbsID);
                         //Response.Redirect("BoardList.aspx");
-                        Response.Redirect(string.Format("BoardList.aspx?BBSSelect={0}", bbsID));
+                        Response.Redirect(string.Format("BoardList.aspx?bbsId={0}", bbsID));
                         break;
                     default:
-                        repository.Add(note);
+                        repository.Add(note, bbsID);
                         //Response.Redirect("BoardList.aspx");
-                        Response.Redirect(string.Format("BoardList.aspx?BBSSelect={0}", bbsID));
+                        Response.Redirect(string.Format("BoardList.aspx?bbsId={0}", bbsID));
                         break;
                 }
             }
@@ -212,6 +225,15 @@ namespace GiSanParkGolf.BBS.Controls
                         // 업로드 처리 : SaveAs()
                         txtFileName.PostedFile.SaveAs(
                             Path.Combine(_BaseDir, _FileName));
+                    }
+                    //기존 업로드된 파일이 있다면 삭제
+                    if (lblFileNamePrevious.Visible)
+                    {
+                        var note = (new NoteRepository()).GetNoteById(Convert.ToInt32(_Id));
+                        Debug.WriteLine("Base Dir : " + _BaseDir);
+                        Debug.WriteLine("Pre FileName : " + note.FileName);
+                        Debug.WriteLine("둘이합쳐 : " + Path.Combine(_BaseDir, note.FileName));
+                        File.Delete(Path.Combine(_BaseDir, note.FileName));
                     }
                 }
             }// 파일 업로드 처리 끝

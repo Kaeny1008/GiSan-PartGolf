@@ -18,6 +18,7 @@ namespace GiSanParkGolf.BBS.Controls
             _repository = new NoteCommentRepository();
         }
 
+        private string userId = string.Empty;
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!Page.IsPostBack)
@@ -26,6 +27,10 @@ namespace GiSanParkGolf.BBS.Controls
                 ctlCommentList.DataSource =
                     _repository.GetNoteComments(Convert.ToInt32(Request["Id"]));
                 ctlCommentList.DataBind();
+
+                txtName.Text = Global.uvm.UserName;
+                txtPassword.Text = Global.uvm.Password;
+                userId = Global.uvm.UserID;
             }
         }
 
@@ -36,6 +41,7 @@ namespace GiSanParkGolf.BBS.Controls
             comment.Name = txtName.Text; // 이름
             comment.Password = txtPassword.Text; // 암호
             comment.Opinion = txtOpinion.Text; // 댓글
+            comment.UserId = userId;
 
             // 데이터 입력
             _repository.AddNoteComment(comment);

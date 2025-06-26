@@ -12,15 +12,15 @@ namespace GiSanParkGolf.BBS
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(Request.QueryString["BBSSelect"]))
+            if (!String.IsNullOrEmpty(Request.QueryString["bbsId"]))
             {
-                Debug.WriteLine("id값이다: " + Request.QueryString["BBSSelect"].ToString());
+                Debug.WriteLine("id값이다: " + Request.QueryString["bbsId"].ToString());
             } else
             {
-                Debug.WriteLine("id값이 없는거 같다?: " + Request.QueryString["BBSSelect"].ToString());
+                Debug.WriteLine("id값이 없는거 같다?: " + Request.QueryString["bbsId"].ToString());
             }
                 
-            Response.Redirect("BoardList.aspx?BBSSelect=" + Request.QueryString["BBSSelect"].ToString());
+            Response.Redirect("BoardList.aspx?bbsId=" + Request.QueryString["bbsId"].ToString());
         }
     }
 }

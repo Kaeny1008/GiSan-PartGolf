@@ -19,5 +19,6 @@ namespace BBS.Models
         public DateTime PostDate { get; set; }
         [Required(ErrorMessage = "암호를 입력하세요.")]
         public string Password { get; set; }
+        public string UserId { get; set; }
     }
 }

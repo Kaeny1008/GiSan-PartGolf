@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.EnterpriseServices;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -26,19 +27,20 @@ namespace GiSanParkGolf.BBS
             _repository = new NoteRepository();
         }
 
-        private string bbsID;
+        private string bbsID;  //어떤 게시판이 선택되었는지 변수 저장
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(Request.QueryString["BBSSelect"]))
+            if (!String.IsNullOrEmpty(Request.QueryString["bbsId"]))
             {
                 //어떤 BBS로 온지 확인후 변수 저장
-                Debug.WriteLine("BBSSelect : " + Request.QueryString["BBSSelect"].ToString());
-                bbsID = Request.QueryString["BBSSelect"].ToString();
+                Debug.WriteLine("bbsId : " + Request.QueryString["bbsId"].ToString());
+                bbsID = Request.QueryString["bbsId"].ToString();
 
                 //BBS가 게시판일때 관리자만 글쓰기 버튼 활성화
                 if (bbsID.Equals("notice"))
                 {
+                    LBMainTitle.Text = "공지사항";
                     if (!String.IsNullOrEmpty(Global.uvm.UserClass))
                     {
                         if (Global.uvm.UserClass.Equals("Administrator") || Global.uvm.UserClass.Equals("Manager"))
@@ -97,13 +99,13 @@ namespace GiSanParkGolf.BBS
             {
                 // Notes 테이블의 전체 레코드
                 RecordCount =
-                    _repository.GetCountAll();
+                    _repository.GetCountAll(bbsID);
             }
             else
             {
                 // Notes 테이블 중 SearchField+SearchQuery에 해당하는 레코드 수
                 RecordCount =
-                    _repository.GetCountBySearch(SearchField, SearchQuery);
+                    _repository.GetCountBySearch(SearchField, SearchQuery, bbsID);
             }
             lblTotalRecord.Text = RecordCount.ToString();
 
@@ -121,12 +123,12 @@ namespace GiSanParkGolf.BBS
         {
             if (SearchMode == false) // 기본 리스트
             {
-                ctlBoardList.DataSource = _repository.GetAll(PageIndex);
+                ctlBoardList.DataSource = _repository.GetAll(PageIndex, bbsID);
             }
             else // 검색 결과 리스트
             {
                 ctlBoardList.DataSource = _repository.GetSeachAll(
-                    PageIndex, SearchField, SearchQuery);
+                    PageIndex, SearchField, SearchQuery, bbsID);
             }
 
             ctlBoardList.DataBind();
@@ -134,7 +136,7 @@ namespace GiSanParkGolf.BBS
 
         protected void BTN_Write_Click(object sender, EventArgs e)
         {
-            string strQuery = string.Format("BoardWrite.aspx?BBSSelect={0}", bbsID);
+            string strQuery = string.Format("BoardWrite.aspx?bbsId={0}", bbsID);
             Response.Redirect(strQuery);
         }
     }

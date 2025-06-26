@@ -7,7 +7,39 @@
     TagPrefix="uc1" TagName="AdvancedPagingSingleWithBootstrap" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <h2 style="text-align: center;">공지사항</h2>
+    <style>
+        .MainLabel {
+            text-align: center;
+            font-size: 30px;
+        }
+        /*클릭한적 없는*/
+        .HyperLink:link {
+	        color:blue; 
+            text-decoration:none;
+        }
+        /*한번이상 클릭*/
+        .HyperLink:visited {
+	        color:black; 
+            text-decoration:none;
+        }
+        /*마우스 오버*/
+        .HyperLink:hover {
+	        color:blue; 
+            text-decoration:underline;
+        }
+        /*클릭순간*/
+        .HyperLink:active {
+	        color:blue; 
+            text-decoration:none;
+        }
+    </style>
+
+    <script language="javascript">
+
+    </script>
+
+    <%--<h2 style="text-align: center;">공지사항</h2>--%>
+    <div style="text-align: center;"><asp:Label ID="LBMainTitle" runat="server" Class="MainLabel">게시판</asp:Label></div>
     <span style="color: #ff0000">글 목록 - 완성형 게시판입니다.</span>
     <hr />
     <table style="width: 100%; margin-left: auto; margin-right: auto;">
@@ -42,9 +74,8 @@
                             HeaderStyle-Width="350px">
                             <ItemTemplate>
                                 <%# Dul.BoardLibrary.FuncStep(Eval("Step")) %>
-                                <asp:HyperLink ID="lnkTitle" runat="server"
-                                    NavigateUrl='<%# "BoardView.aspx?Id=" + Eval("Id") %>'
-                                    style="text-decoration: none;">
+                                <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
+                                    NavigateUrl='<%# "BoardView.aspx?bbsid=" + Request.QueryString["bbsId"] + "&Id=" + Eval("Id") %>'>
                                     <%# Dul.StringLibrary.CutStringUnicode(Eval("Title").ToString(), 30) %>
                                     <a style="font-size:13px"><%# Dul.BoardLibrary.EmptyCommentCount(Eval("CommentCount")) %></a>
                                     <%--모바일에 적용하면 될듯
@@ -54,9 +85,11 @@
                                 <%--<%# Dul.BoardLibrary.FuncNew(Eval("PostDate"))%>--%>
                             </ItemTemplate>
                         </asp:TemplateField>
-                        <asp:TemplateField HeaderText="파일"
+                        <%--첨부파일 다운로드는 게시판 최상위에서 표시 안해도 될듯하여 false함--%>
+                        <asp:TemplateField HeaderText="첨부"
                             HeaderStyle-Width="70px"
-                            ItemStyle-HorizontalAlign="Center">
+                            ItemStyle-HorizontalAlign="Center" 
+                            Visible="false">
                             <ItemTemplate>
                                 <%# Dul.BoardLibrary.FuncFileDownSingle(
                                     Convert.ToInt32(Eval("Id")), 

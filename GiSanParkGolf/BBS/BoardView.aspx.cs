@@ -1,6 +1,7 @@
 ﻿using BBS.Models;
 using System;
 using System.Collections.Generic;
+using System.EnterpriseServices;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -11,9 +12,20 @@ namespace GiSanParkGolf.BBS
     public partial class BoardView : System.Web.UI.Page
     {
         private string _Id; // 앞(리스트)에서 넘어 온 번호 저장
+        private string bbsID;
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!String.IsNullOrEmpty(Request.QueryString["bbsId"]))
+            {
+                bbsID = Request.QueryString["bbsId"].ToString();
+                if (bbsID.Equals("notice"))
+                {
+                    LBMainTitle.Text = "공지사항";
+
+                }
+            }
+
             lnkDelete.NavigateUrl = "BoardDelete.aspx?Id=" + Request["Id"];
             lnkModify.NavigateUrl = "BoardModify.aspx?Id=" + Request["Id"];
             lnkReply.NavigateUrl = "BoardReply.aspx?Id=" + Request["Id"];

@@ -24,19 +24,16 @@ namespace BBS.Models
         {
             // 파라미터 추가
             var parameters = new DynamicParameters();
-            parameters.Add(
-                "@BoardId", value: model.BoardId, dbType: DbType.Int32);
-            parameters.Add(
-                "@Name", value: model.Name, dbType: DbType.String);
-            parameters.Add(
-                "@Opinion", value: model.Opinion, dbType: DbType.String);
-            parameters.Add(
-                "@Password", value: model.Password, dbType: DbType.String);
+            parameters.Add("@BoardId", value: model.BoardId, dbType: DbType.Int32);
+            parameters.Add("@Name", value: model.Name, dbType: DbType.String);
+            parameters.Add("@Opinion", value: model.Opinion, dbType: DbType.String);
+            parameters.Add("@Password", value: model.Password, dbType: DbType.String);
+            parameters.Add("@UserId", value: model.UserId, dbType: DbType.String);
 
             string sql = @"
-                Insert Into NoteComments (BoardId, Name, Opinion, Password)
-                Values(@BoardId, @Name, @Opinion, @Password);
-                Update Notes Set CommentCount = CommentCount + 1 
+                Insert Into BBS_NoteComments (BoardId, Name, Opinion, Password, UserId)
+                Values(@BoardId, @Name, @Opinion, @Password, @UserId);
+                Update BBS_Notes Set CommentCount = CommentCount + 1 
                 Where Id = @BoardId
             ";
 
@@ -49,7 +46,7 @@ namespace BBS.Models
         public List<NoteComment> GetNoteComments(int boardId)
         {
             return con.Query<NoteComment>(
-                "Select * From NoteComments Where BoardId = @BoardId"
+                "Select * From BBS_NoteComments Where BoardId = @BoardId"
                 , new { BoardId = boardId }
                 , commandType: CommandType.Text).ToList();
         }
@@ -59,7 +56,7 @@ namespace BBS.Models
         /// </summary>
         public int GetCountBy(int boardId, int id, string password)
         {
-            return con.Query<int>(@"Select Count(*) From NoteComments 
+            return con.Query<int>(@"Select Count(*) From BBS_NoteComments 
                 Where BoardId = @BoardId And Id = @Id And Password = @Password"
                 , new { BoardId = boardId, Id = id, Password = password }
                 , commandType: CommandType.Text).SingleOrDefault();
@@ -70,9 +67,9 @@ namespace BBS.Models
         /// </summary>
         public int DeleteNoteComment(int boardId, int id, string password)
         {
-            return con.Execute(@"Delete NoteComments 
+            return con.Execute(@"Delete BBS_NoteComments 
                 Where BoardId = @BoardId And Id = @Id And Password = @Password; 
-                Update Notes Set CommentCount = CommentCount - 1 
+                Update BBS_Notes Set CommentCount = CommentCount - 1 
                 Where Id = @BoardId"
                 , new { BoardId = boardId, Id = id, Password = password }
                 , commandType: CommandType.Text);
@@ -84,7 +81,7 @@ namespace BBS.Models
         public List<NoteComment> GetRecentComments()
         {
             string sql = @"SELECT TOP 3 Id, BoardId, Opinion, PostDate 
-                FROM NoteComments Order By Id Desc";
+                FROM BBS_NoteComments Order By Id Desc";
             return con.Query<NoteComment>(sql).ToList();
         }
     }

@@ -44,6 +44,7 @@ namespace BBS.Models
         public int AnswerNum { get; set; }
         public int ParentNum { get; set; }
         public int CommentCount { get; set; }
-        public string Category { get; set; } = "Free"; // 자유게시판(Free) 기본
+        public string Category { get; set; }  // 자유게시판(Free) 기본
+        public string UserID { get; set; }
     }
 }

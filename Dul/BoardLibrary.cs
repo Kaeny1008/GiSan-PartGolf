@@ -117,7 +117,7 @@ namespace Dul
         }
         #endregion
 
-        #region 넘겨온 날짜 형식이 오늘 날짜면 시간 표시
+        #region 넘겨온 날짜 형식이 오늘 날짜면 시간 표시 아니면 일자만 표시
         /// <summary>
         /// 넘겨온 날짜 형식이 오늘 날짜면 시간 표시, 
         /// 그렇지않으면 날짜표시
@@ -144,7 +144,7 @@ namespace Dul
                         return Convert.ToDateTime(date).ToString("HH:mm:ss");
                     } else
                     {
-                        return Convert.ToDateTime(date).ToString("yyyy-MM-dd HH:mm:ss");
+                        return Convert.ToDateTime(date).ToString("yyyy-MM-dd");
                     }
                 }
             }
@@ -219,10 +219,15 @@ namespace Dul
 
             if (strFileName.Length > 0)
             {
-                return "<a href=\"/DotNetNote/BoardDown.aspx?Id="
-                    + id.ToString() + "\">"
-                    + DownloadType(strFileName, strFileName + "("
-                    + ConvertToFileSize(Convert.ToInt32(strFileSize)) + ")")
+                //return "<a href=\"/BBS/BoardDown.aspx?Id="
+                //    + id.ToString() + "\">"
+                //    + DownloadType(strFileName, strFileName + "("
+                //    + ConvertToFileSize(Convert.ToInt32(strFileSize)) + ")")
+                //    + "</a>";
+
+                // 이미지도 없고 굳이 아이콘 표시도 안해도 되니까 DownLoad로 통일시킴
+                return "<a href=\"/BBS/BoardDown.aspx?Id="+ id.ToString() + "\" style=\"text-decoration: none;\">"
+                    + "DownLoad"
                     + "</a>";
             }
             else

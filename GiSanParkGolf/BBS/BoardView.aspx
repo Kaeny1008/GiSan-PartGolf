@@ -4,7 +4,15 @@
     TagPrefix="uc1" TagName="BoardCommentControl" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <h2 style="text-align: center;">게시판</h2>
+    <style>
+        .MainLabel {
+            text-align: center;
+            font-size: 30px;
+        }
+    </style>
+    <div style="text-align: center;">
+        <asp:Label ID="LBMainTitle" runat="server" Class="MainLabel" Text="게시판" />
+    </div>
     <span style="color: #ff0000">
         글 보기 - 현재 글에 대해서 수정 및 삭제를 할 수 있습니다. </span>
     <hr />

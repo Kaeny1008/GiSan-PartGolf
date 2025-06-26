@@ -20,7 +20,7 @@ namespace BBS.Models
         /// <summary>
         /// 데이터 저장, 수정, 답변 공통 메서드
         /// </summary>
-        public int SaveOrUpdate(Note n, BoardWriteFormType formType)
+        public int SaveOrUpdate(Note n, BoardWriteFormType formType, string category)
         {
             int r = 0;
 
@@ -36,6 +36,8 @@ namespace BBS.Models
             p.Add("@Encoding", value: n.Encoding, dbType: DbType.String);
             p.Add("@FileName", value: n.FileName, dbType: DbType.String);
             p.Add("@FileSize", value: n.FileSize, dbType: DbType.Int32);
+            p.Add("@Category", value: n.Category, dbType: DbType.String);
+            p.Add("@UserId", value: n.UserID, dbType: DbType.String);
 
             switch (formType)
             {
@@ -43,7 +45,7 @@ namespace BBS.Models
                     // [b] 글쓰기 전용
                     p.Add("@PostIp", value: n.PostIp, dbType: DbType.String);
 
-                    r = con.Execute("WriteNote", p
+                    r = con.Execute("BBS_WriteNote", p
                         , commandType: CommandType.StoredProcedure);
                     break;
                 case BoardWriteFormType.Modify:
@@ -52,7 +54,7 @@ namespace BBS.Models
                         value: n.ModifyIp, dbType: DbType.String);
                     p.Add("@Id", value: n.Id, dbType: DbType.Int32);
 
-                    r = con.Execute("ModifyNote", p,
+                    r = con.Execute("BBS_ModifyNote", p,
                         commandType: CommandType.StoredProcedure);
                     break;
                 case BoardWriteFormType.Reply:
@@ -61,7 +63,7 @@ namespace BBS.Models
                     p.Add("@ParentNum",
                         value: n.ParentNum, dbType: DbType.Int32);
 
-                    r = con.Execute("ReplyNote", p,
+                    r = con.Execute("BBS_ReplyNote", p,
                         commandType: CommandType.StoredProcedure);
                     break;
             }
@@ -72,11 +74,11 @@ namespace BBS.Models
         /// <summary>
         /// 게시판 글쓰기
         /// </summary>
-        public void Add(Note vm)
+        public void Add(Note vm, string category)
         {
             try
             {
-                SaveOrUpdate(vm, BoardWriteFormType.Write);
+                SaveOrUpdate(vm, BoardWriteFormType.Write, category);
             }
             catch (System.Exception ex)
             {
@@ -87,12 +89,12 @@ namespace BBS.Models
         /// <summary>
         /// 수정하기
         /// </summary>
-        public int UpdateNote(Note vm)
+        public int UpdateNote(Note vm, string category)
         {
             int r = 0;
             try
             {
-                r = SaveOrUpdate(vm, BoardWriteFormType.Modify);
+                r = SaveOrUpdate(vm, BoardWriteFormType.Modify, category);
             }
             catch (System.Exception ex)
             {
@@ -104,11 +106,11 @@ namespace BBS.Models
         /// <summary>
         /// 답변 글쓰기
         /// </summary>
-        public void ReplyNote(Note vm)
+        public void ReplyNote(Note vm, string category)
         {
             try
             {
-                SaveOrUpdate(vm, BoardWriteFormType.Reply);
+                SaveOrUpdate(vm, BoardWriteFormType.Reply, category);
             }
             catch (System.Exception ex)
             {
@@ -120,12 +122,17 @@ namespace BBS.Models
         /// 게시판 리스트: GetAll, FindAll 
         /// </summary>
         /// <param name="page">페이지 번호</param>
-        public List<Note> GetAll(int page)
+        public List<Note> GetAll(int page, string bbsID)
         {
             try
             {
-                var parameters = new DynamicParameters(new { Page = page });
-                return con.Query<Note>("ListNotes", parameters,
+                var parameters = new DynamicParameters(new 
+                { 
+                    Page = page,
+                    Category = bbsID
+                });
+
+                return con.Query<Note>("BBS_ListNotes", parameters,
                     commandType: CommandType.StoredProcedure).ToList();
             }
             catch (System.Exception ex)
@@ -137,14 +144,15 @@ namespace BBS.Models
         /// <summary>
         /// 검색 카운트
         /// </summary>
-        public int GetCountBySearch(string searchField, string searchQuery)
+        public int GetCountBySearch(string searchField, string searchQuery, string bbsId)
         {
             try
             {
-                return con.Query<int>("SearchNoteCount", new
+                return con.Query<int>("BBS_SearchNoteCount", new
                 {
                     SearchField = searchField,
-                    SearchQuery = searchQuery
+                    SearchQuery = searchQuery,
+                    Category = bbsId
                 },
                     commandType: CommandType.StoredProcedure)
                     .SingleOrDefault();
@@ -159,12 +167,19 @@ namespace BBS.Models
         /// <summary>
         /// Notes 테이블의 모든 레코드 수
         /// </summary>
-        public int GetCountAll()
+        public int GetCountAll(string bbsId)
         {
             try
             {
-                return con.Query<int>(
-                    "Select Count(*) From Notes").SingleOrDefault();
+                return con.Query<int>("BBS_SearchNoteCountALL", new
+                {
+                    Category = bbsId
+                },
+                commandType: CommandType.StoredProcedure)
+                .SingleOrDefault();
+
+                //return con.Query<int>(
+                //    "Select Count(*) From Notes").SingleOrDefault();
             }
             catch (System.Exception)
             {
@@ -178,7 +193,7 @@ namespace BBS.Models
         public string GetFileNameById(int id)
         {
             return
-                con.Query<string>("Select FileName From Notes Where Id = @Id",
+                con.Query<string>("Select FileName From BBS_Notes Where Id = @Id",
                 new { Id = id }).SingleOrDefault();
         }
 
@@ -186,15 +201,16 @@ namespace BBS.Models
         /// 검색 결과 리스트
         /// </summary>
         public List<Note> GetSeachAll(
-            int page, string searchField, string searchQuery)
+            int page, string searchField, string searchQuery, string bbsID)
         {
             var parameters = new DynamicParameters(new
             {
                 Page = page,
                 SearchField = searchField,
-                SearchQuery = searchQuery
+                SearchQuery = searchQuery,
+                Category = bbsID
             });
-            return con.Query<Note>("SearchNotes", parameters,
+            return con.Query<Note>("BBS_SearchNotes", parameters,
                 commandType: CommandType.StoredProcedure).ToList();
         }
 
@@ -203,13 +219,13 @@ namespace BBS.Models
         /// </summary>
         public void UpdateDownCount(string fileName)
         {
-            con.Execute("Update Notes Set DownCount = DownCount + 1 "
+            con.Execute("Update BBS_Notes Set DownCount = DownCount + 1 "
                 + " Where FileName = @FileName", new { FileName = fileName });
         }
         public void UpdateDownCountById(int id)
         {
             var p = new DynamicParameters(new { Id = id });
-            con.Execute("Update Notes Set DownCount = DownCount + 1 "
+            con.Execute("Update BBS_Notes Set DownCount = DownCount + 1 "
                 + " Where Id = @Id", p, commandType: CommandType.Text);
         }
 
@@ -219,7 +235,7 @@ namespace BBS.Models
         public Note GetNoteById(int id)
         {
             var parameters = new DynamicParameters(new { Id = id });
-            return con.Query<Note>("ViewNote", parameters,
+            return con.Query<Note>("BBS_ViewNote", parameters,
                 commandType: CommandType.StoredProcedure).SingleOrDefault();
         }
 
@@ -228,7 +244,7 @@ namespace BBS.Models
         /// </summary>
         public int DeleteNote(int id, string password)
         {
-            return con.Execute("DeleteNote",
+            return con.Execute("BBS_DeleteNote",
                 new { Id = id, Password = password },
                 commandType: CommandType.StoredProcedure);
         }
@@ -239,7 +255,7 @@ namespace BBS.Models
         public List<Note> GetNewPhotos()
         {
             string sql =
-                "SELECT TOP 4 Id, Title, FileName, FileSize FROM Notes "
+                "SELECT TOP 4 Id, Title, FileName, FileSize FROM BBS_Notes "
                 + " Where FileName Like '%.png' Or FileName Like '%.jpg' Or "
                 + " FileName Like '%.jpeg' Or FileName Like '%.gif' "
                 + " Order By Id Desc";
@@ -253,7 +269,7 @@ namespace BBS.Models
         {
             string sql = "SELECT TOP 3 Id, Title, Name, PostDate, FileName, "
                 + " FileSize, ReadCount, CommentCount, Step "
-                + " FROM Notes "
+                + " FROM BBS_Notes "
                 + " Where Category = @Category Order By Id Desc";
             return con.Query<Note>(sql, new { Category = category }).ToList();
         }
@@ -263,7 +279,7 @@ namespace BBS.Models
         /// </summary>
         public List<Note> GetRecentPosts()
         {
-            string sql = "SELECT TOP 3 Id, Title, Name, PostDate FROM Notes "
+            string sql = "SELECT TOP 3 Id, Title, Name, PostDate FROM BBS_Notes "
                 + " Order By Id Desc";
             return con.Query<Note>(sql).ToList();
         }
@@ -275,7 +291,7 @@ namespace BBS.Models
         {
             string sql =
                 $"SELECT TOP {numberOfNotes} Id, Title, Name, PostDate "
-                + " FROM Notes Order By Id Desc";
+                + " FROM BBS_Notes Order By Id Desc";
             return con.Query<Note>(sql).ToList();
         }
     }
