@@ -1,9 +1,11 @@
 ﻿using Dapper;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using T_Engine;
 
 namespace BBS.Models
 {
@@ -56,9 +58,12 @@ namespace BBS.Models
         /// </summary>
         public int GetCountBy(int boardId, int id, string password)
         {
+            Cryptography newCrypt = new Cryptography();
+            String cryptPassword = newCrypt.GetEncoding("ParkGolf", password);
+
             return con.Query<int>(@"Select Count(*) From BBS_NoteComments 
                 Where BoardId = @BoardId And Id = @Id And Password = @Password"
-                , new { BoardId = boardId, Id = id, Password = password }
+                , new { BoardId = boardId, Id = id, Password = cryptPassword }
                 , commandType: CommandType.Text).SingleOrDefault();
         }
 
@@ -67,11 +72,13 @@ namespace BBS.Models
         /// </summary>
         public int DeleteNoteComment(int boardId, int id, string password)
         {
+            Cryptography newCrypt = new Cryptography();
+            String cryptPassword = newCrypt.GetEncoding("ParkGolf", password);
             return con.Execute(@"Delete BBS_NoteComments 
                 Where BoardId = @BoardId And Id = @Id And Password = @Password; 
                 Update BBS_Notes Set CommentCount = CommentCount - 1 
                 Where Id = @BoardId"
-                , new { BoardId = boardId, Id = id, Password = password }
+                , new { BoardId = boardId, Id = id, Password = cryptPassword }
                 , commandType: CommandType.Text);
         }
 

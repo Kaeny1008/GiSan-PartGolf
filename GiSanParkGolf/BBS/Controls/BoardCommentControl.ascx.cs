@@ -27,6 +27,7 @@ namespace GiSanParkGolf.BBS.Controls
             //암호는 눈에 보이게 되면 자동입력이 사라진다.
             txtPassword.Text = Global.uvm.Password;
             userId = Global.uvm.UserID;
+
             if (!Page.IsPostBack)
             {
                 // 데이터 출력(현재 게시글의 번호(Id)에 해당하는 댓글 리스트)
@@ -49,7 +50,7 @@ namespace GiSanParkGolf.BBS.Controls
             _repository.AddNoteComment(comment);
 
             Response.Redirect(
-                $"{Request.ServerVariables["SCRIPT_NAME"]}?Id={Request["Id"]}");
+                $"{Request.ServerVariables["SCRIPT_NAME"]}?Id={Request["Id"]}&bbsId={Request["bbsId"]}");
         }
     }
 }

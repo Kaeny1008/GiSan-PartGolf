@@ -22,7 +22,14 @@
         min-width: 100%;
     }
 </style>
-<%--<h2 style="text-align:center;">게시판</h2>--%>
+<%--<script runat="server">
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //쓸일이 있겠지 놔둬보자.
+    }
+</script>--%>
+
+
 <div style="text-align: center;">
     <asp:Label ID="LBMainTitle" runat="server" Class="MainLabel" Text="게시판" />
 </div>
@@ -30,50 +37,59 @@
 <hr />
 <table style="width: 70%; border-collapse: collapse; padding: 5px; margin-left:auto; margin-right:auto;">
     <%--게시글이 수정 상태일때 표시되는 부분--%>
-    <% if (!String.IsNullOrEmpty(Request.QueryString["Id"]) && 
-            FormType == BBS.Models.BoardWriteFormType.Modify) { %>    
-    <tr>
-        <td class="auto-style1">
-            <span style="color: #ff0000;">*</span>번호
-        </td>
-        <td class="auto-style2">
-            <%= Request.QueryString["Id"] %>
-        </td>
-    </tr>
-    <% } %>
+    <% 
+        if (!String.IsNullOrEmpty(Request.QueryString["Id"]) && 
+            FormType == BBS.Models.BoardWriteFormType.Modify) 
+        { 
+    %>    
+        <tr>
+            <td class="auto-style1">
+                <span style="color: #ff0000;">*</span>번호
+            </td>
+            <td class="auto-style2">
+                <%= Request.QueryString["Id"] %>
+            </td>
+        </tr>
+    <% 
+        } 
+    %>
     <%--게시글이 수정 상태일때 표시되는 부분--%>
 
-    <%--공지사항 게시판을 열었을때는 관리자만 작성하니까 이메일 부분은 열지 않도록한다.--%>
-    <% if (!String.IsNullOrEmpty(Request.QueryString["bbsId"])) { %>    
-        <% if (!Request.QueryString["bbsId"].Equals("notice")) { %>   
-            <tr>
-                <td class="BoardWriteFormTableLeftStyle">
-                    <span style="color: #ff0000;">*</span>이름</td>
-                <td>
-                    <asp:TextBox ID="txtName" runat="server" MaxLength="10" 
-                        Width="80%" CssClass="form-control"></asp:TextBox>
-                    <asp:RequiredFieldValidator ID="valName" runat="server" 
-                        ErrorMessage="* 이름을 작성해 주세요." 
-                        ControlToValidate="txtName" Display="None" 
-                        SetFocusOnError="True"></asp:RequiredFieldValidator>
-                </td>
-            </tr>
-            <tr>
-                <td style="text-align:center;">E-mail</td>
-                <td>
-                    <asp:TextBox ID="txtEmail" runat="server" 
-                        MaxLength="80" Width="80%" CssClass="form-control" 
-                        style="display:inline-block;"></asp:TextBox>
-                    <asp:RegularExpressionValidator ID="valEmail" runat="server" 
-                        ErrorMessage="* 메일 형식이 올바르지 않습니다." 
-                        ControlToValidate="txtEmail" Display="None" 
-                        ValidationExpression=
-                            "\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*" 
-                        SetFocusOnError="True"></asp:RegularExpressionValidator>
-                </td>
-            </tr>
-        <% } %>
-    <% } %>
+    <% 
+        //비로그인 중일때는 이름, 이메일 입력
+        //로그인시 자동입력되도록 함.
+        if (!Page.User.Identity.IsAuthenticated)
+        {
+    %>
+        <tr>
+            <td class="BoardWriteFormTableLeftStyle">
+                <span style="color: #ff0000;">*</span>이름</td>
+            <td>
+                <asp:TextBox ID="txtName" runat="server" MaxLength="10" 
+                    Width="80%" CssClass="form-control"></asp:TextBox>
+                <asp:RequiredFieldValidator ID="valName" runat="server" 
+                    ErrorMessage="* 이름을 작성해 주세요." 
+                    ControlToValidate="txtName" Display="None" 
+                    SetFocusOnError="True"></asp:RequiredFieldValidator>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align:center;">E-mail</td>
+            <td>
+                <asp:TextBox ID="txtEmail" runat="server" 
+                    MaxLength="80" Width="80%" CssClass="form-control" 
+                    style="display:inline-block;"></asp:TextBox>
+                <asp:RegularExpressionValidator ID="valEmail" runat="server" 
+                    ErrorMessage="* 메일 형식이 올바르지 않습니다." 
+                    ControlToValidate="txtEmail" Display="None" 
+                    ValidationExpression=
+                        "\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*" 
+                    SetFocusOnError="True"></asp:RegularExpressionValidator>
+            </td>
+        </tr>
+    <%
+        }
+    %>
 
     <tr>
         <td style="text-align:center;">
@@ -137,51 +153,47 @@
             </asp:RadioButtonList>
         </td>
     </tr>
-    <%--공지사항 게시판을 열었을때는 관리자만 작성하니까 비밀번호는 열지 않도록한다.--%>
-    <% if (!String.IsNullOrEmpty(Request.QueryString["bbsId"])) { %>    
-        <% if (!Request.QueryString["bbsId"].Equals("notice")) { %>    
-            <tr>
-                <td style="text-align:center;">
-                    <span style="color: #ff0000;">*</span>비밀번호
-                </td>
-                <td>
-                    <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" 
-                        style="display:inline-block;" MaxLength="20" Width="150px" 
-                        TextMode="Password" EnableViewState="False"></asp:TextBox>
-                    <span style=" color: #aaaaaa;">(수정/삭제 시 필요)</span> 
-                    <br />
-                    <asp:RequiredFieldValidator ID="valPassword" runat="server" 
-                        ErrorMessage="* 비밀번호를 기입해 주세요." 
-                        ControlToValidate="txtPassword" Display="None" 
-                        SetFocusOnError="True"></asp:RequiredFieldValidator>
-                </td>
-            </tr>
-        <% } %>
-    <% } %>
 
-    <%--로그인 중일때는 표시하지 않는 부분--%>
     <% 
+        //비로그인 중일때는 보안코드, 비밀번호를 입력
+        //로그인시 자동입력되도록 함.
         if (!Page.User.Identity.IsAuthenticated)
         {
     %>
-    <tr>
-        <td style="text-align:center;">
-            <span style="color: #ff0000;">*</span>보안코드
-        </td>
-        <td>
-            <asp:TextBox ID="txtImageText" runat="server" 
-                CssClass="form-control" 
-                style="display:inline-block;" 
-                EnableViewState="False" MaxLength="20" 
-                Width="150px"></asp:TextBox>
-            <span style=" color: #aaaaaa;">
-                (아래에 제시되는 보안코드를 입력하십시오.)</span>
-            <br />
-            <asp:Image ID="imgSecurityImageText" runat="server" 
-                ImageUrl="~/BBS/ImageText.aspx" />
-            <asp:Label ID="lblError" runat="server" ForeColor="Red"></asp:Label>
-        </td>
-    </tr>
+        <tr>
+            <td style="text-align:center;">
+                <span style="color: #ff0000;">*</span>비밀번호
+            </td>
+            <td>
+                <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" 
+                    style="display:inline-block;" MaxLength="20" Width="150px" 
+                    TextMode="Password" EnableViewState="False"></asp:TextBox>
+                <span style=" color: #aaaaaa;">(수정/삭제 시 필요)</span> 
+                <br />
+                <asp:RequiredFieldValidator ID="valPassword" runat="server" 
+                    ErrorMessage="* 비밀번호를 기입해 주세요." 
+                    ControlToValidate="txtPassword" Display="None" 
+                    SetFocusOnError="True"></asp:RequiredFieldValidator>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align:center;">
+                <span style="color: #ff0000;">*</span>보안코드
+            </td>
+            <td>
+                <asp:TextBox ID="txtImageText" runat="server" 
+                    CssClass="form-control" 
+                    style="display:inline-block;" 
+                    EnableViewState="False" MaxLength="20" 
+                    Width="150px"></asp:TextBox>
+                <span style=" color: #aaaaaa;">
+                    (아래에 제시되는 보안코드를 입력하십시오.)</span>
+                <br />
+                <asp:Image ID="imgSecurityImageText" runat="server" 
+                    ImageUrl="~/BBS/ImageText.aspx" />
+                <asp:Label ID="lblError" runat="server" ForeColor="Red"></asp:Label>
+            </td>
+        </tr>
     <%
         }
     %>

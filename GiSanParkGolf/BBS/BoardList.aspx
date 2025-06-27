@@ -38,18 +38,12 @@
 
     </script>
 
-    <%--<h2 style="text-align: center;">공지사항</h2>--%>
     <div style="text-align: center;"><asp:Label ID="LBMainTitle" runat="server" Class="MainLabel">게시판</asp:Label></div>
-    <span style="color: #ff0000">글 목록 - 완성형 게시판입니다.</span>
+    <span style="color: #ff0000">게시판입니다.</span>
     <hr />
     <table style="width: 100%; margin-left: auto; margin-right: auto;">
         <tr>
             <td>
-                <style>
-                    table th {
-                        text-align: center;
-                    }
-                </style>
                 <div style="font-style: italic; text-align: right; font-size: 8pt;">
                     Total Record:
                     <asp:Literal ID="lblTotalRecord" runat="server"></asp:Literal>
@@ -63,10 +57,7 @@
                             HeaderStyle-Width="50px"
                             ItemStyle-HorizontalAlign="Center">
                             <ItemTemplate>
-                                <%--<%# Eval("Id") %>--%>
-                                <%# RecordCount -
-                                        ((Container.DataItemIndex)) -
-                                            (PageIndex * 10) %>
+                                <%# RecordCount - (Container.DataItemIndex) - (PageIndex * 10) %>
                             </ItemTemplate>
                         </asp:TemplateField>
                         <asp:TemplateField HeaderText="제 목"
@@ -122,10 +113,32 @@
             </td>
         </tr>
         <tr>
-            <td style="text-align: right;">
-                <%--<a href="BoardWrite.aspx" class="btn btn-primary">글쓰기</a>--%>
-                <asp:Button ID="BTN_Write" runat="server" class="btn btn-primary" Text="글쓰기" OnClick="BTN_Write_Click" />
-            </td>
+           
+            <% 
+                //공지사항일때는 Administrator만 글쓰기 가능
+                if (Request.QueryString["bbsId"].Equals("notice"))
+                {
+                    if (!String.IsNullOrEmpty(global_asax.uvm.UserClass))
+                    {
+                        if (global_asax.uvm.UserClass.Equals("Administrator"))
+                        {
+            %>
+                        <td style="text-align: right;">
+                            <asp:Button ID="BTN_Write" runat="server" class="btn btn-primary" Text="글쓰기" OnClick="BTN_Write_Click" />
+                        </td>
+            <%
+                        }
+                    }
+                } 
+                else
+                {
+            %>
+                <td style="text-align: right;">
+                    <asp:Button ID="Button1" runat="server" class="btn btn-primary" Text="글쓰기" OnClick="BTN_Write_Click" />
+                </td>
+            <%
+                } 
+            %>
         </tr>
     </table>
  

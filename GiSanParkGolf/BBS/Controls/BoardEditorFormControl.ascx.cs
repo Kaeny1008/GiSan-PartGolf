@@ -32,7 +32,7 @@ namespace GiSanParkGolf.BBS.Controls
         {
             txtName.Text = Global.uvm.UserName;
             //암호는 눈에 보이게 되면 자동입력이 사라진다.
-            txtPassword.Text = Global.uvm.Password; 
+            txtPassword.Text = Global.uvm.Password;
             userId = Global.uvm.UserID;
 
             if (!String.IsNullOrEmpty(Request.QueryString["bbsId"]))
@@ -53,16 +53,16 @@ namespace GiSanParkGolf.BBS.Controls
                 {
                     case BoardWriteFormType.Write:
                         lblTitleDescription.Text =
-                            "글 쓰기 - 다음 필드들을 채워주세요.";
+                            "글 쓰기";
                         break;
                     case BoardWriteFormType.Modify:
                         lblTitleDescription.Text =
-                            "글 수정 - 아래 항목을 수정하세요.";
+                            "글 수정";
                         DisplayDataForModify();
                         break;
                     case BoardWriteFormType.Reply:
                         lblTitleDescription.Text =
-                            "글 답변 - 다음 필드들을 채워주세요.";
+                            "글 답변";
                         DisplayDataForReply();
                         break;
                 }

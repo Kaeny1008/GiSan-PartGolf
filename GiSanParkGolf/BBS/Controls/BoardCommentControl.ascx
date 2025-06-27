@@ -5,6 +5,7 @@
         min-width: 100%;
     }
 </style>
+
 <%--<h3>댓글 리스트</h3>--%>
 <asp:Repeater ID="ctlCommentList" runat="server">
     <HeaderTemplate>
@@ -23,12 +24,35 @@
                 <%# Eval("PostDate") %>
             </td>
             <td style="width: 10px; text-align: center;">
-                <a href=
-                    'BoardCommentDelete.aspx?BoardId=<%= Request["Id"] 
-                        %>&Id=<%# Eval("Id") %>' 
-                    title="댓글 삭제">
-                    <img src="/images/dnn/icon_delete_red.gif" border="0">
-                </a>
+                <%
+                    //관리자일때는 댓글삭제가 무조건 가능 아니면 해당아이디의 글만 가능
+                    if (string.IsNullOrEmpty(global_asax.uvm.UserClass))
+                    {
+                        if (global_asax.uvm.UserClass.Equals("Administrator"))
+                        {
+                %>
+                            <a href='BoardCommentDelete.aspx?BoardId=<%= Request["Id"]%>&Id=<%# Eval("Id") %>&bbsId=<%= Request["bbsId"]%>&UId=<%# Eval("UserId") %>' title="삭제">삭제</a>
+                <%
+                        }
+                        else
+                        {
+                %>
+                            <%# Eval("UserId").ToString().Equals(global_asax.uvm.UserID) ? 
+                                    "<a href='BoardCommentDelete.aspx?BoardId=" + Request["Id"] + "&id=" + Eval("Id") + "&bbsId=" + Request["bbsId"] + "&UId=" + Eval("UserId") + "' title=\"삭제\">삭제</a>" 
+                                    : 
+                                    ""
+                            %>
+                <%
+                        }
+                    }
+                    else
+                    {
+                %>
+                        <a href='BoardCommentDelete.aspx?BoardId=<%= Request["Id"]%>&Id=<%# Eval("Id") %>&bbsId=<%= Request["bbsId"]%>&UId=<%# Eval("UserId") %>' title="삭제">삭제</a>
+                <%
+                    }    
+                %>
+                <%--<img src="/images/dnn/icon_delete_red.gif" border="0">--%>
             </td>
         </tr>
     </ItemTemplate>
@@ -38,7 +62,7 @@
 </asp:Repeater>
  
 <%--<h3>댓글 입력</h3>--%>
-<table style="width: 500px; margin-left: auto; margin-right: auto; background-color:aliceblue">
+<table style="width: 500px; margin-left: auto; margin-right: auto;">
     <tr><td></td></tr>
     <tr>
         <td style="width: 64px; text-align: right;">댓글 
@@ -56,39 +80,30 @@
         if (!Page.User.Identity.IsAuthenticated)
         {
     %>
-    <tr>
-        <td style="width: 64px; text-align: right;">이 름 : 
-        </td>
-        <td style="width: 128px;">
-            <asp:TextBox ID="txtName" runat="server" Width="128px" 
-                CssClass="form-control"
-                Style="display: inline-block;"></asp:TextBox>
-        </td>
-    </tr>
-    <tr>
-        <td style="width: 64px; text-align: right;">암 호 : 
-        </td>
-        <td style="width: 128px;">
-            <%--<asp:TextBox ID="txtPassword" runat="server" 
-                TextMode="Password" Width="128px"
-                CssClass="form-control" Style="display: inline-block;">
-            </asp:TextBox>--%>
-            <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" 
-                style="display:inline-block;" MaxLength="20" Width="150px" 
-                TextMode="Password" EnableViewState="False"></asp:TextBox>
-        </td>
-    </tr>
+        <tr>
+            <td style="width: 64px; text-align: right;">이 름 : 
+            </td>
+            <td style="width: 128px;">
+                <asp:TextBox ID="txtName" runat="server" Width="128px" 
+                    CssClass="form-control"
+                    Style="display: inline-block;"></asp:TextBox>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 64px; text-align: right;">암 호 : 
+            </td>
+            <td style="width: 128px;">
+                <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" 
+                    style="display:inline-block;" MaxLength="20" Width="150px" 
+                    TextMode="Password" EnableViewState="False"></asp:TextBox>
+            </td>
+        </tr>
     <%
         }
     %>
     <tr>
         <td></td>
         <td style="text-align:left;">
-            <%--<asp:Button ID="btnWriteComment1" runat="server" 
-            Text="등록" Width="96px"
-            CssClass="form-control btn btn-primary" 
-            Style="display: inline-block;"
-            OnClick="btnWriteComment_Click" />--%>
             <asp:Button ID="btnWriteComment" runat="server" Text="등록" CssClass="btn btn-primary" Width="96px" Style="display: inline-block;" OnClick="btnWriteComment_Click" />
         </td>
     </tr>

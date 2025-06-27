@@ -1,10 +1,12 @@
 ﻿using BBS.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using T_Engine;
 
 namespace GiSanParkGolf.BBS
 {
@@ -24,14 +26,42 @@ namespace GiSanParkGolf.BBS
             {
                 Response.End();
             }
+
+            if (string.IsNullOrEmpty(Global.uvm.UserClass))
+            {
+                if (Global.uvm.UserClass.Equals("Administrator"))
+                {
+                    //관리자 권한으로 온거라면 무조건 삭제
+
+                }
+            }
         }
 
         protected void btnCommentDelete_Click(object sender, EventArgs e)
         {
-            var repo = new NoteCommentRepository();
-            if (repo.GetCountBy(BoardId, Id, txtPassword.Text) > 0)
+            if (Request["UId"] != null)
             {
-                repo.DeleteNoteComment(BoardId, Id, txtPassword.Text);
+                if (Request["UId"].Equals(Global.uvm.UserID))
+                {
+                    string commentPass = Global.uvm.Password;
+                    Cryptography newCrypt = new Cryptography();
+                    commentPass = newCrypt.GetDecoding("ParkGolf", commentPass);
+                    CommentDelete(commentPass);
+                }
+                else
+                {
+                    CommentDelete(txtPassword.Text);
+
+                }
+            }
+        }
+
+        protected void CommentDelete(string commentPass)
+        {
+            var repo = new NoteCommentRepository();
+            if (repo.GetCountBy(BoardId, Id, commentPass) > 0)
+            {
+                repo.DeleteNoteComment(BoardId, Id, commentPass);
                 Response.Redirect($"BoardView.aspx?Id={BoardId}");
             }
             else

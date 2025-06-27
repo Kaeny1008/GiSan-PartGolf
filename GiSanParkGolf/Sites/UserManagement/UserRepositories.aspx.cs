@@ -41,7 +41,7 @@ namespace GiSanParkGolf.Sites.UserManagement
             //String.Format("{0:yyyy-MM-dd}", DateTime.Parse(TextBox1.Text))
             //데이터 저장
             string strSQL = "INSERT INTO SYS_Users(UserName, UserGender, UserNumber, UserAddress, UserAddress2" +
-                    ", UserNote, UserId, UserPassword, UserWClass" +
+                    ", UserNote, UserId, UserPassword, UserWClass, UserClass" +
                     ") VALUES(" +
                     "'" + txtName.Text + "'" +
                     ",'" + txtGender.Text + "'" +
@@ -52,6 +52,7 @@ namespace GiSanParkGolf.Sites.UserManagement
                     ",'" + txtID.Text + "'" +
                     ",'" + userPassword + "'" +
                     ",'승인대기'" +
+                    ",'Member'"+
                     ");";
 
             DB_Management dbWrite = new DB_Management();

@@ -2,20 +2,21 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <h2 style="text-align: center;">게시판</h2>
     <span style="color: #ff0000">
-        댓글 삭제 - 정확한 암호를 입력하시면 댓글을 삭제하실 수 있습니다.</span>
+        댓글 삭제</span>
     <hr />
-    <table style=
-        "width: 500px; margin-left: auto; margin-right: auto;">
+    <table style="width: 500px; margin-left: auto; margin-right: auto;">
         <tr>
             <td colspan="2">
                 <i class="glyphicon glyphicon-lock"></i>
                 <span style="font-size: 12pt;">댓글 삭제</span>
             </td>
         </tr>
+        <tr><td></td></tr>
         <tr>
             <td>&nbsp;</td>
             <td>
                 <span>해당 댓글을 삭제하시려면 올바른 암호를 입력하십시오.</span>
+                <br />
                 <br />
                 암호(<u>P</u>):
                 <asp:TextBox ID="txtPassword" runat="server" TextMode="Password"
