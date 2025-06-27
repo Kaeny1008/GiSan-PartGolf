@@ -19,12 +19,24 @@
     <table style="width: 100%; margin-left: auto; margin-right: auto;">
         <tbody>
             <tr style="color: white; background-color: #46698c;">
-                <td style="width: 80px; text-align: right; height: 35px;">
+                <td style="width: 100px; text-align: right; height: 35px;">
                     <b style="font-size: 18px">제 목</b> :
                 </td>
                 <td colspan="3">
                     <asp:Label ID="lblTitle" Font-Bold="True" Font-Size="18px" 
                         Width="100%" runat="server"></asp:Label>
+                </td>
+            </tr>
+            <tr style="background-color: #efefef;">
+                <td class="text-right">작성자 ID :
+                </td>
+                <td>
+                    <asp:Label ID="lbUserId" Width="100%" runat="server">
+                    </asp:Label>
+                </td>
+                <td class="text-right">
+                </td>
+                <td>
                 </td>
             </tr>
             <tr style="background-color: #efefef;">
@@ -82,6 +94,7 @@
                     </asp:Label>
                 </td>
             </tr>
+
             <tr>
                 <td colspan="4" style="padding: 10px;">
                     <asp:Literal ID="ltrImage" runat="server"></asp:Literal>
@@ -111,9 +124,9 @@
             //공지사항일때는 Administrator만 답쓰기 가능
             if (Request.QueryString["bbsId"].Equals("notice"))
             {
-                if (!String.IsNullOrEmpty(global_asax.uvm.UserClass))
+                if (!String.IsNullOrEmpty(global_asax.uvm.UserClass.ToString()))
                 {
-                    if (global_asax.uvm.UserClass.Equals("Administrator"))
+                    if (global_asax.uvm.UserClass.Equals(1))
                     {
         %>
                         <asp:HyperLink ID="lnkReply" runat="server" 
@@ -124,13 +137,21 @@
                             CssClass="btn btn-default">수정</asp:HyperLink>
         <%
                     }
-                    else
+                }
+            }
+            else
+            {
+                //여기 아래부분은 차차 만들어가야함
+                //로그인 여부에 따라 삭제 수정가능하고
+                //그에따른 링크(비번없이 바로 삭제 가능하도록) 수정하여야함.
+
+                //로그인 되어 있으면
+                if (Page.User.Identity.IsAuthenticated)
+                {
+                    if (lbUserId.Text.Equals(global_asax.uvm.UserID))
                     {
+                        //내가 작성한 글이면
         %>
-                        <%--여기는 상황에 맞게 수정할것--%>
-                        <asp:HyperLink ID="lnkReply2" runat="server" 
-                             CssClass="btn btn-default">답변</asp:HyperLink>
-                        <%--자기 게시글일때 삭제 수정가능하게 변경해야함.--%>
                         <asp:HyperLink ID="lnkDelete2" runat="server" 
                             CssClass="btn btn-default">삭제</asp:HyperLink>
                         <asp:HyperLink ID="lnkModify2" runat="server" 
@@ -138,20 +159,14 @@
         <%
                     }
                 }
-            }
-            else
-            {
+                //로그인 되어 있지 않다면
+                else
+                {
         %>
-                <%--여기는 상황에 맞게 수정할것--%>
-                <asp:HyperLink ID="lnkReply3" runat="server" 
-                     CssClass="btn btn-default">답변</asp:HyperLink>
-                <%--자기 게시글일때 삭제 수정가능하게 변경해야함.--%>
-                <asp:HyperLink ID="lnkDelete3" runat="server" 
-                    CssClass="btn btn-default">삭제</asp:HyperLink>
-                <asp:HyperLink ID="lnkModify3" runat="server" 
-                    CssClass="btn btn-default">수정</asp:HyperLink>
+
         <%
-            } 
+                }
+            }
         %>
 
 

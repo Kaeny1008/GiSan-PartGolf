@@ -11,7 +11,7 @@ namespace GiSanParkGolf.Models
         public string Password { get; set; }
         public string UserName { get; set; }
         public string UserWClass { get; set; }
-        public string UserClass { get; set; }
+        public int UserClass { get; set; }
     }
 
     public class SelectUserViewModel
@@ -26,5 +26,6 @@ namespace GiSanParkGolf.Models
         public DateTime UserRegistrationDate { get; set; }
         public string UserNote { get; set; }
         public string UserWClass { get; set; }
+        public int UserClass { get; set; }
     }
 }

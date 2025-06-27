@@ -18,7 +18,7 @@ namespace GiSanParkGolf.BBS
         {
             if (!String.IsNullOrEmpty(Request.QueryString["bbsId"]))
             {
-                bbsID = Request.QueryString["bbsId"].ToString();
+                bbsID = Request.QueryString["bbsId"];
                 if (bbsID.Equals("notice"))
                 {
                     LBMainTitle.Text = "공지사항";
@@ -27,16 +27,17 @@ namespace GiSanParkGolf.BBS
             }
 
             lnkReply.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
-            lnkReply2.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
-            lnkReply3.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            //lnkReply2.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            //lnkReply3.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
 
+            // 삭제하는것 만들어야 된다.
             lnkDelete.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
-            lnkDelete2.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
-            lnkDelete3.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            //lnkDelete2.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            //lnkDelete3.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
 
-            lnkModify.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
-            lnkModify2.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
-            lnkModify3.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            lnkModify.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}&ignorepass={2}", Request["Id"], bbsID, "true");
+            //lnkModify2.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            //lnkModify3.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
 
             lnkList.NavigateUrl = string.Format("BoardList.aspx?bbsId={0}", bbsID);
 
@@ -63,6 +64,7 @@ namespace GiSanParkGolf.BBS
             lblEmail.Text =
                 String.Format("<a href=\"mailto:{0}\">{0}</a>", note.Email);
             lblTitle.Text = note.Title;
+            lbUserId.Text = note.UserID;
             string content = note.Content;
 
             // 인코딩 방식에 따른 데이터 출력

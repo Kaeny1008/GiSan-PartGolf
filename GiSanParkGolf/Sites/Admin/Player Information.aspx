@@ -3,6 +3,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <link href="/Class/StyleSheet.css?after" rel="stylesheet" type="text/css"/>
+
     <script language="javascript">
         function functionx(evt) {
             if (evt.charCode > 31 && (evt.charCode < 48 || evt.charCode > 57)) {
@@ -33,6 +34,15 @@
                 arguments.IsValid = true;
             }
         }
+
+        function ClassValidate(source, arguments) {
+            if (arguments.Value == "선택...") {
+                arguments.IsValid = false;
+            } else {
+                arguments.IsValid = true;
+            }
+        }
+
         function ValidateCheck() {
             var isValid = false;
             isValid = Page_ClientValidate('NewUser');
@@ -53,87 +63,108 @@
     </script>
 
     <script runat="server"> 
+        
 
     </script>
 
     <div class="Center_Container">
         <div class="Center_Container_Content">
-                <div class="alert alert-success d-flex align-items-center" role="alert">
-                    <svg xmlns="http://www.w3.org/2000/svg" 
-                        width="50" height="50" 
-                        fill="currentColor" 
-                        class="bi bi-check-circle-fill flex-shrink-0 me-2" 
-                        viewBox="0 0 16 16" 
-                        role="img" 
-                        aria-label="Success:">
-                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                    </svg>
-                    <div>
-                        <strong>선수 정보관리</strong><br />
-                        선수의 정보를 수정합니다.
-                    </div>
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    width="50" height="50" 
+                    fill="currentColor" 
+                    class="bi bi-check-circle-fill flex-shrink-0 me-2" 
+                    viewBox="0 0 16 16" 
+                    role="img" 
+                    aria-label="Success:">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                </svg>
+                <div>
+                    <strong>선수 정보관리</strong><br />
+                    선수의 정보를 수정합니다.
                 </div>
+            </div>
             
-                            <asp:TextBox ID="TextBox2" runat="server" ValidationGroup="NewUser" Text="Ready" Enabled="false" Width="150px" BorderStyle="None" ForeColor="white" BackColor="white" /><br />
-                <asp:Label ID="IDResult" runat="server" Text=""></asp:Label><br />
-                <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon1">ID</span>
-                    <asp:TextBox ID="txtID" runat="server" class="form-control" ValidationGroup="IDCheck" ReadOnly="true" onkeypress="reCheckID()"></asp:TextBox>
-                    <asp:button class="btn btn-outline-secondary" runat="server" ID="Btn_IDCheck" ValidationGroup="IDCheck" Text="Check" Enabled="false" AutoPostBack="false"/>
-                </div>
+            <asp:TextBox ID="TextBox2" runat="server" ValidationGroup="NewUser" Text="Ready" Enabled="false" Width="150px" BorderStyle="None" ForeColor="white" BackColor="white" /><br />
+            <asp:Label ID="IDResult" runat="server" Text=""></asp:Label><br />
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">ID</span>
+                <asp:TextBox ID="txtID" runat="server" class="form-control" ValidationGroup="IDCheck" ReadOnly="true" onkeypress="reCheckID()"></asp:TextBox>
+                <asp:button class="btn btn-outline-secondary" runat="server" ID="Btn_IDCheck" ValidationGroup="IDCheck" Text="Check" Enabled="false" AutoPostBack="false"/>
+            </div>
 
-                <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon2">암호</span>
-                    <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" class="form-control" placeholder="" ValidationGroup="NewUser"/>
-                </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon2">암호</span>
+                <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" class="form-control" placeholder="수정시에만 입력하세요." ValidationGroup="NewUser"/>
+            </div>
 
-                <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon3">암호확인</span>
-                    <asp:TextBox ID="txtReCheck" runat="server" TextMode="Password" class="form-control" placeholder="" ValidationGroup="NewUser"/>
-                </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon3">암호확인</span>
+                <asp:TextBox ID="txtReCheck" runat="server" TextMode="Password" class="form-control" placeholder="수정시에만 입력하세요." ValidationGroup="NewUser"/>
+            </div>
 
-                <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon4">이름</span>
-                    <asp:TextBox ID="txtName" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser"/>
-                </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon4">이름</span>
+                <asp:TextBox ID="txtName" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser"/>
+            </div>
 
-                <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon5">주민번호</span>
-                    <asp:TextBox ID="txtBirthDay" runat="server" Width="150px" onkeypress="return functionx(event)" class="form-control" MaxLength="6" ValidationGroup="NewUser"></asp:TextBox>
-                    <span class="input-group-text" style="width:15px">-</span>
-                    <asp:TextBox ID="txtGender" runat="server" Width="30px" onkeypress="return functionx(event)" class="form-control" MaxLength="1" ValidationGroup="NewUser"></asp:TextBox>
-                    <span class="input-group-text" style="width:60px">******</span>
-                </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon5">주민번호</span>
+                <asp:TextBox ID="txtBirthDay" runat="server" Width="150px" onkeypress="return functionx(event)" class="form-control" MaxLength="6" ValidationGroup="NewUser"></asp:TextBox>
+                <span class="input-group-text" style="width:15px">-</span>
+                <asp:TextBox ID="txtGender" runat="server" Width="30px" onkeypress="return functionx(event)" class="form-control" MaxLength="1" ValidationGroup="NewUser"></asp:TextBox>
+                <span class="input-group-text" style="width:60px">******</span>
+            </div>
 
-                <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon6">주소</span>
-                    <asp:TextBox ID="txtAddress" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser"/>
-                    <asp:button class="btn btn-outline-secondary" runat="server" ID="Button1" Text="검색" OnClientClick="return readyAlarm(event)" />
-                </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon6">주소</span>
+                <asp:TextBox ID="txtAddress" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser"/>
+                <asp:button class="btn btn-outline-secondary" runat="server" ID="Button1" Text="검색" OnClientClick="return readyAlarm(event)" />
+            </div>
 
-                <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon7">상세주소</span>
-                    <asp:TextBox ID="txtAddress2" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser"/>
-                </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon7">상세주소</span>
+                <asp:TextBox ID="txtAddress2" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser"/>
+            </div>
 
-                <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon8">비고</span>
-                    <asp:TextBox ID="txtMemo" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser" TextMode="MultiLine" Height="200px"/>
-                </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon8">비고</span>
+                <asp:TextBox ID="txtMemo" runat="server" class="form-control" placeholder="" ValidationGroup="NewUser" TextMode="MultiLine" Height="200px"/>
+            </div>
 
-                <asp:Label ID="label6" runat="server" ForeColor="#FF3300"></asp:Label><br />
+            <asp:Label ID="label6" runat="server" ForeColor="#FF3300"></asp:Label><br />
 
+            <div style="align-items: center"> 
                 <asp:CheckBox ID="CheckBox1" runat="server" Text ="가입 승인" /><br />
+            </div>
+
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="inputGroupSelect01">회원등급</label>
+                <asp:DropDownList ID="DropDownList1" runat="server" class="form-select" ValidationGroup="NewUser">
+                    <asp:ListItem Selected="True" Text="선택..."></asp:ListItem>
+                    <asp:ListItem Value="1" Text="Administrator"></asp:ListItem>
+                    <asp:ListItem Value="2" Text="Manager"></asp:ListItem>
+                    <asp:ListItem Value="3" Text="Member"></asp:ListItem>
+                </asp:DropDownList>
+                <%--<select class="form-select" id="inputGroupSelect01">
+                      <option selected>선택...</option>
+                      <option value="1">Administrator</option>
+                      <option value="2">Manager</option>
+                      <option value="3">Member</option>
+                </select>--%>
+            </div>
+
+            <div style="align-items: center"> 
                 <asp:Button ID="BTN_Modify" 
                     Font-Bold="true" 
                     runat="server" 
                     Text="수정하기" 
                     class="btn btn-primary" 
-                    ValidationGroup="NewUser"
-                    width="100%"
+                    ValidationGroup="NewUser" 
                     height="40px"
                     OnClientClick="ValidateCheck();return false;" />
             </div>
+        </div>
 
         <!-- Modal -->
         <div class="modal fade" id="SaveModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -226,6 +257,14 @@
             Display="None" 
             ForeColor="red" 
             ValidationGroup="NewUser"/><br />
+        <asp:CustomValidator id="CustomValidator2"
+            ControlToValidate="DropDownList1"
+            ClientValidationFunction="ClassValidate"
+            Display="None"
+            ErrorMessage="회원등급을 선택하여 주십시오."
+            ForeColor="red"
+            runat="server" 
+            ValidationGroup="NewUser"/>
 
         <asp:ValidationSummary ID="ValidationSummary_SignupForm"
             ShowMessageBox="true" 

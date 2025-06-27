@@ -34,28 +34,7 @@ namespace GiSanParkGolf.BBS
             if (!String.IsNullOrEmpty(Request.QueryString["bbsId"]))
             {
                 //어떤 BBS로 온지 확인후 변수 저장
-                Debug.WriteLine("bbsId : " + Request.QueryString["bbsId"].ToString());
-                bbsID = Request.QueryString["bbsId"].ToString();
-
-                //BBS가 게시판일때 관리자만 글쓰기 버튼 활성화
-                if (bbsID.Equals("notice"))
-                {
-                    LBMainTitle.Text = "공지사항";
-                    if (!String.IsNullOrEmpty(Global.uvm.UserClass))
-                    {
-                        if (Global.uvm.UserClass.Equals("Administrator") || Global.uvm.UserClass.Equals("Manager"))
-                        {
-                            BTN_Write.Visible = true;
-                        }
-                        else
-                        {
-                            BTN_Write.Visible = false;
-                        }
-                    } else
-                    {
-                        BTN_Write.Visible = false;
-                    }
-                }
+                bbsID = Request.QueryString["bbsId"];
             }
                 // 검색 모드 결정
                 SearchMode =

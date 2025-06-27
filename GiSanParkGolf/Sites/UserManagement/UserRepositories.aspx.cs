@@ -52,7 +52,7 @@ namespace GiSanParkGolf.Sites.UserManagement
                     ",'" + txtID.Text + "'" +
                     ",'" + userPassword + "'" +
                     ",'승인대기'" +
-                    ",'Member'"+
+                    ", 3"+
                     ");";
 
             DB_Management dbWrite = new DB_Management();

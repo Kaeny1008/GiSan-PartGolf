@@ -117,24 +117,26 @@
                 //공지사항일때는 Administrator만 글쓰기 가능
                 if (Request.QueryString["bbsId"].Equals("notice"))
                 {
-                    if (!String.IsNullOrEmpty(global_asax.uvm.UserClass))
+                    if (!String.IsNullOrEmpty(global_asax.uvm.UserClass.ToString()))
                     {
-                        if (global_asax.uvm.UserClass.Equals("Administrator"))
+                        
+                        if (global_asax.uvm.UserClass.Equals(1))
                         {
+                            System.Diagnostics.Debug.WriteLine("현재 유저등급 OK");
             %>
-                        <td style="text-align: right;">
-                            <asp:Button ID="BTN_Write" runat="server" class="btn btn-primary" Text="글쓰기" OnClick="BTN_Write_Click" />
-                        </td>
+                            <td style="text-align: right;">
+                                <asp:Button ID="BTN_Write" runat="server" class="btn btn-primary" Text="글쓰기" OnClick="BTN_Write_Click" />
+                            </td>
             <%
                         }
                     }
-                } 
+                }
                 else
                 {
             %>
-                <td style="text-align: right;">
-                    <asp:Button ID="Button1" runat="server" class="btn btn-primary" Text="글쓰기" OnClick="BTN_Write_Click" />
-                </td>
+                    <td style="text-align: right;">
+                        <asp:Button ID="Button1" runat="server" class="btn btn-primary" Text="글쓰기" OnClick="BTN_Write_Click" />
+                    </td>
             <%
                 } 
             %>

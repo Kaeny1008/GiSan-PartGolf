@@ -48,8 +48,9 @@
                     //관리자일때는 댓글삭제가 무조건 가능
                     //해당아이디의 글만 가능
                     //로그인 하지 않았다면 비밀번호 입력 후 가능
-                    if (!string.IsNullOrEmpty(global_asax.uvm.UserClass))
+                    if (!string.IsNullOrEmpty(global_asax.uvm.UserClass.ToString()))
                     {
+                        Console.WriteLine("유저등급 : "+global_asax.uvm.UserClass);
                         if (global_asax.uvm.UserClass.Equals("Administrator"))
                         {
                 %>

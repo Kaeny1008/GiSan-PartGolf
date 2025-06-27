@@ -31,7 +31,7 @@ namespace GiSanParkGolf.BBS
 
             bbsId = Request.QueryString["bbsId"];
 
-            if (!string.IsNullOrEmpty(Global.uvm.UserClass))
+            if (!string.IsNullOrEmpty(Global.uvm.UserClass.ToString()))
             {
                 if (Global.uvm.UserClass.Equals("Administrator"))
                 {

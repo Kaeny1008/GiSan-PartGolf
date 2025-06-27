@@ -131,18 +131,18 @@ namespace GiSanParkGolf.BBS.Controls
                     ipaddr = Request.ServerVariables["REMOTE_ADDR"];
                 }
 
-                Note note = new Note();
-
-                note.Id = Convert.ToInt32(_Id);
-
-                note.Email = HtmlUtility.Encode(txtEmail.Text);
-                note.Title = HtmlUtility.Encode(txtTitle.Text);
-                note.Content = txtContent.Text;
-                note.FileName = _FileName;
-                note.FileSize = _FileSize;
-                note.PostIp = ipaddr;
-                note.Encoding = rdoEncoding.SelectedValue;
-                note.Category = bbsID;
+                Note note = new Note
+                {
+                    Id = Convert.ToInt32(_Id),
+                    Email = HtmlUtility.Encode(txtEmail.Text),
+                    Title = HtmlUtility.Encode(txtTitle.Text),
+                    Content = txtContent.Text,
+                    FileName = _FileName,
+                    FileSize = _FileSize,
+                    PostIp = ipaddr,
+                    Encoding = rdoEncoding.SelectedValue,
+                    Category = bbsID
+                };
 
                 if (Page.User.Identity.IsAuthenticated)
                 {
@@ -155,6 +155,13 @@ namespace GiSanParkGolf.BBS.Controls
                     note.Name = txtName.Text;
                     note.Password = txtPassword.Text;
                     note.UserID = string.Empty;
+                }
+
+                //관리자가 하는거라면.
+                if (Request.QueryString["ignorepass"].Equals("true"))
+                {
+                    //DB 프로시져에서 해당 암호를 넣으면 암호 무시
+                    note.Password = "Ignore";
                 }
 
                 NoteRepository repository = new NoteRepository();

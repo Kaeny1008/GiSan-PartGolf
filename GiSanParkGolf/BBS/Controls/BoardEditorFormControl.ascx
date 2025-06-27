@@ -61,32 +61,32 @@
         if (!Page.User.Identity.IsAuthenticated)
         {
     %>
-        <tr>
-            <td class="BoardWriteFormTableLeftStyle">
-                <span style="color: #ff0000;">*</span>이름</td>
-            <td>
-                <asp:TextBox ID="txtName" runat="server" MaxLength="10" 
-                    Width="80%" CssClass="form-control"></asp:TextBox>
-                <asp:RequiredFieldValidator ID="valName" runat="server" 
-                    ErrorMessage="* 이름을 작성해 주세요." 
-                    ControlToValidate="txtName" Display="None" 
-                    SetFocusOnError="True"></asp:RequiredFieldValidator>
-            </td>
-        </tr>
-        <tr>
-            <td style="text-align:center;">E-mail</td>
-            <td>
-                <asp:TextBox ID="txtEmail" runat="server" 
-                    MaxLength="80" Width="80%" CssClass="form-control" 
-                    style="display:inline-block;"></asp:TextBox>
-                <asp:RegularExpressionValidator ID="valEmail" runat="server" 
-                    ErrorMessage="* 메일 형식이 올바르지 않습니다." 
-                    ControlToValidate="txtEmail" Display="None" 
-                    ValidationExpression=
-                        "\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*" 
-                    SetFocusOnError="True"></asp:RegularExpressionValidator>
-            </td>
-        </tr>
+            <tr>
+                <td class="BoardWriteFormTableLeftStyle">
+                    <span style="color: #ff0000;">*</span>이름</td>
+                <td>
+                    <asp:TextBox ID="txtName" runat="server" MaxLength="10" 
+                        Width="80%" CssClass="form-control"></asp:TextBox>
+                    <asp:RequiredFieldValidator ID="valName" runat="server" 
+                        ErrorMessage="* 이름을 작성해 주세요." 
+                        ControlToValidate="txtName" Display="None" 
+                        SetFocusOnError="True"></asp:RequiredFieldValidator>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:center;">E-mail</td>
+                <td>
+                    <asp:TextBox ID="txtEmail" runat="server" 
+                        MaxLength="80" Width="80%" CssClass="form-control" 
+                        style="display:inline-block;"></asp:TextBox>
+                    <asp:RegularExpressionValidator ID="valEmail" runat="server" 
+                        ErrorMessage="* 메일 형식이 올바르지 않습니다." 
+                        ControlToValidate="txtEmail" Display="None" 
+                        ValidationExpression=
+                            "\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*" 
+                        SetFocusOnError="True"></asp:RegularExpressionValidator>
+                </td>
+            </tr>
     <%
         }
     %>

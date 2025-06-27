@@ -63,7 +63,7 @@ namespace GiSanParkGolf.Class
                 Global.uvm.Password = sqlDR.GetString(1);
                 Global.uvm.UserName = sqlDR.GetString(2);
                 Global.uvm.UserWClass = sqlDR.GetString(3);
-                Global.uvm.UserClass = sqlDR.GetString(4);
+                Global.uvm.UserClass = sqlDR.GetInt32(4);
             }
             con.Close();
 
@@ -75,7 +75,7 @@ namespace GiSanParkGolf.Class
 
             string strSQL = "SELECT UserId, UserName, UserPassword, UserNumber";
             strSQL += ", UserGender, UserAddress, UserAddress2";
-            strSQL += ", UserRegistrationDate, UserNote, UserWClass";
+            strSQL += ", UserRegistrationDate, UserNote, UserWClass, UserClass";
             strSQL += " FROM SYS_Users";
             strSQL += " WHERE UserId = @UserID";
             strSQL += ";";
@@ -100,6 +100,7 @@ namespace GiSanParkGolf.Class
                 Global.suvm.UserRegistrationDate = sqlDR.GetDateTime(7);
                 Global.suvm.UserNote = sqlDR.GetString(8);
                 Global.suvm.UserWClass = sqlDR.GetString(9);
+                Global.suvm.UserClass = sqlDR.GetInt32(10);
             }
             con.Close();
 

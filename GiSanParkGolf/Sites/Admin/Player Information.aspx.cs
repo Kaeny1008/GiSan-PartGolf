@@ -44,6 +44,7 @@ namespace GiSanParkGolf.Sites.Admin
             {
                 CheckBox1.Checked = false;
             }
+            DropDownList1.Text = Global.suvm.UserClass.ToString();
             //txtID.Text = Global.suvm.UserWClass;
         }
 
@@ -67,6 +68,7 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void UserModify(string userPassword)
         {
+            
             //String.Format("{0:yyyy-MM-dd}", DateTime.Parse(TextBox1.Text))
             string strSQL = "UPDATE SYS_Users SET";
             strSQL += " UserName = '" + txtName.Text + "'";
@@ -75,6 +77,7 @@ namespace GiSanParkGolf.Sites.Admin
             strSQL += ", UserAddress = '" + txtAddress.Text + "'";
             strSQL += ", UserAddress2 = '" + txtAddress2.Text + "'";
             strSQL += ", UserNote = '" + txtMemo.Text + "'";
+            strSQL += ", UserClass = '" + DropDownList1.Text + "'";
 
             if (!userPassword.Equals(string.Empty))
             {
