@@ -131,8 +131,7 @@
             } 
         %>
 
-
-
+        <%--자기 게시글일때 삭제 수정가능하게 변경해야함.--%>
         <asp:HyperLink ID="lnkDelete" runat="server" 
             CssClass="btn btn-default">삭제</asp:HyperLink>
         <asp:HyperLink ID="lnkModify" runat="server" 
