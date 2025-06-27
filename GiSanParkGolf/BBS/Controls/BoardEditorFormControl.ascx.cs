@@ -30,11 +30,6 @@ namespace GiSanParkGolf.BBS.Controls
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            txtName.Text = Global.uvm.UserName;
-            //암호는 눈에 보이게 되면 자동입력이 사라진다.
-            txtPassword.Text = Global.uvm.Password;
-            userId = Global.uvm.UserID;
-
             if (!String.IsNullOrEmpty(Request.QueryString["bbsId"]))
             {
                 bbsID = Request.QueryString["bbsId"].ToString();
@@ -117,9 +112,9 @@ namespace GiSanParkGolf.BBS.Controls
             // 넘어 온 Id 값에 해당하는 레코드를 하나 읽어서 Note 클래스에 바인딩
             var note = (new NoteRepository()).GetNoteById(Convert.ToInt32(_Id));
 
-            txtTitle.Text = $"Re : {note.Title}";
+            txtTitle.Text = $"Reply : {note.Title}";
             txtContent.Text =
-                $"\n\nOn {note.PostDate}, '{note.Name}' wrote:\n----------\n>"
+                $"\n\n\n\nOn {note.PostDate}, '{note.Name}' wrote:\n----------\n>"
                 + $"{note.Content.Replace("\n", "\n>")}\n---------";
         }
 
@@ -130,21 +125,37 @@ namespace GiSanParkGolf.BBS.Controls
             {
                 UploadProcess(); // 파일 업로드 관련 코드 분리
 
+                string ipaddr = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+                if (string.IsNullOrEmpty(ipaddr))
+                {
+                    ipaddr = Request.ServerVariables["REMOTE_ADDR"];
+                }
+
                 Note note = new Note();
 
                 note.Id = Convert.ToInt32(_Id);
 
-                note.Name = txtName.Text;
                 note.Email = HtmlUtility.Encode(txtEmail.Text);
                 note.Title = HtmlUtility.Encode(txtTitle.Text);
                 note.Content = txtContent.Text;
                 note.FileName = _FileName;
                 note.FileSize = _FileSize;
-                note.Password = txtPassword.Text;
-                note.PostIp = Request.UserHostAddress;
+                note.PostIp = ipaddr;
                 note.Encoding = rdoEncoding.SelectedValue;
                 note.Category = bbsID;
-                note.UserID = userId;
+
+                if (Page.User.Identity.IsAuthenticated)
+                {
+                    note.Name = Global.uvm.UserName;
+                    note.Password = Global.uvm.Password;
+                    note.UserID = Global.uvm.UserID;
+                }
+                else
+                {
+                    note.Name = txtName.Text;
+                    note.Password = txtPassword.Text;
+                    note.UserID = string.Empty;
+                }
 
                 NoteRepository repository = new NoteRepository();
 
@@ -156,7 +167,7 @@ namespace GiSanParkGolf.BBS.Controls
                         //Response.Redirect("BoardList.aspx");
                         break;
                     case BoardWriteFormType.Modify:
-                        note.ModifyIp = Request.UserHostAddress;
+                        note.ModifyIp = ipaddr;
                         note.FileName = ViewState["FileName"].ToString();
                         note.FileSize = Convert.ToInt32(ViewState["FileSize"]);
                         int r = repository.UpdateNote(note, bbsID);

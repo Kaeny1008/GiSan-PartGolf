@@ -23,11 +23,6 @@ namespace GiSanParkGolf.BBS.Controls
         private string userId = string.Empty;
         protected void Page_Load(object sender, EventArgs e)
         {
-            txtName.Text = Global.uvm.UserName;
-            //암호는 눈에 보이게 되면 자동입력이 사라진다.
-            txtPassword.Text = Global.uvm.Password;
-            userId = Global.uvm.UserID;
-
             if (!Page.IsPostBack)
             {
                 // 데이터 출력(현재 게시글의 번호(Id)에 해당하는 댓글 리스트)
@@ -41,10 +36,23 @@ namespace GiSanParkGolf.BBS.Controls
         {
             NoteComment comment = new NoteComment();
             comment.BoardId = Convert.ToInt32(Request["Id"]); // 부모글
-            comment.Name = txtName.Text; // 이름
-            comment.Password = txtPassword.Text; // 암호
             comment.Opinion = txtOpinion.Text; // 댓글
-            comment.UserId = userId;
+
+            if (Page.User.Identity.IsAuthenticated)
+            {
+                comment.Name = Global.uvm.UserName; // 이름
+                comment.Password = Global.uvm.Password; // 암호
+                comment.UserId = Global.uvm.UserID;
+            } 
+            else
+            {
+                comment.Name = txtName.Text; // 이름
+                Cryptography newCrypt = new Cryptography();
+                String cryptPassword = newCrypt.GetEncoding("ParkGolf", txtPassword.Text);
+                comment.Password = cryptPassword; // 암호
+                comment.UserId = string.Empty;
+            }
+
 
             // 데이터 입력
             _repository.AddNoteComment(comment);

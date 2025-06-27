@@ -81,6 +81,15 @@ namespace BBS.Models
                 , new { BoardId = boardId, Id = id, Password = cryptPassword }
                 , commandType: CommandType.Text);
         }
+        public int DeleteNoteComment2(int boardId, int id)
+        {
+            return con.Execute(@"Delete BBS_NoteComments 
+                Where BoardId = @BoardId And Id = @Id; 
+                Update BBS_Notes Set CommentCount = CommentCount - 1 
+                Where Id = @BoardId"
+                , new { BoardId = boardId, Id = id }
+                , commandType: CommandType.Text);
+        }
 
         /// <summary>
         /// 최근 댓글 리스트 전체

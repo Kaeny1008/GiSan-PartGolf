@@ -106,14 +106,40 @@
     </table>
  
     <div style="text-align: center;">
+
+        <% 
+            //공지사항일때는 Administrator만 답쓰기 가능
+            if (Request.QueryString["bbsId"].Equals("notice"))
+            {
+                if (!String.IsNullOrEmpty(global_asax.uvm.UserClass))
+                {
+                    if (global_asax.uvm.UserClass.Equals("Administrator"))
+                    {
+        %>
+                        <asp:HyperLink ID="lnkReply" runat="server" 
+                            CssClass="btn btn-default">답변</asp:HyperLink>
+        <%
+                    }
+                }
+            } 
+            else
+            {
+        %>
+                <asp:HyperLink ID="lnkReply2" runat="server" 
+                     CssClass="btn btn-default">답변</asp:HyperLink>
+        <%
+            } 
+        %>
+
+
+
         <asp:HyperLink ID="lnkDelete" runat="server" 
             CssClass="btn btn-default">삭제</asp:HyperLink>
         <asp:HyperLink ID="lnkModify" runat="server" 
             CssClass="btn btn-default">수정</asp:HyperLink>
-        <asp:HyperLink ID="lnkReply" runat="server" 
-            CssClass="btn btn-default">답변</asp:HyperLink>
+
+        <%--이건 그냥 있어야지.. 보드랑 권한이랑 상관없이--%>
         <asp:HyperLink ID="lnkList" runat="server" 
-            NavigateUrl="BoardList.aspx" 
             CssClass="btn btn-default">리스트</asp:HyperLink>
     </div>
  

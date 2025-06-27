@@ -36,13 +36,13 @@ namespace BBS.Models
             p.Add("@Encoding", value: n.Encoding, dbType: DbType.String);
             p.Add("@FileName", value: n.FileName, dbType: DbType.String);
             p.Add("@FileSize", value: n.FileSize, dbType: DbType.Int32);
-            p.Add("@Category", value: n.Category, dbType: DbType.String);
-            p.Add("@UserId", value: n.UserID, dbType: DbType.String);
 
             switch (formType)
             {
                 case BoardWriteFormType.Write:
                     // [b] 글쓰기 전용
+                    p.Add("@Category", value: n.Category, dbType: DbType.String);
+                    p.Add("@UserId", value: n.UserID, dbType: DbType.String);
                     p.Add("@PostIp", value: n.PostIp, dbType: DbType.String);
 
                     r = con.Execute("BBS_WriteNote", p
@@ -59,6 +59,8 @@ namespace BBS.Models
                     break;
                 case BoardWriteFormType.Reply:
                     // [b] 답변쓰기 전용
+                    p.Add("@Category", value: n.Category, dbType: DbType.String);
+                    p.Add("@UserId", value: n.UserID, dbType: DbType.String);
                     p.Add("@PostIp", value: n.PostIp, dbType: DbType.String);
                     p.Add("@ParentNum",
                         value: n.ParentNum, dbType: DbType.Int32);

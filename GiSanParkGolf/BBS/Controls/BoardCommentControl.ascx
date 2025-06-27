@@ -6,6 +6,26 @@
     }
 </style>
 
+<script languade="javascript">
+    var BoardId, Id, bbsId, immediately;
+
+    function goDelete() {
+        var gp = "BoardCommentDelete.aspx?BoardId=" + BoardId + "&Id=" + Id + "&bbsId=" + bbsId + "&immediately=" + immediately;
+        console.log(gp);
+        location.href = gp;
+        
+        return false;
+    }
+
+    function ShowModal(BoardId1, Id1, bbsId1, immediately1) {
+        BoardId = BoardId1;
+        Id = Id1;
+        bbsId = bbsId1;
+        immediately = immediately1;
+        $("#SaveModal").modal("show");
+    }
+</script>
+
 <%--<h3>댓글 리스트</h3>--%>
 <asp:Repeater ID="ctlCommentList" runat="server">
     <HeaderTemplate>
@@ -21,24 +41,29 @@
                 <%# Dul.HtmlUtility.Encode(Eval("Opinion").ToString()) %>
             </td>
             <td style="width: 180px;">
-                <%# Eval("PostDate") %>
+                <%# Dul.BoardLibrary.FuncShowTime(Eval("PostDate")) %>
             </td>
             <td style="width: 10px; text-align: center;">
                 <%
-                    //관리자일때는 댓글삭제가 무조건 가능 아니면 해당아이디의 글만 가능
-                    if (string.IsNullOrEmpty(global_asax.uvm.UserClass))
+                    //관리자일때는 댓글삭제가 무조건 가능
+                    //해당아이디의 글만 가능
+                    //로그인 하지 않았다면 비밀번호 입력 후 가능
+                    if (!string.IsNullOrEmpty(global_asax.uvm.UserClass))
                     {
                         if (global_asax.uvm.UserClass.Equals("Administrator"))
                         {
                 %>
-                            <a href='BoardCommentDelete.aspx?BoardId=<%= Request["Id"]%>&Id=<%# Eval("Id") %>&bbsId=<%= Request["bbsId"]%>&UId=<%# Eval("UserId") %>' title="삭제">삭제</a>
+                            <%--<a href='BoardCommentDelete.aspx?BoardId=<%= Request["Id"]%>&Id=<%# Eval("Id") %>&bbsId=<%= Request["bbsId"]%>&immediately=true' title="삭제">삭제</a>--%>
+
+                            <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                onclick="ShowModal('<%= Request["Id"]%>','<%# Eval("Id")%>','<%= Request["bbsId"]%>','true')">삭제</button>
                 <%
                         }
                         else
                         {
                 %>
                             <%# Eval("UserId").ToString().Equals(global_asax.uvm.UserID) ? 
-                                    "<a href='BoardCommentDelete.aspx?BoardId=" + Request["Id"] + "&id=" + Eval("Id") + "&bbsId=" + Request["bbsId"] + "&UId=" + Eval("UserId") + "' title=\"삭제\">삭제</a>" 
+                                    "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"ShowModal('" + Request["Id"] + "','" + Eval("Id") + "','" + Request["bbsId"] + "','true')\">삭제</button>" 
                                     : 
                                     ""
                             %>
@@ -48,7 +73,8 @@
                     else
                     {
                 %>
-                        <a href='BoardCommentDelete.aspx?BoardId=<%= Request["Id"]%>&Id=<%# Eval("Id") %>&bbsId=<%= Request["bbsId"]%>&UId=<%# Eval("UserId") %>' title="삭제">삭제</a>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                            onclick="ShowModal('<%= Request["Id"]%>','<%# Eval("Id")%>','<%= Request["bbsId"]%>','false')">삭제</button>
                 <%
                     }    
                 %>
@@ -60,6 +86,29 @@
         </table>
     </FooterTemplate>
 </asp:Repeater>
+
+        <!-- Modal -->
+        <div class="modal fade" id="SaveModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered"> <%--modal-dialog-centered 를 옆에 넣으면 화면 중앙에 나타난다.--%>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">삭제확인</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        해당 댓글을 삭제 하시겠습니까??
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
+                        <asp:Button ID="Button2" 
+                            runat="server" 
+                            OnClientClick="return goDelete();" 
+                            class="btn btn-primary" 
+                            Text="예" />
+                    </div>
+                </div>
+            </div>
+        </div>
  
 <%--<h3>댓글 입력</h3>--%>
 <table style="width: 500px; margin-left: auto; margin-right: auto;">

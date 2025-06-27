@@ -15,6 +15,8 @@ namespace GiSanParkGolf.BBS
         public int BoardId { get; set; } // 게시판 글 번호
         public int Id { get; set; } // 댓글 번호
 
+        private string bbsId = string.Empty;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Request["BoardId"] != null && Request.QueryString["Id"] != null)
@@ -27,33 +29,28 @@ namespace GiSanParkGolf.BBS
                 Response.End();
             }
 
-            if (string.IsNullOrEmpty(Global.uvm.UserClass))
+            bbsId = Request.QueryString["bbsId"];
+
+            if (!string.IsNullOrEmpty(Global.uvm.UserClass))
             {
                 if (Global.uvm.UserClass.Equals("Administrator"))
                 {
                     //관리자 권한으로 온거라면 무조건 삭제
-
+                    ImmediatelyDelete();
+                }
+                else
+                {
+                    if (Request.QueryString["immediately"].Equals("true"))
+                    {
+                        ImmediatelyDelete();
+                    }
                 }
             }
         }
 
         protected void btnCommentDelete_Click(object sender, EventArgs e)
         {
-            if (Request["UId"] != null)
-            {
-                if (Request["UId"].Equals(Global.uvm.UserID))
-                {
-                    string commentPass = Global.uvm.Password;
-                    Cryptography newCrypt = new Cryptography();
-                    commentPass = newCrypt.GetDecoding("ParkGolf", commentPass);
-                    CommentDelete(commentPass);
-                }
-                else
-                {
-                    CommentDelete(txtPassword.Text);
-
-                }
-            }
+            CommentDelete(txtPassword.Text);
         }
 
         protected void CommentDelete(string commentPass)
@@ -68,6 +65,13 @@ namespace GiSanParkGolf.BBS
             {
                 lblError.Text = "암호가 틀립니다. 다시 입력해주세요.";
             }
+        }
+
+        protected void ImmediatelyDelete()
+        {
+            var repo = new NoteCommentRepository();
+            repo.DeleteNoteComment2(BoardId, Id);
+            Response.Redirect($"BoardView.aspx?Id={BoardId}&bbsId={bbsId}");
         }
     }
 }

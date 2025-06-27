@@ -26,14 +26,17 @@ namespace GiSanParkGolf.BBS
                 }
             }
 
-            lnkDelete.NavigateUrl = "BoardDelete.aspx?Id=" + Request["Id"];
-            lnkModify.NavigateUrl = "BoardModify.aspx?Id=" + Request["Id"];
-            lnkReply.NavigateUrl = "BoardReply.aspx?Id=" + Request["Id"];
+            lnkReply.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            lnkReply2.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+
+            lnkDelete.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            lnkModify.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            lnkList.NavigateUrl = string.Format("BoardList.aspx?bbsId={0}", bbsID);
 
             _Id = Request.QueryString["Id"];
             if (_Id == null)
             {
-                Response.Redirect("./BoardList.aspx");
+                Response.Redirect("./BoardList.aspx?bbsId=" + bbsID);
             }
 
             if (!Page.IsPostBack)

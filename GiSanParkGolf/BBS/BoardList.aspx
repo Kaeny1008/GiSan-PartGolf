@@ -64,9 +64,9 @@
                             ItemStyle-HorizontalAlign="Left"
                             HeaderStyle-Width="350px">
                             <ItemTemplate>
-                                <%# Dul.BoardLibrary.FuncStep(Eval("Step")) %>
+                                <%--<%# Dul.BoardLibrary.FuncStep(Eval("Step")) %>--%>
                                 <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
-                                    NavigateUrl='<%# "BoardView.aspx?bbsid=" + Request.QueryString["bbsId"] + "&Id=" + Eval("Id") %>'>
+                                    NavigateUrl='<%# "BoardView.aspx?bbsId=" + Request.QueryString["bbsId"] + "&Id=" + Eval("Id") %>'>
                                     <%# Dul.StringLibrary.CutStringUnicode(Eval("Title").ToString(), 30) %>
                                     <a style="font-size:13px"><%# Dul.BoardLibrary.EmptyCommentCount(Eval("CommentCount")) %></a>
                                     <%--모바일에 적용하면 될듯
@@ -113,7 +113,6 @@
             </td>
         </tr>
         <tr>
-           
             <% 
                 //공지사항일때는 Administrator만 글쓰기 가능
                 if (Request.QueryString["bbsId"].Equals("notice"))
