@@ -118,24 +118,42 @@
         %>
                         <asp:HyperLink ID="lnkReply" runat="server" 
                             CssClass="btn btn-default">답변</asp:HyperLink>
+                        <asp:HyperLink ID="lnkDelete" runat="server" 
+                            CssClass="btn btn-default">삭제</asp:HyperLink>
+                        <asp:HyperLink ID="lnkModify" runat="server" 
+                            CssClass="btn btn-default">수정</asp:HyperLink>
+        <%
+                    }
+                    else
+                    {
+        %>
+                        <%--여기는 상황에 맞게 수정할것--%>
+                        <asp:HyperLink ID="lnkReply2" runat="server" 
+                             CssClass="btn btn-default">답변</asp:HyperLink>
+                        <%--자기 게시글일때 삭제 수정가능하게 변경해야함.--%>
+                        <asp:HyperLink ID="lnkDelete2" runat="server" 
+                            CssClass="btn btn-default">삭제</asp:HyperLink>
+                        <asp:HyperLink ID="lnkModify2" runat="server" 
+                            CssClass="btn btn-default">수정</asp:HyperLink>
         <%
                     }
                 }
-            } 
+            }
             else
             {
         %>
-                <asp:HyperLink ID="lnkReply2" runat="server" 
+                <%--여기는 상황에 맞게 수정할것--%>
+                <asp:HyperLink ID="lnkReply3" runat="server" 
                      CssClass="btn btn-default">답변</asp:HyperLink>
+                <%--자기 게시글일때 삭제 수정가능하게 변경해야함.--%>
+                <asp:HyperLink ID="lnkDelete3" runat="server" 
+                    CssClass="btn btn-default">삭제</asp:HyperLink>
+                <asp:HyperLink ID="lnkModify3" runat="server" 
+                    CssClass="btn btn-default">수정</asp:HyperLink>
         <%
             } 
         %>
 
-        <%--자기 게시글일때 삭제 수정가능하게 변경해야함.--%>
-        <asp:HyperLink ID="lnkDelete" runat="server" 
-            CssClass="btn btn-default">삭제</asp:HyperLink>
-        <asp:HyperLink ID="lnkModify" runat="server" 
-            CssClass="btn btn-default">수정</asp:HyperLink>
 
         <%--이건 그냥 있어야지.. 보드랑 권한이랑 상관없이--%>
         <asp:HyperLink ID="lnkList" runat="server" 

@@ -28,9 +28,16 @@ namespace GiSanParkGolf.BBS
 
             lnkReply.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
             lnkReply2.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            lnkReply3.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
 
             lnkDelete.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            lnkDelete2.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            lnkDelete3.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+
             lnkModify.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            lnkModify2.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            lnkModify3.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+
             lnkList.NavigateUrl = string.Format("BoardList.aspx?bbsId={0}", bbsID);
 
             _Id = Request.QueryString["Id"];
