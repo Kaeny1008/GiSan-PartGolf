@@ -28,6 +28,12 @@
         //쓸일이 있겠지 놔둬보자.
     }
 </script>--%>
+<script languade="javascript">
+    function ShowModal() {
+        $("#SaveModal").modal("show");
+    }
+</script>
+
 
 
 <div style="text-align: center;">
@@ -197,17 +203,41 @@
     <%
         }
     %>
-    <tr>
-        <td colspan="2" style="text-align:center;">
-            <asp:Button ID="btnWrite" runat="server" Text="저장" 
-                CssClass="btn btn-primary" OnClick="btnWrite_Click"></asp:Button> 
-            <%--<a href="BoardList.aspx" class="btn btn-default">리스트</a>--%>
-            <br />
-            <asp:ValidationSummary ID="valSummary" runat="server" 
-                ShowSummary="False" 
-                ShowMessageBox="True" 
-                DisplayMode="List"></asp:ValidationSummary>
-            <br />
-        </td>
-    </tr>
 </table>
+
+<div>
+    <div colspan="2" style="text-align:center;">
+        <asp:Button ID="btnWrite" runat="server" Text="저장" OnClientClick="ShowModal();return false;" 
+            CssClass="btn btn-primary" OnClick="btnWrite_Click"></asp:Button> 
+        <%--<a href="BoardList.aspx" class="btn btn-default">리스트</a>--%>
+        <br />
+        <asp:ValidationSummary ID="valSummary" runat="server" 
+            ShowSummary="False" 
+            ShowMessageBox="True" 
+            DisplayMode="List"></asp:ValidationSummary>
+        <br />
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="SaveModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"> <%--modal-dialog-centered 를 옆에 넣으면 화면 중앙에 나타난다.--%>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">확인</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                저장 하시겠습니까?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
+                <asp:Button ID="Button2" 
+                    runat="server" 
+                    OnClick="btnWrite_Click"
+                    class="btn btn-primary" 
+                    Text="예" />
+            </div>
+        </div>
+    </div>
+</div>

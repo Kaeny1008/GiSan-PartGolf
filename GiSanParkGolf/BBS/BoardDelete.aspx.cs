@@ -22,17 +22,27 @@ namespace GiSanParkGolf.BBS
 
             if (String.IsNullOrEmpty(_Id))
             {
-                Response.Redirect("BoardList.aspx");
+                Response.Redirect("BoardList.aspx?bbsId=" + Request.QueryString["bbsId"]);
+            }
+
+            if (Request.QueryString["ignorepass"].Equals("true"))
+            {
+                btnDelete_Click(null, null);
             }
         }
 
         protected void btnDelete_Click(object sender, EventArgs e)
         {
+            string password = txtPassword.Text;
+            if (Request.QueryString["ignorepass"].Equals("true")){
+                password = "Ignore";
+            }
+
             // 현재 글(Id)의 비밀번호가 맞으면 삭제
             if ((new NoteRepository()).DeleteNote(
-                Convert.ToInt32(_Id), txtPassword.Text) > 0)
+                Convert.ToInt32(_Id), password) > 0)
             {
-                Response.Redirect("BoardList.aspx");
+                Response.Redirect("BoardList.aspx?bbsId=" + Request.QueryString["bbsId"]);
             }
             else
             {

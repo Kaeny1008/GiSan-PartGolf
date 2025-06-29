@@ -157,13 +157,6 @@ namespace GiSanParkGolf.BBS.Controls
                     note.UserID = string.Empty;
                 }
 
-                //관리자가 하는거라면.
-                if (Request.QueryString["ignorepass"].Equals("true"))
-                {
-                    //DB 프로시져에서 해당 암호를 넣으면 암호 무시
-                    note.Password = "Ignore";
-                }
-
                 NoteRepository repository = new NoteRepository();
 
                 switch (FormType)
@@ -174,6 +167,12 @@ namespace GiSanParkGolf.BBS.Controls
                         //Response.Redirect("BoardList.aspx");
                         break;
                     case BoardWriteFormType.Modify:
+                        //관리자가 하는거라면.
+                        if (Request.QueryString["ignorepass"].Equals("true"))
+                        {
+                            //DB 프로시져에서 해당 암호를 넣으면 암호 무시
+                            note.Password = "Ignore";
+                        }
                         note.ModifyIp = ipaddr;
                         note.FileName = ViewState["FileName"].ToString();
                         note.FileSize = Convert.ToInt32(ViewState["FileSize"]);

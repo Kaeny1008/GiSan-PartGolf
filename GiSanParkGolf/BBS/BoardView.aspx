@@ -10,6 +10,26 @@
             font-size: 30px;
         }
     </style>
+
+    <script languade="javascript">
+        var Id, bbsId, Ignorepass;
+
+        function GoNoteDelete() {
+            var gp = "BoardDelete.aspx?Id=" + Id + "&bbsId=" + bbsId + "&ignorepass=" + Ignorepass;
+            console.log(gp);
+            location.href = gp;
+        
+            return false;
+        }
+
+        function SelectModalShoe(modalname, id, bbsid, ignorepass) {
+            Id = id;
+            bbsId = bbsid;
+            Ignorepass = ignorepass;
+            $(modalname).modal("show");
+        }
+    </script>
+
     <div style="text-align: center;">
         <asp:Label ID="LBMainTitle" runat="server" Class="MainLabel" Text="게시판" />
     </div>
@@ -130,11 +150,17 @@
                     {
         %>
                         <asp:HyperLink ID="lnkReply" runat="server" 
+                            CssClass="btn btn-outline-primary">답글</asp:HyperLink>
+                        <button type="button" class="btn btn-outline-danger" 
+                            onclick="SelectModalShoe('#ReplyModal','<%= Request["Id"]%>','<%= Request["bbsId"]%>','true')">삭제</button>
+                        <asp:HyperLink ID="lnkModify" runat="server" 
+                            CssClass="btn btn-outline-warning">수정</asp:HyperLink>
+                        <%--<asp:HyperLink ID="lnkReply" runat="server" 
                             CssClass="btn btn-default">답변</asp:HyperLink>
                         <asp:HyperLink ID="lnkDelete" runat="server" 
                             CssClass="btn btn-default">삭제</asp:HyperLink>
                         <asp:HyperLink ID="lnkModify" runat="server" 
-                            CssClass="btn btn-default">수정</asp:HyperLink>
+                            CssClass="btn btn-default">수정</asp:HyperLink>--%>
         <%
                     }
                 }
@@ -152,10 +178,10 @@
                     {
                         //내가 작성한 글이면
         %>
-                        <asp:HyperLink ID="lnkDelete2" runat="server" 
+                        <%--<asp:HyperLink ID="lnkDelete2" runat="server" 
                             CssClass="btn btn-default">삭제</asp:HyperLink>
                         <asp:HyperLink ID="lnkModify2" runat="server" 
-                            CssClass="btn btn-default">수정</asp:HyperLink>
+                            CssClass="btn btn-default">수정</asp:HyperLink>--%>
         <%
                     }
                 }
@@ -171,8 +197,32 @@
 
 
         <%--이건 그냥 있어야지.. 보드랑 권한이랑 상관없이--%>
-        <asp:HyperLink ID="lnkList" runat="server" 
-            CssClass="btn btn-default">리스트</asp:HyperLink>
+        <%--<asp:HyperLink ID="lnkList" runat="server" 
+            CssClass="btn btn-default">리스트</asp:HyperLink>--%>
+        <button type="button" class="btn btn-outline-dark" onclick="history.go(-1)">리스트</button>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="ReplyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">확인</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    삭제 하시겠습니까?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
+                    <asp:Button ID="Button2" 
+                        runat="server" 
+                        OnClientClick="return GoNoteDelete();" 
+                        class="btn btn-primary" 
+                        Text="예" />
+                </div>
+            </div>
+        </div>
     </div>
  
     <asp:Label ID="lblError" runat="server" 

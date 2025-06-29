@@ -150,15 +150,6 @@ namespace GiSanParkGolf.BBS
         protected global::System.Web.UI.WebControls.HyperLink lnkReply;
 
         /// <summary>
-        /// lnkDelete 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkDelete;
-
-        /// <summary>
         /// lnkModify 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -168,31 +159,13 @@ namespace GiSanParkGolf.BBS
         protected global::System.Web.UI.WebControls.HyperLink lnkModify;
 
         /// <summary>
-        /// lnkDelete2 컨트롤입니다.
+        /// Button2 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkDelete2;
-
-        /// <summary>
-        /// lnkModify2 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkModify2;
-
-        /// <summary>
-        /// lnkList 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkList;
+        protected global::System.Web.UI.WebControls.Button Button2;
 
         /// <summary>
         /// lblError 컨트롤입니다.

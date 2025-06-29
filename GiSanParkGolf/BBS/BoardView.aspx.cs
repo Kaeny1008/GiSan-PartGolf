@@ -31,7 +31,7 @@ namespace GiSanParkGolf.BBS
             //lnkReply3.NavigateUrl = string.Format("BoardReply.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
 
             // 삭제하는것 만들어야 된다.
-            lnkDelete.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
+            //lnkDelete.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}&ignorepass={2}", Request["Id"], bbsID, "true");
             //lnkDelete2.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
             //lnkDelete3.NavigateUrl = string.Format("BoardDelete.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
 
@@ -39,7 +39,7 @@ namespace GiSanParkGolf.BBS
             //lnkModify2.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
             //lnkModify3.NavigateUrl = string.Format("BoardModify.aspx?Id={0}&bbsId={1}", Request["Id"], bbsID);
 
-            lnkList.NavigateUrl = string.Format("BoardList.aspx?bbsId={0}", bbsID);
+            //lnkList.NavigateUrl = string.Format("BoardList.aspx?bbsId={0}", bbsID);
 
             _Id = Request.QueryString["Id"];
             if (_Id == null)
