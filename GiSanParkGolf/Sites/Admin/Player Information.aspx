@@ -136,6 +136,13 @@
 
             <div style="align-items: center"> 
                 <asp:CheckBox ID="CheckBox1" runat="server" Text ="가입 승인" /><br />
+
+                <%--슬라이더 값 가져 올수 있게 변경해보자.--%>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="slider" id="switchCheckDefault" runat="server">
+                    <label class="form-check-label" for="switchCheckDefault" runat="server">가입 승인</label>
+                </div>
+
             </div>
 
             <div class="input-group mb-3">

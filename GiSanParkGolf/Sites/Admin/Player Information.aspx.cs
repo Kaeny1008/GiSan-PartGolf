@@ -68,7 +68,6 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void UserModify(string userPassword)
         {
-            
             //String.Format("{0:yyyy-MM-dd}", DateTime.Parse(TextBox1.Text))
             string strSQL = "UPDATE SYS_Users SET";
             strSQL += " UserName = '" + txtName.Text + "'";

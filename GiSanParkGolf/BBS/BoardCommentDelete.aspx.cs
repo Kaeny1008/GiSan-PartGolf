@@ -59,7 +59,7 @@ namespace GiSanParkGolf.BBS
             if (repo.GetCountBy(BoardId, Id, commentPass) > 0)
             {
                 repo.DeleteNoteComment(BoardId, Id, commentPass);
-                Response.Redirect($"BoardView.aspx?Id={BoardId}");
+                Response.Redirect($"BoardView.aspx?Id={BoardId}&bbsId={bbsId}");
             }
             else
             {

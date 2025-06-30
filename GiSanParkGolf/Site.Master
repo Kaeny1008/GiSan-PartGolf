@@ -73,7 +73,7 @@
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="/">대회개최 설정</a></li>
+                                    <li><a class="dropdown-item" href="/Sites/Admin/GameSettingUp">대회개최 설정</a></li>
                                     <li><a class="dropdown-item" href="/">인원 코스 및 배치</a></li>
                                     <li><a class="dropdown-item" href="/">대회결과 입력</a></li>
                                 </ul>

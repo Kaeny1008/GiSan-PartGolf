@@ -72,18 +72,19 @@ namespace GiSanParkGolf.Class
                 Global.uvm.Password,
                 Global.uvm.UserName,
                 Global.uvm.UserWClass,
-                Global.uvm.UserClass);
+                Global.uvm.UserClass
+                , 2);
 
             return Global.uvm;
         }
 
-        protected void SetCookie(string userID, string userPassword, string userName, string userWClass, int userClass)
+        public void SetCookie(string userID, string userPassword, string userName, string userWClass, int userClass, int expireDayAdd)
         {
             string strUserData = userID + ":" + userPassword + ":" + userName + ":" + userWClass + ":" + userClass;
 
-            FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(1, userID, DateTime.Now, DateTime.Now.AddDays(30), false, strUserData, FormsAuthentication.FormsCookiePath);
+            FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(1, userID, DateTime.Now, DateTime.Now.AddDays(expireDayAdd), false, strUserData, FormsAuthentication.FormsCookiePath);
             string hash = FormsAuthentication.Encrypt(ticket); //Encrypt ticket
-
+            Debug.WriteLine("쿠기 유저데이터 : " + strUserData);
             HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, hash);
             if (ticket.IsPersistent)
                 cookie.Expires = ticket.Expiration;

@@ -50,6 +50,7 @@ namespace GiSanParkGolf
                 string userData = authTicket.UserData;
                 DateTime issueDate = authTicket.IssueDate; //cookie created date
                 DateTime expiredDate = authTicket.Expiration; //cookie expired date
+                bool expired = authTicket.Expired;
 
                 Debug.WriteLine("로그인 ID: " + userName);
                 Debug.WriteLine("Cookie Data: " + userData);
@@ -57,7 +58,7 @@ namespace GiSanParkGolf
                 Debug.WriteLine("파기날짜: " + expiredDate);
                 string[] abcd = userData.Split(':');
 
-                if (DateTime.Now > expiredDate)
+                if (expired)
                 {
                     Debug.WriteLine("파기일자가 도래하여 인증거부.");
                     return false;
@@ -70,6 +71,10 @@ namespace GiSanParkGolf
                     Global.uvm.UserName = abcd[2];
                     Global.uvm.UserWClass = abcd[3];
                     Global.uvm.UserClass = int.Parse(abcd[4]);
+
+                    //파기 시간을 2일 연장한다.
+                    DB_Management userRepo = new DB_Management();
+                    userRepo.SetCookie(abcd[0], abcd[1], abcd[2], abcd[3], int.Parse(abcd[4]), 2);
                 }
                 return true;
             }
