@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GiSanParkGolf.Class;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -13,12 +14,23 @@ namespace GiSanParkGolf
         protected void Page_Load(object sender, EventArgs e)
         {
             // [!] 로그아웃
+
+            DB_Management userRepo = new DB_Management();
+            userRepo.LogoutUser(Global.uvm.UserID);
+
             FormsAuthentication.SignOut();
             Global.uvm.UserID = null;
             Global.uvm.Password = null;
             Global.uvm.UserName = null;
             Global.uvm.UserWClass = null;
             Global.uvm.UserClass = 0;
+
+            //쿠키값 삭제
+            var cookie = new HttpCookie(FormsAuthentication.FormsCookieName)
+            {
+                Expires = DateTime.Now.AddDays(-1)
+            };
+            HttpContext.Current.Response.Cookies.Add(cookie);
 
             Response.Redirect("~/Default.aspx");
         }

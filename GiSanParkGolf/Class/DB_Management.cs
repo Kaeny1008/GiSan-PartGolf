@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Configuration;
+using System.Web.Security;
 using System.Web.UI.WebControls;
 using System.Xml.Linq;
 using T_Engine;
@@ -41,6 +42,19 @@ namespace GiSanParkGolf.Class
         //    con.Close();
         //}
 
+        protected void SetCookie(string userID, string userPassword, string userName, string userWClass, int userClass)
+        {
+            string strUserData = userID + ":" + userPassword + ":" + userName + ":" + userWClass + ":" + userClass;
+            FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(1, userID, DateTime.Now, DateTime.Now.AddDays(365), true, strUserData, FormsAuthentication.FormsCookiePath);
+            string hash = FormsAuthentication.Encrypt(ticket); //Encrypt ticket
+
+            HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, hash);
+            if (ticket.IsPersistent)
+                cookie.Expires = ticket.Expiration;
+
+            HttpContext.Current.Response.Cookies.Add(cookie); //Create cookie
+        }
+
         public UserViewModel GetUserByUserID(string userID)
         {
 
@@ -66,6 +80,12 @@ namespace GiSanParkGolf.Class
                 Global.uvm.UserClass = sqlDR.GetInt32(4);
             }
             con.Close();
+
+            SetCookie(Global.uvm.UserID,
+                Global.uvm.Password,
+                Global.uvm.UserName,
+                Global.uvm.UserWClass,
+                Global.uvm.UserClass);
 
             return Global.uvm;
         }
@@ -116,12 +136,11 @@ namespace GiSanParkGolf.Class
 
             con.Open();
 
-            string strSql = "SELECT UserWClass FROM SYS_Users WHERE UserID = @UserId AND UserPassword = @Password";
             SqlCommand cmd = new SqlCommand
             {
                 Connection = con,
-                CommandText = strSql,
-                CommandType = CommandType.Text
+                CommandText = "SYS_UserLogin",
+                CommandType = CommandType.StoredProcedure
             };
 
             cmd.Parameters.AddWithValue("@UserID", userID);
@@ -136,6 +155,10 @@ namespace GiSanParkGolf.Class
                 } else if (sqlDR.GetString(0).Equals("승인대기"))
                 {
                     result = "Ready";
+                }
+                else if (sqlDR.GetString(0).Equals("Logged in"))
+                {
+                    result = "Logged in";
                 } else
                 {
                     result = string.Empty;
@@ -147,12 +170,27 @@ namespace GiSanParkGolf.Class
             return result;
         }
 
+        public void LogoutUser(string userID)
+        {
+            con.Open();
+
+            SqlCommand cmd = new SqlCommand
+            {
+                Connection = con,
+                CommandText = "SYS_UserLogOut",
+                CommandType = CommandType.StoredProcedure
+            };
+
+            cmd.Parameters.AddWithValue("@UserID", userID);
+            cmd.ExecuteNonQuery();
+
+            con.Close();
+        }
+
         public string DB_Write(string strSQL)
         {
             try
             {
-                con = new SqlConnection();
-                con.ConnectionString = WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString;
                 con.Open();
 
                 SqlCommand cmd = new SqlCommand
