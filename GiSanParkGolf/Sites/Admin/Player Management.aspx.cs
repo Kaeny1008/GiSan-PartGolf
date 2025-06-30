@@ -16,14 +16,22 @@ namespace GiSanParkGolf.Sites.Admin
         private SqlConnection con;
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!Page.IsPostBack)
+            if (Page.User.Identity.IsAuthenticated)
             {
-                if (!Page.User.Identity.IsAuthenticated)
+                if (!Global.uvm.UserClass.Equals(1))
                 {
-                    Response.Redirect("~/Sites/Login/Login.aspx");
+                    Response.Redirect("~/Sites/Login/Admin Alert.aspx");
                     return;
                 }
+            } 
+            else
+            {
+                Response.Redirect("~/Sites/Login/Admin Alert.aspx");
+                return;
+            }
 
+            if (!Page.IsPostBack)
+            {
                 PlayerList(string.Empty, false);
             }
 

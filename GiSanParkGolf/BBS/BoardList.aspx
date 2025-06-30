@@ -117,9 +117,8 @@
                 //공지사항일때는 Administrator만 글쓰기 가능
                 if (Request.QueryString["bbsId"].Equals("notice"))
                 {
-                    if (!String.IsNullOrEmpty(global_asax.uvm.UserClass.ToString()))
+                    if (!Page.User.Identity.IsAuthenticated)
                     {
-                        
                         if (global_asax.uvm.UserClass.Equals(1))
                         {
                             System.Diagnostics.Debug.WriteLine("현재 유저등급 OK");

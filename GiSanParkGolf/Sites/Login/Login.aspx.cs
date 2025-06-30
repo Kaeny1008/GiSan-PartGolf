@@ -33,17 +33,19 @@ namespace GiSanParkGolf
             {
                 case "OK":
                     // 로그인 인증 되었으면 유저 정보를 불러온다.
+                    // 쿠기도 생성
                     Global.uvm = userRepo.GetUserByUserID(txtUserID.Text);
 
                     if (!String.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
                     {
                         // 인증 쿠키값 부여(돌아가는 곳이 있는 경우)
-                        FormsAuthentication.RedirectFromLoginPage(txtUserID.Text, false);
+                        //FormsAuthentication.RedirectFromLoginPage(txtUserID.Text, false);
+                        Response.Redirect(Request.QueryString["ReturnUrl"]);
                     }
                     else
                     {
                         // 인증 쿠키값 부여(돌아가는 곳이 없을 경우)
-                        FormsAuthentication.SetAuthCookie(txtUserID.Text, false);
+                        //FormsAuthentication.SetAuthCookie(txtUserID.Text, false);
                         Response.Redirect("~/Default.aspx");
                     }
                     break;

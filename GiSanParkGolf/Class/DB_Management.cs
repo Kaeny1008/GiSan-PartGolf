@@ -42,19 +42,6 @@ namespace GiSanParkGolf.Class
         //    con.Close();
         //}
 
-        protected void SetCookie(string userID, string userPassword, string userName, string userWClass, int userClass)
-        {
-            string strUserData = userID + ":" + userPassword + ":" + userName + ":" + userWClass + ":" + userClass;
-            FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(1, userID, DateTime.Now, DateTime.Now.AddDays(365), false, strUserData, FormsAuthentication.FormsCookiePath);
-            string hash = FormsAuthentication.Encrypt(ticket); //Encrypt ticket
-
-            HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, hash);
-            if (ticket.IsPersistent)
-                cookie.Expires = ticket.Expiration;
-
-            HttpContext.Current.Response.Cookies.Add(cookie); //Create cookie
-        }
-
         public UserViewModel GetUserByUserID(string userID)
         {
 
@@ -88,6 +75,20 @@ namespace GiSanParkGolf.Class
                 Global.uvm.UserClass);
 
             return Global.uvm;
+        }
+
+        protected void SetCookie(string userID, string userPassword, string userName, string userWClass, int userClass)
+        {
+            string strUserData = userID + ":" + userPassword + ":" + userName + ":" + userWClass + ":" + userClass;
+
+            FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(1, userID, DateTime.Now, DateTime.Now.AddDays(30), false, strUserData, FormsAuthentication.FormsCookiePath);
+            string hash = FormsAuthentication.Encrypt(ticket); //Encrypt ticket
+
+            HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, hash);
+            if (ticket.IsPersistent)
+                cookie.Expires = ticket.Expiration;
+
+            HttpContext.Current.Response.Cookies.Add(cookie); //Create cookie
         }
 
         public SelectUserViewModel GetSelectUserByUserID(string userID)

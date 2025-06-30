@@ -48,11 +48,13 @@
                     //관리자일때는 댓글삭제가 무조건 가능
                     //해당아이디의 글만 가능
                     //로그인 하지 않았다면 비밀번호 입력 후 가능
-                    if (!string.IsNullOrEmpty(global_asax.uvm.UserClass.ToString()))
+
+                    if (Page.User.Identity.IsAuthenticated)
                     {
-                        Console.WriteLine("유저등급 : " + global_asax.uvm.UserClass);
+                        System.Diagnostics.Debug.WriteLine("로그인 되어 있다.");
                         if (global_asax.uvm.UserClass.Equals(1))
                         {
+                            System.Diagnostics.Debug.WriteLine("관리자가 로그인이다.");
                 %>
                             <%--<a href='BoardCommentDelete.aspx?BoardId=<%= Request["Id"]%>&Id=<%# Eval("Id") %>&bbsId=<%= Request["bbsId"]%>&immediately=true' title="삭제">삭제</a>--%>
 
@@ -62,17 +64,19 @@
                         }
                         else
                         {
+                            System.Diagnostics.Debug.WriteLine("관리자 아닌사람이 로그인이다.");
                 %>
                             <%# Eval("UserId").ToString().Equals(global_asax.uvm.UserID) ? 
                                     "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"ShowModal('" + Request["Id"] + "','" + Eval("Id") + "','" + Request["bbsId"] + "','true')\">삭제</button>" 
                                     : 
-                                    ""
+                                    "" 
                             %>
                 <%
                         }
                     }
                     else
                     {
+                        System.Diagnostics.Debug.WriteLine("로그인 되어 있지 않다.");
                 %>
                         <button type="button" class="btn btn-outline-secondary btn-sm" 
                             onclick="ShowModal('<%= Request["Id"]%>','<%# Eval("Id")%>','<%= Request["bbsId"]%>','false')">삭제</button>
