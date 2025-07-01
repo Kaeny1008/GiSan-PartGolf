@@ -18,6 +18,7 @@ namespace GiSanParkGolf.Sites.Admin
         {
             if (Page.User.Identity.IsAuthenticated)
             {
+                Debug.WriteLine("선수정보 관리 : 로그인 되어 있다.");
                 if (!Global.uvm.UserClass.Equals(1))
                 {
                     Response.Redirect("~/Sites/Login/Admin Alert.aspx");

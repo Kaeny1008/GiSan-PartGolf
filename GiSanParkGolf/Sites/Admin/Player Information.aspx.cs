@@ -15,6 +15,20 @@ namespace GiSanParkGolf.Sites.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (Page.User.Identity.IsAuthenticated)
+            {
+                if (!Global.uvm.UserClass.Equals(1))
+                {
+                    Response.Redirect("~/Sites/Login/Admin Alert.aspx");
+                    return;
+                }
+            }
+            else
+            {
+                Response.Redirect("~/Sites/Login/Admin Alert.aspx");
+                return;
+            }
+
             if (!Page.IsPostBack)
             {
                 if (!String.IsNullOrEmpty(Request.QueryString["UserId"]))
@@ -38,11 +52,11 @@ namespace GiSanParkGolf.Sites.Admin
             txtMemo.Text = Global.suvm.UserNote;
             if (Global.suvm.UserWClass.Equals("승인"))
             {
-                CheckBox1.Checked = true;
+                switchCheckDefault.Checked = true;
 
             } else
             {
-                CheckBox1.Checked = false;
+                switchCheckDefault.Checked = false;
             }
             DropDownList1.Text = Global.suvm.UserClass.ToString();
             //txtID.Text = Global.suvm.UserWClass;
@@ -52,7 +66,8 @@ namespace GiSanParkGolf.Sites.Admin
         {
             if (Page.IsValid)
             {
-                Debug.WriteLine(txtName.Text);
+                //Debug.WriteLine(switchCheckDefault.Checked);
+                //Debug.WriteLine(txtName.Text);
                 //패스워드가 입력되었다면 암호화 하기.
                 string newPassword = txtPassword.Text;
 
@@ -82,7 +97,7 @@ namespace GiSanParkGolf.Sites.Admin
             {
                 strSQL += ", UserPassword = '" + txtPassword.Text + "'";
             }
-            if (CheckBox1.Checked)
+            if (switchCheckDefault.Checked)
             {
                 strSQL += ", UserWClass = '승인'";
             } else

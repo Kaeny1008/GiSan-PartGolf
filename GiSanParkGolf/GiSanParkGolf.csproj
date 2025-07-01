@@ -347,6 +347,7 @@
     <Compile Include="BBS\ThumbNail.aspx.designer.cs">
       <DependentUpon>ThumbNail.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Models\GameListModel.cs" />
     <Compile Include="Sites\Admin\GameSettingUp.aspx.cs">
       <DependentUpon>GameSettingUp.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

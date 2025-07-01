@@ -26,15 +26,14 @@ namespace GiSanParkGolf
 
         protected void BtnLogin_Click(object sender, EventArgs e)
         {
-            DB_Management userRepo = new DB_Management();
-            string result = userRepo.IsCorrectUser(txtUserID.Text, txtPassword.Text);
+            string result = Global.dbManager.IsCorrectUser(txtUserID.Text, txtPassword.Text);
 
             switch (result)
             {
                 case "OK":
                     // 로그인 인증 되었으면 유저 정보를 불러온다.
                     // 쿠기도 생성
-                    Global.uvm = userRepo.GetUserByUserID(txtUserID.Text);
+                    Global.uvm = Global.dbManager.GetUserByUserID(txtUserID.Text);
 
                     if (!String.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
                     {

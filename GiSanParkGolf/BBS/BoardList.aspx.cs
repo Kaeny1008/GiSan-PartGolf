@@ -35,11 +35,16 @@ namespace GiSanParkGolf.BBS
             {
                 //어떤 BBS로 온지 확인후 변수 저장
                 bbsID = Request.QueryString["bbsId"];
+                if (bbsID.Equals("notice"))
+                {
+                    LBMainTitle.Text = "공지사항";
+                }
             }
-                // 검색 모드 결정
-                SearchMode =
-                (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
-                    !string.IsNullOrEmpty(Request.QueryString["SearchQuery"]));
+
+            // 검색 모드 결정
+            SearchMode =
+            (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
+                !string.IsNullOrEmpty(Request.QueryString["SearchQuery"]));
             if (SearchMode)
             {
                 SearchField = Request.QueryString["SearchField"];
@@ -47,6 +52,7 @@ namespace GiSanParkGolf.BBS
             }
 
             // 쿼리스트링에 따른 페이지 보여주기
+            Debug.WriteLine("요청 Page No. : " + Request["Page"]);
             if (Request["Page"] != null)
             {
                 // Page는 보여지는 쪽은 1, 2, 3, ... 코드단에서는 0, 1, 2, ...

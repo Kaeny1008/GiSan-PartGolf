@@ -1,4 +1,5 @@
-﻿using GiSanParkGolf.Models;
+﻿using GiSanParkGolf.Class;
+using GiSanParkGolf.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace GiSanParkGolf
     {
         public static UserViewModel uvm = new UserViewModel();
         public static SelectUserViewModel suvm = new SelectUserViewModel();
+        public static DB_Management dbManager = new DB_Management();
+        public static GameListModel gameList = new GameListModel();
 
         void Application_Start(object sender, EventArgs e)
         {

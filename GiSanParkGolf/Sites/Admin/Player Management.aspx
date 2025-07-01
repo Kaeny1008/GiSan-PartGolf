@@ -39,13 +39,10 @@
 
             <asp:Label ID="LabelResult" runat="server" Text="선택정보" Visible="false"></asp:Label>
             <h12>(선수이름을 클릭하여 수정)</h12><br />
-            <asp:GridView ID="GridView1" runat="server" BorderWidth="1" Width="100%" BorderStyle="Solid"
-                AutoGenerateColumns="false" ShowHeader="true" CellPadding="1" 
-                CellSpacing="0" DataKeyNames="UserId" AllowPaging="True" 
-                AllowSorting="True"  PageSize="10"   PagerStyle-HorizontalAlign="Center" 
-                onpageindexchanging="grdList_PageIndexChanging">
-                <HeaderStyle Width="80px" Height="75px" HorizontalAlign="center" BackColor="LightSlateGray" ForeColor="white" />
-                <RowStyle Height="34px" HorizontalAlign="Center"/>
+            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="GameCode"
+                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
+                <HeaderStyle HorizontalAlign="center" />
+                <RowStyle HorizontalAlign="Center"/>
                 <AlternatingRowStyle  />                            
                     <Columns>       
                         <asp:BoundField DataField="UserWClass" HeaderText="상태">

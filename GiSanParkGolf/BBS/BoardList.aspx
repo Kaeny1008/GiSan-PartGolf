@@ -32,6 +32,9 @@
 	        color:blue; 
             text-decoration:none;
         }
+        .table_backcolor{
+            background-color:red;
+        }
     </style>
 
     <script language="javascript">
@@ -51,18 +54,24 @@
                 <asp:GridView ID="ctlBoardList"
                     runat="server" AutoGenerateColumns="False" DataKeyNames="Id"
                     CssClass="table table-bordered table-hover table-condensed 
-                        table-striped table-responsive">
+                        table-striped table-responsive ">
+                    <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
+                    <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
                     <Columns>
-                        <asp:TemplateField HeaderText="번호"
-                            HeaderStyle-Width="50px"
-                            ItemStyle-HorizontalAlign="Center">
+                        <asp:TemplateField>
+                            <HeaderTemplate>
+                                <asp:Label ID="LB_No" runat="server" Text="No."></asp:Label>
+                            </HeaderTemplate>
                             <ItemTemplate>
                                 <%# RecordCount - (Container.DataItemIndex) - (PageIndex * 10) %>
                             </ItemTemplate>
+                            <HeaderStyle Width="50px" />
+                            <ItemStyle Width="50px" />
                         </asp:TemplateField>
-                        <asp:TemplateField HeaderText="제 목"
-                            ItemStyle-HorizontalAlign="Left"
-                            HeaderStyle-Width="350px">
+                        <asp:TemplateField>
+                            <HeaderTemplate>
+                                <asp:Label ID="LB_Name" runat="server" Text="제목"></asp:Label>
+                            </HeaderTemplate>
                             <ItemTemplate>
                                 <%--<%# Dul.BoardLibrary.FuncStep(Eval("Step")) %>--%>
                                 <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
@@ -75,33 +84,54 @@
                                 </asp:HyperLink>
                                 <%--<%# Dul.BoardLibrary.FuncNew(Eval("PostDate"))%>--%>
                             </ItemTemplate>
+                            <HeaderStyle Width="350px" />
+                            <ItemStyle Width="350px" HorizontalAlign="Left" />
                         </asp:TemplateField>
                         <%--첨부파일 다운로드는 게시판 최상위에서 표시 안해도 될듯하여 false함--%>
-                        <asp:TemplateField HeaderText="첨부"
-                            HeaderStyle-Width="70px"
-                            ItemStyle-HorizontalAlign="Center" 
-                            Visible="false">
+                        <asp:TemplateField Visible="false">
+                            <HeaderTemplate>
+                                <asp:Label ID="LB_Add" runat="server" Text="첨부"></asp:Label>
+                            </HeaderTemplate>
                             <ItemTemplate>
                                 <%# Dul.BoardLibrary.FuncFileDownSingle(
                                     Convert.ToInt32(Eval("Id")), 
                                     Eval("FileName").ToString(), 
                                     Eval("FileSize").ToString()) %>
                             </ItemTemplate>
+                            <HeaderStyle Width="70px" />
+                            <ItemStyle Width="70px" />
                         </asp:TemplateField>
-                        <asp:BoundField DataField="Name" HeaderText="작성자"
-                            HeaderStyle-Width="60px"
-                            ItemStyle-HorizontalAlign="Center"></asp:BoundField>
-                        <asp:TemplateField HeaderText="작성일"
-                            ItemStyle-Width="90px"
-                            ItemStyle-HorizontalAlign="Center">
+                        <asp:TemplateField>
+                            <HeaderTemplate>
+                                <asp:Label ID="LB_Writer" runat="server" Text="작성자"></asp:Label>
+                            </HeaderTemplate>
+                            <ItemTemplate>
+                                <%#Eval("Name")%>
+                            </ItemTemplate>
+                            <HeaderStyle Width="60px" />
+                            <ItemStyle Width="60px" />
+                        </asp:TemplateField>
+                        <asp:TemplateField>
+                            <HeaderTemplate>
+                                <asp:Label ID="LB_WriteDate" runat="server" Text="작성일"></asp:Label>
+                            </HeaderTemplate>
                             <ItemTemplate>
                                 <%# Dul.BoardLibrary.FuncShowTime(
                                     Eval("PostDate")) %>
                             </ItemTemplate>
+                            <HeaderStyle Width="90px" />
+                            <ItemStyle Width="90px" />
                         </asp:TemplateField>
-                        <asp:BoundField DataField="ReadCount" HeaderText="조회수"
-                            ItemStyle-HorizontalAlign="Right"
-                            HeaderStyle-Width="60px"></asp:BoundField>
+                        <asp:TemplateField>
+                            <HeaderTemplate>
+                                <asp:Label ID="LB_ReadCount" runat="server" Text="조회수"></asp:Label>
+                            </HeaderTemplate>
+                            <ItemTemplate>
+                                <%#Eval("ReadCount","{0:0}")%>
+                            </ItemTemplate>
+                            <HeaderStyle Width="60px" />
+                            <ItemStyle Width="60px" />
+                        </asp:TemplateField>
                     </Columns>
                 </asp:GridView>
             </td>
@@ -117,8 +147,9 @@
                 //공지사항일때는 Administrator만 글쓰기 가능
                 if (Request.QueryString["bbsId"].Equals("notice"))
                 {
-                    if (!Page.User.Identity.IsAuthenticated)
+                    if (Page.User.Identity.IsAuthenticated)
                     {
+                        System.Diagnostics.Debug.WriteLine("게시판 : 로그인 되어 있다.");
                         if (global_asax.uvm.UserClass.Equals(1))
                         {
                             System.Diagnostics.Debug.WriteLine("현재 유저등급 OK");
@@ -128,6 +159,10 @@
                             </td>
             <%
                         }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("게시판 : 로그인 되어 있지 않다.");
                     }
                 }
                 else
@@ -141,6 +176,8 @@
             %>
         </tr>
     </table>
+
+    
  
     <uc1:BoardSearchFormSingleControl runat="server"
         ID="BoardSearchFormSingleControl" />

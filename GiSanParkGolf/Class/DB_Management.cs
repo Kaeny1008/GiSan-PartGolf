@@ -1,15 +1,21 @@
-﻿using GiSanParkGolf.Models;
+﻿using BBS.Models;
+using Dapper;
+using GiSanParkGolf.Models;
+using GiSanParkGolf.Sites.UserManagement;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Security;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Xml.Linq;
 using T_Engine;
@@ -27,20 +33,30 @@ namespace GiSanParkGolf.Class
             con.ConnectionString = WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString;
         }
 
-        //public void AddUser(string userID, string password)
-        //{
-        //    SqlCommand cmd = new SqlCommand();
-        //    cmd.Connection = con;
-        //    cmd.CommandText = "WriteUsers";
-        //    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+        /// <summary>
+        /// 대회 검색 결과 리스트
+        /// </summary>
+        /// /// <param name="page">페이지 번호</param>
+        public DataTable GetGameList(int page)
+        {
+            SqlCommand sqlCmd = new SqlCommand
+            {
+                Connection = con,
+                CommandText = "Game_LoadList",
+                CommandType = CommandType.StoredProcedure
+            };
+            sqlCmd.Parameters.AddWithValue("@Page", page);
 
-        //    cmd.Parameters.AddWithValue("@UserID", userID);
-        //    cmd.Parameters.AddWithValue("@Password", password);
+            con.Open();
 
-        //    con.Open();
-        //    cmd.ExecuteNonQuery();
-        //    con.Close();
-        //}
+            SqlDataAdapter adapter = new SqlDataAdapter(sqlCmd);
+            DataSet dataSet = new DataSet();
+            adapter.Fill(dataSet);
+
+            con.Close();
+
+            return dataSet.Tables["Table"];
+        }
 
         public UserViewModel GetUserByUserID(string userID)
         {
@@ -94,7 +110,6 @@ namespace GiSanParkGolf.Class
 
         public SelectUserViewModel GetSelectUserByUserID(string userID)
         {
-
             string strSQL = "SELECT UserId, UserName, UserPassword, UserNumber";
             strSQL += ", UserGender, UserAddress, UserAddress2";
             strSQL += ", UserRegistrationDate, UserNote, UserWClass, UserClass";
