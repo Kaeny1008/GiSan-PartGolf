@@ -26,9 +26,6 @@
 	        color:blue; 
             text-decoration:none;
         }
-        .table tbody tr:hover td, .table tbody tr:hover th {
-            background-color:blue;
-        }
     </style>
 
     <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>

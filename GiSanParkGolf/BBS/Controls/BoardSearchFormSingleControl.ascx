@@ -2,13 +2,13 @@
 
 <div style="text-align:center;">
     <asp:DropDownList ID="SearchField" runat="server" 
-        CssClass="form-control" Width="80px" Style="display: inline-block;">
-        <asp:ListItem Value="Name">이름</asp:ListItem>
+        CssClass="form-select" Width="80px" Style="display: inline-block;">
         <asp:ListItem Value="Title">제목</asp:ListItem>
         <asp:ListItem Value="Content">내용</asp:ListItem>
-    </asp:DropDownList>&nbsp;
+        <asp:ListItem Value="Name">이름</asp:ListItem>
+    </asp:DropDownList>
     <asp:TextBox ID="SearchQuery" runat="server" Width="200px" 
-        CssClass="form-control" Style="display: inline-block;" ValidationGroup="Group1"></asp:TextBox>&nbsp;
+        CssClass="form-control" Style="display: inline-block;" ValidationGroup="Group1"></asp:TextBox>
     <asp:RequiredFieldValidator ID="valSearchQuery" runat="server" 
         ControlToValidate="SearchQuery" Display="None" 
         ErrorMessage="검색할 단어를 입력하세요." ValidationGroup="Group1"></asp:RequiredFieldValidator>
@@ -22,6 +22,6 @@
 <% if (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) 
         && !String.IsNullOrEmpty(Request.QueryString["SearchQuery"])) { %>
 <div style="text-align:center;">
-    <a href="/BBS/BoardList.aspx" class="btn btn-success">검색 완료</a>
+    <a href="<%#"/BBS/BoardList.aspx?bbsId=" + Request.QueryString["bbsId"]%>" class="btn btn-success">검색 완료</a>
 </div>
 <% } %>

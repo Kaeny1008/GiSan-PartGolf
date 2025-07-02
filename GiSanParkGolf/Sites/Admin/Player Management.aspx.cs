@@ -5,6 +5,7 @@ using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
+using System.EnterpriseServices;
 using System.Web.Configuration;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -13,7 +14,9 @@ namespace GiSanParkGolf.Sites.Admin
 {
     public partial class Player_Management : Page
     {
-        private SqlConnection con;
+        public int pageIndex = 0; // 현재 보여줄 페이지 번호
+        public int recordCount = 0; // 총 레코드 개수
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Page.User.Identity.IsAuthenticated)
@@ -31,43 +34,64 @@ namespace GiSanParkGolf.Sites.Admin
                 return;
             }
 
+            TB_Search.Attributes["onkeypress"] =
+               "if (event.keyCode==13){" +
+               ClientScript.GetPostBackEventReference(BTN_Search, "") + "; return false;}";
+
+            // 쿼리스트링에 따른 페이지 보여주기
+            Debug.WriteLine("요청 Page No. : " + Request["Page"]);
+            if (Request["Page"] != null)
+            {
+                // Page는 보여지는 쪽은 1, 2, 3, ... 코드단에서는 0, 1, 2, ...
+                pageIndex = Convert.ToInt32(Request["Page"]) - 1;
+            }
+            else
+            {
+                pageIndex = 0; // 1페이지
+            }
+
+            // 쿠키를 사용한 리스트 페이지 번호 유지 적용: 
+            // 100번째 페이지의 글 보고, 다시 리스트 왔을 때 100번째 페이지 표시
+            if (Request.Cookies["BBS"] != null)
+            {
+                if (!String.IsNullOrEmpty(
+                    Request.Cookies["BBS"]["PageNum"]))
+                {
+                    pageIndex = Convert.ToInt32(
+                        Request.Cookies["BBS"]["PageNum"]);
+                }
+                else
+                {
+                    pageIndex = 0;
+                }
+            }
+
+            // 레코드 카운트 출력
+            //if (SearchMode == false)
+            //{
+            //    // Notes 테이블의 전체 레코드
+            //    RecordCount =
+            //        _repository.GetCountAll(bbsID);
+            //}
+            //else
+            //{
+            //    // Notes 테이블 중 SearchField+SearchQuery에 해당하는 레코드 수
+            //    RecordCount =
+            //        _repository.GetCountBySearch(SearchField, SearchQuery, bbsID);
+            //}
+            //lblTotalRecord.Text = RecordCount.ToString();
+            lblTotalRecord.Text = "0";
+
             if (!Page.IsPostBack)
             {
-                PlayerList(string.Empty, false);
+                PlayerList(string.Empty, 0);
             }
-
-            //알림창 띄우는거임
-            //string strJs = @"<script language='JavaScript'>window.alert('안녕');</script>";
-            //Response.Write(strJs);
         }
 
-        private void PlayerList(string userName, Boolean readyUser)
+        private void PlayerList(string userName, int readyUser)
         {
-            string strSQL = "SELECT UserWClass, UserId, UserName, UserNumber, UserNote FROM SYS_Users";
-            strSQL += " where UserName like '%' + '" + userName + "' + '%'";
-            if (readyUser)
-            {
-                strSQL += " and UserWClass = '승인대기'";
-            }
-            strSQL += ";";
-            SqlCommand sqlCmd = new SqlCommand();
-            con = new SqlConnection();
-            con.ConnectionString = WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString;
-
-            sqlCmd.Connection = con;
-            sqlCmd.CommandText = strSQL;
-            sqlCmd.CommandType = System.Data.CommandType.Text;
-
-            con.Open();
-            DataSet ds = new DataSet();
-            SqlDataAdapter da = new SqlDataAdapter(sqlCmd);
-
-            da.Fill(ds);
-            GridView1.DataSourceID = "";         //그리드 뷰 데이터 초기화
-            GridView1.DataSource = ds;
-            GridView1.DataKeyNames = new string[] { "UserId" };
+            GridView1.DataSource = Global.dbManager.GetUserList(userName, readyUser, pageIndex);
             GridView1.DataBind();
-            con.Close();
         }
 
         protected void grdList_PageIndexChanging(object sender, GridViewPageEventArgs e)
@@ -105,10 +129,10 @@ namespace GiSanParkGolf.Sites.Admin
         {
             if (CheckBox1.Checked)
             {
-                PlayerList(TB_Search.Text, true);
+                PlayerList(TB_Search.Text, 1);
             } else
             {
-                PlayerList(TB_Search.Text, false);
+                PlayerList(TB_Search.Text, 0);
             }
                 
         }
@@ -117,11 +141,11 @@ namespace GiSanParkGolf.Sites.Admin
         {
             if (CheckBox1.Checked)
             {
-                PlayerList(TB_Search.Text, true);
+                PlayerList(TB_Search.Text, 1);
             }
             else
             {
-                PlayerList(TB_Search.Text, false);
+                PlayerList(TB_Search.Text, 0);
             }
         }
     }

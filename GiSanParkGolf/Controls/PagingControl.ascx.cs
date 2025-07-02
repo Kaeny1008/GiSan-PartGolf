@@ -7,9 +7,9 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace GiSanParkGolf.BBS.Controls
+namespace GiSanParkGolf.Controls
 {
-    public partial class AdvancedPagingSingleWithBootstrap : System.Web.UI.UserControl
+    public partial class PagingControl : System.Web.UI.UserControl
     {
         // 공통 속성: 검색 모드: 검색 모드이면 true, 그렇지 않으면 false.
         public bool SearchMode { get; set; } = false; // 일반 모드, 검색 모드
@@ -185,7 +185,7 @@ namespace GiSanParkGolf.BBS.Controls
             // <!--이전 10개, 다음 10개 페이징 처리 종료-->
             strPage += "</ul>";
 
-            ctlAdvancedPaingWithBootstrap.Text = strPage;
+            ctlPagingControl.Text = strPage;
         }
     }
 }

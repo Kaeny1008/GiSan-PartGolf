@@ -26,7 +26,7 @@ namespace GiSanParkGolf
 
         protected void BtnLogin_Click(object sender, EventArgs e)
         {
-            string result = Global.dbManager.IsCorrectUser(txtUserID.Text, txtPassword.Text);
+            string result = Global.dbManager.IsCorrectUser(txtUserID.Text, txtPassword.Text, 0);
 
             switch (result)
             {

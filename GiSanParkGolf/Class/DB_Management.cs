@@ -36,20 +36,48 @@ namespace GiSanParkGolf.Class
         /// <summary>
         /// 대회 검색 결과 리스트
         /// </summary>
-        /// /// <param name="page">페이지 번호</param>
+        /// <param name="page">페이지 번호</param>
         public DataTable GetGameList(int page)
         {
-            SqlCommand sqlCmd = new SqlCommand
+            SqlCommand sqlCMD = new SqlCommand
             {
                 Connection = con,
                 CommandText = "Game_LoadList",
                 CommandType = CommandType.StoredProcedure
             };
-            sqlCmd.Parameters.AddWithValue("@Page", page);
+            sqlCMD.Parameters.AddWithValue("@Page", page);
 
             con.Open();
 
-            SqlDataAdapter adapter = new SqlDataAdapter(sqlCmd);
+            SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
+            DataSet dataSet = new DataSet();
+            adapter.Fill(dataSet);
+
+            con.Close();
+
+            return dataSet.Tables["Table"];
+        }
+
+        /// <summary>
+        /// 유저 검색 결과 리스트
+        /// </summary>
+        /// <param name="UserName">사용자명 검색</param>
+        /// <param name="onlyReady">승인대기 중인 사용자만</param>
+        public DataTable GetUserList(string userName, int onlyReady, int pageIndex)
+        {
+            SqlCommand sqlCMD = new SqlCommand
+            {
+                Connection = con,
+                CommandText = "SYS_UserList",
+                CommandType = CommandType.StoredProcedure
+            };
+            sqlCMD.Parameters.AddWithValue("@UserName", userName);
+            sqlCMD.Parameters.AddWithValue("@OnlyReady", onlyReady);
+            sqlCMD.Parameters.AddWithValue("@Page", pageIndex);
+
+            con.Open();
+
+            SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
             DataSet dataSet = new DataSet();
             adapter.Fill(dataSet);
 
@@ -66,14 +94,14 @@ namespace GiSanParkGolf.Class
             strSQL += " WHERE UserId = @UserID";
             strSQL += ";";
 
-            SqlCommand sqlCmd = new SqlCommand(strSQL, con);
-            sqlCmd.CommandType = CommandType.Text;
+            SqlCommand sqlCMD = new SqlCommand(strSQL, con);
+            sqlCMD.CommandType = CommandType.Text;
             
-            sqlCmd.Parameters.AddWithValue("@UserID", userID);
+            sqlCMD.Parameters.AddWithValue("@UserID", userID);
 
             con.Open();
 
-            SqlDataReader sqlDR = sqlCmd.ExecuteReader();
+            SqlDataReader sqlDR = sqlCMD.ExecuteReader();
             while (sqlDR.Read())
             {
                 Global.uvm.UserID = sqlDR.GetString(0);
@@ -100,12 +128,13 @@ namespace GiSanParkGolf.Class
 
             FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(1, userID, DateTime.Now, DateTime.Now.AddDays(expireDayAdd), false, strUserData, FormsAuthentication.FormsCookiePath);
             string hash = FormsAuthentication.Encrypt(ticket); //Encrypt ticket
-            Debug.WriteLine("쿠기 유저데이터 : " + strUserData);
+            
             HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, hash);
             if (ticket.IsPersistent)
                 cookie.Expires = ticket.Expiration;
 
             HttpContext.Current.Response.Cookies.Add(cookie); //Create cookie
+            Debug.WriteLine("쿠기 생성완료.");
         }
 
         public SelectUserViewModel GetSelectUserByUserID(string userID)
@@ -117,14 +146,14 @@ namespace GiSanParkGolf.Class
             strSQL += " WHERE UserId = @UserID";
             strSQL += ";";
 
-            SqlCommand sqlCmd = new SqlCommand(strSQL, con);
-            sqlCmd.CommandType = CommandType.Text;
+            SqlCommand sqlCMD = new SqlCommand(strSQL, con);
+            sqlCMD.CommandType = CommandType.Text;
 
-            sqlCmd.Parameters.AddWithValue("@UserID", userID);
+            sqlCMD.Parameters.AddWithValue("@UserID", userID);
 
             con.Open();
 
-            SqlDataReader sqlDR = sqlCmd.ExecuteReader();
+            SqlDataReader sqlDR = sqlCMD.ExecuteReader();
             while (sqlDR.Read())
             {
                 Global.suvm.UserID = sqlDR.GetString(0);
@@ -144,7 +173,7 @@ namespace GiSanParkGolf.Class
             return Global.suvm;
         }
 
-        public string IsCorrectUser(string userID, string password)
+        public string IsCorrectUser(string userID, string password, int onlyInsert)
         {
             string result = string.Empty;
 
@@ -162,6 +191,7 @@ namespace GiSanParkGolf.Class
 
             cmd.Parameters.AddWithValue("@UserID", userID);
             cmd.Parameters.AddWithValue("@Password", cryptPassword);
+            cmd.Parameters.AddWithValue("@OnlyInsert", onlyInsert);
 
             SqlDataReader sqlDR = cmd.ExecuteReader();
             if (sqlDR.Read())
@@ -183,7 +213,7 @@ namespace GiSanParkGolf.Class
             }
             sqlDR.Close();
             con.Close();
-
+            Debug.WriteLine("로그인 기록을 남긴다. 로그인 결과 : " + result);
             return result;
         }
 
@@ -234,11 +264,11 @@ namespace GiSanParkGolf.Class
 
             con.Open();
 
-            string strSql = "SELECT * FROM SYS_Users WHERE UserID = @UserId";
+            string strSQL = "SELECT * FROM SYS_Users WHERE UserID = @UserId";
             SqlCommand cmd = new SqlCommand
             {
                 Connection = con,
-                CommandText = strSql,
+                CommandText = strSQL,
                 CommandType = CommandType.Text
             };
 

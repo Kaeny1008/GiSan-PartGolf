@@ -128,6 +128,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Controls\PagingControl.ascx" />
     <Content Include="Database\Database.accdb" />
     <Content Include="BBS\BoardCommentDelete.aspx" />
     <Content Include="BBS\BoardDelete.aspx" />
@@ -346,6 +347,13 @@
     </Compile>
     <Compile Include="BBS\ThumbNail.aspx.designer.cs">
       <DependentUpon>ThumbNail.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\PagingControl.ascx.cs">
+      <DependentUpon>PagingControl.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Controls\PagingControl.ascx.designer.cs">
+      <DependentUpon>PagingControl.ascx</DependentUpon>
     </Compile>
     <Compile Include="Models\GameListModel.cs" />
     <Compile Include="Sites\Admin\GameSettingUp.aspx.cs">

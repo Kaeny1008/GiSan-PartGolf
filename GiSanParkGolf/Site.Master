@@ -20,7 +20,7 @@
     </head>
 
     <body>
-        <form runat="server">
+        <form id="frm" runat="server" defaultbutton="btnNull">
             <asp:ScriptManager runat="server">
                 <Scripts>
                     <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
@@ -54,6 +54,13 @@
                     return false;
                 }
             </script>
+            <style>
+                .hidden{
+                    display: none;
+                }
+            </style>
+
+            <asp:Button ID="btnNull" runat="server" ClientIDMode="Static" OnClientClick="javascript:return false;" CssClass="hidden"/>
 
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div class="container">
