@@ -81,21 +81,30 @@ namespace Dul
         /// </summary>
         public static string FuncNew(object strDate, string imgUrl = "/images/MemoEngine/")
         {
-            if (strDate != null)
-            {
-                if (!String.IsNullOrEmpty(strDate.ToString()))
-                {
-                    DateTime originDate = Convert.ToDateTime(strDate);
+            //if (strDate != null)
+            //{
+            //    if (!String.IsNullOrEmpty(strDate.ToString()))
+            //    {
+            //        DateTime originDate = Convert.ToDateTime(strDate);
 
-                    TimeSpan objTs = DateTime.Now - originDate;
-                    string newImage = "";
-                    if (objTs.TotalMinutes < 1440)
-                    {
-                        newImage = "<img src=\"" + imgUrl + "new.gif\" alt=\"new\">";
-                    }
-                    return newImage;
-                }
+            //        TimeSpan objTs = DateTime.Now - originDate;
+            //        string newImage = "";
+            //        if (objTs.TotalMinutes < 1440)
+            //        {
+            //            newImage = "<img src=\"" + imgUrl + "new.gif\" alt=\"new\">";
+            //        }
+            //        return newImage;
+            //    }
+            //}
+            //return "";
+
+            string strPostDate = Convert.ToDateTime(strDate).ToString("yyyy-MM-dd");
+            string nowDate = DateTime.Now.ToString("yyyy-MM-dd");
+            if (nowDate == strPostDate)
+            {
+                return "<span class=\"badge text-bg-secondary\">New</span>";
             }
+
             return "";
         }
         public static Boolean FuncNew_Boolean(object strDate)

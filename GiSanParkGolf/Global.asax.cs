@@ -1,14 +1,10 @@
 ﻿using GiSanParkGolf.Class;
 using GiSanParkGolf.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Web;
 using System.Web.Optimization;
 using System.Web.Routing;
-using System.Web.Security;
-using System.Web.SessionState;
-using System.Web.UI;
 
 namespace GiSanParkGolf
 {
@@ -18,6 +14,7 @@ namespace GiSanParkGolf
         public static SelectUserViewModel suvm = new SelectUserViewModel();
         public static DB_Management dbManager = new DB_Management();
         public static GameListModel gameList = new GameListModel();
+        public static Search_Property searchProperty = new Search_Property();
 
         void Application_Start(object sender, EventArgs e)
         {
@@ -35,6 +32,12 @@ namespace GiSanParkGolf
 
             //ValidationSettings.UnobtrusiveValidationMode = UnobtrusiveValidationMode.WebForms;
             //위에 라인을 주석처리하면 유효성 검사 결과가 다르게 나타난다.
+        }
+
+        void Application_End(object sender, EventArgs e)
+        {
+            Debug.WriteLine("로그아웃한다.");
+            Response.Redirect("~/Sites/Login/Logout");
         }
     }
 }

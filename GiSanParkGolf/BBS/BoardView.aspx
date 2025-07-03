@@ -22,7 +22,7 @@
             return false;
         }
 
-        function SelectModalShoe(modalname, id, bbsid, ignorepass) {
+        function SelectModalShow(modalname, id, bbsid, ignorepass) {
             Id = id;
             bbsId = bbsid;
             Ignorepass = ignorepass;
@@ -152,7 +152,7 @@
                         <asp:HyperLink ID="lnkReply" runat="server" 
                             CssClass="btn btn-outline-primary">답글</asp:HyperLink>
                         <button type="button" class="btn btn-outline-danger" 
-                            onclick="SelectModalShoe('#ReplyModal','<%= Request["Id"]%>','<%= Request["bbsId"]%>','true')">삭제</button>
+                            onclick="SelectModalShow('#ReplyModal','<%= Request["Id"]%>','<%= Request["bbsId"]%>','true')">삭제</button>
                         <asp:HyperLink ID="lnkModify" runat="server" 
                             CssClass="btn btn-outline-warning">수정</asp:HyperLink>
                         <%--<asp:HyperLink ID="lnkReply" runat="server" 

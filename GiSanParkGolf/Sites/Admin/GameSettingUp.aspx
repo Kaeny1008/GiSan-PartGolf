@@ -1,5 +1,8 @@
 ﻿<%@ Page Title="대회개최 설정" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="GameSettingUp.aspx.cs" Inherits="GiSanParkGolf.Sites.Admin.GameSettingUp" %>
 
+<%@ Register Src="~/Controls/PagingControl.ascx" TagPrefix="uc1" TagName="PagingControl" %>
+<%@ Register Src="~/Controls/SearchControl.ascx" TagPrefix="uc1" TagName="SearchControl" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <style>
         .MainLabel {
@@ -28,9 +31,23 @@
         }
     </style>
 
+    <script language="javascript">
+        function NewGameOpen(strPath) {
+            window.open(strPath, "_blank","scrollbars,resizable,width=950,height=800,left=0,top=0");
+        }
+    </script>
+
     <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
 
-    <h12>(대회명을 클릭하여 수정 / 확인)</h12><br />
+    <div style="text-align: right;">
+        <asp:Button ID="BTN_NewGame" runat="server" Text="신규대회 개최" class="btn btn-outline-success btn-lg" 
+            OnClientClick="NewGameOpen('/Sites/Admin/NewGameSetting.aspx');return false;" />
+    </div>
+    <hr />
+    <div>
+        <h12>(대회명을 클릭하여 수정 / 확인)</h12><br />
+    </div>
+
     <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="GameCode"
         CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
         <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>

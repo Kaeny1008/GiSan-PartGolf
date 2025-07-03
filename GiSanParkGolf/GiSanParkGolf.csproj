@@ -154,6 +154,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Sites\Admin\GameSettingUp.aspx" />
+    <Content Include="Sites\Admin\NewGameSetting.aspx" />
     <Content Include="Sites\Login\Admin Alert.aspx" />
     <Content Include="Sites\Admin\Player Information.aspx" />
     <Content Include="Sites\Login\Login.aspx" />
@@ -349,6 +350,7 @@
     <Compile Include="BBS\ThumbNail.aspx.designer.cs">
       <DependentUpon>ThumbNail.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Class\BaseProperty.cs" />
     <Compile Include="Controls\PagingControl.ascx.cs">
       <DependentUpon>PagingControl.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -370,6 +372,13 @@
     </Compile>
     <Compile Include="Sites\Admin\GameSettingUp.aspx.designer.cs">
       <DependentUpon>GameSettingUp.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Sites\Admin\NewGameSetting.aspx.cs">
+      <DependentUpon>NewGameSetting.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Sites\Admin\NewGameSetting.aspx.designer.cs">
+      <DependentUpon>NewGameSetting.aspx</DependentUpon>
     </Compile>
     <Compile Include="UpdateHistory.cs" />
     <Compile Include="Sites\Login\Admin Alert.aspx.cs">

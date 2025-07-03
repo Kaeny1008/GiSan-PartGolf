@@ -73,6 +73,7 @@
                             </HeaderTemplate>
                             <ItemTemplate>
                                 <%--<%# Dul.BoardLibrary.FuncStep(Eval("Step")) %>--%>
+                                <%# Dul.BoardLibrary.FuncNew(Eval("PostDate"))%>
                                 <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
                                     NavigateUrl='<%# "BoardView.aspx?bbsId=" + Request.QueryString["bbsId"] + "&Id=" + Eval("Id") %>'>
                                     <%# Dul.StringLibrary.CutStringUnicode(Eval("Title").ToString(), 30) %>
@@ -81,7 +82,6 @@
                                     <br />
                                     <a style="font-size:13px"><%# Eval("Name") %>&nbsp;|조회&nbsp;<%# Eval("ReadCount") %></a>--%>
                                 </asp:HyperLink>
-                                <%--<%# Dul.BoardLibrary.FuncNew(Eval("PostDate"))%>--%>
                             </ItemTemplate>
                             <HeaderStyle Width="350px" />
                             <ItemStyle Width="350px" HorizontalAlign="Left" />
@@ -115,8 +115,7 @@
                                 <asp:Label ID="LB_WriteDate" runat="server" Text="작성일"></asp:Label>
                             </HeaderTemplate>
                             <ItemTemplate>
-                                <%# Dul.BoardLibrary.FuncShowTime(
-                                    Eval("PostDate")) %>
+                                <%# Dul.BoardLibrary.FuncShowTime(Eval("PostDate")) %>
                             </ItemTemplate>
                             <HeaderStyle Width="90px" />
                             <ItemStyle Width="90px" />

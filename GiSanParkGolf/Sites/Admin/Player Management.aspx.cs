@@ -1,37 +1,18 @@
-﻿using GiSanParkGolf.BBS.Controls;
-using GiSanParkGolf.Class;
-using GiSanParkGolf.Models;
-using System;
-using System.Data;
-using System.Data.OleDb;
-using System.Data.SqlClient;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
-using System.EnterpriseServices;
-using System.Web.Configuration;
-using System.Web.Services.Description;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using static GiSanParkGolf.Global;
 
 namespace GiSanParkGolf.Sites.Admin
 {
     public partial class Player_Management : Page
     {
-        // 공통 속성: 검색 모드: 검색 모드이면 true, 그렇지 않으면 false.
-        // [참고] 이러한 공통 속성들은 Base 클래스에 모아 넣고 상속해줘도 좋음
-        public bool SearchMode { get; set; } = false;
-        public string SearchField { get; set; }
-        public string SearchQuery { get; set; }
-        public string ReadyUser { get; set; }
-
-        public int pageIndex = 0; // 현재 보여줄 페이지 번호
-        public int recordCount = 0; // 총 레코드 개수
-
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Page.User.Identity.IsAuthenticated)
             {
-                Debug.WriteLine("선수정보 관리 : 로그인 되어 있다.");
                 if (!Global.uvm.UserClass.Equals(1))
                 {
                     Response.Redirect("~/Sites/Login/Admin Alert.aspx");
@@ -43,35 +24,35 @@ namespace GiSanParkGolf.Sites.Admin
                 Response.Redirect("~/Sites/Login/Admin Alert.aspx");
                 return;
             }
-
+            
             if (!string.IsNullOrEmpty(Request.QueryString["ReadyUser"]))
             {
-                ReadyUser = Request.QueryString["ReadyUser"];
+                searchProperty.ReadyUser = Request.QueryString["ReadyUser"];
             }
             else
             {
-                ReadyUser = "False";
+                searchProperty.ReadyUser = "False";
             }
 
-                // 검색 모드 결정
-                SearchMode =
+            // 검색 모드 결정
+            searchProperty.SearchMode =
                     (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
                         !string.IsNullOrEmpty(Request.QueryString["SearchQuery"]));
-            if (SearchMode)
+            if (searchProperty.SearchMode)
             {
-                SearchField = Request.QueryString["SearchField"];
-                SearchQuery = Request.QueryString["SearchQuery"];
+                searchProperty.SearchField = Request.QueryString["SearchField"];
+                searchProperty.SearchQuery = Request.QueryString["SearchQuery"];
             }
 
             // 쿼리스트링에 따른 페이지 보여주기
             if (Request["Page"] != null)
             {
                 // Page는 보여지는 쪽은 1, 2, 3, ... 코드단에서는 0, 1, 2, ...
-                pageIndex = Convert.ToInt32(Request["Page"]) - 1;
+                searchProperty.PageIndex = Convert.ToInt32(Request["Page"]) - 1;
             }
             else
             {
-                pageIndex = 0; // 1페이지
+                searchProperty.PageIndex = 0; // 1페이지
             }
 
             // 쿠키를 사용한 리스트 페이지 번호 유지 적용: 
@@ -81,31 +62,33 @@ namespace GiSanParkGolf.Sites.Admin
                 if (!String.IsNullOrEmpty(
                     Request.Cookies["PlayerManagement"]["PageNum"]))
                 {
-                    pageIndex = Convert.ToInt32(
+                    searchProperty.PageIndex = Convert.ToInt32(
                         Request.Cookies["PlayerManagement"]["PageNum"]);
                 }
                 else
                 {
-                    pageIndex = 0;
+                    searchProperty.PageIndex = 0;
                 }
             }
 
             //레코드 카운트 출력
-            if (SearchMode == false)
+            if (searchProperty.SearchMode == false)
             {
                 // 테이블의 전체 레코드
-                recordCount = Global.dbManager.GetUserCountAll(ReadyUser);
+                searchProperty.RecordCount = 
+                    Global.dbManager.GetUserCountAll(searchProperty.ReadyUser);
             }
             else
             {
-                // Notes 테이블 중 SearchField+SearchQuery에 해당하는 레코드 수
-                recordCount = Global.dbManager.GetUserCountBySearch(SearchField, SearchQuery, ReadyUser);
+                // Notes 테이블 중 searchProperty.SearchField+searchProperty.SearchQuery에 해당하는 레코드 수
+                searchProperty.RecordCount = 
+                    Global.dbManager.GetUserCountBySearch(searchProperty.SearchField, searchProperty.SearchQuery, searchProperty.ReadyUser);
             }
-            lblTotalRecord.Text = recordCount.ToString();
+            lblTotalRecord.Text = searchProperty.RecordCount.ToString();
 
-            // 페이징 처리
-            PagingControl.PageIndex = pageIndex;
-            PagingControl.RecordCount = recordCount;
+            // 페이징 처리... 나중에 좀 쌓였을때 확인 해봐야할듯..
+            //pageProperty.PageIndex = searchProperty.PageIndex;
+            //pageProperty.RecordCount = searchProperty.RecordCount;
 
             if (!Page.IsPostBack)
             {
@@ -115,13 +98,23 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void PlayerList()
         {
-            if (SearchMode == false) // 기본 리스트
+            if (searchProperty.SearchMode == false) // 기본 리스트
             {
-                GridView1.DataSource = Global.dbManager.GetUserAll(pageIndex, ReadyUser);
+                GridView1.DataSource = 
+                    Global.dbManager.GetUserAll(
+                        searchProperty.PageIndex, 
+                        searchProperty.ReadyUser)
+                    ;
             }
             else // 검색 결과 리스트
             {
-                GridView1.DataSource = Global.dbManager.GetUserSeachAll(pageIndex, ReadyUser, SearchField, SearchQuery);
+                GridView1.DataSource = 
+                    Global.dbManager.GetUserSeachAll(
+                        searchProperty.PageIndex, 
+                        searchProperty.ReadyUser, 
+                        searchProperty.SearchField, 
+                        searchProperty.SearchQuery)
+                    ;
             }
             
             GridView1.DataBind();

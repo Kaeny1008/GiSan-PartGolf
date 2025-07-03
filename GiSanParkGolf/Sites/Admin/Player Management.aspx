@@ -80,6 +80,11 @@
                         <asp:Label ID="LB_No" runat="server" Text="이름"></asp:Label>
                     </HeaderTemplate>
                     <ItemTemplate>
+                        <%# Eval("UserWClass").Equals("승인대기") ? 
+                                "<span class=\"badge text-bg-secondary\">New</span>" 
+                                : 
+                                "" 
+                        %>
                         <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
                             NavigateUrl='<%# "~/Sites/Admin/Player Information.aspx?UserId=" + Eval("UserId") %>'>
                             <%# Dul.StringLibrary.CutStringUnicode(Eval("UserName").ToString(), 30) %>
