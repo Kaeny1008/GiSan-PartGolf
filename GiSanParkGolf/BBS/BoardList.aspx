@@ -1,7 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="BoardList.aspx.cs" Inherits="GiSanParkGolf.BBS.BoardList" %>
 
-<%@ Register 
-    Src="~/BBS/Controls/BoardSearchFormSingleControl.ascx" 
+<%@ Register Src="~/BBS/Controls/BoardSearchFormSingleControl.ascx" 
     TagPrefix="uc1" TagName="BoardSearchFormSingleControl" %>
 <%@ Register Src="~/BBS/Controls/AdvancedPagingSingleWithBootstrap.ascx" 
     TagPrefix="uc1" TagName="AdvancedPagingSingleWithBootstrap" %>

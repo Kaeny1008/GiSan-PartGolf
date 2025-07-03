@@ -1,4 +1,6 @@
-﻿using GiSanParkGolf.Models;
+﻿using GiSanParkGolf.BBS.Controls;
+using GiSanParkGolf.Class;
+using GiSanParkGolf.Models;
 using System;
 using System.Data;
 using System.Data.OleDb;
@@ -7,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.EnterpriseServices;
 using System.Web.Configuration;
+using System.Web.Services.Description;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -14,6 +17,13 @@ namespace GiSanParkGolf.Sites.Admin
 {
     public partial class Player_Management : Page
     {
+        // 공통 속성: 검색 모드: 검색 모드이면 true, 그렇지 않으면 false.
+        // [참고] 이러한 공통 속성들은 Base 클래스에 모아 넣고 상속해줘도 좋음
+        public bool SearchMode { get; set; } = false;
+        public string SearchField { get; set; }
+        public string SearchQuery { get; set; }
+        public string ReadyUser { get; set; }
+
         public int pageIndex = 0; // 현재 보여줄 페이지 번호
         public int recordCount = 0; // 총 레코드 개수
 
@@ -34,12 +44,26 @@ namespace GiSanParkGolf.Sites.Admin
                 return;
             }
 
-            TB_Search.Attributes["onkeypress"] =
-               "if (event.keyCode==13){" +
-               ClientScript.GetPostBackEventReference(BTN_Search, "") + "; return false;}";
+            if (!string.IsNullOrEmpty(Request.QueryString["ReadyUser"]))
+            {
+                ReadyUser = Request.QueryString["ReadyUser"];
+            }
+            else
+            {
+                ReadyUser = "False";
+            }
+
+                // 검색 모드 결정
+                SearchMode =
+                    (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
+                        !string.IsNullOrEmpty(Request.QueryString["SearchQuery"]));
+            if (SearchMode)
+            {
+                SearchField = Request.QueryString["SearchField"];
+                SearchQuery = Request.QueryString["SearchQuery"];
+            }
 
             // 쿼리스트링에 따른 페이지 보여주기
-            Debug.WriteLine("요청 Page No. : " + Request["Page"]);
             if (Request["Page"] != null)
             {
                 // Page는 보여지는 쪽은 1, 2, 3, ... 코드단에서는 0, 1, 2, ...
@@ -52,13 +76,13 @@ namespace GiSanParkGolf.Sites.Admin
 
             // 쿠키를 사용한 리스트 페이지 번호 유지 적용: 
             // 100번째 페이지의 글 보고, 다시 리스트 왔을 때 100번째 페이지 표시
-            if (Request.Cookies["BBS"] != null)
+            if (Request.Cookies["PlayerManagement"] != null)
             {
                 if (!String.IsNullOrEmpty(
-                    Request.Cookies["BBS"]["PageNum"]))
+                    Request.Cookies["PlayerManagement"]["PageNum"]))
                 {
                     pageIndex = Convert.ToInt32(
-                        Request.Cookies["BBS"]["PageNum"]);
+                        Request.Cookies["PlayerManagement"]["PageNum"]);
                 }
                 else
                 {
@@ -66,52 +90,44 @@ namespace GiSanParkGolf.Sites.Admin
                 }
             }
 
-            // 레코드 카운트 출력
-            //if (SearchMode == false)
-            //{
-            //    // Notes 테이블의 전체 레코드
-            //    RecordCount =
-            //        _repository.GetCountAll(bbsID);
-            //}
-            //else
-            //{
-            //    // Notes 테이블 중 SearchField+SearchQuery에 해당하는 레코드 수
-            //    RecordCount =
-            //        _repository.GetCountBySearch(SearchField, SearchQuery, bbsID);
-            //}
-            //lblTotalRecord.Text = RecordCount.ToString();
-            lblTotalRecord.Text = "0";
+            //레코드 카운트 출력
+            if (SearchMode == false)
+            {
+                // 테이블의 전체 레코드
+                recordCount = Global.dbManager.GetUserCountAll(ReadyUser);
+            }
+            else
+            {
+                // Notes 테이블 중 SearchField+SearchQuery에 해당하는 레코드 수
+                recordCount = Global.dbManager.GetUserCountBySearch(SearchField, SearchQuery, ReadyUser);
+            }
+            lblTotalRecord.Text = recordCount.ToString();
+
+            // 페이징 처리
+            PagingControl.PageIndex = pageIndex;
+            PagingControl.RecordCount = recordCount;
 
             if (!Page.IsPostBack)
             {
-                PlayerList(string.Empty, 0);
+                PlayerList();
             }
         }
 
-        private void PlayerList(string userName, int readyUser)
+        private void PlayerList()
         {
-            GridView1.DataSource = Global.dbManager.GetUserList(userName, readyUser, pageIndex);
+            if (SearchMode == false) // 기본 리스트
+            {
+                GridView1.DataSource = Global.dbManager.GetUserAll(pageIndex, ReadyUser);
+            }
+            else // 검색 결과 리스트
+            {
+                GridView1.DataSource = Global.dbManager.GetUserSeachAll(pageIndex, ReadyUser, SearchField, SearchQuery);
+            }
+            
             GridView1.DataBind();
         }
 
-        protected void grdList_PageIndexChanging(object sender, GridViewPageEventArgs e)
-        {
-            GridView1.PageIndex = e.NewPageIndex;
-            mf_List();
-        }
-        protected void mf_List()
-        {
-            //SqlParameter[] param = {
-            //                            new SqlParameter("@UserName", SqlDbType.VarChar, 20)
-            //                        };
-
-            //param[0].Value = UserName.Trim();
-
-            //DataSet ds = SqlHelper.ExecuteDataset(ConfigurationManager.ConnectionStrings["..."].ToString(), CommandType.StoredProcedure, "프로시저명", param);
-
-            //grd_List.DataSource = ds1.Tables[0];
-            //grd_List.DataBind();
-        }
+        //사용하진 않지만 행의 번호를 확인하는 방법이라 지우지 않음.
         protected void MyButtonClick(object sender, System.EventArgs e)
         {
             Button btn = (Button)sender;
@@ -123,30 +139,6 @@ namespace GiSanParkGolf.Sites.Admin
             string userid = GridView1.Rows[x].Cells[1].Text;
             
             Response.Redirect("~/Sites/Admin/Player Information.aspx?UserId=" + userid);
-        }
-
-        protected void BTN_Search_Click(object sender, EventArgs e)
-        {
-            if (CheckBox1.Checked)
-            {
-                PlayerList(TB_Search.Text, 1);
-            } else
-            {
-                PlayerList(TB_Search.Text, 0);
-            }
-                
-        }
-
-        protected void CheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            if (CheckBox1.Checked)
-            {
-                PlayerList(TB_Search.Text, 1);
-            }
-            else
-            {
-                PlayerList(TB_Search.Text, 0);
-            }
         }
     }
 }

@@ -147,7 +147,7 @@ namespace GiSanParkGolf.BBS.Controls
                             + "\">"
                             + i.ToString() + "</a></li>";
                     }
-                    Debug.WriteLine("이게뭐지? " + Request.ServerVariables["SCRIPT_NAME"]);
+                    //Debug.WriteLine("이게뭐지? " + Request.ServerVariables["SCRIPT_NAME"]);
                 }
                 strPage += "&nbsp;";
             }

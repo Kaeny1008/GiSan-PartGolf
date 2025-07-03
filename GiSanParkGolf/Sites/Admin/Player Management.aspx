@@ -1,9 +1,8 @@
 ﻿<%@ Page Title="선수정보 관리" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Player Management.aspx.cs" 
     Inherits="GiSanParkGolf.Sites.Admin.Player_Management" EnableEventValidation="false" %>
 
-<%@ Register 
-    Src="~/Controls/PagingControl.ascx" 
-    TagPrefix="uc1" TagName="PagingControl" %>
+<%@ Register Src="~/Controls/PagingControl.ascx" TagPrefix="uc1" TagName="PagingControl" %>
+<%@ Register Src="~/Controls/SearchControl.ascx" TagPrefix="uc1" TagName="SearchControl" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
@@ -31,68 +30,91 @@
      <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
 
     <div>
-        <div id="PlayList">
-            <div>
-                <asp:CheckBox ID="CheckBox1" runat="server" Text="승인대기만 보기" OnCheckedChanged="CheckBox_CheckedChanged" AutoPostBack="true" />
-                <a>&emsp;&emsp;&emsp;&emsp;</a>
-                <asp:TextBox ID="TB_Search" runat="server" placeholder="이름을 입력하여 검색"></asp:TextBox>
-                <asp:Button ID="BTN_Search" runat="server" Text="검색" OnClick="BTN_Search_Click" />
-            </div>      
-            
-            <hr />
-            <div style="font-style: italic; text-align: right; font-size: 8pt;">
-                Total Record:
-                <asp:Literal ID="lblTotalRecord" runat="server"></asp:Literal>
-            </div>
-            <asp:Label ID="LabelResult" runat="server" Text="선택정보" Visible="false"></asp:Label>
-            <h12>(선수이름을 클릭하여 수정)</h12><br />
-            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="UserId"
-                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
-                <HeaderStyle HorizontalAlign="center" />
-                <RowStyle HorizontalAlign="Center"/>
-                <AlternatingRowStyle  />                            
-                    <Columns>       
-                        <asp:BoundField DataField="UserWClass" HeaderText="상태">
-                            <HeaderStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
-                            <ItemStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
-                        </asp:BoundField>    
-                        <asp:BoundField DataField="UserId" HeaderText="ID">
-                            <HeaderStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
-                            <ItemStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
-                        </asp:BoundField>    
-                        <asp:TemplateField HeaderText="이름">
-                            <ItemTemplate>
-                                <%--<asp:Button ID="PlayerButton" runat="server" 
-                                    Text='<%# Eval("UserName") %>' 
-                                    OnClick="MyButtonClick" CssClass="RowButton"/>--%>
+        <uc1:SearchControl runat="server" ID="SearchControl" />
+        <hr />
+        <div style="font-style: italic; text-align: right; font-size: 8pt;">
+            Total Record:
+            <asp:Literal ID="lblTotalRecord" runat="server"></asp:Literal>
+        </div>
+        <asp:Label ID="LabelResult" runat="server" Text="선택정보" Visible="false"></asp:Label>
+        <h12>(선수이름을 클릭하여 수정)</h12><br />
 
-                                <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
-                                    NavigateUrl='<%# "~/Sites/Admin/Player Information.aspx?UserId=" + Eval("UserId") %>'>
-                                    <%# Dul.StringLibrary.CutStringUnicode(Eval("UserName").ToString(), 30) %>
-                                </asp:HyperLink>
+            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False"
+            CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
+        <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
+        <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
+        <FooterStyle BackColor="#CCCCCC" />                     
+            <Columns>       
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:Label ID="LB_No" runat="server" Text="No."></asp:Label>
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%#Eval("RowNumber")%>
+                    </ItemTemplate>
+                    <HeaderStyle Width="5%" />
+                    <ItemStyle Width="5%" />
+                </asp:TemplateField>
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:Label ID="LB_No" runat="server" Text="상태"></asp:Label>
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%#Eval("UserWClass")%>
+                    </ItemTemplate>
+                    <HeaderStyle Width="10%" />
+                    <ItemStyle Width="10%" />
+                </asp:TemplateField>
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:Label ID="LB_No" runat="server" Text="ID"></asp:Label>
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%#Eval("UserId")%>
+                    </ItemTemplate>
+                    <HeaderStyle Width="10%" />
+                    <ItemStyle Width="10%" />
+                </asp:TemplateField>
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:Label ID="LB_No" runat="server" Text="이름"></asp:Label>
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
+                            NavigateUrl='<%# "~/Sites/Admin/Player Information.aspx?UserId=" + Eval("UserId") %>'>
+                            <%# Dul.StringLibrary.CutStringUnicode(Eval("UserName").ToString(), 30) %>
+                        </asp:HyperLink>
+                    </ItemTemplate>
+                    <HeaderStyle Width="15%" />
+                    <ItemStyle Width="15%" />
+                </asp:TemplateField>
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:Label ID="LB_No" runat="server" Text="생년월일"></asp:Label>
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%#Eval("UserNumber")%>
+                    </ItemTemplate>
+                    <HeaderStyle Width="10%" />
+                    <ItemStyle Width="10%" />
+                </asp:TemplateField>
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:Label ID="LB_No" runat="server" Text="비고"></asp:Label>
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%#Eval("UserNote")%>
+                    </ItemTemplate>
+                    <HeaderStyle Width="50%" />
+                    <ItemStyle Width="50%" />
+                </asp:TemplateField>
+            </Columns>
+                <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
+        </asp:GridView>
 
-
-                            </ItemTemplate>
-                            <HeaderStyle Width="15%" BorderStyle="Solid" BorderWidth="1px"/>
-                            <ItemStyle Width="15%" BorderStyle="Solid" BorderWidth="1px"/>
-                        </asp:TemplateField>    
-                        <asp:BoundField DataField="UserNumber" HeaderText="생년월일" DataFormatString="{0:d}">
-                            <HeaderStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
-                            <ItemStyle Width="10%" BorderStyle="Solid" BorderWidth="1px"/>
-                        </asp:BoundField> 
-                        <asp:BoundField DataField="UserNote" HeaderText="비고">
-                            <HeaderStyle Width="55%" BorderStyle="Solid" BorderWidth="1px"/>
-                            <ItemStyle Width="55%" BorderStyle="Solid" BorderWidth="1px" HorizontalAlign="left"/>
-                        </asp:BoundField> 
-                    </Columns>
-            </asp:GridView>
-            <div>
-            <div style="text-align: center;">
-                <uc1:PagingControl runat="server"
-                    ID="PagingControl" />
-            </div>
-            </div>
+        <div style="text-align: center;">
+            <uc1:PagingControl runat="server"
+                ID="PagingControl" />
         </div>
     </div>
-    <%--Text='<%# Bind("UserId") %>'--%> 
 </asp:Content>

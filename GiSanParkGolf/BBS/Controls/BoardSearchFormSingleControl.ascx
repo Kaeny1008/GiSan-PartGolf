@@ -19,9 +19,10 @@
         Style="display: inline-block;" OnClick="btnSearch_Click" ValidationGroup="Group1"></asp:Button>
 </div>
 <br />
-<% if (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) 
+
+<%--<% if (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) 
         && !String.IsNullOrEmpty(Request.QueryString["SearchQuery"])) { %>
 <div style="text-align:center;">
     <a href="<%#"/BBS/BoardList.aspx?bbsId=" + Request.QueryString["bbsId"]%>" class="btn btn-success">검색 완료</a>
 </div>
-<% } %>
+<% } %>--%>

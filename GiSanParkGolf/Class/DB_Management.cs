@@ -25,12 +25,138 @@ namespace GiSanParkGolf.Class
     public class DB_Management
     {
         // 공통으로 사용될 커넥션 개체
-        private SqlConnection con;
+        private readonly SqlConnection DB_Connection;
 
         public DB_Management()
         {
-            con = new SqlConnection();
-            con.ConnectionString = WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString;
+            DB_Connection = new SqlConnection
+            {
+                ConnectionString = WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString
+            };
+        }
+
+        /// <summary>
+        /// SYS_Users 리스트: GetAll, FindAll 
+        /// </summary>
+        /// <param name="page">페이지 번호</param>
+        public DataTable GetUserAll(int page, string readyUser)
+        {
+            SqlCommand sqlCMD = new SqlCommand
+            {
+                Connection = DB_Connection,
+                CommandText = "SYS_UserList",
+                CommandType = CommandType.StoredProcedure
+            };
+            sqlCMD.Parameters.AddWithValue("@Page", page);
+            sqlCMD.Parameters.AddWithValue("@ReadyUser", readyUser);
+
+            DB_Connection.Open();
+
+            SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
+            DataSet dataSet = new DataSet();
+            adapter.Fill(dataSet);
+
+            DB_Connection.Close();
+
+            return dataSet.Tables["Table"];
+
+        }
+
+        /// <summary>
+        /// SYS_Users 검색 결과 리스트
+        /// </summary>
+        public DataTable GetUserSeachAll(int page, string readyUser, string searchField, string searchQuery)
+        {
+            SqlCommand sqlCMD = new SqlCommand
+            {
+                Connection = DB_Connection,
+                CommandText = "SYS_UserSearch",
+                CommandType = CommandType.StoredProcedure
+            };
+            sqlCMD.Parameters.AddWithValue("@Page", page);
+            sqlCMD.Parameters.AddWithValue("@SearchField", searchField);
+            sqlCMD.Parameters.AddWithValue("@SearchQuery", searchQuery);
+            sqlCMD.Parameters.AddWithValue("@ReadyUser", readyUser);
+
+            DB_Connection.Open();
+
+            SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
+            DataSet dataSet = new DataSet();
+            adapter.Fill(dataSet);
+
+            DB_Connection.Close();
+
+            return dataSet.Tables["Table"];
+        }
+
+        /// <summary>
+        /// SYS_Users 테이블의 모든 레코드 수
+        /// </summary>
+        public int GetUserCountAll(string readyUser)
+        {
+            try
+            {
+                int userCount = 0;
+                SqlCommand sqlCMD = new SqlCommand
+                {
+                    Connection = DB_Connection,
+                    CommandText = "SYS_UserCountALL",
+                    CommandType = CommandType.StoredProcedure
+                };
+                sqlCMD.Parameters.AddWithValue("@ReadyUser", readyUser);
+
+                DB_Connection.Open();
+
+                SqlDataReader sqlDR = sqlCMD.ExecuteReader();
+
+                while (sqlDR.Read())
+                {
+                    userCount = sqlDR.GetInt32(0);
+                }
+
+                DB_Connection.Close();
+                return userCount;
+            }
+            catch (System.Exception)
+            {
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// SYS_Users 검색 카운트
+        /// </summary>
+        public int GetUserCountBySearch(string searchField, string searchQuery, string readyUser)
+        {
+            try
+            {
+                int userCount = 0;
+                SqlCommand sqlCMD = new SqlCommand
+                {
+                    Connection = DB_Connection,
+                    CommandText = "SYS_UserCount",
+                    CommandType = CommandType.StoredProcedure
+                };
+                sqlCMD.Parameters.AddWithValue("@SearchField", searchField);
+                sqlCMD.Parameters.AddWithValue("@SearchQuery", searchQuery);
+                sqlCMD.Parameters.AddWithValue("@ReadyUser", readyUser);
+
+                DB_Connection.Open();
+
+                SqlDataReader sqlDR = sqlCMD.ExecuteReader();
+
+                while (sqlDR.Read())
+                {
+                    userCount = sqlDR.GetInt32(0);
+                }
+
+                DB_Connection.Close();
+                return userCount;
+            }
+            catch (System.Exception)
+            {
+                return -1;
+            }
         }
 
         /// <summary>
@@ -41,19 +167,19 @@ namespace GiSanParkGolf.Class
         {
             SqlCommand sqlCMD = new SqlCommand
             {
-                Connection = con,
+                Connection = DB_Connection,
                 CommandText = "Game_LoadList",
                 CommandType = CommandType.StoredProcedure
             };
             sqlCMD.Parameters.AddWithValue("@Page", page);
 
-            con.Open();
+            DB_Connection.Open();
 
             SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
             DataSet dataSet = new DataSet();
             adapter.Fill(dataSet);
 
-            con.Close();
+            DB_Connection.Close();
 
             return dataSet.Tables["Table"];
         }
@@ -67,7 +193,7 @@ namespace GiSanParkGolf.Class
         {
             SqlCommand sqlCMD = new SqlCommand
             {
-                Connection = con,
+                Connection = DB_Connection,
                 CommandText = "SYS_UserList",
                 CommandType = CommandType.StoredProcedure
             };
@@ -75,13 +201,13 @@ namespace GiSanParkGolf.Class
             sqlCMD.Parameters.AddWithValue("@OnlyReady", onlyReady);
             sqlCMD.Parameters.AddWithValue("@Page", pageIndex);
 
-            con.Open();
+            DB_Connection.Open();
 
             SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
             DataSet dataSet = new DataSet();
             adapter.Fill(dataSet);
 
-            con.Close();
+            DB_Connection.Close();
 
             return dataSet.Tables["Table"];
         }
@@ -94,12 +220,12 @@ namespace GiSanParkGolf.Class
             strSQL += " WHERE UserId = @UserID";
             strSQL += ";";
 
-            SqlCommand sqlCMD = new SqlCommand(strSQL, con);
+            SqlCommand sqlCMD = new SqlCommand(strSQL, DB_Connection);
             sqlCMD.CommandType = CommandType.Text;
             
             sqlCMD.Parameters.AddWithValue("@UserID", userID);
 
-            con.Open();
+            DB_Connection.Open();
 
             SqlDataReader sqlDR = sqlCMD.ExecuteReader();
             while (sqlDR.Read())
@@ -110,7 +236,7 @@ namespace GiSanParkGolf.Class
                 Global.uvm.UserWClass = sqlDR.GetString(3);
                 Global.uvm.UserClass = sqlDR.GetInt32(4);
             }
-            con.Close();
+            DB_Connection.Close();
 
             SetCookie(Global.uvm.UserID,
                 Global.uvm.Password,
@@ -146,12 +272,12 @@ namespace GiSanParkGolf.Class
             strSQL += " WHERE UserId = @UserID";
             strSQL += ";";
 
-            SqlCommand sqlCMD = new SqlCommand(strSQL, con);
+            SqlCommand sqlCMD = new SqlCommand(strSQL, DB_Connection);
             sqlCMD.CommandType = CommandType.Text;
 
             sqlCMD.Parameters.AddWithValue("@UserID", userID);
 
-            con.Open();
+            DB_Connection.Open();
 
             SqlDataReader sqlDR = sqlCMD.ExecuteReader();
             while (sqlDR.Read())
@@ -168,7 +294,7 @@ namespace GiSanParkGolf.Class
                 Global.suvm.UserWClass = sqlDR.GetString(9);
                 Global.suvm.UserClass = sqlDR.GetInt32(10);
             }
-            con.Close();
+            DB_Connection.Close();
 
             return Global.suvm;
         }
@@ -180,11 +306,11 @@ namespace GiSanParkGolf.Class
             Cryptography newCrypt = new Cryptography();
             String cryptPassword = newCrypt.GetEncoding("ParkGolf", password);
 
-            con.Open();
+            DB_Connection.Open();
 
             SqlCommand cmd = new SqlCommand
             {
-                Connection = con,
+                Connection = DB_Connection,
                 CommandText = "SYS_UserLogin",
                 CommandType = CommandType.StoredProcedure
             };
@@ -212,18 +338,20 @@ namespace GiSanParkGolf.Class
                 }
             }
             sqlDR.Close();
-            con.Close();
+
+            DB_Connection.Close();
+
             Debug.WriteLine("로그인 기록을 남긴다. 로그인 결과 : " + result);
             return result;
         }
 
         public void LogoutUser(string userID)
         {
-            con.Open();
+            DB_Connection.Open();
 
             SqlCommand cmd = new SqlCommand
             {
-                Connection = con,
+                Connection = DB_Connection,
                 CommandText = "SYS_UserLogOut",
                 CommandType = CommandType.StoredProcedure
             };
@@ -231,24 +359,24 @@ namespace GiSanParkGolf.Class
             cmd.Parameters.AddWithValue("@UserID", userID);
             cmd.ExecuteNonQuery();
 
-            con.Close();
+            DB_Connection.Close();
         }
 
         public string DB_Write(string strSQL)
         {
             try
             {
-                con.Open();
+                DB_Connection.Open();
 
                 SqlCommand cmd = new SqlCommand
                 {
-                    Connection = con,
+                    Connection = DB_Connection,
                     CommandText = strSQL,
                     CommandType = System.Data.CommandType.Text
                 };
                 cmd.ExecuteNonQuery();
 
-                con.Close();
+                DB_Connection.Close();
             }
             catch (OleDbException ex)
             {
@@ -262,12 +390,12 @@ namespace GiSanParkGolf.Class
         {
             bool result = true;
 
-            con.Open();
+            DB_Connection.Open();
 
             string strSQL = "SELECT * FROM SYS_Users WHERE UserID = @UserId";
             SqlCommand cmd = new SqlCommand
             {
-                Connection = con,
+                Connection = DB_Connection,
                 CommandText = strSQL,
                 CommandType = CommandType.Text
             };
@@ -279,7 +407,7 @@ namespace GiSanParkGolf.Class
                 result = false;
 
             dr.Close();
-            con.Close();
+            DB_Connection.Close();
 
             return result;
         }

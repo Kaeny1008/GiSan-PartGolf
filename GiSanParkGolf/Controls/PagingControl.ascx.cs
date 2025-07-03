@@ -15,7 +15,6 @@ namespace GiSanParkGolf.Controls
         public bool SearchMode { get; set; } = false; // 일반 모드, 검색 모드
         public string SearchField { get; set; } // 검색 필드: Name, Title, ...
         public string SearchQuery { get; set; } // 검색 내용
-        public string bbsId { get; set; } // 넘어온 BBS Id
 
         /// <summary>
         /// 몇 번째 페이지를 보여줄 건지 : 웹 폼에서 속성으로 전달됨
@@ -59,7 +58,6 @@ namespace GiSanParkGolf.Controls
         // 페이지 로드할 때 페이저 구현하기
         protected void Page_Load(object sender, EventArgs e)
         {
-            bbsId = Request.QueryString["bbsId"];
             // 검색 모드 결정: 검색 모드이면 SearchMode 속성이 true
             SearchMode =
                 (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
@@ -87,7 +85,6 @@ namespace GiSanParkGolf.Controls
                         //+ "?BoardName=" + Request["BoardName"] // 멀티 게시판
                         + "?Page="
                         + Convert.ToString(((PageIndex - 1) / (int)10) * 10)
-                        + "&bbsId=" + bbsId
                         + "&SearchField=" + SearchField
                         + "&SearchQuery=" + SearchQuery + "\">◀</a></li>";
                 }
@@ -98,7 +95,6 @@ namespace GiSanParkGolf.Controls
                         //+ "?BoardName=" + Request["BoardName"]
                         + "?Page="
                         + Convert.ToString(((PageIndex - 1) / (int)10) * 10)
-                        + "&bbsId=" + bbsId
                         + "\">◀</a></li>";
                 }
             }
@@ -132,7 +128,6 @@ namespace GiSanParkGolf.Controls
                             + Request.ServerVariables["SCRIPT_NAME"]
                             //+ "?BoardName=" + Request["BoardName"]
                             + "?Page=" + i.ToString()
-                            + "&bbsId=" + bbsId
                             + "&SearchField=" + SearchField
                             + "&SearchQuery=" + SearchQuery + "\">"
                             + i.ToString() + "</a></li>";
@@ -143,11 +138,10 @@ namespace GiSanParkGolf.Controls
                             + Request.ServerVariables["SCRIPT_NAME"]
                             //+ "?BoardName=" + Request["BoardName"]
                             + "?Page=" + i.ToString()
-                            + "&bbsId=" + bbsId
                             + "\">"
                             + i.ToString() + "</a></li>";
                     }
-                    Debug.WriteLine("이게뭐지? " + Request.ServerVariables["SCRIPT_NAME"]);
+                    //Debug.WriteLine("이게뭐지? " + Request.ServerVariables["SCRIPT_NAME"]);
                 }
                 strPage += "&nbsp;";
             }
@@ -162,7 +156,6 @@ namespace GiSanParkGolf.Controls
                         //+ "?BoardName=" + Request["BoardName"]
                         + "?Page="
                         + Convert.ToString(((PageIndex - 1) / (int)10) * 10 + 11)
-                        + "&bbsId=" + bbsId
                         + "&SearchField=" + SearchField
                         + "&SearchQuery=" + SearchQuery + "\">▶</a></li>";
                 }
@@ -173,7 +166,6 @@ namespace GiSanParkGolf.Controls
                         //+ "?BoardName=" + Request["BoardName"]
                         + "?Page="
                         + Convert.ToString(((PageIndex - 1) / (int)10) * 10 + 11)
-                        + "&bbsId=" + bbsId
                         + "\">▶</a></li>";
                 }
             }

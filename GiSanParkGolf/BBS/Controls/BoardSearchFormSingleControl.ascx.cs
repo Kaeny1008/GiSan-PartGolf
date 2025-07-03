@@ -13,6 +13,12 @@ namespace GiSanParkGolf.BBS.Controls
         {
             if (!IsPostBack)
             {
+                if (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
+                    !string.IsNullOrEmpty(Request.QueryString["SearchQuery"]))
+                {
+                    SearchField.SelectedValue = Request.QueryString["SearchField"];
+                    SearchQuery.Text = Request.QueryString["SearchQuery"];
+                }
             }
             SearchQuery.Attributes["onkeypress"] =
                "if (event.keyCode==13){" +

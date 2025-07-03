@@ -81,7 +81,6 @@
                 <ItemStyle Width="30%" />
             </asp:TemplateField>
         </Columns>
-        <PagerStyle HorizontalAlign="Center" CssClass="pgr" />
         <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
     </asp:GridView>
 </asp:Content>

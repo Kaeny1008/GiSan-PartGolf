@@ -129,6 +129,7 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Controls\PagingControl.ascx" />
+    <Content Include="Controls\SearchControl.ascx" />
     <Content Include="Database\Database.accdb" />
     <Content Include="BBS\BoardCommentDelete.aspx" />
     <Content Include="BBS\BoardDelete.aspx" />
@@ -354,6 +355,13 @@
     </Compile>
     <Compile Include="Controls\PagingControl.ascx.designer.cs">
       <DependentUpon>PagingControl.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SearchControl.ascx.cs">
+      <DependentUpon>SearchControl.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Controls\SearchControl.ascx.designer.cs">
+      <DependentUpon>SearchControl.ascx</DependentUpon>
     </Compile>
     <Compile Include="Models\GameListModel.cs" />
     <Compile Include="Sites\Admin\GameSettingUp.aspx.cs">

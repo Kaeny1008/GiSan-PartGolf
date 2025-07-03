@@ -7,56 +7,47 @@
 // </자동 생성됨>
 //------------------------------------------------------------------------------
 
-namespace GiSanParkGolf.Sites.Admin
+namespace GiSanParkGolf.Controls
 {
 
 
-    public partial class Player_Management
+    public partial class SearchControl
     {
 
         /// <summary>
-        /// SearchControl 컨트롤입니다.
+        /// CB_ReadyUser 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::GiSanParkGolf.Controls.SearchControl SearchControl;
+        protected global::System.Web.UI.WebControls.CheckBox CB_ReadyUser;
 
         /// <summary>
-        /// lblTotalRecord 컨트롤입니다.
+        /// DDL_SearchField 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal lblTotalRecord;
+        protected global::System.Web.UI.WebControls.DropDownList DDL_SearchField;
 
         /// <summary>
-        /// LabelResult 컨트롤입니다.
+        /// TB_SearchQuery 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label LabelResult;
+        protected global::System.Web.UI.WebControls.TextBox TB_SearchQuery;
 
         /// <summary>
-        /// GridView1 컨트롤입니다.
+        /// BTN_Search 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView GridView1;
-
-        /// <summary>
-        /// PagingControl 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::GiSanParkGolf.Controls.PagingControl PagingControl;
+        protected global::System.Web.UI.WebControls.Button BTN_Search;
     }
 }
