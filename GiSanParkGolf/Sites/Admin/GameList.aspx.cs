@@ -4,7 +4,7 @@ using System.Web.UI;
 
 namespace GiSanParkGolf.Sites.Admin
 {
-    public partial class GameSettingUp : System.Web.UI.Page
+    public partial class GameList : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {

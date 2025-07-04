@@ -1,4 +1,4 @@
-﻿<%@ Page Title="대회개최 설정" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="GameSettingUp.aspx.cs" Inherits="GiSanParkGolf.Sites.Admin.GameSettingUp" %>
+﻿<%@ Page Title="대회개최" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="GameList.aspx.cs" Inherits="GiSanParkGolf.Sites.Admin.GameList" %>
 
 <%@ Register Src="~/Controls/PagingControl.ascx" TagPrefix="uc1" TagName="PagingControl" %>
 <%@ Register Src="~/Controls/SearchControl.ascx" TagPrefix="uc1" TagName="SearchControl" %>
@@ -33,7 +33,10 @@
 
     <script language="javascript">
         function NewGameOpen(strPath) {
-            window.open(strPath, "_blank","scrollbars,resizable,width=950,height=800,left=0,top=0");
+            <%--자바스크립트 새창열기 예제--%>
+            /*window.open(strPath, "_blank", "scrollbars,resizable,width=950,height=800,left=0,top=0");*/
+            location.href = strPath;
+            window.open(strPath);
         }
     </script>
 
@@ -41,7 +44,7 @@
 
     <div style="text-align: right;">
         <asp:Button ID="BTN_NewGame" runat="server" Text="신규대회 개최" class="btn btn-outline-success btn-lg" 
-            OnClientClick="NewGameOpen('/Sites/Admin/NewGameSetting.aspx');return false;" />
+            OnClientClick="NewGameOpen('/Sites/Admin/GameCreate.aspx');return false;" />
     </div>
     <hr />
     <div>
@@ -70,7 +73,7 @@
                 </HeaderTemplate>
                 <ItemTemplate>
                     <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
-                        NavigateUrl='<%# "BoardView1111111.aspx?&gamecode=" + Eval("GameCode") %>'>
+                        NavigateUrl='<%# "GameCreate.aspx?gamecode=" + Eval("GameCode") %>'>
                         <%#Eval("GameName")%>
                     </asp:HyperLink>
                 </ItemTemplate>

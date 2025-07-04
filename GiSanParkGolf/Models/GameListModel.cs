@@ -11,8 +11,8 @@ namespace GiSanParkGolf.Models
     /// </summary>
     public class GameListModel
     {
-        [Display(Name = "Game Code")]
-        [Required(ErrorMessage = "* Game Code를 생성해 주십시오.")]
+        [Display(Name = "GameCode")]
+        [Required(ErrorMessage = "* GameCode를 생성해 주십시오.")]
         public string GameCode { get; set; }
 
         [Display(Name = "대회일자")]
@@ -49,5 +49,6 @@ namespace GiSanParkGolf.Models
         [Display(Name = "대회명")]
         [Required(ErrorMessage = "* 대회명을 입력하여 주십시오.")]
         public string GameName { get; set; }
+        public string GameNote { get; set; }
     }
 }

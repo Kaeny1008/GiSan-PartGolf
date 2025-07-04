@@ -45,7 +45,7 @@ namespace BBS.Models
                     p.Add("@UserId", value: n.UserID, dbType: DbType.String);
                     p.Add("@PostIp", value: n.PostIp, dbType: DbType.String);
 
-                    r = con.Execute("BBS_WriteNote", p
+                    r = con.Execute("sp_BBS_WriteNote", p
                         , commandType: CommandType.StoredProcedure);
                     break;
                 case BoardWriteFormType.Modify:
@@ -54,7 +54,7 @@ namespace BBS.Models
                         value: n.ModifyIp, dbType: DbType.String);
                     p.Add("@Id", value: n.Id, dbType: DbType.Int32);
 
-                    r = con.Execute("BBS_ModifyNote", p,
+                    r = con.Execute("sp_BBS_ModifyNote", p,
                         commandType: CommandType.StoredProcedure);
                     break;
                 case BoardWriteFormType.Reply:
@@ -65,7 +65,7 @@ namespace BBS.Models
                     p.Add("@ParentNum",
                         value: n.ParentNum, dbType: DbType.Int32);
 
-                    r = con.Execute("BBS_ReplyNote", p,
+                    r = con.Execute("sp_BBS_ReplyNote", p,
                         commandType: CommandType.StoredProcedure);
                     break;
             }
@@ -134,7 +134,7 @@ namespace BBS.Models
                     Category = bbsID
                 });
 
-                return con.Query<Note>("BBS_ListNotes", parameters,
+                return con.Query<Note>("sp_BBS_ListNotes", parameters,
                     commandType: CommandType.StoredProcedure).ToList();
             }
             catch (System.Exception ex)
@@ -150,7 +150,7 @@ namespace BBS.Models
         {
             try
             {
-                return con.Query<int>("BBS_SearchNoteCount", new
+                return con.Query<int>("sp_BBS_SearchNoteCount", new
                 {
                     SearchField = searchField,
                     SearchQuery = searchQuery,
@@ -173,7 +173,7 @@ namespace BBS.Models
         {
             try
             {
-                return con.Query<int>("BBS_SearchNoteCountALL", new
+                return con.Query<int>("sp_BBS_SearchNoteCountALL", new
                 {
                     Category = bbsId
                 },
@@ -212,7 +212,7 @@ namespace BBS.Models
                 SearchQuery = searchQuery,
                 Category = bbsID
             });
-            return con.Query<Note>("BBS_SearchNotes", parameters,
+            return con.Query<Note>("sp_BBS_SearchNotes", parameters,
                 commandType: CommandType.StoredProcedure).ToList();
         }
 
@@ -237,7 +237,7 @@ namespace BBS.Models
         public Note GetNoteById(int id)
         {
             var parameters = new DynamicParameters(new { Id = id });
-            return con.Query<Note>("BBS_ViewNote", parameters,
+            return con.Query<Note>("sp_BBS_ViewNote", parameters,
                 commandType: CommandType.StoredProcedure).SingleOrDefault();
         }
 
@@ -246,7 +246,7 @@ namespace BBS.Models
         /// </summary>
         public int DeleteNote(int id, string password)
         {
-            return con.Execute("BBS_DeleteNote",
+            return con.Execute("sp_BBS_DeleteNote",
                 new { Id = id, Password = password },
                 commandType: CommandType.StoredProcedure);
         }

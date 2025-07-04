@@ -10,10 +10,12 @@ using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Web;
 using System.Web.Configuration;
+using System.Web.Mvc;
 using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -44,7 +46,7 @@ namespace GiSanParkGolf.Class
             SqlCommand sqlCMD = new SqlCommand
             {
                 Connection = DB_Connection,
-                CommandText = "SYS_UserList",
+                CommandText = "sp_SYS_UserList",
                 CommandType = CommandType.StoredProcedure
             };
             sqlCMD.Parameters.AddWithValue("@Page", page);
@@ -70,7 +72,7 @@ namespace GiSanParkGolf.Class
             SqlCommand sqlCMD = new SqlCommand
             {
                 Connection = DB_Connection,
-                CommandText = "SYS_UserSearch",
+                CommandText = "sp_SYS_UserSearch",
                 CommandType = CommandType.StoredProcedure
             };
             sqlCMD.Parameters.AddWithValue("@Page", page);
@@ -100,7 +102,7 @@ namespace GiSanParkGolf.Class
                 SqlCommand sqlCMD = new SqlCommand
                 {
                     Connection = DB_Connection,
-                    CommandText = "SYS_UserCountALL",
+                    CommandText = "sp_SYS_UserCountALL",
                     CommandType = CommandType.StoredProcedure
                 };
                 sqlCMD.Parameters.AddWithValue("@ReadyUser", readyUser);
@@ -134,7 +136,7 @@ namespace GiSanParkGolf.Class
                 SqlCommand sqlCMD = new SqlCommand
                 {
                     Connection = DB_Connection,
-                    CommandText = "SYS_UserCount",
+                    CommandText = "sp_SYS_UserCount",
                     CommandType = CommandType.StoredProcedure
                 };
                 sqlCMD.Parameters.AddWithValue("@SearchField", searchField);
@@ -168,7 +170,7 @@ namespace GiSanParkGolf.Class
             SqlCommand sqlCMD = new SqlCommand
             {
                 Connection = DB_Connection,
-                CommandText = "Game_LoadList",
+                CommandText = "sp_Game_LoadList",
                 CommandType = CommandType.StoredProcedure
             };
             sqlCMD.Parameters.AddWithValue("@Page", page);
@@ -194,7 +196,7 @@ namespace GiSanParkGolf.Class
             SqlCommand sqlCMD = new SqlCommand
             {
                 Connection = DB_Connection,
-                CommandText = "SYS_UserList",
+                CommandText = "sp_SYS_UserList",
                 CommandType = CommandType.StoredProcedure
             };
             sqlCMD.Parameters.AddWithValue("@UserName", userName);
@@ -210,6 +212,17 @@ namespace GiSanParkGolf.Class
             DB_Connection.Close();
 
             return dataSet.Tables["Table"];
+        }
+
+        /// <summary>
+        /// GameCode 결과 리스트
+        /// </summary>
+        /// <param name="gameCode">GameCode</param>
+        public GameListModel GetGameInformation(string gameCode)
+        {
+            var parameters = new DynamicParameters(new { GameCode = gameCode });
+            return DB_Connection.Query<GameListModel>("sp_Game_LoadInformation", parameters,
+                commandType: CommandType.StoredProcedure).SingleOrDefault();
         }
 
         public UserViewModel GetUserByUserID(string userID)
@@ -311,7 +324,7 @@ namespace GiSanParkGolf.Class
             SqlCommand cmd = new SqlCommand
             {
                 Connection = DB_Connection,
-                CommandText = "SYS_UserLogin",
+                CommandText = "sp_SYS_UserLogin",
                 CommandType = CommandType.StoredProcedure
             };
 
@@ -352,7 +365,7 @@ namespace GiSanParkGolf.Class
             SqlCommand cmd = new SqlCommand
             {
                 Connection = DB_Connection,
-                CommandText = "SYS_UserLogOut",
+                CommandText = "sp_SYS_UserLogOut",
                 CommandType = CommandType.StoredProcedure
             };
 
