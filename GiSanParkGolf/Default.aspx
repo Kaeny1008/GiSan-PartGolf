@@ -9,10 +9,9 @@
     </style>
     <div class="row">
         <div class="col">
-            <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
-                NavigateUrl="~/BBS/BoardView.aspx?bbsId=notice">
-                공지사항
-            </asp:HyperLink>
+            <asp:LinkButton ID="LinkButton1" runat="server" PostBackUrl="~/BBS/BoardView.aspx?bbsId=notice">
+                <h5>[공지사항]</h5>
+            </asp:LinkButton>
             <asp:GridView ID="ctlBoardList"
                 runat="server" AutoGenerateColumns="False" DataKeyNames="Id"
                 CssClass="table table-bordered table-hover table-condensed 
