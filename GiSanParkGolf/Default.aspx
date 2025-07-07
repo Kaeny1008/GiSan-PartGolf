@@ -6,10 +6,14 @@
         .HyperLink:visited {
 	        color:black; 
         }
+        .MyLabel {
+          color: Black;
+          text-decoration: none;
+        }
     </style>
     <div class="row">
         <div class="col">
-            <asp:LinkButton ID="LinkButton1" runat="server" PostBackUrl="~/BBS/BoardView.aspx?bbsId=notice">
+            <asp:LinkButton ID="LinkButton1" runat="server" PostBackUrl="~/BBS/BoardView.aspx?bbsId=notice" CssClass="MyLabel">
                 <h5>[공지사항]</h5>
             </asp:LinkButton>
             <asp:GridView ID="ctlBoardList"
