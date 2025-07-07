@@ -162,15 +162,15 @@ namespace GiSanParkGolf.Class
         }
 
         /// <summary>
-        /// 대회 검색 결과 리스트
+        /// 대회 리스트
         /// </summary>
         /// <param name="page">페이지 번호</param>
-        public DataTable GetGameList(int page)
+        public DataTable GetGameALL(int page)
         {
             SqlCommand sqlCMD = new SqlCommand
             {
                 Connection = DB_Connection,
-                CommandText = "sp_Game_LoadList",
+                CommandText = "sp_GameList",
                 CommandType = CommandType.StoredProcedure
             };
             sqlCMD.Parameters.AddWithValue("@Page", page);
@@ -184,6 +184,100 @@ namespace GiSanParkGolf.Class
             DB_Connection.Close();
 
             return dataSet.Tables["Table"];
+        }
+
+        /// <summary>
+        /// 대회 검색 검색 리스트
+        /// </summary>
+        public DataTable GetGameSeachAll(int page, string searchField, string searchQuery)
+        {
+            SqlCommand sqlCMD = new SqlCommand
+            {
+                Connection = DB_Connection,
+                CommandText = "sp_GameSearch",
+                CommandType = CommandType.StoredProcedure
+            };
+            sqlCMD.Parameters.AddWithValue("@Page", page);
+            sqlCMD.Parameters.AddWithValue("@SearchField", searchField);
+            sqlCMD.Parameters.AddWithValue("@SearchQuery", searchQuery);
+
+            DB_Connection.Open();
+
+            SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
+            DataSet dataSet = new DataSet();
+            adapter.Fill(dataSet);
+
+            DB_Connection.Close();
+
+            return dataSet.Tables["Table"];
+        }
+
+        /// <summary>
+        /// Game_List 테이블의 모든 레코드 수
+        /// </summary>
+        public int GetGameCountAll()
+        {
+            try
+            {
+                int gameCount = 0;
+                SqlCommand sqlCMD = new SqlCommand
+                {
+                    Connection = DB_Connection,
+                    CommandText = "sp_GameCountALL",
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                DB_Connection.Open();
+
+                SqlDataReader sqlDR = sqlCMD.ExecuteReader();
+
+                while (sqlDR.Read())
+                {
+                    gameCount = sqlDR.GetInt32(0);
+                }
+
+                DB_Connection.Close();
+                return gameCount;
+            }
+            catch (System.Exception)
+            {
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// Game_List 검색 카운트
+        /// </summary>
+        public int GetGameCountBySearch(string searchField, string searchQuery)
+        {
+            try
+            {
+                int userCount = 0;
+                SqlCommand sqlCMD = new SqlCommand
+                {
+                    Connection = DB_Connection,
+                    CommandText = "sp_GameCountSearch",
+                    CommandType = CommandType.StoredProcedure
+                };
+                sqlCMD.Parameters.AddWithValue("@SearchField", searchField);
+                sqlCMD.Parameters.AddWithValue("@SearchQuery", searchQuery);
+
+                DB_Connection.Open();
+
+                SqlDataReader sqlDR = sqlCMD.ExecuteReader();
+
+                while (sqlDR.Read())
+                {
+                    userCount = sqlDR.GetInt32(0);
+                }
+
+                DB_Connection.Close();
+                return userCount;
+            }
+            catch (System.Exception)
+            {
+                return -1;
+            }
         }
 
         /// <summary>
@@ -221,7 +315,7 @@ namespace GiSanParkGolf.Class
         public GameListModel GetGameInformation(string gameCode)
         {
             var parameters = new DynamicParameters(new { GameCode = gameCode });
-            return DB_Connection.Query<GameListModel>("sp_Game_LoadInformation", parameters,
+            return DB_Connection.Query<GameListModel>("sp_GameInformation", parameters,
                 commandType: CommandType.StoredProcedure).SingleOrDefault();
         }
 
@@ -423,6 +517,18 @@ namespace GiSanParkGolf.Class
             DB_Connection.Close();
 
             return result;
+        }
+
+        /// <summary>
+        /// 최근 글 리스트 전체(최근 글 5개 리스트)
+        /// </summary>
+        public List<Note> GetRecentPosts(string bbsId)
+        {
+            string sql = "SELECT TOP 5 [Id], [Title], [Name], [PostDate]"
+                + ", ROW_NUMBER() Over (Order By Id) As 'RowNumber'"
+                + " FROM BBS_Notes"
+                + " Where Category = @Category Order By Id Desc";
+            return DB_Connection.Query<Note>(sql, new { Category = bbsId }).ToList();
         }
     }
 }

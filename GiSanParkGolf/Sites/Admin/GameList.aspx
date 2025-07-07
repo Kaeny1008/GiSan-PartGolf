@@ -4,33 +4,6 @@
 <%@ Register Src="~/Controls/SearchControl.ascx" TagPrefix="uc1" TagName="SearchControl" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <style>
-        .MainLabel {
-            text-align: center;
-            font-size: 30px;
-        }
-        /*클릭한적 없는*/
-        .HyperLink:link {
-	        color:blue; 
-            text-decoration:none;
-        }
-        /*한번이상 클릭*/
-        .HyperLink:visited {
-	        color:black; 
-            text-decoration:none;
-        }
-        /*마우스 오버*/
-        .HyperLink:hover {
-	        color:blue; 
-            text-decoration:underline;
-        }
-        /*클릭순간*/
-        .HyperLink:active {
-	        color:blue; 
-            text-decoration:none;
-        }
-    </style>
-
     <script language="javascript">
         function NewGameOpen(strPath) {
             <%--자바스크립트 새창열기 예제--%>
@@ -40,13 +13,17 @@
         }
     </script>
 
-    <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
-
     <div style="text-align: right;">
         <asp:Button ID="BTN_NewGame" runat="server" Text="신규대회 개최" class="btn btn-outline-success btn-lg" 
             OnClientClick="NewGameOpen('/Sites/Admin/GameCreate.aspx');return false;" />
     </div>
     <hr />
+    <uc1:SearchControl runat="server" ID="SearchControl" />
+    <hr />
+    <div style="font-style: italic; text-align: right; font-size: 8pt;">
+        Total Record:
+        <asp:Literal ID="lblTotalRecord" runat="server"></asp:Literal>
+    </div>
     <div>
         <h12>(대회명을 클릭하여 수정 / 확인)</h12><br />
     </div>
@@ -87,8 +64,8 @@
                 <ItemTemplate>
                     <%#Eval("GameDate","{0:yyyy-MM-dd}")%>
                 </ItemTemplate>
-                <HeaderStyle Width="30%" />
-                <ItemStyle Width="30%" />
+                <HeaderStyle Width="20%" />
+                <ItemStyle Width="20%" />
             </asp:TemplateField>
             <asp:TemplateField SortExpression="ContentPlace">
                 <HeaderTemplate>
@@ -100,7 +77,23 @@
                 <HeaderStyle Width="30%" />
                 <ItemStyle Width="30%" />
             </asp:TemplateField>
+            <asp:TemplateField SortExpression="ContentPlace">
+                <HeaderTemplate>
+                    <asp:Label ID="LB_Place" runat="server" Text="참가인원(신청)"></asp:Label>
+                </HeaderTemplate>
+                <ItemTemplate>
+                    준비중
+                </ItemTemplate>
+                <HeaderStyle Width="10%" />
+                <ItemStyle Width="10%" />
+            </asp:TemplateField>
         </Columns>
         <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
     </asp:GridView>
+
+    <div class="center_container">
+        <div>
+            <uc1:PagingControl runat="server" ID="PagingControl" />
+        </div>
+    </div>
 </asp:Content>

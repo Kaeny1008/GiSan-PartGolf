@@ -12,10 +12,24 @@ namespace GiSanParkGolf.Controls
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Debug.WriteLine(Request.ServerVariables["SCRIPT_NAME"]);
             // 검색 Textbox에서 엔터키를 누를때 검색버튼이 누르는 효과
             TB_SearchQuery.Attributes["onkeypress"] =
                "if (event.keyCode==13){" +
                Page.GetPostBackEventReference(BTN_Search) + "; return false;}";
+
+            //어떤 메뉴로 왔는지 따라 검색필드를 변경
+            if (Request.ServerVariables["SCRIPT_NAME"].Contains("Player Management"))
+            {
+                CB_ReadyUser.Visible = true;
+                DDL_SearchField.Items.Add(new ListItem("이름", "Name"));
+                DDL_SearchField.Items.Add(new ListItem("ID", "Id"));
+            } else
+            {
+                CB_ReadyUser.Visible = false;
+                DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
+                DDL_SearchField.Items.Add(new ListItem("개최지", "Stadium"));
+            }
 
             if (!Page.IsPostBack)
             {
@@ -70,7 +84,7 @@ namespace GiSanParkGolf.Controls
             }
 
             returnLink += returnLink2;
-            //Debug.WriteLine("검색 URL : " + returnLink);
+            Debug.WriteLine("검색 URL : " + returnLink);
             return returnLink;
         }
     }

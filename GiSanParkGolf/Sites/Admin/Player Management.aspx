@@ -5,30 +5,6 @@
 <%@ Register Src="~/Controls/SearchControl.ascx" TagPrefix="uc1" TagName="SearchControl" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <style>
-        /*클릭한적 없는*/
-        .HyperLink:link {
-	        color:blue; 
-            text-decoration:none;
-        }
-        /*한번이상 클릭*/
-        .HyperLink:visited {
-	        color:blue; 
-            text-decoration:none;
-        }
-        /*마우스 오버*/
-        .HyperLink:hover {
-	        color:blue; 
-            text-decoration:underline;
-        }
-        /*클릭순간*/
-        .HyperLink:active {
-	        color:blue; 
-            text-decoration:none;
-        }
-    </style>
-     <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
-
     <div>
         <uc1:SearchControl runat="server" ID="SearchControl" />
         <hr />
@@ -39,7 +15,7 @@
         <asp:Label ID="LabelResult" runat="server" Text="선택정보" Visible="false"></asp:Label>
         <h12>(선수이름을 클릭하여 수정)</h12><br />
 
-            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False"
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False"
             CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
         <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
         <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
@@ -117,9 +93,10 @@
                 <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
         </asp:GridView>
 
-        <div style="text-align: center;">
-            <uc1:PagingControl runat="server"
-                ID="PagingControl" />
+        <div class="center_container">
+            <div>
+                <uc1:PagingControl runat="server" ID="PagingControl" />
+            </div>
         </div>
     </div>
 </asp:Content>

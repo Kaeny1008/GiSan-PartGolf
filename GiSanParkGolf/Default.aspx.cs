@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.EnterpriseServices;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
@@ -35,6 +36,9 @@ namespace GiSanParkGolf
                 Debug.WriteLine("인증이 되어 있으므로 쿠키를 불러온다.");
                 LoadCookie();
             }
+
+            ctlBoardList.DataSource = Global.dbManager.GetRecentPosts("notice");
+            ctlBoardList.DataBind();
         }
 
         protected Boolean LoadCookie()

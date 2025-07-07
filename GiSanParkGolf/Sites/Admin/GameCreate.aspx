@@ -1,31 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="GameCreate.aspx.cs" Inherits="GiSanParkGolf.Sites.Admin.GameCreate" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <style>
-        .Center_Container {
-            width: 100%;
-            min-height: 100%;
-            display: flex;
-            align-items: center; /*세로*/
-            justify-content: center; /*가로*/
-        }
-        .Login_Container_Content {
-            /*background-color: aliceblue;*/
-            text-align: center;
-        }
-        .input-group-text{
-            width: 150px;
-            text-align: center;
-        }
-        .form-control{
-            text-align: center;
-            min-width: 400px;
-        }
-        .redfont{
-            color:red;
-            font-size:15px;
-        }
-    </style>
     <script language="javascript">
         function ValidateCheck() {
             var isValid = false;
@@ -39,9 +14,29 @@
             $("#SaveModal").modal("show");
         }
     </script>
+    <style>
+        .input-group{
+            text-align: center;
+            width: 500px; /*이 값에 따라 Textbox가 변한다.*/
+        }
+        .input-group-text{
+            width: 150px;
+            text-align: center;
+        }
+        .redfont{
+            color:red;
+        }
+        .form-control{
+            background-color:aliceblue;
+        }
+        .bc-white{
+            background-color:white;
+        }
+    </style>
 
-    <div class="Center_Container">
-        <div class="Login_Container_Content">
+
+    <div class="center_container">
+        <div>
             <div class="input-group mb-3">
                 <span class="input-group-text redfont">대회명</span>
                 <asp:TextBox ID="TB_GameName" runat="server" class="form-control"></asp:TextBox>
@@ -72,7 +67,7 @@
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">비고</span>
-                <asp:TextBox ID="TB_Note" runat="server" class="form-control" Height="300px" TextMode="MultiLine"></asp:TextBox>
+                <asp:TextBox ID="TB_Note" runat="server" class="form-control bc-white" Height="300px" TextMode="MultiLine"></asp:TextBox>
             </div>
             <br />
             <asp:button ID="BTN_Save" type="button" runat="server" 
@@ -83,6 +78,8 @@
                 OnClientClick="ValidateCheck();return false;" />
         </div>
     </div>
+
+
 
     <!-- 유효성검사 -->
     <asp:RequiredFieldValidator ID="RequiredFieldValidator1" 

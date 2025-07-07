@@ -399,7 +399,6 @@
     <Compile Include="Sites\Admin\GameCreate.aspx.designer.cs">
       <DependentUpon>GameCreate.aspx</DependentUpon>
     </Compile>
-    <Compile Include="UpdateHistory.cs" />
     <Compile Include="Sites\Login\Admin Alert.aspx.cs">
       <DependentUpon>Admin Alert.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -490,6 +489,7 @@
     <Folder Include="BBS\Documents\" />
     <Folder Include="BBS\images\" />
     <Folder Include="BBS\MyFiles\" />
+    <Folder Include="Sites\Player\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

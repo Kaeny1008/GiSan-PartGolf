@@ -11,34 +11,11 @@
             text-align: center;
             font-size: 30px;
         }
-        /*클릭한적 없는*/
-        .HyperLink:link {
-	        color:blue; 
-            text-decoration:none;
-        }
         /*한번이상 클릭*/
         .HyperLink:visited {
 	        color:black; 
-            text-decoration:none;
-        }
-        /*마우스 오버*/
-        .HyperLink:hover {
-	        color:blue; 
-            text-decoration:underline;
-        }
-        /*클릭순간*/
-        .HyperLink:active {
-	        color:blue; 
-            text-decoration:none;
-        }
-        .table_backcolor{
-            background-color:red;
         }
     </style>
-
-    <script language="javascript">
-
-    </script>
 
     <div style="text-align: center;"><asp:Label ID="LBMainTitle" runat="server" Class="MainLabel">게시판</asp:Label></div>
     <span style="color: #ff0000">게시판입니다.</span>
