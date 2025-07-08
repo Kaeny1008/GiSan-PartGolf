@@ -19,6 +19,7 @@ namespace GiSanParkGolf
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            return;
             // Determine current view
             var isMobile = WebFormsFriendlyUrlResolver.IsMobileView(new HttpContextWrapper(Context));
             CurrentView = isMobile ? "Mobile" : "Desktop";

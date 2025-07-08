@@ -1,4 +1,7 @@
-﻿namespace Dul
+﻿using System;
+using System.ComponentModel.Design;
+
+namespace Dul
 {
     public static class StringLibrary
     {
@@ -38,6 +41,39 @@
                 {
                     result = si.SubstringByTextElements(0, length - 3) + "" + suffix;
                 }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 경기상태 문자변환
+        /// </summary>
+        /// <param name="str">DB의 경기상태</param>
+        /// <param name="startdate">모집시작 일시</param>
+        /// <param name="startdate">모집종료 일시</param>
+        /// <returns>준비중, 모집중, 종료</returns>
+        public static string StatusStringConvert(string str, DateTime startdate, DateTime enddate)
+        {
+            string result;
+            switch (str)
+            {
+                case "End":
+                    result = "대회종료";
+                    break;
+                default:
+                    DateTime nowDate = DateTime.Now;
+                    DateTime newStartDate = new DateTime(startdate.Year, startdate.Month, startdate.Day, 0, 0, 0);
+                    DateTime newEndDate = new DateTime(enddate.Year, enddate.Month, enddate.Day, 23, 59, 59);
+                    if (nowDate >= newStartDate && nowDate <= newEndDate)
+                    {
+                        result = "모집중";
+                    } 
+                    else
+                    {
+                        result = "준비중";
+                    }
+                    break;
             }
 
             return result;

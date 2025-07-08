@@ -50,7 +50,7 @@ namespace GiSanParkGolf.Models
         [Required(ErrorMessage = "* 대회명을 입력하여 주십시오.")]
         public string GameName { get; set; }
         public string GameNote { get; set; }
-
         public string GameStatus { get; set; }
+        public string RowNumber { get; set; }
     }
 }

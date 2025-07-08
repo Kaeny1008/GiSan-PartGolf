@@ -87,7 +87,7 @@
                         <%#Eval("UserNote")%>
                     </ItemTemplate>
                     <HeaderStyle Width="50%" />
-                    <ItemStyle Width="50%" />
+                    <ItemStyle Width="50%" HorizontalAlign="left"/>
                 </asp:TemplateField>
             </Columns>
                 <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />

@@ -91,7 +91,7 @@
                                     대회참가 신청
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="/">신청서 작성</a></li>
+                                    <li><a class="dropdown-item" href="/Sites/Player/JoinGame">대회참가 신청</a></li>
                                     <li><a class="dropdown-item" href="/">신청 확인</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="/">경기결과 확인</a></li>

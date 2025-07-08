@@ -37,8 +37,10 @@ namespace GiSanParkGolf
                 LoadCookie();
             }
 
-            ctlBoardList.DataSource = Global.dbManager.GetRecentPosts("notice");
-            ctlBoardList.DataBind();
+            NoticeList.DataSource = Global.dbManager.GetNoticeRecentPosts("notice");
+            NoticeList.DataBind();
+            GameList.DataSource = Global.dbManager.GetGameList(2);
+            GameList.DataBind();
         }
 
         protected Boolean LoadCookie()

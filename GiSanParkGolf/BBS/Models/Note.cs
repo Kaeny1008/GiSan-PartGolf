@@ -46,7 +46,6 @@ namespace BBS.Models
         public int CommentCount { get; set; }
         public string Category { get; set; }  // 자유게시판(Free) 기본
         public string UserID { get; set; }
-
         public string RowNumber { get; set; }
     }
 }

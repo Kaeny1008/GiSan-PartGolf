@@ -1,25 +1,18 @@
 ﻿using BBS.Models;
 using Dapper;
 using GiSanParkGolf.Models;
-using GiSanParkGolf.Sites.UserManagement;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
-using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Web;
 using System.Web.Configuration;
-using System.Web.Mvc;
 using System.Web.Security;
-using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Xml.Linq;
 using T_Engine;
 
 namespace GiSanParkGolf.Class
@@ -520,15 +513,35 @@ namespace GiSanParkGolf.Class
         }
 
         /// <summary>
-        /// 최근 글 리스트 전체(최근 글 5개 리스트)
+        /// 공지사항 최근 글 리스트(최근 글 5개 리스트)
         /// </summary>
-        public List<Note> GetRecentPosts(string bbsId)
+        public List<Note> GetNoticeRecentPosts(string bbsId)
         {
             string sql = "SELECT TOP 5 [Id], [Title], [Name], [PostDate]"
                 + ", ROW_NUMBER() Over (Order By Id) As 'RowNumber'"
                 + " FROM BBS_Notes"
                 + " Where Category = @Category Order By Id Desc";
             return DB_Connection.Query<Note>(sql, new { Category = bbsId }).ToList();
+        }
+
+        /// <summary>
+        /// 최근 대회 리스트(최근 글 5개 리스트)
+        /// </summary>
+        /// <param name="topcount">최근글 몇개를 불러올지</param>
+        public List<GameListModel> GetGameList(int topcount)
+        {
+            var parameters = new DynamicParameters(new { TopCount = topcount });
+            return DB_Connection.Query<GameListModel>("sp_GameList_Recent", parameters,
+                commandType: CommandType.StoredProcedure).ToList();
+        }
+
+        /// <summary>
+        /// 활성화된 대회 리스트(최근 글 5개 리스트)
+        /// </summary>
+        public List<GameListModel> GetGameReadyList()
+        {
+            return DB_Connection.Query<GameListModel>("sp_GameList_Ready", null,
+                commandType: CommandType.StoredProcedure).ToList();
         }
     }
 }
