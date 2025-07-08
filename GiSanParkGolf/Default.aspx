@@ -11,10 +11,11 @@
           text-decoration: none;
         }
     </style>
-    <div class="row">
-        <div class="col">
-            <asp:LinkButton ID="LinkButton1" runat="server" PostBackUrl="~/BBS/BoardView.aspx?bbsId=notice" CssClass="NoneDeco">
-                <h5>[공지사항]</h5>
+    <div class="row g-3">
+        <div class="col" style="background-color:aliceblue">
+            <br />
+            <asp:LinkButton ID="LinkButton1" runat="server" PostBackUrl="~/BBS/BoardView.aspx?bbsId=notice" CssClass="NoneDeco text-center">
+                <h5 style="color:cadetblue">[공지사항]</h5>
             </asp:LinkButton>
             <asp:GridView ID="NoticeList"
                 runat="server" AutoGenerateColumns="False"
@@ -69,9 +70,10 @@
                 </Columns>
             </asp:GridView>
         </div>
-        <div class="col">
-            <asp:LinkButton ID="LinkButton2" runat="server" PostBackUrl="~/" CssClass="NoneDeco">
-                <h5>[대회]</h5>
+        <div class="col" style="background-color:antiquewhite">
+            <br />
+            <asp:LinkButton ID="LinkButton2" runat="server" PostBackUrl="~/Sites/Player/JoinGame" CssClass="NoneDeco text-center">
+                <h5 style="color:brown">[대회목록]</h5>
             </asp:LinkButton>
             <asp:GridView ID="GameList"
                 runat="server" AutoGenerateColumns="False"

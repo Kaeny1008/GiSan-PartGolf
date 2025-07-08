@@ -135,6 +135,7 @@
         
             <div class="container body-content">
                 <hr />
+                <br />
                 <div class="column">
                     <asp:ContentPlaceHolder ID="MainContent" runat="server">
                     </asp:ContentPlaceHolder>
@@ -143,7 +144,7 @@
             </div>
             <div class="container body-content">
                 <footer>
-                    <p>&copy; <%: DateTime.Now.Year %> - 기산 파크골프</p>
+                    <p>&copy; 2025 - 기산 파크골프</p>
                 </footer>
             </div>
         </form>
