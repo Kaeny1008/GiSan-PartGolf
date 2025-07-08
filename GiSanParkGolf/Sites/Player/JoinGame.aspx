@@ -2,7 +2,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <div id="MainDIV" runat="server">
         <h5>[참여가능 대회 목록]</h5>
-        <h8>대회명을 선택하여 참가신청서를 작성하십시오.</h8>
+        <h8>참가하려는 대회명을 선택하여 참가신청을 하십시오.</h8>
         <asp:GridView ID="GameList"
             runat="server" AutoGenerateColumns="False"
             CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
@@ -26,7 +26,7 @@
                     <ItemTemplate>
                         <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink" 
                             NavigateUrl=<%# "~/Sites/Player/JoinGame.aspx?GameCode=" + Eval("GameCode")%>>
-                            <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 30) %>
+                            <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 25) %>
                         </asp:HyperLink>
                     </ItemTemplate>
                     <HeaderStyle Width="200px" />
@@ -38,6 +38,16 @@
                     </HeaderTemplate>
                     <ItemTemplate>
                         <%#Eval("StadiumName")%>
+                    </ItemTemplate>
+                    <HeaderStyle Width="120px" />
+                    <ItemStyle Width="120px" />
+                </asp:TemplateField>
+                <asp:TemplateField>
+                    <HeaderTemplate>
+                        <asp:Label ID="LB_Writer" runat="server" Text="주최자"></asp:Label>
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <%#Eval("GameHost")%>
                     </ItemTemplate>
                     <HeaderStyle Width="120px" />
                     <ItemStyle Width="120px" />

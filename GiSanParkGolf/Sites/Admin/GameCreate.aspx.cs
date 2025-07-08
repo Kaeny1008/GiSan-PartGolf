@@ -12,45 +12,50 @@ namespace GiSanParkGolf.Sites.Admin
 {
     public partial class GameCreate : System.Web.UI.Page
     {
-        private String gameCode = null;
-        private string ipaddr = null;
+        private static String gameCode = null;
+        private static string ipaddr = null;
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            //if (Page.User.Identity.IsAuthenticated)
-            //{
-            //    if (!Global.uvm.UserClass.Equals(1))
-            //    {
-            //        Response.Redirect("~/Sites/Login/Admin Alert.aspx");
-            //        return;
-            //    }
-            //}
-            //else
-            //{
-            //    Response.Redirect("~/Sites/Login/Admin Alert.aspx");
-            //    return;
-            //}
-
-            ipaddr = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
-
-            DateTime now = DateTime.Now;
-            string formattedDate = now.ToString("yyyy-MM-dd");
-            TB_GameDate.Text = formattedDate;
-            TB_StartDate.Text = formattedDate;
-
-            DateTime addDay = now.AddDays(15);
-            string formattedAddDay = addDay.ToString("yyyy-MM-dd");
-            TB_EndDate.Text = formattedAddDay;
-
-            if (!string.IsNullOrEmpty(Request.QueryString["gamecode"]))
+            if (Page.User.Identity.IsAuthenticated)
             {
-                gameCode = Request.QueryString["gamecode"];
-                LoadGame(gameCode);
-                BTN_Save.Text = "수정";
+                if (!Global.uvm.UserClass.Equals(1))
+                {
+                    Response.Redirect("~/Sites/Login/Admin Alert.aspx");
+                    return;
+                }
             }
             else
             {
-                gameCode = null;
-                BTN_Save.Text = "저장";
+                Response.Redirect("~/Sites/Login/Admin Alert.aspx");
+                return;
+            }
+
+            ipaddr = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+
+            if (!Page.IsPostBack)
+            {
+                if (!string.IsNullOrEmpty(Request.QueryString["gamecode"]))
+                {
+
+                    gameCode = Request.QueryString["gamecode"];
+                    LoadGame(gameCode);
+                    BTN_Save.Text = "수정";
+                }
+                else
+                {
+                    DateTime now = DateTime.Now;
+                    string formattedDate = now.ToString("yyyy-MM-dd");
+                    TB_GameDate.Text = formattedDate;
+                    TB_StartDate.Text = formattedDate;
+
+                    DateTime addDay = now.AddDays(15);
+                    string formattedAddDay = addDay.ToString("yyyy-MM-dd");
+                    TB_EndDate.Text = formattedAddDay;
+
+                    gameCode = null;
+                    BTN_Save.Text = "저장";
+                }
             }
         }
 

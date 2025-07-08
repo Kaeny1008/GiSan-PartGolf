@@ -55,7 +55,7 @@
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text redfont">홀당 최대인원</span>
-                <asp:TextBox ID="TB_HoleMaximum" runat="server" class="form-control"></asp:TextBox>
+                <asp:TextBox ID="TB_HoleMaximum" runat="server" class="form-control" TextMode="Number" Text="4"></asp:TextBox>
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text redfont">모집시작</span>

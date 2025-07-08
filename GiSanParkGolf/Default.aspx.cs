@@ -39,7 +39,7 @@ namespace GiSanParkGolf
 
             NoticeList.DataSource = Global.dbManager.GetNoticeRecentPosts("notice");
             NoticeList.DataBind();
-            GameList.DataSource = Global.dbManager.GetGameList(2);
+            GameList.DataSource = Global.dbManager.GetGameList(5);
             GameList.DataBind();
         }
 

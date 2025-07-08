@@ -51,7 +51,7 @@
                 <ItemTemplate>
                     <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
                         NavigateUrl='<%# "GameCreate.aspx?gamecode=" + Eval("GameCode") %>'>
-                        <%#Eval("GameName")%>
+                        <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 30) %>
                     </asp:HyperLink>
                 </ItemTemplate>
                 <HeaderStyle Width="30%" />
