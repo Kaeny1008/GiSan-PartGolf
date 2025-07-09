@@ -11,16 +11,17 @@ namespace GiSanParkGolf.Sites.Player
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            // 참가취소로 온경우
+            if (!string.IsNullOrEmpty(Request.QueryString["GameCancel"]))
+            {
+
+            }
+
             if (!Page.IsPostBack)
             {
                 GameList.DataSource = Global.dbManager.GetMyGameList(Global.uvm.UserID);
                 GameList.DataBind();
             }
-        }
-
-        protected void BTN_Save_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }
