@@ -17,17 +17,19 @@
     <style>
         .input-group{
             text-align: center;
-            width: 500px; /*이 값에 따라 Textbox가 변한다.*/
+            width:100%;
         }
         .input-group-text{
-            width: 150px;
+            min-width: 30%;
+            max-width: 30%;
             text-align: center;
         }
         .redfont{
             color:red;
         }
         .form-control{
-            background-color:aliceblue;
+            min-width: 70%;
+            max-width: 70%;
         }
         .bc-white{
             background-color:white;
@@ -36,7 +38,7 @@
 
 
     <div class="center_container">
-        <div>
+        <div style="width:40%">
             <div class="input-group mb-3">
                 <span class="input-group-text redfont">대회명</span>
                 <asp:TextBox ID="TB_GameName" runat="server" class="form-control"></asp:TextBox>

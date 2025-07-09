@@ -1,7 +1,6 @@
 ﻿<%@ Page Title="회원가입" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="UserRepositories.aspx.cs" Inherits="GiSanParkGolf.Sites.UserManagement.UserRepositories" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <link href="/Class/StyleSheet.css?after" rel="stylesheet" type="text/css"/>
     <script language="javascript">
         //function GenderValidate(source, arguments) {
         //    if (arguments.Value == "선택") {
@@ -70,9 +69,14 @@
             $("#SaveModal").modal("show");
         }
     </script>
+    <style>
+        .input-group-text{
+            width: 150px;
+        }
+    </style>
 
-    <div class="Center_Container">
-        <div class="Login_Container_Content">
+    <div class="center_container">
+        <div>
             <div>
                 <div class="alert alert-success d-flex align-items-center" role="alert">
                     <svg xmlns="http://www.w3.org/2000/svg" 

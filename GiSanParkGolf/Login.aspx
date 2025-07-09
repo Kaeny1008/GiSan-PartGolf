@@ -1,10 +1,8 @@
 ﻿<%@ Page Title="Login" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="GiSanParkGolf.Login" %>
 
-<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
-    
-    <div class="Center_Container">
-        <div class="Login_Container_Content">
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="center_container">
+        <div>
             <br />
             <br />
             <br />
@@ -21,11 +19,11 @@
             </div>
             <br />
             <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon1">ID</span>
+                <span class="input-group-text" id="basic-addon1" style="width:100px">ID</span>
                 <asp:TextBox ID="txtUserID" runat="server" class="form-control" placeholder="" />
             </div>
             <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon2">비밀번호</span>
+                <span class="input-group-text" id="basic-addon2" style="width:100px">비밀번호</span>
                 <asp:TextBox ID="txtPassword" runat="server" class="form-control" placeholder="" TextMode="Password" />
             </div>
             <br />

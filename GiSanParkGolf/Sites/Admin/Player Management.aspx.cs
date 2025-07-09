@@ -11,20 +11,12 @@ namespace GiSanParkGolf.Sites.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Page.User.Identity.IsAuthenticated)
-            {
-                if (!Global.uvm.UserClass.Equals(1))
-                {
-                    Response.Redirect("~/Sites/Login/Admin Alert.aspx");
-                    return;
-                }
-            } 
-            else
+            if (!Global.uvm.UserClass.Equals(1))
             {
                 Response.Redirect("~/Sites/Login/Admin Alert.aspx");
                 return;
             }
-            
+
             if (!string.IsNullOrEmpty(Request.QueryString["ReadyUser"]))
             {
                 searchProperty.ReadyUser = Request.QueryString["ReadyUser"];

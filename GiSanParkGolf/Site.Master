@@ -43,7 +43,7 @@
         
             <script type="text/javascript" language="javascript">
                 function go_loginpage() {
-                    location.href = "/Sites/Login/Login";
+                    location.href = "/Login";
                     return false;
                 }
                 function go_logoutpage() {
@@ -65,51 +65,76 @@
 
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div class="container">
-                    <a class="navbar-brand" href="/">기산 파크골프</a>
+                    <% if (Page.User.Identity.IsAuthenticated)
+                        {
+                    %>
+                        <a class="navbar-brand" href="/">
+                    <% 
+                        }
+                        else
+                        {
+                    %>
+                        <a class="navbar-brand" href="/Login">
+                    <% 
+                        }
+                    %>
+                    기산 파크골프
+                    </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="/">홈</a>
-                            </li>
+
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" id="navbarDropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     관리자 페이지
                                 </a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="/Sites/Admin/GameList">대회개최</a></li>
-                                    <li><a class="dropdown-item" href="/">인원 코스 및 배치</a></li>
-                                    <li><a class="dropdown-item" href="/">대회결과 입력</a></li>
-                                </ul>
+                                <% if (Page.User.Identity.IsAuthenticated)
+                                    {
+                                %>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="/Sites/Admin/GameList">대회개최</a></li>
+                                        <li><a class="dropdown-item" href="/">인원 코스 및 배치</a></li>
+                                        <li><a class="dropdown-item" href="/">대회결과 입력</a></li>
+                                    </ul>
+                                <% 
+                                    }
+                                %>
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    대회참가 신청
+                                    선수 페이지
                                 </a>
+                                <% if (Page.User.Identity.IsAuthenticated)
+                                    {
+                                %>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="/Sites/Player/JoinGame">대회참가 신청</a></li>
-                                    <li><a class="dropdown-item" href="/">신청 확인</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="/">경기결과 확인</a></li>
+                                    <li><a class="dropdown-item" href="/Sites/Player/MyGame">내 대회</a></li>
                                 </ul>
+                                <% 
+                                    } 
+                                %>
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     게시판
                                 </a>
+                                <% if (Page.User.Identity.IsAuthenticated)
+                                    {
+                                %>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="/BBS/Default.aspx?bbsId=notice">공지사항</a></li>
                                 </ul>
+                                <% 
+                                    } 
+                                %>
                             </li>
                         </ul>
-    <%--                    <form class="d-flex">
-                            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                            <button class="btn btn-outline-success" type="submit">Search</button>
-                        </form>--%>
                     </div>
                 </div>
             </nav>

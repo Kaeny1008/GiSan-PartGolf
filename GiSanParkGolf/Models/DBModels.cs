@@ -52,5 +52,62 @@ namespace GiSanParkGolf.Models
         public string GameNote { get; set; }
         public string GameStatus { get; set; }
         public string RowNumber { get; set; }
+
+        [Display(Name = "참가인원 수")]
+        public int ParticipantNumber { get; set; }
+    }
+
+    /// <summary>
+    /// UserViewModel 클래스: SYS_Users 테이블과 일대일 매핑되는 ViewModel 클래스
+    /// </summary>
+    public class UserViewModel
+    {
+        public string UserID { get; set; }
+        public string Password { get; set; }
+        public string UserName { get; set; }
+        public string UserWClass { get; set; }
+        public int UserClass { get; set; }
+    }
+
+    /// <summary>
+    /// SelectUserViewModel 클래스: ...
+    /// </summary>
+    public class SelectUserViewModel
+    {
+        public string UserID { get; set; }
+        public string UserName { get; set; }
+        public string UserPassword { get; set; }
+        public int UserNumber { get; set; }
+        public int UserGender { get; set; }
+        public string UserAddress { get; set; }
+        public string UserAddress2 { get; set; }
+        public DateTime UserRegistrationDate { get; set; }
+        public string UserNote { get; set; }
+        public string UserWClass { get; set; }
+        public int UserClass { get; set; }
+    }
+
+    /// <summary>
+    /// GameJoinUserModel 클래스: Game_JoinUser 테이블과 매핑
+    /// </summary>
+    public class GameJoinUserModel
+    {
+        [Display(Name = "JoinId")]
+        public string JoinId { get; set; }
+
+        [Display(Name = "UserId")]
+        public string UserId { get; set; }
+
+        [Display(Name = "JoinDate")]
+        public DateTime JoinDate { get; set; }
+
+        [Display(Name = "JoinIP")]
+        public string JoinIP { get; set; }
+
+        [Display(Name = "JoinStatus")]
+        public string JoinStatus { get; set; }
+
+        [Display(Name = "GameCode")]
+        public string GameCode { get; set; }
     }
 }

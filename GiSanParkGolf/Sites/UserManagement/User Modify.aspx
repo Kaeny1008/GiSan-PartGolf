@@ -1,7 +1,6 @@
 ﻿<%@ Page Title="정보수정" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="User Modify.aspx.cs" Inherits="GiSanParkGolf.Sites.UserManagement.User_Modify" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <link href="/Class/StyleSheet.css?after" rel="stylesheet" type="text/css"/>
     <script language="javascript" type="text/javascript">
         function functionx(evt) {
             if (evt.charCode > 31 && (evt.charCode < 48 || evt.charCode > 57)) {
@@ -52,9 +51,14 @@
             $("#SaveModal").modal("show");
         }
     </script>
+    <style>
+        .input-group-text{
+            width: 150px;
+        }
+    </style>
 
-    <div class="Center_Container">
-        <div class="Login_Container_Content">
+    <div class="center_container">
+        <div>
             <div>
                 <div class="alert alert-success d-flex align-items-center" role="alert">
                     <svg xmlns="http://www.w3.org/2000/svg" 

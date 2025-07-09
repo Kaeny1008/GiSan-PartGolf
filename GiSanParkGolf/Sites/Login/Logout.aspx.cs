@@ -32,7 +32,7 @@ namespace GiSanParkGolf
             };
             HttpContext.Current.Response.Cookies.Add(cookie);
 
-            Response.Redirect("~/Default.aspx");
+            Response.Redirect("~/Login.aspx");
         }
     }
 }

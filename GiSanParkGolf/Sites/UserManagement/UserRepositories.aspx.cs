@@ -60,7 +60,7 @@ namespace GiSanParkGolf.Sites.UserManagement
 
             if (writeResult.Equals("Success"))
             {
-                string strJs = "<script>alert('가입 승인대기 되었습니다.'); location.href='/Default.aspx';</script>";
+                string strJs = "<script>alert('가입 승인대기 되었습니다.'); location.href='/Login.aspx';</script>";
                 Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
             }
             else

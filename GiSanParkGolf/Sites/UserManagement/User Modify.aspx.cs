@@ -1,12 +1,7 @@
 ﻿using GiSanParkGolf.Class;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Security.Policy;
-using System.Web;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 using T_Engine;
 
 namespace GiSanParkGolf.Sites.UserManagement
@@ -85,6 +80,7 @@ namespace GiSanParkGolf.Sites.UserManagement
             {
                 //모달을 닫을때 사용(근데 자동으로 닫히는데?)
                 //ClientScript.RegisterStartupScript(this.GetType(), "alert", "CloseModal();", true);
+                Global.uvm.UserName = txtName.Text;
                 Debug.WriteLine("이전 위치로 이동한다. : " + prePage);
                 Response.Redirect(prePage);
                 //string strJs = "<script>alert('수정 되었습니다.'); location.href='/Default';</script>";

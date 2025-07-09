@@ -79,10 +79,10 @@
             </asp:TemplateField>
             <asp:TemplateField SortExpression="ContentPlace">
                 <HeaderTemplate>
-                    <asp:Label ID="LB_Place" runat="server" Text="참가인원(신청)"></asp:Label>
+                    <asp:Label ID="LB_Place" runat="server" Text="참가인원"></asp:Label>
                 </HeaderTemplate>
                 <ItemTemplate>
-                    준비중
+                    <%#Eval("ParticipantNumber")%>
                 </ItemTemplate>
                 <HeaderStyle Width="10%" />
                 <ItemStyle Width="10%" />

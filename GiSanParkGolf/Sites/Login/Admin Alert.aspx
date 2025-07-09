@@ -1,10 +1,8 @@
 ﻿<%@ Page Title="Login" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Admin Alert.aspx.cs" Inherits="GiSanParkGolf.Sites.Login.Admin_Alert" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <link href="/Class/StyleSheet.css?after" rel="stylesheet"/>
-    
-    <div class="Center_Container">
-        <div class="Login_Container_Content">
+    <div class="center_container">
+        <div>
             <br />
             <br />
             <br />
@@ -20,18 +18,6 @@
                 </div>
             </div>
             <br />
-            <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon1">ID</span>
-                <asp:TextBox ID="txtUserID" runat="server" class="form-control" placeholder="" />
-            </div>
-            <div class="input-group mb-3">
-                <span class="input-group-text" id="basic-addon2">비밀번호</span>
-                <asp:TextBox ID="txtPassword" runat="server" class="form-control" placeholder="" TextMode="Password" />
-            </div>
-            <br />
-            <br />
-            <asp:Button ID="btnLogin" runat="server" Text="로그인" class="btn btn-primary" OnClick="BtnLogin_Click" ValidationGroup="UserLogin" />
-            <asp:Button ID="BtnRegister" runat="server" Text="회원가입" class="btn btn-secondary" OnClick="BtnRegister_Click" />
             <br />
             <br />
             <br />
@@ -39,25 +25,6 @@
             <br />
             <br />
             <br />
-            <asp:RequiredFieldValidator ID="RequiredFieldValidator2" 
-                runat="server"
-                ErrorMessage="ID를 입력하여 주십시오." 
-                ControlToValidate="txtUserID"
-                Display="None" 
-                ForeColor="red" 
-                ValidationGroup="UserLogin"/><br />
-            <asp:RequiredFieldValidator ID="RequiredFieldValidator1" 
-                runat="server"
-                ErrorMessage="비밀번호를 입력하여 주십시오." 
-                ControlToValidate="txtPassword"
-                Display="None" 
-                ForeColor="red" 
-                ValidationGroup="UserLogin"/><br />
-            <asp:ValidationSummary ID="ValidationSummary_SignupForm"
-                ShowMessageBox="true" 
-                ShowSummary="false"
-                HeaderText="다음 사항을 확인하여 주십시오."
-                runat="server" ValidationGroup="UserLogin" />
         </div>
     </div>
 </asp:Content>

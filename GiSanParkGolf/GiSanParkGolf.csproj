@@ -148,7 +148,6 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Controls\PagingControl.ascx" />
     <Content Include="Controls\SearchControl.ascx" />
-    <Content Include="Database\Database.accdb" />
     <Content Include="BBS\BoardCommentDelete.aspx" />
     <Content Include="BBS\BoardDelete.aspx" />
     <Content Include="BBS\BoardDown.aspx" />
@@ -175,7 +174,7 @@
     <Content Include="Sites\Admin\GameList.aspx" />
     <Content Include="Sites\Login\Admin Alert.aspx" />
     <Content Include="Sites\Admin\Player Information.aspx" />
-    <Content Include="Sites\Login\Login.aspx" />
+    <Content Include="Login.aspx" />
     <Content Include="Sites\Login\Logout.aspx" />
     <Content Include="Sites\Admin\Player Management.aspx" />
     <Content Include="Content\Site.css" />
@@ -243,6 +242,7 @@
     <Content Include="Site.Master" />
     <Content Include="Sites\Admin\GameCreate.aspx" />
     <Content Include="Sites\Player\JoinGame.aspx" />
+    <Content Include="Sites\Player\MyGame.aspx" />
     <Content Include="Sites\UserManagement\User Modify.aspx" />
     <Content Include="Sites\UserManagement\UserRepositories.aspx" />
     <Content Include="ViewSwitcher.ascx" />
@@ -385,7 +385,7 @@
     <Compile Include="Controls\SearchControl.ascx.designer.cs">
       <DependentUpon>SearchControl.ascx</DependentUpon>
     </Compile>
-    <Compile Include="Models\GameListModel.cs" />
+    <Compile Include="Models\DBModels.cs" />
     <Compile Include="Sites\Admin\GameList.aspx.cs">
       <DependentUpon>GameList.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -414,11 +414,11 @@
     <Compile Include="Sites\Admin\Player Information.aspx.designer.cs">
       <DependentUpon>Player Information.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Sites\Login\Login.aspx.cs">
+    <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Sites\Login\Login.aspx.designer.cs">
+    <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
     <Compile Include="Sites\Login\Logout.aspx.cs">
@@ -428,7 +428,6 @@
     <Compile Include="Sites\Login\Logout.aspx.designer.cs">
       <DependentUpon>Logout.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Models\UserViewModel.cs" />
     <Compile Include="Class\DB_Management.cs" />
     <Compile Include="Sites\Admin\Player Management.aspx.cs">
       <DependentUpon>Player Management.aspx</DependentUpon>
@@ -469,6 +468,13 @@
     </Compile>
     <Compile Include="Sites\Player\JoinGame.aspx.designer.cs">
       <DependentUpon>JoinGame.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Sites\Player\MyGame.aspx.cs">
+      <DependentUpon>MyGame.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Sites\Player\MyGame.aspx.designer.cs">
+      <DependentUpon>MyGame.aspx</DependentUpon>
     </Compile>
     <Compile Include="Sites\UserManagement\User Modify.aspx.cs">
       <DependentUpon>User Modify.aspx</DependentUpon>

@@ -7,11 +7,14 @@ using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Drawing;
+using System.EnterpriseServices;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Security;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 using T_Engine;
 
@@ -322,7 +325,7 @@ namespace GiSanParkGolf.Class
 
             SqlCommand sqlCMD = new SqlCommand(strSQL, DB_Connection);
             sqlCMD.CommandType = CommandType.Text;
-            
+
             sqlCMD.Parameters.AddWithValue("@UserID", userID);
 
             DB_Connection.Open();
@@ -354,7 +357,7 @@ namespace GiSanParkGolf.Class
 
             FormsAuthenticationTicket ticket = new FormsAuthenticationTicket(1, userID, DateTime.Now, DateTime.Now.AddDays(expireDayAdd), false, strUserData, FormsAuthentication.FormsCookiePath);
             string hash = FormsAuthentication.Encrypt(ticket); //Encrypt ticket
-            
+
             HttpCookie cookie = new HttpCookie(FormsAuthentication.FormsCookieName, hash);
             if (ticket.IsPersistent)
                 cookie.Expires = ticket.Expiration;
@@ -425,14 +428,16 @@ namespace GiSanParkGolf.Class
                 if (sqlDR.GetString(0).Equals("승인"))
                 {
                     result = "OK";
-                } else if (sqlDR.GetString(0).Equals("승인대기"))
+                }
+                else if (sqlDR.GetString(0).Equals("승인대기"))
                 {
                     result = "Ready";
                 }
                 else if (sqlDR.GetString(0).Equals("Logged in"))
                 {
                     result = "Logged in";
-                } else
+                }
+                else
                 {
                     result = string.Empty;
                 }
@@ -541,6 +546,49 @@ namespace GiSanParkGolf.Class
         public List<GameListModel> GetGameReadyList()
         {
             return DB_Connection.Query<GameListModel>("sp_GameList_Ready", null,
+                commandType: CommandType.StoredProcedure).ToList();
+        }
+
+        public string GetEarlyJoin(string gameCode, string userID)
+        {
+            string strSQL = "SELECT JoinStatus FROM Game_JoinUser WHERE UserId = @Id AND GameCode = @GameCode";
+            var parameters = new DynamicParameters(new
+            {
+                Id = userID,
+                GameCode = gameCode
+            });
+
+            return DB_Connection.Query<string>(strSQL, parameters, commandType:CommandType.Text).SingleOrDefault();
+        }
+
+        public string GameJoin(GameJoinUserModel n)
+        {
+            try
+            {
+                // 파라미터 추가
+                var p = new DynamicParameters();
+
+                //[a] 공통
+                p.Add("@UserId", value: n.UserId, dbType: DbType.String);
+                p.Add("@JoinIP", value: n.JoinIP, dbType: DbType.String);
+                p.Add("@GameCode", value: n.GameCode, dbType: DbType.String);
+                DB_Connection.Execute("sp_Player_GameJoin", p, commandType: CommandType.StoredProcedure);
+
+                return "Success";
+            }
+            catch (System.Exception ex)
+            {
+                throw new System.Exception(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 내가 치룬 대회의 목록을 조회
+        /// </summary>
+        public List<GameListModel> GetMyGameList(string userID)
+        {
+            var parameters = new DynamicParameters(new { UserId = userID });
+            return DB_Connection.Query<GameListModel>("sp_Player_MyGame", parameters,
                 commandType: CommandType.StoredProcedure).ToList();
         }
     }
