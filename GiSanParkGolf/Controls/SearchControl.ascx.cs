@@ -12,24 +12,46 @@ namespace GiSanParkGolf.Controls
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            Debug.WriteLine(Request.ServerVariables["SCRIPT_NAME"]);
             // 검색 Textbox에서 엔터키를 누를때 검색버튼이 누르는 효과
             TB_SearchQuery.Attributes["onkeypress"] =
                "if (event.keyCode==13){" +
                Page.GetPostBackEventReference(BTN_Search) + "; return false;}";
 
+            //Debug.WriteLine(Request.ServerVariables["SCRIPT_NAME"]);
             //어떤 메뉴로 왔는지 따라 검색필드를 변경
-            if (Request.ServerVariables["SCRIPT_NAME"].Contains("Player Management"))
+            //if (Request.ServerVariables["SCRIPT_NAME"].Contains("Player Management"))
+            //{
+            //    CB_ReadyUser.Visible = true;
+            //    DDL_SearchField.Items.Add(new ListItem("이름", "Name"));
+            //    DDL_SearchField.Items.Add(new ListItem("ID", "Id"));
+            //} else
+            //{
+            //    CB_ReadyUser.Visible = false;
+            //    DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
+            //    DDL_SearchField.Items.Add(new ListItem("개최지", "Stadium"));
+            //}
+
+            switch (Request.ServerVariables["SCRIPT_NAME"])
             {
-                CB_ReadyUser.Visible = true;
-                DDL_SearchField.Items.Add(new ListItem("이름", "Name"));
-                DDL_SearchField.Items.Add(new ListItem("ID", "Id"));
-            } else
-            {
-                CB_ReadyUser.Visible = false;
-                DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
-                DDL_SearchField.Items.Add(new ListItem("개최지", "Stadium"));
+                case "/Sites/Admin/Player Management":
+                    checkbox1.Visible = true;
+                    checkbox2.Visible = false;
+                    DDL_SearchField.Items.Add(new ListItem("이름", "Name"));
+                    DDL_SearchField.Items.Add(new ListItem("ID", "Id"));
+                    break;
+                case "/Sites/Admin/GameUserSetting":
+                    checkbox1.Visible = false;
+                    checkbox2.Visible = true;
+                    DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
+                    break;
+                default:
+                    checkbox1.Visible = false;
+                    checkbox2.Visible = false;
+                    DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
+                    DDL_SearchField.Items.Add(new ListItem("개최지", "Stadium"));
+                    break;
             }
+
 
             if (!Page.IsPostBack)
             {
@@ -49,6 +71,18 @@ namespace GiSanParkGolf.Controls
                     else
                     {
                         CB_ReadyUser.Checked = false;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(Request.QueryString["ReadyGame"]))
+                {
+                    if (Request.QueryString["ReadyGame"].Equals("True"))
+                    {
+                        CB_ReadyGame.Checked = true;
+                    }
+                    else
+                    {
+                        CB_ReadyGame.Checked = false;
                     }
                 }
             }
@@ -80,6 +114,18 @@ namespace GiSanParkGolf.Controls
                 else
                 {
                     returnLink2 += String.Format("&ReadyUser={0}", "True");
+                }
+            }
+
+            if (CB_ReadyGame.Checked)
+            {
+                if (returnLink2.Equals(string.Empty))
+                {
+                    returnLink2 += String.Format("?ReadyGame={0}", "True");
+                }
+                else
+                {
+                    returnLink2 += String.Format("&ReadyGame={0}", "True");
                 }
             }
 

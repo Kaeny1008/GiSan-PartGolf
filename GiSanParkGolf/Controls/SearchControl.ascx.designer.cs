@@ -15,13 +15,40 @@ namespace GiSanParkGolf.Controls
     {
 
         /// <summary>
+        /// checkbox1 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl checkbox1;
+
+        /// <summary>
         /// CB_ReadyUser 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox CB_ReadyUser;
+        protected global::System.Web.UI.HtmlControls.HtmlInputCheckBox CB_ReadyUser;
+
+        /// <summary>
+        /// checkbox2 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl checkbox2;
+
+        /// <summary>
+        /// CB_ReadyGame 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlInputCheckBox CB_ReadyGame;
 
         /// <summary>
         /// DDL_SearchField 컨트롤입니다.

@@ -612,5 +612,19 @@ namespace GiSanParkGolf.Class
             }
             return result;
         }
+
+        public List<GameListModel> GetReadyGame(int readyOnly)
+        {
+            string strSQL = "SELECT *";
+            strSQL += " FROM Game_List";
+            strSQL += " WHERE UserId = @Id AND GameCode = @GameCode";
+
+            var parameters = new DynamicParameters(new
+            {
+                ReadyOnly = readyOnly
+            });
+
+            return DB_Connection.Query<GameListModel>(strSQL, parameters, commandType: CommandType.Text).ToList();
+        }
     }
 }
