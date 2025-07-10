@@ -1,4 +1,6 @@
-﻿using System;
+﻿using GiSanParkGolf.Class;
+using System;
+using System.Diagnostics;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using static GiSanParkGolf.Global;
@@ -75,24 +77,48 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void Load_GameList()
         {
-            //if (searchProperty.SearchMode == false) // 기본 리스트
-            //{
-            //    GameList.DataSource =
-            //        Global.dbManager.GetGameALL(
-            //            searchProperty.PageIndex
-            //            );
-            //}
-            //else
-            //{
-            //    GameList.DataSource =
-            //        Global.dbManager.GetGameSeachAll(
-            //            searchProperty.PageIndex,
-            //            searchProperty.SearchField,
-            //            searchProperty.SearchQuery
-            //            );
-            //}
-
+            if (searchProperty.SearchMode == false) // 기본 리스트
+            {
+                GameList.DataSource =
+                    Global.dbManager.GetGameALL(
+                        searchProperty.PageIndex
+                        );
+            }
+            else
+            {
+                GameList.DataSource =
+                    Global.dbManager.GetGameSeachAll(
+                        searchProperty.PageIndex,
+                        searchProperty.SearchField,
+                        searchProperty.SearchQuery
+                        );
+            }
             GameList.DataBind();
+        }
+
+        protected void LnkGame_Click(object sender, EventArgs e)
+        {
+            LinkButton btn = (LinkButton)sender;
+            Debug.WriteLine("선택된 GameCode : " + btn.ToolTip.ToString());
+            LoadGame(btn.ToolTip.ToString());
+        }
+
+        protected void LoadGame(string gameCode)
+        {
+            var gameinfo = (new DB_Management()).GetGameInformation(gameCode);
+            TB_GameName.Text = gameinfo.GameName;
+            TB_GameDate.Text = Helper.ConvertDate(gameinfo.GameDate);
+            TB_StadiumName.Text = gameinfo.StadiumName;
+            TB_GameHost.Text = gameinfo.GameHost;
+            TB_StartDate.Text = Helper.ConvertDate(gameinfo.StartRecruiting);
+            TB_EndDate.Text = Helper.ConvertDate(gameinfo.EndRecruiting);
+            TB_HoleMaximum.Text = gameinfo.HoleMaximum.ToString();
+            TB_Note.Text = gameinfo.GameNote;
+            TB_User.Text = gameinfo.ParticipantNumber.ToString();
+
+            BTN_1.Disabled = false;
+            BTN_2.Disabled = false;
+            BTN_3.Disabled = false;
         }
     }
 }

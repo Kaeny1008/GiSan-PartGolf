@@ -186,7 +186,7 @@
 
     <div id="GameContent" runat="server">
         <div class="row">
-            <div class="col-md-4" style="background-color:lightskyblue; border-top-left-radius:1rem; border-bottom-left-radius:1rem;">
+            <div class="col-md-4" style="background-color:aliceblue; border-top-left-radius:1rem; border-bottom-left-radius:1rem;">
                 <div class="center_container">
                     <div style="width:100%">
                         <div style="text-align:left;">
@@ -232,7 +232,7 @@
                     </div>
                 </div> 
             </div>
-            <div class="col" style="background-color:aliceblue; border-top-right-radius:1rem; border-bottom-right-radius:1rem">
+            <div class="col" style="background-color:lightskyblue; border-top-right-radius:1rem; border-bottom-right-radius:1rem">
                 <div style="text-align:left;">
                     <h4 class="mb-3" style="color:cornflowerblue">대회 정보표시(예상)</h4>
                     <p></p>

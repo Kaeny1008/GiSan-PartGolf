@@ -1,16 +1,8 @@
-﻿using BBS.Models;
-using Dul;
-using GiSanParkGolf.Class;
+﻿using GiSanParkGolf.Class;
 using GiSanParkGolf.Models;
 using System;
-using System.Collections.Generic;
-using System.EnterpriseServices;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Web;
 using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Xml.Linq;
+using static GiSanParkGolf.Global;
 
 namespace GiSanParkGolf.Sites.Player
 {
@@ -43,11 +35,11 @@ namespace GiSanParkGolf.Sites.Player
             var gameinfo = (new DB_Management()).GetGameInformation(gameCode);
 
             TB_GameName.Text = gameinfo.GameName;
-            TB_GameDate.Text = ConvertDate(gameinfo.GameDate);
+            TB_GameDate.Text = Helper.ConvertDate(gameinfo.GameDate);
             TB_StadiumName.Text = gameinfo.StadiumName;
             TB_GameHost.Text = gameinfo.GameHost;
-            TB_StartDate.Text = ConvertDate(gameinfo.StartRecruiting);
-            TB_EndDate.Text = ConvertDate(gameinfo.EndRecruiting);
+            TB_StartDate.Text = Helper.ConvertDate(gameinfo.StartRecruiting);
+            TB_EndDate.Text = Helper.ConvertDate(gameinfo.EndRecruiting);
             TB_HoleMaximum.Text = gameinfo.HoleMaximum.ToString();
             TB_Note.Text = gameinfo.GameNote;
         }
@@ -67,14 +59,6 @@ namespace GiSanParkGolf.Sites.Player
             }
 
             LoadGame();
-        }
-
-        protected string ConvertDate(DateTime datetime)
-        {
-            DateTime now = datetime;
-            string formattedDate = now.ToString("yyyy-MM-dd");
-
-            return formattedDate;
         }
 
         protected void BTN_Save_Click(object sender, EventArgs e)

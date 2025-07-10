@@ -11,6 +11,7 @@ namespace GiSanParkGolf
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Console.WriteLine("콘솔 테스트");
             // [!] 인증 여부 확인 : 로그인했으면 참, 그렇지 않으면 거짓을 반환
             if (!Page.User.Identity.IsAuthenticated)
             {

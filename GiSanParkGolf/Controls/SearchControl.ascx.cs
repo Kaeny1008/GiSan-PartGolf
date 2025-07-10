@@ -34,21 +34,21 @@ namespace GiSanParkGolf.Controls
             switch (Request.ServerVariables["SCRIPT_NAME"])
             {
                 case "/Sites/Admin/Player Management":
-                    checkbox1.Visible = true;
-                    checkbox2.Visible = false;
+                    CheckControl.Visible = true;
                     DDL_SearchField.Items.Add(new ListItem("이름", "Name"));
                     DDL_SearchField.Items.Add(new ListItem("ID", "Id"));
                     break;
                 case "/Sites/Admin/GameUserSetting":
-                    checkbox1.Visible = false;
-                    checkbox2.Visible = true;
-                    DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
-                    break;
-                default:
-                    checkbox1.Visible = false;
-                    checkbox2.Visible = false;
+                    CheckControl.Visible = false;
                     DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
                     DDL_SearchField.Items.Add(new ListItem("개최지", "Stadium"));
+                    DDL_SearchField.Items.Add(new ListItem("주최", "Host"));
+                    break;
+                default:
+                    CheckControl.Visible = false;
+                    DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
+                    DDL_SearchField.Items.Add(new ListItem("개최지", "Stadium"));
+                    DDL_SearchField.Items.Add(new ListItem("주최", "Host"));
                     break;
             }
 
@@ -71,18 +71,6 @@ namespace GiSanParkGolf.Controls
                     else
                     {
                         CB_ReadyUser.Checked = false;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(Request.QueryString["ReadyGame"]))
-                {
-                    if (Request.QueryString["ReadyGame"].Equals("True"))
-                    {
-                        CB_ReadyGame.Checked = true;
-                    }
-                    else
-                    {
-                        CB_ReadyGame.Checked = false;
                     }
                 }
             }
@@ -117,21 +105,14 @@ namespace GiSanParkGolf.Controls
                 }
             }
 
-            if (CB_ReadyGame.Checked)
-            {
-                if (returnLink2.Equals(string.Empty))
-                {
-                    returnLink2 += String.Format("?ReadyGame={0}", "True");
-                }
-                else
-                {
-                    returnLink2 += String.Format("&ReadyGame={0}", "True");
-                }
-            }
-
             returnLink += returnLink2;
             Debug.WriteLine("검색 URL : " + returnLink);
             return returnLink;
+        }
+
+        protected void BTN_Reset_Click(object sender, EventArgs e)
+        {
+            Response.Redirect(String.Format("{0}", Request.ServerVariables["SCRIPT_NAME"]));
         }
     }
 }

@@ -45,40 +45,50 @@
                 <HeaderStyle Width="10%" />
                 <ItemStyle Width="10%" />
             </asp:TemplateField>
-            <asp:TemplateField SortExpression="ContentName">
+            <asp:TemplateField>
                 <HeaderTemplate>
                     <asp:Label ID="LB_Name" runat="server" Text="대회명"></asp:Label>
                 </HeaderTemplate>
                 <ItemTemplate>
                     <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
                         NavigateUrl='<%# "GameCreate.aspx?gamecode=" + Eval("GameCode") %>'>
-                        <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 30) %>
+                        <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 45) %>
                     </asp:HyperLink>
                 </ItemTemplate>
-                <HeaderStyle Width="30%" />
-                <ItemStyle Width="30%" />
+                <HeaderStyle Width="35%" />
+                <ItemStyle Width="35%" />
             </asp:TemplateField>
-            <asp:TemplateField SortExpression="ContentDate">
+            <asp:TemplateField>
                 <HeaderTemplate>
                     <asp:Label ID="LB_Date" runat="server" Text="개최일자"></asp:Label>
                 </HeaderTemplate>
                 <ItemTemplate>
                     <%#Eval("GameDate","{0:yyyy-MM-dd}")%>
                 </ItemTemplate>
-                <HeaderStyle Width="20%" />
-                <ItemStyle Width="20%" />
+                <HeaderStyle Width="15%" />
+                <ItemStyle Width="15%" />
             </asp:TemplateField>
-            <asp:TemplateField SortExpression="ContentPlace">
+            <asp:TemplateField>
                 <HeaderTemplate>
                     <asp:Label ID="LB_Place" runat="server" Text="개최지"></asp:Label>
                 </HeaderTemplate>
                 <ItemTemplate>
                     <%#Eval("StadiumName")%>
                 </ItemTemplate>
-                <HeaderStyle Width="30%" />
-                <ItemStyle Width="30%" />
+                <HeaderStyle Width="15%" />
+                <ItemStyle Width="15%" />
             </asp:TemplateField>
-            <asp:TemplateField SortExpression="ContentPlace">
+            <asp:TemplateField>
+                <HeaderTemplate>
+                    <asp:Label ID="LB_Place" runat="server" Text="주최"></asp:Label>
+                </HeaderTemplate>
+                <ItemTemplate>
+                    <%#Eval("GameHost")%>
+                </ItemTemplate>
+                <HeaderStyle Width="15%" />
+                <ItemStyle Width="15%" />
+            </asp:TemplateField>
+            <asp:TemplateField>
                 <HeaderTemplate>
                     <asp:Label ID="LB_Place" runat="server" Text="참가인원"></asp:Label>
                 </HeaderTemplate>

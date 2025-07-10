@@ -20,11 +20,13 @@ namespace GiSanParkGolf
                 if (!LoadCookie())
                 {
                     Debug.WriteLine("인증되어 있지 않고 쿠키도 확인되지 않아 Login으로 이동한다.");
+                    Console.WriteLine("인증되어 있지 않고 쿠키도 확인되지 않아 Login으로 이동한다.");
                     Response.Redirect("~/Login.aspx");
                 }
                 else
                 {
                     Debug.WriteLine("인증되어 있지 않지만 쿠키기록이 있다.");
+                    Console.WriteLine("인증되어 있지 않지만 쿠키기록이 있다.");
                 }
             }
             else
@@ -32,11 +34,13 @@ namespace GiSanParkGolf
                 if (!LoadCookie())
                 {
                     Debug.WriteLine("인증은 되어 있지만 쿠키가 확인되지 않아 Login으로 이동한다.");
+                    Console.WriteLine("인증은 되어 있지만 쿠키가 확인되지 않아 Login으로 이동한다.");
                     Response.Redirect("~/Login.aspx");
                 }
                 else
                 {
                     Debug.WriteLine("인증되어 있고 쿠키도 확인 되었다.");
+                    Console.WriteLine("인증되어 있고 쿠키도 확인 되었다.");
                 }
             }
 

@@ -52,7 +52,7 @@ namespace GiSanParkGolf.Controls
                 strPage += "<li class=\"disabled\"><a>◁</a></li>";
             }
             strPage += "&nbsp;";
-            Debug.WriteLine("총 페이지 수: " + searchProperty.PageCount);
+            //Debug.WriteLine("총 페이지 수: " + searchProperty.PageCount);
             // 가운데, 숫자 형식의 페이저 표시
             for (
                 i = (((searchProperty.PageIndex - 1) / (int)10) * 10 + 1);

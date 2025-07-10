@@ -8,6 +8,17 @@ using System.Web;
 
 namespace GiSanParkGolf.Class
 {
+    public class HelpClass
+    {
+        public string ConvertDate(DateTime datetime)
+        {
+            DateTime now = datetime;
+            string formattedDate = now.ToString("yyyy-MM-dd");
+
+            return formattedDate;
+        }
+    }
+
     /// <summary>
     /// BaseProperty 클래스: 공통으로 사용되는 속성모음
     /// </summary>
@@ -73,7 +84,7 @@ namespace GiSanParkGolf.Class
                 _RecordCount = value;
                 // 총 페이지 수 계산
                 PageCount = ((_RecordCount - 1) / PageSize) + 1; // 계산식
-                Debug.WriteLine("총 페이지 수: " + PageCount);
+                //Debug.WriteLine("총 페이지 수: " + PageCount);
             }
         }
     }
