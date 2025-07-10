@@ -51,7 +51,7 @@ namespace GiSanParkGolf.Models
         public string GameName { get; set; }
         public string GameNote { get; set; }
         public string GameStatus { get; set; }
-        public string RowNumber { get; set; }
+        public int RowNumber { get; set; }
 
         [Display(Name = "참가인원 수")]
         public int ParticipantNumber { get; set; }

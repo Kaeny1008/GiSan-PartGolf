@@ -17,7 +17,7 @@
 
         <webopt:bundlereference runat="server" path="~/Content/css" />
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-        <link rel="Stylesheet" type="text/css" href="~/Class/StyleSheet.css?after1" />
+        <link rel="Stylesheet" type="text/css" href="/Class/StyleSheet.css?after1" />
     </head>
 
     <body>
@@ -97,8 +97,8 @@
                                         <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" href="/Sites/Admin/GameList">대회개최</a></li>
-                                        <li><a class="dropdown-item" href="/">인원 코스 및 배치</a></li>
-                                        <li><a class="dropdown-item" href="/">대회결과 입력</a></li>
+                                        <li><a class="dropdown-item" href="/Sites/Admin/GameUserSetting">인원 코스 및 배치</a></li>
+                                        <li><a class="dropdown-item" href="/Sites/Admin/">대회결과 입력</a></li>
                                     </ul>
                                 <% 
                                     }
@@ -160,7 +160,6 @@
         
             <div class="container body-content">
                 <hr />
-                <br />
                 <div class="column">
                     <asp:ContentPlaceHolder ID="MainContent" runat="server">
                     </asp:ContentPlaceHolder>

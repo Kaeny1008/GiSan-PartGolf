@@ -30,7 +30,8 @@
                 <asp:GridView ID="ctlBoardList"
                     runat="server" AutoGenerateColumns="False" DataKeyNames="Id"
                     CssClass="table table-bordered table-hover table-condensed 
-                        table-striped table-responsive ">
+                        table-striped table-responsive"
+                    ShowHeaderWhenEmpty="true">
                     <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
                     <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
                     <Columns>
@@ -108,6 +109,7 @@
                             <ItemStyle Width="60px" />
                         </asp:TemplateField>
                     </Columns>
+                    <EmptyDataTemplate>게시글이 없습니다.</EmptyDataTemplate>
                 </asp:GridView>
             </td>
         </tr>

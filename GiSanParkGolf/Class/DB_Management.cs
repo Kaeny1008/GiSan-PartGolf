@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.EnterpriseServices;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Web;
 using System.Web.Configuration;
@@ -590,6 +591,26 @@ namespace GiSanParkGolf.Class
             var parameters = new DynamicParameters(new { UserId = userID });
             return DB_Connection.Query<GameListModel>("sp_Player_MyGame", parameters,
                 commandType: CommandType.StoredProcedure).ToList();
+        }
+
+        public string MyGameCancel(string gameCode, string userID)
+        {
+            string result = "Success";
+            try
+            {
+                var parameters = new DynamicParameters(new
+                {
+                    UserId = userID,
+                    GameCode = gameCode
+                });
+                DB_Connection.Query("sp_Player_GameCancel",
+                    parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+            catch (Exception ex)
+            {
+                result = ex.Message;
+            }
+            return result;
         }
     }
 }

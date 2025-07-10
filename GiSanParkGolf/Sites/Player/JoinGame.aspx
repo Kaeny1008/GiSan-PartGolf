@@ -38,7 +38,8 @@
                 </div>
                 <asp:GridView ID="GameList"
                     runat="server" AutoGenerateColumns="False"
-                    CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
+                    CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                    ShowHeaderWhenEmpty="true">
                     <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
                     <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
                     <Columns>
@@ -140,6 +141,7 @@
                             <ItemStyle Width="50px" />
                         </asp:TemplateField>
                     </Columns>
+                    <EmptyDataTemplate>참가 신청 가능한 대회가 없습니다.</EmptyDataTemplate>
                 </asp:GridView>
             </div>
         </div>

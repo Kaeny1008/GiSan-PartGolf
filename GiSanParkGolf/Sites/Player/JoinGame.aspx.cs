@@ -56,15 +56,17 @@ namespace GiSanParkGolf.Sites.Player
         {
             // 기존 참가 신청했는지 확인
             string earlyJoinCheck = Global.dbManager.GetEarlyJoin(gameCode, Global.uvm.UserID);
-            if (earlyJoinCheck.Equals("Join"))
+            if (!string.IsNullOrEmpty(earlyJoinCheck))
             {
-                string strJs = "<script>alert('이미 대회참가 신청을 하셨습니다.'); location.href='javascript:history.go(-1)';</script>";
-                Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
+                if (earlyJoinCheck.Equals("Join"))
+                {
+                    string strJs = "<script>alert('이미 대회참가 신청을 하셨습니다.'); location.href='javascript:history.go(-1)';</script>";
+                    Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
+                    return;
+                }
             }
-            else
-            {
-                LoadGame();
-            }
+
+            LoadGame();
         }
 
         protected string ConvertDate(DateTime datetime)

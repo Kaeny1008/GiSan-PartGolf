@@ -172,6 +172,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Sites\Admin\GameList.aspx" />
+    <Content Include="Sites\Admin\GameUserSetting.aspx" />
     <Content Include="Sites\Login\Admin Alert.aspx" />
     <Content Include="Sites\Admin\Player Information.aspx" />
     <Content Include="Login.aspx" />
@@ -399,6 +400,13 @@
     </Compile>
     <Compile Include="Sites\Admin\GameCreate.aspx.designer.cs">
       <DependentUpon>GameCreate.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Sites\Admin\GameUserSetting.aspx.cs">
+      <DependentUpon>GameUserSetting.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Sites\Admin\GameUserSetting.aspx.designer.cs">
+      <DependentUpon>GameUserSetting.aspx</DependentUpon>
     </Compile>
     <Compile Include="Sites\Login\Admin Alert.aspx.cs">
       <DependentUpon>Admin Alert.aspx</DependentUpon>

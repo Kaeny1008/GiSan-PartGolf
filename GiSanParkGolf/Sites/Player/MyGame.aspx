@@ -16,6 +16,22 @@
             return false;
         }
     </script>
+    <style>
+        .input-group{
+            text-align: center;
+            width:100%;
+        }
+        .input-group-text{
+            min-width: 30%;
+            max-width: 30%;
+            text-align: center;
+        }
+        .form-control{
+            min-width: 70%;
+            max-width: 70%;
+            text-align: left;
+        }
+    </style>
 
     <div id="MainContent" runat="server">
         <div class="center_container">
@@ -25,8 +41,9 @@
                     <p>내 대회의 결과 및 참가여부 수정을 할 수 있습니다.</p>
                 </div>
                 <asp:GridView ID="GameList"
-                    runat="server" AutoGenerateColumns="False"
-                    CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
+                    runat="server" AutoGenerateColumns="False" DataKeyNames="GameCode"
+                    CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                    ShowHeaderWhenEmpty="true">
                     <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
                     <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
                     <Columns>
@@ -46,7 +63,7 @@
                             </HeaderTemplate>
                             <ItemTemplate>
                                 <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink" 
-                                    NavigateUrl=<%# "~/Sites/Player/JoinGame.aspx?GameCode=" + Eval("GameCode")%>>
+                                    NavigateUrl=<%# "~/Sites/Player/MyGame.aspx?GameCode=" + Eval("GameCode")%>>
                                     <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 25) %>
                                 </asp:HyperLink>
                             </ItemTemplate>
@@ -123,7 +140,7 @@
                             </HeaderTemplate>
                             <ItemTemplate>
                                 <%#Eval("GameStatus").ToString().Equals("모집중") ?
-                                    "<button type=\"button\" class=\"btn btn-primary\"" +
+                                    "<button type=\"button\" class=\"btn btn-danger\"" +
                                     " style=\"--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;\"" +
                                     " runat=\"server\" OnClick=\"ShowModal('" + Eval("GameCode") + "');return false;\" id=\"Button2\">" +
                                     "취소" +
@@ -136,6 +153,7 @@
                             <ItemStyle Width="50px" />
                         </asp:TemplateField>
                     </Columns>
+                    <EmptyDataTemplate>참가 신청 또는 참가한 데이터가 없습니다.</EmptyDataTemplate>
                 </asp:GridView>
             </div>
         </div>
@@ -163,6 +181,71 @@
                         Text="예" />
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="GameContent" runat="server">
+        <div class="row">
+            <div class="col-md-4" style="background-color:lightskyblue; border-top-left-radius:1rem; border-bottom-left-radius:1rem;">
+                <div class="center_container">
+                    <div style="width:100%">
+                        <div style="text-align:left;">
+                            <h4 class="mb-3" style="color:cornflowerblue">선택된 대회정보입니다.</h4>
+                            <p></p>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">대회명</span>
+                            <asp:TextBox ID="TB_GameName" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">대회일자</span>
+                            <asp:TextBox ID="TB_GameDate" runat="server" CssClass="form-control" TextMode="date" Enabled="false"></asp:TextBox>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">대회장소</span>
+                            <asp:TextBox ID="TB_StadiumName" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">주최</span>
+                            <asp:TextBox ID="TB_GameHost" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">홀당 최대인원</span>
+                            <asp:TextBox ID="TB_HoleMaximum" runat="server" CssClass="form-control" TextMode="Number" Text="4" Enabled="false"></asp:TextBox>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">모집시작</span>
+                            <asp:TextBox ID="TB_StartDate" runat="server" CssClass="form-control" TextMode="date" Enabled="false"></asp:TextBox>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">모집종료</span>
+                            <asp:TextBox ID="TB_EndDate" runat="server" CssClass="form-control" TextMode="date" Enabled="false"></asp:TextBox>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">비고</span>
+                            <asp:TextBox ID="TB_Note" runat="server" CssClass="form-control" Height="300px" TextMode="MultiLine" Enabled="false"></asp:TextBox>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">참가인원</span>
+                            <asp:TextBox ID="TB_User" runat="server" CssClass="form-control" TextMode="Number" Text="4" Enabled="false"></asp:TextBox>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+            <div class="col" style="background-color:aliceblue; border-top-right-radius:1rem; border-bottom-right-radius:1rem">
+                <div style="text-align:left;">
+                    <h4 class="mb-3" style="color:cornflowerblue">대회 정보표시(예상)</h4>
+                    <p></p>
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="center_container">
+            <input type="button" runat="server" 
+                class="btn btn-outline-success btn-lg" 
+                style="width:300px; height:50px" 
+                value="닫기" 
+                OnClick="history.go(-1);" />
         </div>
     </div>
 </asp:Content>

@@ -12,14 +12,15 @@
         }
     </style>
     <div class="row g-3">
-        <div class="col" style="background-color:aliceblue">
+        <div class="col" style="background-color:aliceblue; border-radius:0.375rem;">
             <br />
             <asp:LinkButton ID="LinkButton1" runat="server" PostBackUrl="~/BBS/BoardView.aspx?bbsId=notice" CssClass="NoneDeco text-center">
                 <h5 style="color:cadetblue">[공지사항]</h5>
             </asp:LinkButton>
             <asp:GridView ID="NoticeList"
                 runat="server" AutoGenerateColumns="False"
-                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
+                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                ShowHeaderWhenEmpty="true">
                 <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
                 <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
                 <Columns>
@@ -68,16 +69,18 @@
                         <ItemStyle Width="90px" />
                     </asp:TemplateField>
                 </Columns>
+                <EmptyDataTemplate>데이터가 없습니다.</EmptyDataTemplate>
             </asp:GridView>
         </div>
-        <div class="col" style="background-color:antiquewhite">
+        <div class="col" style="background-color:antiquewhite; border-radius:0.375rem;">
             <br />
             <asp:LinkButton ID="LinkButton2" runat="server" PostBackUrl="~/Sites/Player/JoinGame" CssClass="NoneDeco text-center">
                 <h5 style="color:brown">[대회목록]</h5>
             </asp:LinkButton>
             <asp:GridView ID="GameList"
                 runat="server" AutoGenerateColumns="False"
-                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
+                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                ShowHeaderWhenEmpty="true">
                 <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
                 <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
                 <Columns>
@@ -129,6 +132,7 @@
                         <ItemStyle Width="90px" />
                     </asp:TemplateField>
                 </Columns>
+                <EmptyDataTemplate>대회가 없습니다.</EmptyDataTemplate>
             </asp:GridView>
         </div>
     </div>

@@ -2,8 +2,6 @@
     Inherits="GiSanParkGolf.Sites.Admin.Player_Information" EnableEventValidation="true"%>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <link href="/Class/StyleSheet.css?after" rel="stylesheet" type="text/css"/>
-
     <script language="javascript">
         function functionx(evt) {
             if (evt.charCode > 31 && (evt.charCode < 48 || evt.charCode > 57)) {
@@ -61,14 +59,25 @@
             $("#SaveModal").modal("show");
         }
     </script>
+    <style>
+        .input-group{
+            text-align: center;
+            width:100%;
+        }
+        .input-group-text{
+            min-width: 30%;
+            max-width: 30%;
+            text-align: center;
+        }
+        .form-control{
+            min-width: 70%;
+            max-width: 70%;
+            text-align: left;
+        }
+    </style>
 
-    <script runat="server"> 
-        
-
-    </script>
-
-    <div class="Center_Container">
-        <div class="Center_Container_Content">
+    <div class="center_container">
+        <div>
             <div class="alert alert-success d-flex align-items-center" role="alert">
                 <svg xmlns="http://www.w3.org/2000/svg" 
                     width="50" height="50" 

@@ -29,7 +29,8 @@
     </div>
 
     <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="GameCode"
-        CssClass="table table-bordered table-hover table-condensed table-striped table-responsive">
+        CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+        ShowHeaderWhenEmpty="true">
         <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
         <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
         <FooterStyle BackColor="#CCCCCC" />
@@ -89,6 +90,7 @@
             </asp:TemplateField>
         </Columns>
         <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
+        <EmptyDataTemplate>대회가 없습니다.</EmptyDataTemplate>
     </asp:GridView>
 
     <div class="center_container">
