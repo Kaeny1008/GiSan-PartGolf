@@ -114,7 +114,7 @@
             </td>
         </tr>
         <tr>
-            <td style="text-align: center;">
+            <td class="center_container">
                 <uc1:AdvancedPagingSingleWithBootstrap runat="server"
                     ID="AdvancedPagingSingleWithBootstrap" />
             </td>
