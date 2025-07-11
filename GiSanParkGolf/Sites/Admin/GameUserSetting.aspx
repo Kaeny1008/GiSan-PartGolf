@@ -88,7 +88,75 @@
                 max-width: 30%;
                 text-align: left;
             }
+            .note{
+                min-width: 80%;
+                max-width: 80%;
+                height: 300px;
+            }
         </style>
+        <script type="text/javascript"> 
+            function ShowModal(modalname) {
+                $(modalname).modal("show");
+            }
+
+            /*로딩을 완료하기 위해(안그러면 로딩이 안되어 모달 실행이 안된다.*/
+            /*아래 두함수가 셋트로 움직여야 한다.*/
+            var launch = false;
+            function launchModal() {
+                launch = true;
+            }
+            function pageLoad() {
+                if (launch) {
+                    $("#CloseGame").modal("show");
+                }
+            }
+            //왜 안될까...
+            $('#CloseGame').on('show.bs.modal', function () {
+                var titleTxt = "abcd"
+                var modal = $(this)
+                modal.find('.modal-title').text('Title : ' + titleTxt)
+            })
+        </script>
+
+        <!-- Modal 시작 -->
+        <div class="modal fade" id="CloseModal" tabindex="-1" aria-labelledby="EarlyCloseModal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">확인</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        참가를 조기마감 하시겠습니까?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
+                        <asp:Button ID="BTN_EarlyCloseYes" 
+                            runat="server" 
+                            OnClick="BTN_EarlyCloseYes_Click" 
+                            class="btn btn-primary" 
+                            Text="예" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="CloseGame" tabindex="-1" aria-labelledby="EarlyCloseModal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel2">확인</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        종료된 대회입니다.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">확인</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal 끝 -->
 
         <div class="col" style="background-color:lightskyblue; border-top-right-radius:1rem; border-bottom-right-radius:1rem">
             <div style="text-align:left;">
@@ -120,12 +188,22 @@
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">비고</span>
-                <asp:TextBox ID="TB_Note" runat="server" CssClass="form-control bc-white" Height="300px" Width="80%" TextMode="MultiLine" Enabled="false"></asp:TextBox>
+                <asp:TextBox ID="TB_Note" runat="server" CssClass="form-control note" TextMode="MultiLine" Enabled="false"></asp:TextBox>
             </div>
-            <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                <button runat="server" id="BTN_1" type="button" class="btn btn-danger" disabled>참가마감</button>
-                <button runat="server" id="BTN_2" type="button" class="btn btn-warning" disabled>참가자 확인</button>
-                <button runat="server" id="BTN_3" type="button" class="btn btn-success" disabled>선수 코스배치</button>
+            <div class="row">
+                <div class="center_container">
+                    <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                        <button runat="server" id="BTN_EarlyClose" type="button" class="btn btn-danger" disabled 
+                            onclick="ShowModal('#CloseModal');return false;">
+                            조기마감
+                        </button>
+                        <button runat="server" id="BTN_PlayerCheck" type="button" class="btn btn-warning" disabled 
+                            onclick="ShowModal('#CloseGame');return false;">
+                            참가자 확인
+                        </button>
+                        <button runat="server" id="BTN_Setting" type="button" class="btn btn-success" disabled>선수 코스배치</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

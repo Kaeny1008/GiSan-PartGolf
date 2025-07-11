@@ -127,7 +127,7 @@ namespace GiSanParkGolf
                     userRepo.SetCookie(abcd[0], abcd[1], abcd[2], abcd[3], int.Parse(abcd[4]), 2);
 
                     //DB에 로그인 기록을 남긴다.
-                    Global.dbManager.IsCorrectUser(abcd[0], abcd[1], 1);
+                    //Global.dbManager.IsCorrectUser(abcd[0], abcd[1], 1);
                 }
                 return true;
             }

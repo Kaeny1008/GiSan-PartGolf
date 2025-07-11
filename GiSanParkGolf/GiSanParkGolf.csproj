@@ -44,6 +44,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AjaxControlToolkit, Version=20.1.0.0, Culture=neutral, PublicKeyToken=28f01b0e84b6d53e, processorArchitecture=MSIL">
+      <HintPath>..\packages\AjaxControlToolkit.20.1.0\lib\net40\AjaxControlToolkit.dll</HintPath>
+    </Reference>
     <Reference Include="AspNet.ScriptManager.jQuery, Version=3.7.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AspNet.ScriptManager.jQuery.3.7.1\lib\net45\AspNet.ScriptManager.jQuery.dll</HintPath>
     </Reference>
@@ -246,6 +249,7 @@
     <Content Include="Sites\Player\MyGame.aspx" />
     <Content Include="Sites\UserManagement\User Modify.aspx" />
     <Content Include="Sites\UserManagement\UserRepositories.aspx" />
+    <Content Include="TempHint.aspx" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -497,6 +501,13 @@
     </Compile>
     <Compile Include="Sites\UserManagement\UserRepositories.aspx.designer.cs">
       <DependentUpon>UserRepositories.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TempHint.aspx.cs">
+      <DependentUpon>TempHint.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TempHint.aspx.designer.cs">
+      <DependentUpon>TempHint.aspx</DependentUpon>
     </Compile>
     <Compile Include="ViewSwitcher.ascx.cs">
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>

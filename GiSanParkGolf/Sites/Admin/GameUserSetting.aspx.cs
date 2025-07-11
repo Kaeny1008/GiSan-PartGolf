@@ -1,6 +1,7 @@
 ﻿using GiSanParkGolf.Class;
 using System;
 using System.Diagnostics;
+using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using static GiSanParkGolf.Global;
@@ -105,20 +106,52 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void LoadGame(string gameCode)
         {
-            var gameinfo = (new DB_Management()).GetGameInformation(gameCode);
-            TB_GameName.Text = gameinfo.GameName;
-            TB_GameDate.Text = Helper.ConvertDate(gameinfo.GameDate);
-            TB_StadiumName.Text = gameinfo.StadiumName;
-            TB_GameHost.Text = gameinfo.GameHost;
-            TB_StartDate.Text = Helper.ConvertDate(gameinfo.StartRecruiting);
-            TB_EndDate.Text = Helper.ConvertDate(gameinfo.EndRecruiting);
-            TB_HoleMaximum.Text = gameinfo.HoleMaximum.ToString();
-            TB_Note.Text = gameinfo.GameNote;
-            TB_User.Text = gameinfo.ParticipantNumber.ToString();
+            var gameinfo = new DB_Management().GetGameInformation(gameCode);
+            if (gameinfo.GameStatus.Equals("Completed"))
+            {
+                //string strAlarm = @"<script language='JavaScript'>window.alert('";
+                //strAlarm += "종료된 대회입니다.";
+                //strAlarm += "');</script>";
+                //Response.Write(strAlarm);
 
-            BTN_1.Disabled = false;
-            BTN_2.Disabled = false;
-            BTN_3.Disabled = false;
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal();", true);
+
+                TB_GameName.Text = string.Empty;
+                TB_GameDate.Text = string.Empty;
+                TB_StadiumName.Text = string.Empty;
+                TB_GameHost.Text = string.Empty;
+                TB_StartDate.Text = string.Empty;
+                TB_EndDate.Text = string.Empty;
+                TB_HoleMaximum.Text = string.Empty;
+                TB_Note.Text = string.Empty;
+                TB_User.Text = string.Empty;
+
+                BTN_EarlyClose.Disabled = true;
+                BTN_PlayerCheck.Disabled = true;
+                BTN_Setting.Disabled = true;
+            }
+            else
+            {
+                TB_GameName.Text = gameinfo.GameName;
+                TB_GameDate.Text = Helper.ConvertDate(gameinfo.GameDate);
+                TB_StadiumName.Text = gameinfo.StadiumName;
+                TB_GameHost.Text = gameinfo.GameHost;
+                TB_StartDate.Text = Helper.ConvertDate(gameinfo.StartRecruiting);
+                TB_EndDate.Text = Helper.ConvertDate(gameinfo.EndRecruiting);
+                TB_HoleMaximum.Text = gameinfo.HoleMaximum.ToString();
+                TB_Note.Text = gameinfo.GameNote;
+                TB_User.Text = gameinfo.ParticipantNumber.ToString();
+
+                BTN_EarlyClose.Disabled = false;
+                BTN_PlayerCheck.Disabled = false;
+                BTN_Setting.Disabled = false;
+            }
+
+        }
+
+        protected void BTN_EarlyCloseYes_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
