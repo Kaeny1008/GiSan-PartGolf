@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -25,6 +26,11 @@ namespace GiSanParkGolf
             //{
             //    ClientScript.RegisterClientScriptBlock(this.GetType(), "PopupScript", strBuilder.ToString());
             //}
+        }
+
+        protected void BTN_EarlyCloseYes_Click(object sender, EventArgs e)
+        {
+            Debug.WriteLine(1);
         }
     }
 }

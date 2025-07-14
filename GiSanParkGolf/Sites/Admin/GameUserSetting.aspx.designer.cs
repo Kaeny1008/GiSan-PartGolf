@@ -60,6 +60,42 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.Button BTN_EarlyCloseYes;
 
         /// <summary>
+        /// BTN_PlayerCheckYes 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button BTN_PlayerCheckYes;
+
+        /// <summary>
+        /// BTN_SettingYes 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button BTN_SettingYes;
+
+        /// <summary>
+        /// TB_GameStatus 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox TB_GameStatus;
+
+        /// <summary>
+        /// TB_GameCode 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox TB_GameCode;
+
+        /// <summary>
         /// TB_GameName 컨트롤입니다.
         /// </summary>
         /// <remarks>

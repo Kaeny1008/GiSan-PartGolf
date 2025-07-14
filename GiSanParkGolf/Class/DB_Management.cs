@@ -626,5 +626,15 @@ namespace GiSanParkGolf.Class
 
             return DB_Connection.Query<GameListModel>(strSQL, parameters, commandType: CommandType.Text).ToList();
         }
+
+        public List<GameJoinUserList> GetGameUserList(string gameCode)
+        {
+            var parameters = new DynamicParameters(new
+            {
+                GameCode = gameCode
+            });
+
+            return DB_Connection.Query<GameJoinUserList>("sp_GameJoinUser", parameters, commandType: CommandType.StoredProcedure).ToList();
+        }
     }
 }

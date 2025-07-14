@@ -95,31 +95,95 @@
             }
         </style>
         <script type="text/javascript"> 
-            function ShowModal(modalname) {
+            var showModalName; //모달이름
+            var showTitle; //타이틀
+            var showBody; //바디내용
+            var onlyYes; // 예 버튼만 표시
+            var showYesButton
+            function ShowModal(modalname, title, body, yes, yesbutton) {
+                showModalName = modalname;
+                showTitle = title;
+                showBody = body;
+                onlyYes = yes;
+                showYesButton = yesbutton;
                 $(modalname).modal("show");
             }
-
+            $(document).on('show.bs.modal', showModalName, function () {
+                var modal = $(this);
+                modal.find('.modal-title').text(showTitle);
+                modal.find('.modal-body').text(showBody);
+                if (onlyYes) {
+                    modal.find('.modal-footer #MainContent_BTN_EarlyCloseYes').hide();
+                    modal.find('.modal-footer #MainContent_BTN_PlayerCheckYes').hide();
+                    modal.find('.modal-footer #MainContent_BTN_SettingYes').hide();
+                    modal.find('.modal-footer #BTN_No').text("확인");
+                    return;
+                } else {
+                    modal.find('.modal-footer #BTN_No').text("아니오");
+                }
+                switch (showYesButton){
+                    case 0:
+                        modal.find('.modal-footer #MainContent_BTN_EarlyCloseYes').show();
+                        modal.find('.modal-footer #MainContent_BTN_PlayerCheckYes').hide();
+                        modal.find('.modal-footer #MainContent_BTN_SettingYes').hide();
+                        break;
+                    case 1:
+                        modal.find('.modal-footer #MainContent_BTN_EarlyCloseYes').hide();
+                        modal.find('.modal-footer #MainContent_BTN_PlayerCheckYes').show();
+                        modal.find('.modal-footer #MainContent_BTN_SettingYes').hide();
+                        break;
+                    case 2:
+                        modal.find('.modal-footer #MainContent_BTN_EarlyCloseYes').hide();
+                        modal.find('.modal-footer #MainContent_BTN_PlayerCheckYes').hide();
+                        modal.find('.modal-footer #MainContent_BTN_SettingYes').show();
+                        break;
+                    default:
+                        break;
+                }
+            })
             /*로딩을 완료하기 위해(안그러면 로딩이 안되어 모달 실행이 안된다.*/
             /*아래 두함수가 셋트로 움직여야 한다.*/
             var launch = false;
-            function launchModal() {
+            function launchModal(modalname, title, body, yes, yesbutton) {
+                showModalName = modalname;
+                showTitle = title;
+                showBody = body;
+                onlyYes = yes;
+                showYesButton = yesbutton;
                 launch = true;
             }
             function pageLoad() {
                 if (launch) {
-                    $("#CloseGame").modal("show");
+                    $(showModalName).modal("show");
                 }
             }
-            //왜 안될까...
-            $('#CloseGame').on('show.bs.modal', function () {
-                var titleTxt = "abcd"
-                var modal = $(this)
-                modal.find('.modal-title').text('Title : ' + titleTxt)
-            })
+            function winPopUPCenter(url, winName, pwidth, pheight, scrollYN, resizeYN) {
+                var win = null;
+                var winL = (screen.width - pwidth) / 2;
+                var winT = (screen.height - pheight) / 2;
+                var spec = 'toolbar=no,'; // 도구메뉴
+                spec += 'status=no,'; // 상태바
+                spec += 'location=yes,'; // 주소관련메뉴
+                spec += 'height=' + pheight + ','; // 높이
+                spec += 'width=' + pwidth + ','; // 너비
+                spec += 'top=' + winT + ','; // 세로위치
+                spec += 'left=' + winL + ','; // 가로위치
+                spec += 'scrollbars=' + (scrollYN == undefined ? "no" : scrollYN) + ','; // 스크롤바 여부(기본)
+                spec += 'resizable=' + (resizeYN == undefined ? "no" : resizeYN); // 창크기조정 여부
+
+                var gameCode = document.getElementById('MainContent_TB_GameCode').value;
+                url += '?GameCode=' + gameCode;
+                console.log(gameCode);
+                win = window.open(url, winName, spec);
+                if (parseInt(navigator.appVersion) >= 4) {
+                    win.window.focus();
+                }
+                $(showModalName).modal("hide");
+            }
         </script>
 
         <!-- Modal 시작 -->
-        <div class="modal fade" id="CloseModal" tabindex="-1" aria-labelledby="EarlyCloseModal" aria-hidden="true">
+        <div class="modal fade" id="MainModal" tabindex="-1" aria-labelledby="MainModal" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -127,31 +191,14 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        참가를 조기마감 하시겠습니까?
+                        이미 종료된 대회입니다.
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
-                        <asp:Button ID="BTN_EarlyCloseYes" 
-                            runat="server" 
-                            OnClick="BTN_EarlyCloseYes_Click" 
-                            class="btn btn-primary" 
-                            Text="예" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="CloseGame" tabindex="-1" aria-labelledby="EarlyCloseModal" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel2">확인</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        종료된 대회입니다.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">확인</button>
+                        <button id="BTN_No" type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
+                        <asp:Button ID="BTN_EarlyCloseYes" runat="server" Text="예" OnClick="BTN_EarlyCloseYes_Click" CssClass="btn btn-primary"/>
+                        <asp:Button ID="BTN_PlayerCheckYes" runat="server" Text="예" CssClass="btn btn-primary"
+                            onClientclick="winPopUPCenter('GameUserList.aspx', 'User List', 750, 800);return false;" />
+                        <asp:Button ID="BTN_SettingYes" runat="server" Text="예" OnClick="BTN_SettingYes_Click" CssClass="btn btn-primary"/>
                     </div>
                 </div>
             </div>
@@ -161,6 +208,12 @@
         <div class="col" style="background-color:lightskyblue; border-top-right-radius:1rem; border-bottom-right-radius:1rem">
             <div style="text-align:left;">
                 <h4 style="color:white">선택된 대회정보입니다.</h4>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">현재상태</span>
+                <asp:TextBox ID="TB_GameStatus" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>
+                <span class="input-group-text">대회코드</span>
+                <asp:TextBox ID="TB_GameCode" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">대회명</span>
@@ -194,14 +247,17 @@
                 <div class="center_container">
                     <div class="btn-group" role="group" aria-label="Basic mixed styles example">
                         <button runat="server" id="BTN_EarlyClose" type="button" class="btn btn-danger" disabled 
-                            onclick="ShowModal('#CloseModal');return false;">
+                            onclick="ShowModal('#MainModal', '조기마감 확인', '모집을 조기마감 하시겠습니까?', false, 0);return false;">
                             조기마감
                         </button>
-                        <button runat="server" id="BTN_PlayerCheck" type="button" class="btn btn-warning" disabled 
-                            onclick="ShowModal('#CloseGame');return false;">
+                        <button runat="server" id="BTN_PlayerCheck" type="button" class="btn btn-warning" disabled
+                            onclick="ShowModal('#MainModal', '참가자확인', '참가자 리스트를 확인 하시겠습니까?', false, 1);return false;">
                             참가자 확인
                         </button>
-                        <button runat="server" id="BTN_Setting" type="button" class="btn btn-success" disabled>선수 코스배치</button>
+                        <button runat="server" id="BTN_Setting" type="button" class="btn btn-success" disabled
+                            onclick="ShowModal('#MainModal', '코스배치 확인', '선수 코스배치를 하시겠습니까?', false, 2);return false;">
+                            선수 코스배치
+                        </button>
                     </div>
                 </div>
             </div>

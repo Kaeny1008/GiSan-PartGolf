@@ -100,21 +100,21 @@ namespace GiSanParkGolf.Sites.Admin
         protected void LnkGame_Click(object sender, EventArgs e)
         {
             LinkButton btn = (LinkButton)sender;
-            Debug.WriteLine("선택된 GameCode : " + btn.ToolTip.ToString());
+            //Debug.WriteLine("선택된 GameCode : " + btn.ToolTip.ToString());
             LoadGame(btn.ToolTip.ToString());
         }
 
         protected void LoadGame(string gameCode)
         {
             var gameinfo = new DB_Management().GetGameInformation(gameCode);
-            if (gameinfo.GameStatus.Equals("Completed"))
+            if (gameinfo.GameStatus.Equals("대회종료"))
             {
                 //string strAlarm = @"<script language='JavaScript'>window.alert('";
                 //strAlarm += "종료된 대회입니다.";
                 //strAlarm += "');</script>";
                 //Response.Write(strAlarm);
 
-                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal();", true);
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '확인', '이미 종료된 대회입니다.', true);", true);
 
                 TB_GameName.Text = string.Empty;
                 TB_GameDate.Text = string.Empty;
@@ -125,6 +125,8 @@ namespace GiSanParkGolf.Sites.Admin
                 TB_HoleMaximum.Text = string.Empty;
                 TB_Note.Text = string.Empty;
                 TB_User.Text = string.Empty;
+                TB_GameStatus.Text = string.Empty;
+                TB_GameCode.Text = string.Empty;    
 
                 BTN_EarlyClose.Disabled = true;
                 BTN_PlayerCheck.Disabled = true;
@@ -141,17 +143,67 @@ namespace GiSanParkGolf.Sites.Admin
                 TB_HoleMaximum.Text = gameinfo.HoleMaximum.ToString();
                 TB_Note.Text = gameinfo.GameNote;
                 TB_User.Text = gameinfo.ParticipantNumber.ToString();
+                TB_GameStatus.Text = gameinfo.GameStatus;
+                TB_GameCode.Text = gameinfo.GameCode;
 
                 BTN_EarlyClose.Disabled = false;
                 BTN_PlayerCheck.Disabled = false;
                 BTN_Setting.Disabled = false;
+
+                if (gameinfo.GameStatus.Equals("조기마감"))
+                {
+                    BTN_EarlyClose.Disabled = true;
+                }
+
+                if (gameinfo.GameStatus.Equals("코스배치 완료"))
+                {
+                    BTN_EarlyClose.Disabled = true;
+                    BTN_PlayerCheck.Disabled = true;
+                }
+
+                if (gameinfo.GameStatus.Equals("대회종료"))
+                {
+                    BTN_EarlyClose.Disabled = true;
+                    BTN_PlayerCheck.Disabled = true;
+                    BTN_Setting.Disabled = true;
+                }
             }
 
         }
 
         protected void BTN_EarlyCloseYes_Click(object sender, EventArgs e)
         {
+            string strSQL = "UPDATE Game_List SET GameStatus = 'EarlyClose'";
+            strSQL += " WHERE GameCode = '" + TB_GameCode.Text + "';";
 
+            string result =  Global.dbManager.DB_Write(strSQL);
+            if (result.Equals("Success"))
+            {
+                BTN_EarlyClose.Disabled = true;
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '확인', '저장되었습니다.', true);", true);
+            }
+            else
+            {
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', 'Error', '" + result + "', true);", true);
+            }
+;       }
+
+        protected void BTN_PlayerCheckYes_Click(object sender, EventArgs e)
+        {
+            //Response.Write("<script>window.open('GameUserList.aspx'" + 
+            //    ", 'popup'" + "" +
+            //    ", 'scrollbars, resizable, width=450, height=450, left=0, top=0'" + 
+            //    ")</script>");
+            //Response.Write("<script>NewWin('GameUserList.aspx')</script>");
+
+            //ScriptManager.RegisterStartupScript(this.Page, Page.GetType(), "text", "NewWin('/Sites/Admin/GameUserList.aspx')", true);
+            ClientScript.RegisterStartupScript(this.GetType(), "key", "NewWin('/Sites/Admin/GameUserList.aspx')", false);
+        }
+
+        protected void BTN_SettingYes_Click(object sender, EventArgs e)
+        {
+            Debug.WriteLine("2")
+;
         }
     }
 }

@@ -110,4 +110,21 @@ namespace GiSanParkGolf.Models
         [Display(Name = "GameCode")]
         public string GameCode { get; set; }
     }
+
+    public class  GameJoinUserList
+    {
+        public int RowNumber { get; set; }
+
+        [Display(Name = "JoinId")]
+        public string JoinId { get; set; }
+
+        [Display(Name = "UserId")]
+        public string UserId { get; set; }
+        
+        [Display(Name = "UserName")]
+        public string UserName { get; set; }
+
+        [Display(Name = "UserNumber")]
+        public int UserNumber { get; set; }
+    }
 }
