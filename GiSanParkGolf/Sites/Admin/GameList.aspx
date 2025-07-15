@@ -9,7 +9,6 @@
             <%--자바스크립트 새창열기 예제--%>
             /*window.open(strPath, "_blank", "scrollbars,resizable,width=950,height=800,left=0,top=0");*/
             location.href = strPath;
-            window.open(strPath);
         }
     </script>
 
@@ -65,8 +64,8 @@
                 <ItemTemplate>
                     <%#Eval("GameDate","{0:yyyy-MM-dd}")%>
                 </ItemTemplate>
-                <HeaderStyle Width="15%" />
-                <ItemStyle Width="15%" />
+                <HeaderStyle Width="10%" />
+                <ItemStyle Width="10%" />
             </asp:TemplateField>
             <asp:TemplateField>
                 <HeaderTemplate>
@@ -75,8 +74,8 @@
                 <ItemTemplate>
                     <%#Eval("StadiumName")%>
                 </ItemTemplate>
-                <HeaderStyle Width="15%" />
-                <ItemStyle Width="15%" />
+                <HeaderStyle Width="10%" />
+                <ItemStyle Width="10%" />
             </asp:TemplateField>
             <asp:TemplateField>
                 <HeaderTemplate>
@@ -94,6 +93,16 @@
                 </HeaderTemplate>
                 <ItemTemplate>
                     <%#Eval("ParticipantNumber")%>
+                </ItemTemplate>
+                <HeaderStyle Width="10%" />
+                <ItemStyle Width="10%" />
+            </asp:TemplateField>
+            <asp:TemplateField>
+                <HeaderTemplate>
+                    <asp:Label ID="LB_Place" runat="server" Text="상태"></asp:Label>
+                </HeaderTemplate>
+                <ItemTemplate>
+                    <%#Eval("GameStatus")%>
                 </ItemTemplate>
                 <HeaderStyle Width="10%" />
                 <ItemStyle Width="10%" />

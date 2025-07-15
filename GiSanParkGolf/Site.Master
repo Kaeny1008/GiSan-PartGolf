@@ -95,9 +95,11 @@
                                 %>
                                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                         <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
+                                        <li><a class="dropdown-item" href="/Sites/Admin/GameHandicap">Handicap 설정</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" href="/Sites/Admin/GameList">대회개최</a></li>
                                         <li><a class="dropdown-item" href="/Sites/Admin/GameUserSetting">인원 코스 및 배치</a></li>
+                                        <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" href="/TempHint">대회결과 입력</a></li>
                                     </ul>
                                 <% 

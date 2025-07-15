@@ -32,7 +32,6 @@ namespace GiSanParkGolf.Sites.Admin
 
                     gameCode = Request.QueryString["gamecode"];
                     LoadGame(gameCode);
-                    BTN_Save.Text = "수정";
                 }
                 else
                 {
@@ -46,25 +45,11 @@ namespace GiSanParkGolf.Sites.Admin
                     TB_EndDate.Text = formattedAddDay;
 
                     gameCode = null;
-                    BTN_Save.Text = "저장";
                 }
             }
         }
 
         protected void BTN_Save_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(gameCode))
-            {
-                SaveGame();
-            }
-            else
-            {
-                UpdateGame();
-            }
-
-        }
-
-        protected void SaveGame()
         {
             string strSQL = "INSERT INTO Game_List(";
             strSQL += "[GameCode], [GameName], [GameDate], [StadiumName], [GameHost]";
@@ -87,7 +72,7 @@ namespace GiSanParkGolf.Sites.Admin
             SaveLastStep(strSQL);
         }
 
-        protected void UpdateGame()
+        protected void BTN_Update_Click(object sender, EventArgs e)
         {
             string strSQL = "UPDATE Game_List SET";
             strSQL += " GameName = '" + TB_GameName.Text + "'";
@@ -106,6 +91,16 @@ namespace GiSanParkGolf.Sites.Admin
             SaveLastStep(strSQL);
         }
 
+        protected void BTN_Cancel_Click(object sender, EventArgs e)
+        {
+            string strSQL = "UPDATE Game_List SET";
+            strSQL += " GameStatus = 'Cancel'";
+            strSQL += " WHERE GameCode = '" + gameCode + "'";
+            strSQL += ";";
+
+            SaveLastStep(strSQL);
+        }
+
         protected void SaveLastStep(string strSQL)
         {
             DB_Management dbWrite = new DB_Management();
@@ -113,14 +108,12 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (writeResult.Equals("Success"))
             {
-                Response.Redirect("/Sites/Admin/GameList.aspx");
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '확인', '저장 되었습니다.', true);", true);
+                //Response.Redirect("/Sites/Admin/GameList.aspx");
             }
             else
             {
-                string strAlarm = @"<script language='JavaScript'>window.alert('";
-                strAlarm += writeResult;
-                strAlarm += "');</script>";
-                Response.Write(strAlarm);
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', 'Error', '" + writeResult + "', true);", true);
             }
         }
 

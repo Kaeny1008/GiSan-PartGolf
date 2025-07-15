@@ -87,13 +87,31 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.TextBox TB_Note;
 
         /// <summary>
-        /// BTN_Save 컨트롤입니다.
+        /// BTN_ModalShow 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button BTN_Save;
+        protected global::System.Web.UI.WebControls.Button BTN_ModalShow;
+
+        /// <summary>
+        /// Button1 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button Button1;
+
+        /// <summary>
+        /// BTN_ModalShow2 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button BTN_ModalShow2;
 
         /// <summary>
         /// RequiredFieldValidator1 컨트롤입니다.
@@ -132,12 +150,30 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.ValidationSummary ValidationSummary_SignupForm;
 
         /// <summary>
-        /// Button2 컨트롤입니다.
+        /// BTN_Save 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button Button2;
+        protected global::System.Web.UI.WebControls.Button BTN_Save;
+
+        /// <summary>
+        /// BTN_Update 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button BTN_Update;
+
+        /// <summary>
+        /// BTN_Cancel 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button BTN_Cancel;
     }
 }

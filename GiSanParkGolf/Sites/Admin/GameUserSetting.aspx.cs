@@ -107,68 +107,70 @@ namespace GiSanParkGolf.Sites.Admin
         protected void LoadGame(string gameCode)
         {
             var gameinfo = new DB_Management().GetGameInformation(gameCode);
-            if (gameinfo.GameStatus.Equals("대회종료"))
+
+            if (gameinfo == null)
             {
-                //string strAlarm = @"<script language='JavaScript'>window.alert('";
-                //strAlarm += "종료된 대회입니다.";
-                //strAlarm += "');</script>";
-                //Response.Write(strAlarm);
-
-                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '확인', '이미 종료된 대회입니다.', true);", true);
-
-                TB_GameName.Text = string.Empty;
-                TB_GameDate.Text = string.Empty;
-                TB_StadiumName.Text = string.Empty;
-                TB_GameHost.Text = string.Empty;
-                TB_StartDate.Text = string.Empty;
-                TB_EndDate.Text = string.Empty;
-                TB_HoleMaximum.Text = string.Empty;
-                TB_Note.Text = string.Empty;
-                TB_User.Text = string.Empty;
-                TB_GameStatus.Text = string.Empty;
-                TB_GameCode.Text = string.Empty;    
-
-                BTN_EarlyClose.Disabled = true;
-                BTN_PlayerCheck.Disabled = true;
-                BTN_Setting.Disabled = true;
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '오류', '대회 정보를 찾을 수 없습니다.', true);", true);
+                return;
             }
-            else
+
+            bool isClosed = gameinfo.GameStatus == "대회종료" || gameinfo.GameStatus == "취소";
+            if (isClosed)
             {
-                TB_GameName.Text = gameinfo.GameName;
-                TB_GameDate.Text = Helper.ConvertDate(gameinfo.GameDate);
-                TB_StadiumName.Text = gameinfo.StadiumName;
-                TB_GameHost.Text = gameinfo.GameHost;
-                TB_StartDate.Text = Helper.ConvertDate(gameinfo.StartRecruiting);
-                TB_EndDate.Text = Helper.ConvertDate(gameinfo.EndRecruiting);
-                TB_HoleMaximum.Text = gameinfo.HoleMaximum.ToString();
-                TB_Note.Text = gameinfo.GameNote;
-                TB_User.Text = gameinfo.ParticipantNumber.ToString();
-                TB_GameStatus.Text = gameinfo.GameStatus;
-                TB_GameCode.Text = gameinfo.GameCode;
+                string msg = gameinfo.GameStatus == "대회종료" ? "종료된 대회입니다." : "취소된 대회입니다.";
+                ClientScript.RegisterStartupScript(this.GetType(), "key", $"launchModal('#MainModal', '확인', '{msg}', true);", true);
 
-                BTN_EarlyClose.Disabled = false;
-                BTN_PlayerCheck.Disabled = false;
-                BTN_Setting.Disabled = false;
+                TB_GameName.Text = TB_GameDate.Text = TB_StadiumName.Text = TB_GameHost.Text =
+                TB_StartDate.Text = TB_EndDate.Text = TB_HoleMaximum.Text = TB_Note.Text =
+                TB_User.Text = TB_GameStatus.Text = TB_GameCode.Text = string.Empty;
 
-                if (gameinfo.GameStatus.Equals("조기마감"))
-                {
+                BTN_EarlyClose.Disabled = BTN_PlayerCheck.Disabled = BTN_Setting.Disabled = true;
+                return;
+            }
+
+            TB_GameName.Text = gameinfo.GameName;
+            TB_GameDate.Text = Helper.ConvertDate(gameinfo.GameDate);
+            TB_StadiumName.Text = gameinfo.StadiumName;
+            TB_GameHost.Text = gameinfo.GameHost;
+            TB_StartDate.Text = Helper.ConvertDate(gameinfo.StartRecruiting);
+            TB_EndDate.Text = Helper.ConvertDate(gameinfo.EndRecruiting);
+            TB_HoleMaximum.Text = gameinfo.HoleMaximum.ToString();
+            TB_Note.Text = gameinfo.GameNote;
+            TB_User.Text = gameinfo.ParticipantNumber.ToString();
+            TB_GameStatus.Text = gameinfo.GameStatus;
+            TB_GameCode.Text = gameinfo.GameCode;
+
+            BTN_EarlyClose.Disabled = BTN_PlayerCheck.Disabled = BTN_Setting.Disabled = false;
+
+            switch (gameinfo.GameStatus)
+            {
+                case "조기마감":
                     BTN_EarlyClose.Disabled = true;
-                }
-
-                if (gameinfo.GameStatus.Equals("코스배치 완료"))
-                {
+                    break;
+                case "코스배치 완료":
                     BTN_EarlyClose.Disabled = true;
                     BTN_PlayerCheck.Disabled = true;
-                }
-
-                if (gameinfo.GameStatus.Equals("대회종료"))
-                {
+                    break;
+                case "대회종료":
                     BTN_EarlyClose.Disabled = true;
                     BTN_PlayerCheck.Disabled = true;
                     BTN_Setting.Disabled = true;
-                }
+                    break;
             }
+        }
 
+        protected void DbWrite(string strSQL)
+        {
+            try
+            {
+                Global.dbManager.DB_Write(strSQL);
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '확인', '저장되었습니다.', true);", true);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("DB Write Error: " + ex.Message);
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '오류', '데이터베이스에 오류가 발생했습니다. 관리자에게 문의하세요.', true);", true);
+            }
         }
 
         protected void BTN_EarlyCloseYes_Click(object sender, EventArgs e)
@@ -176,29 +178,9 @@ namespace GiSanParkGolf.Sites.Admin
             string strSQL = "UPDATE Game_List SET GameStatus = 'EarlyClose'";
             strSQL += " WHERE GameCode = '" + TB_GameCode.Text + "';";
 
-            string result =  Global.dbManager.DB_Write(strSQL);
-            if (result.Equals("Success"))
-            {
-                BTN_EarlyClose.Disabled = true;
-                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '확인', '저장되었습니다.', true);", true);
-            }
-            else
-            {
-                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', 'Error', '" + result + "', true);", true);
-            }
-;       }
-
-        protected void BTN_PlayerCheckYes_Click(object sender, EventArgs e)
-        {
-            //Response.Write("<script>window.open('GameUserList.aspx'" + 
-            //    ", 'popup'" + "" +
-            //    ", 'scrollbars, resizable, width=450, height=450, left=0, top=0'" + 
-            //    ")</script>");
-            //Response.Write("<script>NewWin('GameUserList.aspx')</script>");
-
-            //ScriptManager.RegisterStartupScript(this.Page, Page.GetType(), "text", "NewWin('/Sites/Admin/GameUserList.aspx')", true);
-            ClientScript.RegisterStartupScript(this.GetType(), "key", "NewWin('/Sites/Admin/GameUserList.aspx')", false);
+            DbWrite(strSQL);
         }
+
 
         protected void BTN_SettingYes_Click(object sender, EventArgs e)
         {

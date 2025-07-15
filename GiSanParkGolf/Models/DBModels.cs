@@ -125,6 +125,6 @@ namespace GiSanParkGolf.Models
         public string UserName { get; set; }
 
         [Display(Name = "UserNumber")]
-        public int UserNumber { get; set; }
+        public string UserNumber { get; set; }
     }
 }

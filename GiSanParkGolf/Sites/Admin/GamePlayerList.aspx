@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="GameUserList.aspx.cs" Inherits="GiSanParkGolf.Sites.Admin.GameUserList" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="GamePlayerList.aspx.cs" Inherits="GiSanParkGolf.Sites.Admin.GamePlayerList" %>
 
 <!DOCTYPE html>
 
@@ -14,6 +14,8 @@
 <body>
     <form id="form1" runat="server">
         <div>
+            <asp:Button ID="BTN_ToExcel" runat="server" Text="Excel 저장" OnClick="BTN_ToExcel_Click" CssClass="btn btn-primary" />
+            <hr />
             <asp:GridView ID="GameList"
                 runat="server" AutoGenerateColumns="False" DataKeyNames="UserId"
                 CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
@@ -56,7 +58,7 @@
                             <asp:Label ID="LB_WriteDate" runat="server" Text="생년월일"></asp:Label>
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <%#Eval("UserNumber", "{0:yyyy-MM-dd}")%>
+                            <%#Eval("UserNumber")%>
                         </ItemTemplate>
                         <HeaderStyle Width="30%" />
                         <ItemStyle Width="30%" />

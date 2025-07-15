@@ -131,8 +131,8 @@
                                     "<a>" + Eval("GameStatus") + "</a>"
                                 %>
                             </ItemTemplate>
-                            <HeaderStyle Width="50px" />
-                            <ItemStyle Width="50px" />
+                            <HeaderStyle Width="60px" />
+                            <ItemStyle Width="60px" />
                         </asp:TemplateField>
                         <asp:TemplateField>
                             <HeaderTemplate>
@@ -149,8 +149,8 @@
                                     "<a>완료</a>"
                                 %>
                             </ItemTemplate>
-                            <HeaderStyle Width="50px" />
-                            <ItemStyle Width="50px" />
+                            <HeaderStyle Width="40px" />
+                            <ItemStyle Width="40px" />
                         </asp:TemplateField>
                     </Columns>
                     <EmptyDataTemplate>참가 신청 또는 참가한 데이터가 없습니다.</EmptyDataTemplate>
