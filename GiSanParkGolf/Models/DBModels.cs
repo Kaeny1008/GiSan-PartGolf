@@ -127,4 +127,15 @@ namespace GiSanParkGolf.Models
         [Display(Name = "UserNumber")]
         public string UserNumber { get; set; }
     }
+
+    public class PlayerHandicapViewModel
+    {
+        public string UserId { get; set; }    // 참가자 ID (SYS_Users.UserId)
+        public string UserName { get; set; }    // 참가자 이름
+        public string GameCode { get; set; }    // 대회 코드
+        public string GameName { get; set; }    // 대회 이름
+        public int Handicap { get; set; }    // 핸디캡 값
+        public string Source { get; set; }    // Manual / Auto
+        public DateTime LastUpdated { get; set; }    // 마지막 수정일
+    }
 }
