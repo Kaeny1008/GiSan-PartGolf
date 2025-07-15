@@ -555,7 +555,7 @@ namespace GiSanParkGolf.Class
                 GameCode = gameCode
             });
 
-            return DB_Connection.Query<string>(strSQL, parameters, commandType:CommandType.Text).SingleOrDefault();
+            return DB_Connection.Query<string>(strSQL, parameters, commandType: CommandType.Text).SingleOrDefault();
         }
 
         public string GameJoin(GameJoinUserModel n)
@@ -644,48 +644,6 @@ namespace GiSanParkGolf.Class
                 "sp_GetGameHandicaps",
                 new { GameCode = gameCode, SearchTerm = searchTerm },
                 commandType: CommandType.StoredProcedure);
-        }
-
-        /// <summary>
-        /// 개별 참가자의 핸디캡 수정
-        /// </summary>
-        public void UpdateHandicap(
-            string userId,
-            string gameCode,
-            int handicap,
-            string source)
-        {
-            DB_Connection.Execute(
-                "sp_UpdateGameHandicap",
-                new { UserId = userId, GameCode = gameCode, Handicap = handicap, Source = source },
-                commandType: CommandType.StoredProcedure);
-        }
-
-        /// <summary>
-        /// 지정 게임의 모든 참가자 핸디캡을
-        /// sp_RecalculateHandicapsByGame 프로시저로 재산정
-        /// </summary>
-        public void RecalculateAll(string gameCode)
-        {
-            DB_Connection.Execute(
-                "sp_RecalculateHandicapsByGame",
-                new { GameCode = gameCode },
-                commandType: CommandType.StoredProcedure);
-        }
-
-        /// <summary>
-        /// 대회 목록을 Dapper로 조회
-        /// </summary>
-        public IEnumerable<GameList> GetGames()
-        {
-            const string sql = @"
-                SELECT GameCode, GameName
-                  FROM Game_List
-                 ORDER BY GameDate DESC";
-
-            return DB_Connection.Query<GameList>(
-                sql,
-                commandType: CommandType.Text);
         }
     }
 }
