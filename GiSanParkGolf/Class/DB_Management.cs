@@ -739,5 +739,18 @@ namespace GiSanParkGolf.Class
 
             DB_Connection.Execute(sql, log);
         }
+
+        public List<HandicapChangeLog> GetHandicapChangeLogs()
+        {
+            string sql = @"
+                SELECT l.LogId, l.UserId, u.UserName, l.Age, l.PrevHandicap, l.NewHandicap,
+                        l.PrevSource, l.NewSource, l.ChangedBy, l.ChangedAt, l.Reason
+                FROM SYS_HandicapLog l
+                LEFT JOIN SYS_Users u ON l.UserId = u.UserId
+                ORDER BY l.ChangedAt DESC
+            ";
+
+            return DB_Connection.Query<HandicapChangeLog>(sql).AsList();
+        }
     }
 }

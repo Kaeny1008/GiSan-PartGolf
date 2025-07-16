@@ -167,14 +167,14 @@ namespace GiSanParkGolf.Models
     {
         public int LogId { get; set; }
         public string UserId { get; set; }
+        public string UserName { get; set; }   // 사용자 이름 속성 추가됨
         public int Age { get; set; }
         public int PrevHandicap { get; set; }
         public int NewHandicap { get; set; }
         public string PrevSource { get; set; }
         public string NewSource { get; set; }
-        public string Reason { get; set; }
         public string ChangedBy { get; set; }
         public DateTime ChangedAt { get; set; }
+        public string Reason { get; set; }
     }
-
 }
