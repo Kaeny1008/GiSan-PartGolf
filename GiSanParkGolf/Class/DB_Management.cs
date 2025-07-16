@@ -645,5 +645,99 @@ namespace GiSanParkGolf.Class
                 new { GameCode = gameCode, SearchTerm = searchTerm },
                 commandType: CommandType.StoredProcedure);
         }
+
+        // ✅ 사용자 + 핸디캡 JOIN 조회
+        public List<UserWithHandicap> GetUserHandicaps()
+        {
+            string sql = @"
+                SELECT 
+                    u.UserId, u.UserName, u.UserNumber,
+                    h.AgeHandicap, h.Source, h.LastUpdated, h.LastUpdatedBy
+                FROM SYS_Users u
+                LEFT JOIN SYS_Handicap h ON u.UserId = h.UserId";
+
+            var result = DB_Connection.Query<UserWithHandicap>(sql).AsList();
+
+            foreach (var user in result)
+                user.Age = CalculateAge(user.UserNumber);
+
+            return result;
+        }
+
+        // ✅ 핸디캡 정보 저장 (업데이트 또는 신규)
+        public void UpdateHandicap(string userId, int handicap, string source, string updatedBy)
+        {
+            string sql = @"
+                MERGE SYS_Handicap AS target
+                USING (SELECT @UserId AS UserId) AS src
+                ON target.UserId = src.UserId
+                WHEN MATCHED THEN 
+                    UPDATE SET AgeHandicap = @Handicap,
+                               Source = @Source,
+                               LastUpdated = GETDATE(),
+                               LastUpdatedBy = @UpdatedBy
+                WHEN NOT MATCHED THEN
+                    INSERT (UserId, AgeHandicap, Source, LastUpdated, LastUpdatedBy)
+                    VALUES (@UserId, @Handicap, @Source, GETDATE(), @UpdatedBy);";
+
+            DB_Connection.Execute(sql, new
+            {
+                UserId = userId,
+                Handicap = handicap,
+                Source = source,
+                UpdatedBy = updatedBy
+            });
+        }
+
+
+        // ✅ 나이 계산 유틸리티
+        private int CalculateAge(string userNumber)
+        {
+            if (string.IsNullOrWhiteSpace(userNumber) || userNumber.Length != 6)
+                return 0;
+
+            int yy = int.Parse(userNumber.Substring(0, 2));
+            int mm = int.Parse(userNumber.Substring(2, 2));
+            int dd = int.Parse(userNumber.Substring(4, 2));
+
+            // 현재 연도와 기준 생년 조합
+            DateTime today = DateTime.Today;
+            int base1900 = 1900 + yy;
+            int base2000 = 2000 + yy;
+
+            // 두 후보 생년 중 어떤 것이 실제 생일에 가까운지 선택
+            DateTime birth1900, birth2000;
+            try
+            {
+                birth1900 = new DateTime(base1900, mm, dd);
+                birth2000 = new DateTime(base2000, mm, dd);
+            }
+            catch
+            {
+                return 0;
+            }
+
+            int age1900 = today.Year - birth1900.Year;
+            if (birth1900 > today.AddYears(-age1900)) age1900--;
+
+            int age2000 = today.Year - birth2000.Year;
+            if (birth2000 > today.AddYears(-age2000)) age2000--;
+
+            // ✅ 나이가 0~130세인 정상 범위일 경우 선택
+            if (age1900 >= 0 && age1900 <= 130) return age1900;
+            if (age2000 >= 0 && age2000 <= 130) return age2000;
+
+            return 0; // 둘 다 비정상일 경우
+        }
+
+        public void InsertHandicapChangeLog(HandicapChangeLog log)
+        {
+            string sql = @"
+                INSERT INTO SYS_HandicapLog
+                (UserId, Age, PrevHandicap, NewHandicap, PrevSource, NewSource, Reason, ChangedBy)
+                VALUES (@UserId, @Age, @PrevHandicap, @NewHandicap, @PrevSource, @NewSource, @Reason, @ChangedBy);";
+
+            DB_Connection.Execute(sql, log);
+        }
     }
 }

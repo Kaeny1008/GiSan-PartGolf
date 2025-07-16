@@ -106,7 +106,7 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void LoadGame(string gameCode)
         {
-            var gameinfo = new DB_Management().GetGameInformation(gameCode);
+            var gameinfo = Global.dbManager.GetGameInformation(gameCode);
 
             if (gameinfo == null)
             {

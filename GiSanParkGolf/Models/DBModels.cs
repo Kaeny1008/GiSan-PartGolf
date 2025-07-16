@@ -138,4 +138,43 @@ namespace GiSanParkGolf.Models
         public string Source { get; set; }    // Manual / Auto
         public DateTime LastUpdated { get; set; }    // 마지막 수정일
     }
+
+    //핸디캡 테이블 (SYS_Handicap)
+    public class SYS_Handicap
+    {
+        public string UserId { get; set; }        // NVARCHAR(15)
+        public int AgeHandicap { get; set; }      // 나이 기반 핸디캡 점수
+        public string Source { get; set; }        // "자동" or "수동"
+        public DateTime LastUpdated { get; set; } // 마지막 갱신일
+        public string LastUpdatedBy { get; set; } // 마지막 갱신자 ID
+    }
+
+     // 화면 출력용 뷰 모델
+    public class UserWithHandicap
+    {
+        public string UserId { get; set; }
+        public string UserName { get; set; }
+        public string UserNumber { get; set; }
+
+        public int Age { get; set; }              // 생년월일 → 계산된 나이
+        public int AgeHandicap { get; set; }      // 핸디캡 점수
+        public string Source { get; set; }
+        public DateTime LastUpdated { get; set; }
+        public string LastUpdatedBy { get; set; } // 마지막 갱신자 ID
+    }
+
+    public class HandicapChangeLog
+    {
+        public int LogId { get; set; }
+        public string UserId { get; set; }
+        public int Age { get; set; }
+        public int PrevHandicap { get; set; }
+        public int NewHandicap { get; set; }
+        public string PrevSource { get; set; }
+        public string NewSource { get; set; }
+        public string Reason { get; set; }
+        public string ChangedBy { get; set; }
+        public DateTime ChangedAt { get; set; }
+    }
+
 }

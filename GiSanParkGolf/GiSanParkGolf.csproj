@@ -185,6 +185,7 @@
     <Content Include="Sites\Admin\GameList.aspx" />
     <Content Include="Sites\Admin\GamePlayerList.aspx" />
     <Content Include="Sites\Admin\GameUserSetting.aspx" />
+    <Content Include="Sites\Admin\HandicapLog.aspx" />
     <Content Include="Sites\Login\Admin Alert.aspx" />
     <Content Include="Sites\Admin\Player Information.aspx" />
     <Content Include="Login.aspx" />
@@ -434,6 +435,13 @@
     </Compile>
     <Compile Include="Sites\Admin\GameUserSetting.aspx.designer.cs">
       <DependentUpon>GameUserSetting.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Sites\Admin\HandicapLog.aspx.cs">
+      <DependentUpon>HandicapLog.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Sites\Admin\HandicapLog.aspx.designer.cs">
+      <DependentUpon>HandicapLog.aspx</DependentUpon>
     </Compile>
     <Compile Include="Sites\Login\Admin Alert.aspx.cs">
       <DependentUpon>Admin Alert.aspx</DependentUpon>
