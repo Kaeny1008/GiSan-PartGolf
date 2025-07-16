@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 
 namespace GiSanParkGolf.Sites.Admin
 {
-    public partial class HandicapLog : System.Web.UI.Page
+    public partial class GameHandicapLog : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {

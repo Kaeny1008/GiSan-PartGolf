@@ -52,6 +52,19 @@
         function clearHandicapTooltip(txtbox) {
             txtbox.value = "";
         }
+        window.addEventListener("DOMContentLoaded", function () {
+        const txt = document.getElementById("<%= txtSearch.ClientID %>");
+        const btn = document.getElementById("<%= btnSearch.ClientID %>");
+
+        if (txt && btn) {
+            txt.addEventListener("keypress", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();  // 폼 자동 제출 방지
+                    btn.click();         // 버튼 클릭 유도
+                }
+            });
+        }
+    });
     </script>
 
     <style>
@@ -80,34 +93,43 @@
 
         <%-- 필터 영역 --%>
         <div class="row mb-4">
-            <div class="col-md-1 gx-1">
-                <asp:DropDownList ID="ddlSourceFilter" runat="server"
-                    AutoPostBack="true"
-                    CssClass="form-select"
-                    OnSelectedIndexChanged="ddlSourceFilter_SelectedIndexChanged">
-                    <asp:ListItem Text="전체" Value="" />
-                    <asp:ListItem Text="자동" Value="자동" />
-                    <asp:ListItem Text="수동" Value="수동" />
+            <!-- 드롭다운 & 검색창 -->
+            <div class="col-md-10 d-flex flex-wrap gap-2">
+                <div class="col-md-auto">
+                    <asp:DropDownList ID="ddlSourceFilter" runat="server"
+                        AutoPostBack="true" CssClass="form-select"
+                        OnSelectedIndexChanged="ddlSourceFilter_SelectedIndexChanged">
+                        <asp:ListItem Text="전체" Value="" />
+                        <asp:ListItem Text="자동" Value="자동" />
+                        <asp:ListItem Text="수동" Value="수동" />
+                    </asp:DropDownList>
+                </div>
+                <div class="col-md-auto">
+                    <asp:DropDownList ID="ddlSort" runat="server"
+                        AutoPostBack="true" CssClass="form-select"
+                        OnSelectedIndexChanged="ddlSort_SelectedIndexChanged">
+                        <asp:ListItem Text="이름 오름차순" Value="NameAsc" />
+                        <asp:ListItem Text="이름 내림차순" Value="NameDesc" />
+                        <asp:ListItem Text="핸디캡 낮은순" Value="HandicapAsc" />
+                        <asp:ListItem Text="핸디캡 높은순" Value="HandicapDesc" />
                 </asp:DropDownList>
-            </div>
-            <div class="col-md-2 gx-1">
-                <asp:DropDownList ID="ddlSort" runat="server"
-                    AutoPostBack="true"
-                    CssClass="form-select"
-                    OnSelectedIndexChanged="ddlSort_SelectedIndexChanged">
-                    <asp:ListItem Text="이름 오름차순" Value="NameAsc" />
-                    <asp:ListItem Text="이름 내림차순" Value="NameDesc" />
-                    <asp:ListItem Text="핸디캡 낮은순" Value="HandicapAsc" />
-                    <asp:ListItem Text="핸디캡 높은순" Value="HandicapDesc" />
-                </asp:DropDownList>
-            </div>
-            <div class="col-md-4 gx-1">
-                <div class="input-group mb-3">
-                  <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control" placeholder="이름 또는 ID로 검색" />
-                  <asp:Button ID="btnSearch" runat="server" CssClass="btn btn-primary" Text="검색" OnClick="btnSearch_Click" />
+                </div>
+                <div class="col-md-auto">
+                    <div class="input-group">
+                        <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control" placeholder="이름 또는 ID로 검색" />
+                        <asp:Button ID="btnSearch" runat="server" CssClass="btn btn-primary" Text="검색" OnClick="btnSearch_Click" />
+                    </div>
                 </div>
             </div>
+
+            <!-- 오른쪽 버튼 -->
+            <div class="col-md-2 text-end">
+                <a href="GameHandicapLog.aspx" class="btn btn-outline-dark">
+                    <i class="bi bi-bar-chart-line"></i> 핸디캡 기록 보기
+                </a>
+            </div>
         </div>
+
 
         <!-- 일괄 자동 계산 버튼 -->
         <asp:Button ID="btnRecalculateAllTrigger" runat="server"
