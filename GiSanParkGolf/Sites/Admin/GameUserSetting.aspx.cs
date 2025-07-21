@@ -79,13 +79,13 @@ namespace GiSanParkGolf.Sites.Admin
 
                 switch (SearchField)
                 {
-                    case "Name":
+                    case "GameName":
                         filtered = filtered.Where(g => g.GameName?.ToLower().Contains(kw) == true);
                         break;
-                    case "Stadium":
+                    case "StadiumName":
                         filtered = filtered.Where(g => g.StadiumName?.ToLower().Contains(kw) == true);
                         break;
-                    case "Host":
+                    case "GameHost":
                         filtered = filtered.Where(g => g.GameHost?.ToLower().Contains(kw) == true);
                         break;
                 }

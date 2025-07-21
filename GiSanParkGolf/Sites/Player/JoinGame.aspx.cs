@@ -68,8 +68,11 @@ namespace GiSanParkGolf.Sites.Player
             {
                 if (earlyJoinCheck.Equals("Join"))
                 {
-                    string strJs = "<script>alert('이미 대회참가 신청을 하셨습니다.'); location.href='javascript:history.go(-1)';</script>";
-                    Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
+                    //string strJs = "<script>alert('이미 대회참가 신청을 하셨습니다.'); location.href='javascript:history.go(-1)';</script>";
+                    //Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "alreadyJoin",
+                        "launchModal('#SaveModal', '안내', '이미 대회 참가 신청을 하셨습니다.', true, -1);", true);
+
                     return;
                 }
             }
@@ -77,7 +80,7 @@ namespace GiSanParkGolf.Sites.Player
             LoadGame();
         }
 
-        protected void BTN_Save_Click(object sender, EventArgs e)
+        protected void JoinGame_Click(object sender, EventArgs e)
         {
             string ipaddr = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
             if (string.IsNullOrEmpty(ipaddr))
@@ -95,14 +98,14 @@ namespace GiSanParkGolf.Sites.Player
             string dbWrite = Global.dbManager.GameJoin(gjum);
             if (dbWrite.Equals("Success"))
             {
-                Response.Redirect(string.Format("~/Sites/Player/JoinGame.aspx"));
+                //Response.Redirect(string.Format("~/Sites/Player/JoinGame.aspx"));
+                string js = $"launchModal('#SaveModal', '참가신청 성공', '참가신청이 완료 되었습니다.', true, -1);";
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "joinSuccess", js, true);
             }
             else
             {
-                string strAlarm = @"<script language='JavaScript'>window.alert('";
-                strAlarm += dbWrite;
-                strAlarm += "');</script>";
-                Response.Write(strAlarm);
+                string js = $"launchModal('#SaveModal', '참가신청 실패', '{dbWrite}', true, -1);";
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "joinError", js, true);
             }
         }
 

@@ -8,6 +8,58 @@
         function ShowModal() {
             $("#SaveModal").modal("show");
         }
+
+        let showModalName, showTitle, showBody, onlyYes, showYesButton;
+        let launch = false;
+
+        function launchModal(modalname, title, body, yes, yesbutton) {
+            showModalName = modalname;
+            showTitle = title;
+            showBody = body;
+            onlyYes = yes;
+            showYesButton = yesbutton;
+            launch = true;
+            pageLoad(); // 바로 실행
+        }
+
+        function pageLoad() {
+            if (!launch) return;
+            const modal = $(showModalName);
+            modal.find('.modal-title').text(showTitle);
+            modal.find('.modal-body').text(showBody);
+
+            const $buttons = $('#SaveModalButtons');
+            $buttons.html(''); // 초기화
+
+            if (onlyYes) {
+                // ✅ 성공 메시지일 경우 확인 누르면 이동
+                if (showTitle === "참가신청 성공") {
+                    $buttons.append(`
+                    <button type="button" class="btn btn-primary" onclick="location.href='/Sites/Player/JoinGame.aspx';">
+                        확인
+                    </button>
+                    `);
+                } else {
+                    $buttons.append(`
+                    <button type="button" class="btn btn-primary" onclick="history.back();">
+                        확인
+                    </button>
+                    `);
+                }
+            } else {
+                $buttons.append(`<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>`);
+                switch (showYesButton) {
+                    case 0:
+                        $buttons.append(`<button type="button" class="btn btn-primary" onclick="SubmitJoin();">예</button>`); break;
+                }
+            }
+
+            modal.modal("show");
+            launch = false;
+        }
+        function SubmitJoin() {
+            document.getElementById('<%= BTN_JoinGame.ClientID %>').click();
+        }
     </script>
     <style>
         .input-group{
@@ -191,36 +243,44 @@
                     <asp:TextBox ID="TB_Note" runat="server" CssClass="form-control bc-white" Height="300px" TextMode="MultiLine" Enabled="false"></asp:TextBox>
                 </div>
                 <br />
-                <asp:button ID="BTN_Save" type="button" runat="server" 
-                    class="btn btn-outline-success btn-lg" 
-                    style="width:300px; height:50px" 
-                    Text="참가신청" 
+                <%-- 참가신청 버튼: 모달로 확인 처리 --%>
+                <asp:Button ID="BTN_Save" runat="server"
+                    CssClass="btn btn-outline-success btn-lg"
+                    Style="width:300px; height:50px"
+                    Text="참가신청"
                     ValidationGroup="NewGame"
-                    OnClientClick="ShowModal();return false;" />
+                    OnClientClick="launchModal('#SaveModal', '확인', '참가신청 하시겠습니까?', false, 0); return false;" />
             </div>
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="SaveModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <%-- 상황별 안내를 위한 단일 모달 --%>
+    <div class="modal fade" id="SaveModal" tabindex="-1" aria-labelledby="SaveModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
+
+                <%-- 모달 헤더 --%>
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">확인</h1>
+                    <h5 class="modal-title" id="SaveModalLabel">알림</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    참가신청 하시겠습니까?
+
+                <%-- 모달 본문 메시지 --%>
+                <div class="modal-body" id="SaveModalMessage">
+                    메시지 내용이 여기에 들어옵니다.
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
-                    <asp:Button ID="Button2" 
-                        runat="server" 
-                        OnClick="BTN_Save_Click" 
-                        class="btn btn-primary" 
-                        Text="예" />
+
+                <%-- 모달 푸터 버튼 컨테이너 --%>
+                <div class="modal-footer" id="SaveModalButtons">
+                    <%-- 버튼들은 JS에서 동적 생성됨 --%>
                 </div>
+
             </div>
         </div>
     </div>
+    <%-- 참가신청 처리용 서버 버튼 --%>
+    <asp:Button ID="BTN_JoinGame" runat="server"
+        Text="참가신청 처리"
+        OnClick="JoinGame_Click"
+        Style="display:none" />
 </asp:Content>
