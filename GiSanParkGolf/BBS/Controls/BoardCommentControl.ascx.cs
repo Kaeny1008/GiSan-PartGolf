@@ -41,8 +41,8 @@ namespace GiSanParkGolf.BBS.Controls
             if (Page.User.Identity.IsAuthenticated)
             {
                 comment.Name = Global.uvm.UserName; // 이름
-                comment.Password = Global.uvm.Password; // 암호
-                comment.UserId = Global.uvm.UserID;
+                comment.Password = Global.uvm.UserPassword; // 암호
+                comment.UserId = Global.uvm.UserId;
             } 
             else
             {

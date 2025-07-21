@@ -1,9 +1,9 @@
-﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="SearchControl.ascx.cs" Inherits="GiSanParkGolf.Controls.SearchControl" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="NewSearchControl.ascx.cs" Inherits="GiSanParkGolf.Controls.NewSearchControl" %>
 
-<div class="form-check" id="CheckControl" runat="server">
-    <input class="form-check-input" type="checkbox" value="" id="CB_ReadyUser" runat="server">
-    <label class="form-check-label" for="CB_ReadyUser">승인대기만 보기</label>
-</div>
+<asp:Panel ID="CheckControl" CssClass="form-check" runat="server">
+    <input type="checkbox" runat="server" id="CB_ReadyUser" class="form-check-input" />
+    <label for="<%= CB_ReadyUser.ClientID %>" class="form-check-label">승인대기만 보기</label>
+</asp:Panel>
 
 <div class="input-group mb-3">
     <asp:DropDownList ID="DDL_SearchField" runat="server" CssClass="btn btn-success dropdown-toggle"/>

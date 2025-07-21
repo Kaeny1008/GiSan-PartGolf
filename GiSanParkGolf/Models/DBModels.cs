@@ -62,11 +62,14 @@ namespace GiSanParkGolf.Models
     /// </summary>
     public class UserViewModel
     {
-        public string UserID { get; set; }
-        public string Password { get; set; }
+        public string UserId { get; set; }
+        public string UserPassword { get; set; }
         public string UserName { get; set; }
         public string UserWClass { get; set; }
         public int UserClass { get; set; }
+        public string UserNote { get; set; }
+        public DateTime UserRegistrationDate { get; set; }
+        public int UserNumber { get; set; }
     }
 
     /// <summary>

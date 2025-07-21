@@ -156,6 +156,8 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Controls\NewPagingControl.ascx" />
+    <Content Include="Controls\NewSearchControl.ascx" />
     <Content Include="Controls\PagingControl.ascx" />
     <Content Include="Controls\SearchControl.ascx" />
     <Content Include="BBS\BoardCommentDelete.aspx" />
@@ -386,6 +388,20 @@
       <DependentUpon>ThumbNail.aspx</DependentUpon>
     </Compile>
     <Compile Include="Class\BaseProperty.cs" />
+    <Compile Include="Controls\NewPagingControl.ascx.cs">
+      <DependentUpon>NewPagingControl.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Controls\NewPagingControl.ascx.designer.cs">
+      <DependentUpon>NewPagingControl.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\NewSearchControl.ascx.cs">
+      <DependentUpon>NewSearchControl.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Controls\NewSearchControl.ascx.designer.cs">
+      <DependentUpon>NewSearchControl.ascx</DependentUpon>
+    </Compile>
     <Compile Include="Controls\PagingControl.ascx.cs">
       <DependentUpon>PagingControl.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

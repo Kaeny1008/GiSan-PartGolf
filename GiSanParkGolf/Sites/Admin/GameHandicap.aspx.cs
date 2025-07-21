@@ -157,55 +157,42 @@ namespace GiSanParkGolf.Sites.Admin
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "showErrorMsg", "showMessageModal();", true);
             }
         }
-
-
-
-        protected void ddlSourceFilter_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            gvHandicaps.PageIndex = 0;
-            LoadHandicapData();
-        }
-
-        protected void ddlSort_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            SortOption = ddlSort.SelectedValue;
-            gvHandicaps.PageIndex = 0;
-            LoadHandicapData();
-        }
-
         private void LoadHandicapData()
         {
             var all = Global.dbManager.GetUserHandicaps();
 
-            // 검색어 적용
-            if (!string.IsNullOrEmpty(SearchKeyword))
+            // 🔍 검색 조건 적용
+            string field = ViewState["SearchField"] as string;
+            string keyword = ViewState["SearchKeyword"] as string;
+            bool readyOnly = ViewState["ReadyOnly"] != null && (bool)ViewState["ReadyOnly"];
+
+            if (!string.IsNullOrEmpty(keyword) && !string.IsNullOrEmpty(field))
             {
-                string keyword = SearchKeyword.ToLower();
-                all = all.FindAll(u =>
-                    u.UserId.ToLower().Contains(keyword) ||     // ✅ ID 기준
-                    u.UserName.ToLower().Contains(keyword)      // ✅ 이름 기준
-                );
+                string lower = keyword.ToLower();
+                switch (field)
+                {
+                    case "UserId":
+                        all = all.FindAll(u => u.UserId.ToLower().Contains(lower));
+                        break;
+                    case "UserName":
+                        all = all.FindAll(u => u.UserName.ToLower().Contains(lower));
+                        break;
+                }
             }
 
-            // 산정 방식 필터
-            string source = ddlSourceFilter.SelectedValue;
-            if (!string.IsNullOrEmpty(source))
-                all = all.FindAll(u => u.Source == source);
-
-            // 정렬 기준
-            switch (SortOption)
+            if (readyOnly)
             {
-                case "NameAsc": all.Sort((a, b) => a.UserName.CompareTo(b.UserName)); break;
-                case "NameDesc": all.Sort((a, b) => b.UserName.CompareTo(a.UserName)); break;
-                case "HandicapAsc": all.Sort((a, b) => a.AgeHandicap.CompareTo(b.AgeHandicap)); break;
-                case "HandicapDesc": all.Sort((a, b) => b.AgeHandicap.CompareTo(a.AgeHandicap)); break;
+                all = all.FindAll(u => u.Source == "승인대기"); // 필요시 값 수정
             }
 
-            // 바인딩
             gvHandicaps.DataSource = all;
             gvHandicaps.DataBind();
 
-            // 안내
+            // 페이징 연결
+            pager.CurrentPage = gvHandicaps.PageIndex;
+            pager.TotalPages = gvHandicaps.PageCount;
+
+            // 안내 메시지
             if (all.Count == 0)
             {
                 lblModalMessage.Text = "⚠️ 현재 조건에 맞는 핸디캡 데이터가 없습니다.";
@@ -213,30 +200,35 @@ namespace GiSanParkGolf.Sites.Admin
             }
         }
 
-        private string SortOption
+        protected void gvHandicaps_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
-            get => ViewState["SortOption"]?.ToString() ?? "NameAsc";  // 기본값: 이름 오름차순
-            set => ViewState["SortOption"] = value;
+            gvHandicaps.PageIndex = e.NewPageIndex;
+            LoadHandicapData();
         }
 
-        // 🔍 검색어 보존용
-        private string SearchKeyword
+        protected void Search_SearchRequested(object sender, EventArgs e)
         {
-            get => ViewState["SearchKeyword"]?.ToString() ?? "";
-            set => ViewState["SearchKeyword"] = value;
-        }
+            ViewState["SearchField"] = search.SelectedField;
+            ViewState["SearchKeyword"] = search.Keyword;
+            ViewState["ReadyOnly"] = search.ReadyOnly;
 
-        protected void btnSearch_Click(object sender, EventArgs e)
-        {
-            SearchKeyword = txtSearch.Text.Trim();
             gvHandicaps.PageIndex = 0;
             LoadHandicapData();
         }
 
-
-        protected void gvHandicaps_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        protected void Search_ResetRequested(object sender, EventArgs e)
         {
-            gvHandicaps.PageIndex = e.NewPageIndex;
+            ViewState.Remove("SearchField");
+            ViewState.Remove("SearchKeyword");
+            ViewState.Remove("ReadyOnly");
+
+            gvHandicaps.PageIndex = 0;
+            LoadHandicapData();
+        }
+
+        protected void Pager_PageChanged(object sender, int newPage)
+        {
+            gvHandicaps.PageIndex = newPage;
             LoadHandicapData();
         }
     }

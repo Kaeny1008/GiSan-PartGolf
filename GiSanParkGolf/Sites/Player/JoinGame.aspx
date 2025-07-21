@@ -1,5 +1,8 @@
 ﻿<%@ Page Title="대회참가" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="JoinGame.aspx.cs" Inherits="GiSanParkGolf.Sites.Player.JoinGame" %>
 
+<%@ Register Src="~/Controls/NewSearchControl.ascx" TagPrefix="uc" TagName="NewSearchControl" %>
+<%@ Register Src="~/Controls/NewPagingControl.ascx" TagPrefix="uc" TagName="NewPagingControl" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <script language="javascript">
         function ShowModal() {
@@ -36,22 +39,22 @@
                     <h4 style="color:cornflowerblue">참여가능 대회 목록</h4>
                     <p>참가하려는 대회명을 선택하여 참가신청을 하십시오.</p>
                 </div>
-                <asp:GridView ID="GameList"
-                    runat="server" AutoGenerateColumns="False"
-                    CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-                    ShowHeaderWhenEmpty="true">
+                <div style="width:40%">
+                    <uc:NewSearchControl ID="search" runat="server"
+                        OnSearchRequested="Search_SearchRequested"
+                        OnResetRequested="Search_ResetRequested" />
+                </div>
+                <asp:GridView ID="GameList" runat="server"
+                    AutoGenerateColumns="False" CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                    ShowHeaderWhenEmpty="true" OnRowDataBound="GameList_RowDataBound">
                     <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
                     <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
                     <Columns>
-                        <asp:TemplateField>
-                            <HeaderTemplate>
-                                <asp:Label ID="LB_No" runat="server" Text="No."></asp:Label>
-                            </HeaderTemplate>
-                            <ItemTemplate>
-                                <%#Eval("RowNumber")%>
-                            </ItemTemplate>
+                        <%-- No 컬럼: RowDataBound에서 처리 --%>
+                        <asp:TemplateField HeaderText="No">
+                            <ItemTemplate />
+                            <ItemStyle HorizontalAlign="Center" Width="50px" />
                             <HeaderStyle Width="50px" />
-                            <ItemStyle Width="50px" />
                         </asp:TemplateField>
                         <asp:TemplateField>
                             <HeaderTemplate>
@@ -131,11 +134,7 @@
                                 <asp:Label ID="LB_WriteDate" runat="server" Text="상태"></asp:Label>
                             </HeaderTemplate>
                             <ItemTemplate>
-                                <%#Eval("GameStatus").ToString().Equals("모집중") ?
-                                    "<a style=\"color:blue;\">모집중</a>"
-                                    :
-                                    "<a>" + Eval("GameStatus") + "</a>"
-                                %>
+                                <%#Eval("GameStatus")%>
                             </ItemTemplate>
                             <HeaderStyle Width="50px" />
                             <ItemStyle Width="50px" />
@@ -143,6 +142,11 @@
                     </Columns>
                     <EmptyDataTemplate>참가 신청 가능한 대회가 없습니다.</EmptyDataTemplate>
                 </asp:GridView>
+                <div style="text-align: right; font-style: italic; font-size: 8pt;">
+                    총 건수: <asp:Literal ID="lblTotalRecord" runat="server" />
+                </div>
+                <uc:NewPagingControl ID="pager" runat="server"
+                    OnPageChanged="Pager_PageChanged" />
             </div>
         </div>
     </div>

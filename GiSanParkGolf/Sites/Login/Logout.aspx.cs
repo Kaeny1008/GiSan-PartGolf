@@ -16,11 +16,11 @@ namespace GiSanParkGolf
             // [!] 로그아웃
 
             DB_Management userRepo = new DB_Management();
-            userRepo.LogoutUser(Global.uvm.UserID);
+            userRepo.LogoutUser(Global.uvm.UserId);
 
             FormsAuthentication.SignOut();
-            Global.uvm.UserID = null;
-            Global.uvm.Password = null;
+            Global.uvm.UserId = null;
+            Global.uvm.UserPassword = null;
             Global.uvm.UserName = null;
             Global.uvm.UserWClass = null;
             Global.uvm.UserClass = 0;

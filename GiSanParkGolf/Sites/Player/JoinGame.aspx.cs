@@ -1,17 +1,33 @@
 ﻿using GiSanParkGolf.Class;
 using GiSanParkGolf.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using static GiSanParkGolf.Global;
 
 namespace GiSanParkGolf.Sites.Player
 {
     public partial class JoinGame : System.Web.UI.Page
     {
+        private string SearchField
+        {
+            get => ViewState["SearchField"]?.ToString();
+            set => ViewState["SearchField"] = value;
+        }
+
+        private string SearchKeyword
+        {
+            get => ViewState["SearchKeyword"]?.ToString();
+            set => ViewState["SearchKeyword"] = value;
+        }
+
         private static string gameCode = string.Empty;
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!Page.IsPostBack)
+            if (!IsPostBack)
             {
                 if (!string.IsNullOrEmpty(Request.QueryString["GameCode"]))
                 {
@@ -24,8 +40,8 @@ namespace GiSanParkGolf.Sites.Player
                 {
                     MainContent.Visible = true;
                     GameContent.Visible = false;
-                    GameList.DataSource = Global.dbManager.GetGameReadyList();
-                    GameList.DataBind();
+                    GameList.PageIndex = 0;
+                    LoadGameList();
                 }
             }
         }
@@ -47,7 +63,7 @@ namespace GiSanParkGolf.Sites.Player
         protected void EarlyJoin()
         {
             // 기존 참가 신청했는지 확인
-            string earlyJoinCheck = Global.dbManager.GetEarlyJoin(gameCode, Global.uvm.UserID);
+            string earlyJoinCheck = Global.dbManager.GetEarlyJoin(gameCode, Global.uvm.UserId);
             if (!string.IsNullOrEmpty(earlyJoinCheck))
             {
                 if (earlyJoinCheck.Equals("Join"))
@@ -71,7 +87,7 @@ namespace GiSanParkGolf.Sites.Player
 
             GameJoinUserModel gjum = new GameJoinUserModel
             {
-                UserId = Global.uvm.UserID
+                UserId = Global.uvm.UserId
                 , JoinIP = ipaddr
                 , GameCode = gameCode
             };
@@ -87,6 +103,76 @@ namespace GiSanParkGolf.Sites.Player
                 strAlarm += dbWrite;
                 strAlarm += "');</script>";
                 Response.Write(strAlarm);
+            }
+        }
+
+        protected void Search_SearchRequested(object sender, EventArgs e)
+        {
+            SearchField = search.SelectedField;
+            SearchKeyword = search.Keyword;
+            GameList.PageIndex = 0;
+            LoadGameList();
+        }
+
+        protected void Search_ResetRequested(object sender, EventArgs e)
+        {
+            ViewState.Remove("SearchField");
+            ViewState.Remove("SearchKeyword");
+            GameList.PageIndex = 0;
+            LoadGameList();
+        }
+
+        protected void Pager_PageChanged(object sender, int newPage)
+        {
+            GameList.PageIndex = newPage;
+            LoadGameList();
+        }
+
+        private void LoadGameList()
+        {
+            var games = Global.dbManager.GetGameReadyList(); // 모집중 + 신청 가능 대회 목록
+
+            IEnumerable<GameListModel> filtered = games;
+
+            if (!string.IsNullOrEmpty(SearchField) && !string.IsNullOrEmpty(SearchKeyword))
+            {
+                string kw = SearchKeyword.ToLower();
+                switch (SearchField)
+                {
+                    case "Name":
+                        filtered = filtered.Where(g => g.GameName?.ToLower().Contains(kw) == true);
+                        break;
+                    case "Stadium":
+                        filtered = filtered.Where(g => g.StadiumName?.ToLower().Contains(kw) == true);
+                        break;
+                    case "Host":
+                        filtered = filtered.Where(g => g.GameHost?.ToLower().Contains(kw) == true);
+                        break;
+                }
+            }
+
+            var result = filtered.ToList();
+
+            GameList.DataSource = result;
+            GameList.DataBind();
+
+            lblTotalRecord.Text = result.Count.ToString();
+            pager.CurrentPage = GameList.PageIndex;
+            pager.TotalPages = GameList.PageCount;
+        }
+
+        protected void GameList_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                int no = (GameList.PageIndex * GameList.PageSize) + e.Row.RowIndex + 1;
+                e.Row.Cells[0].Text = no.ToString();
+
+                var status = DataBinder.Eval(e.Row.DataItem, "GameStatus")?.ToString();
+                if (status == "모집중")
+                {
+                    e.Row.Cells[e.Row.Cells.Count - 1].Text = "<span style='color:blue;'>모집중</span>";
+                }
             }
         }
     }

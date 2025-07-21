@@ -101,9 +101,9 @@
 
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon5">주민번호</span>
-                    <asp:TextBox ID="txtBirthDay" runat="server" Width="150px" onkeypress="return functionx(event)" class="form-control" MaxLength="6" ValidationGroup="NewUser"></asp:TextBox>
+                    <asp:TextBox ID="txtBirthDay" runat="server" Width="140px" onkeypress="return functionx(event)" class="form-control" MaxLength="6" ValidationGroup="NewUser"></asp:TextBox>
                     <span class="input-group-text" style="width:15px">-</span>
-                    <asp:TextBox ID="txtGender" runat="server" Width="30px" onkeypress="return functionx(event)" class="form-control" MaxLength="1" ValidationGroup="NewUser"></asp:TextBox>
+                    <asp:TextBox ID="txtGender" runat="server" Width="40px" onkeypress="return functionx(event)" class="form-control" MaxLength="1" ValidationGroup="NewUser"></asp:TextBox>
                     <span class="input-group-text" style="width:60px">******</span>
                 </div>
 

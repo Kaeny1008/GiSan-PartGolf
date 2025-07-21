@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="인원 코스 및 배치" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="GameUserSetting.aspx.cs" Inherits="GiSanParkGolf.Sites.Admin.GameUserSetting" %>
 
-<%@ Register Src="~/Controls/PagingControl.ascx" TagPrefix="uc1" TagName="PagingControl" %>
-<%@ Register Src="~/Controls/SearchControl.ascx" TagPrefix="uc1" TagName="SearchControl" %>
+<%@ Register Src="~/Controls/NewSearchControl.ascx" TagPrefix="uc" TagName="NewSearchControl" %>
+<%@ Register Src="~/Controls/NewPagingControl.ascx" TagPrefix="uc" TagName="NewPagingControl" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <div class="row">
@@ -14,46 +14,43 @@
             </div>
             <div class="row mb-1">
                 <div>
-                <uc1:SearchControl runat="server" ID="SearchControl" />
+                <uc:NewSearchControl ID="search" runat="server"
+                    OnSearchRequested="Search_SearchRequested"
+                    OnResetRequested="Search_ResetRequested" />
                 </div>
             </div>
             <div class="row">
                 <asp:GridView ID="GameList"
                     runat="server" AutoGenerateColumns="False" DataKeyNames="GameCode"
                     CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-                    ShowHeaderWhenEmpty="true" >
+                    ShowHeaderWhenEmpty="true"
+                    OnRowDataBound="GameList_RowDataBound">
                     <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
                     <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
                     <Columns>
-                        <asp:TemplateField>
-                            <HeaderTemplate>
-                                <asp:Label ID="LB_No" runat="server" Text="No."></asp:Label>
-                            </HeaderTemplate>
-                            <ItemTemplate>
-                                <%#Eval("RowNumber")%>
-                            </ItemTemplate>
+                        <%-- No 컬럼: RowDataBound에서 처리 --%>
+                        <asp:TemplateField HeaderText="No">
+                            <ItemTemplate />
+                            <ItemStyle HorizontalAlign="Center" Width="50px" />
                             <HeaderStyle Width="50px" />
-                            <ItemStyle Width="50px" />
                         </asp:TemplateField>
-                        <asp:TemplateField>
-                            <HeaderTemplate>
-                                <asp:Label ID="LB_Name" runat="server" Text="대회명"></asp:Label>
-                            </HeaderTemplate>
+                        <%-- 대회명 --%>
+                        <asp:TemplateField HeaderText="대회명">
                             <ItemTemplate>
-                                <asp:LinkButton ID="LnkGame" runat="server" CssClass="HyperLink" OnClick="LnkGame_Click" CommandName="select" 
-                                    ToolTip='<%#Eval("GameCode")%>'>
-                                    <%#Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 25)%>
+                                <asp:LinkButton ID="LnkGame" runat="server"
+                                    CssClass="HyperLink"
+                                    OnClick="LnkGame_Click" CommandName="select"
+                                    ToolTip='<%# Eval("GameCode") %>'>
+                                    <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 25) %>
                                 </asp:LinkButton>
                             </ItemTemplate>
                             <HeaderStyle Width="200px" />
                             <ItemStyle Width="200px" />
                         </asp:TemplateField>
-                        <asp:TemplateField>
-                            <HeaderTemplate>
-                                <asp:Label ID="LB_WriteDate" runat="server" Text="대회일자"></asp:Label>
-                            </HeaderTemplate>
+                        <%-- 대회일자 --%>
+                        <asp:TemplateField HeaderText="대회일자">
                             <ItemTemplate>
-                                <%#Eval("GameDate", "{0:yyyy-MM-dd}")%>
+                                <%# Eval("GameDate", "{0:yyyy-MM-dd}") %>
                             </ItemTemplate>
                             <HeaderStyle Width="90px" />
                             <ItemStyle Width="90px" />
@@ -63,12 +60,12 @@
                 </asp:GridView>
             </div>
             <div class="row">
-                <div style="font-style: italic; text-align: right; font-size: 8pt;">
-                    Total Record:
-                    <asp:Literal ID="lblTotalRecord" runat="server"></asp:Literal>
+                <div style="text-align: right; font-size: 8pt; font-style: italic;">
+                    총 건수: <asp:Literal ID="lblTotalRecord" runat="server" />
                 </div>
                 <div class="center_container">
-                    <uc1:PagingControl runat="server" ID="PagingControl" />
+                    <uc:NewPagingControl ID="pager" runat="server"
+                        OnPageChanged="Pager_PageChanged" />
                 </div>
             </div>
         </div>

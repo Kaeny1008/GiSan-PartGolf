@@ -1,6 +1,9 @@
-﻿using System;
+﻿using GiSanParkGolf.Models;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using static GiSanParkGolf.Global;
@@ -17,113 +20,106 @@ namespace GiSanParkGolf.Sites.Admin
                 return;
             }
 
-            if (!string.IsNullOrEmpty(Request.QueryString["ReadyUser"]))
-            {
-                searchProperty.ReadyUser = Request.QueryString["ReadyUser"];
-            }
-            else
-            {
-                searchProperty.ReadyUser = "False";
-            }
-
-            // 검색 모드 결정
-            searchProperty.SearchMode =
-                    (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
-                        !string.IsNullOrEmpty(Request.QueryString["SearchQuery"]));
-            if (searchProperty.SearchMode)
-            {
-                searchProperty.SearchField = Request.QueryString["SearchField"];
-                searchProperty.SearchQuery = Request.QueryString["SearchQuery"];
-            }
-
-            // 쿼리스트링에 따른 페이지 보여주기
-            if (Request["Page"] != null)
-            {
-                // Page는 보여지는 쪽은 1, 2, 3, ... 코드단에서는 0, 1, 2, ...
-                searchProperty.PageIndex = Convert.ToInt32(Request["Page"]) - 1;
-            }
-            else
-            {
-                searchProperty.PageIndex = 0; // 1페이지
-            }
-
-            // 쿠키를 사용한 리스트 페이지 번호 유지 적용: 
-            // 100번째 페이지의 글 보고, 다시 리스트 왔을 때 100번째 페이지 표시
-            if (Request.Cookies["PlayerManagement"] != null)
-            {
-                if (!String.IsNullOrEmpty(
-                    Request.Cookies["PlayerManagement"]["PageNum"]))
-                {
-                    searchProperty.PageIndex = Convert.ToInt32(
-                        Request.Cookies["PlayerManagement"]["PageNum"]);
-                }
-                else
-                {
-                    searchProperty.PageIndex = 0;
-                }
-            }
-
-            //레코드 카운트 출력
-            if (searchProperty.SearchMode == false)
-            {
-                // 테이블의 전체 레코드
-                searchProperty.RecordCount = 
-                    Global.dbManager.GetUserCountAll(searchProperty.ReadyUser);
-            }
-            else
-            {
-                // Notes 테이블 중 searchProperty.SearchField+searchProperty.SearchQuery에 해당하는 레코드 수
-                searchProperty.RecordCount = 
-                    Global.dbManager.GetUserCountBySearch(searchProperty.SearchField, searchProperty.SearchQuery, searchProperty.ReadyUser);
-            }
-            lblTotalRecord.Text = searchProperty.RecordCount.ToString();
-
-            // 페이징 처리... 나중에 좀 쌓였을때 확인 해봐야할듯..
-            //pageProperty.PageIndex = searchProperty.PageIndex;
-            //pageProperty.RecordCount = searchProperty.RecordCount;
-
             if (!Page.IsPostBack)
             {
-                PlayerList();
+                LoadPlayerData();
             }
         }
 
-        private void PlayerList()
+        private string SearchField
         {
-            if (searchProperty.SearchMode == false) // 기본 리스트
+            get => ViewState["SearchField"]?.ToString();
+            set => ViewState["SearchField"] = value;
+        }
+
+        private string SearchKeyword
+        {
+            get => ViewState["SearchKeyword"]?.ToString();
+            set => ViewState["SearchKeyword"] = value;
+        }
+
+        private bool ReadyOnly
+        {
+            get => ViewState["ReadyOnly"] != null && (bool)ViewState["ReadyOnly"];
+            set => ViewState["ReadyOnly"] = value;
+        }
+
+        protected void Search_SearchRequested(object sender, EventArgs e)
+        {
+            SearchField = search.SelectedField;
+            SearchKeyword = search.Keyword;
+            ReadyOnly = search.ReadyOnly;
+
+            GridView1.PageIndex = 0;
+            LoadPlayerData();
+        }
+
+        protected void Search_ResetRequested(object sender, EventArgs e)
+        {
+            ViewState.Remove("SearchField");
+            ViewState.Remove("SearchKeyword");
+            ViewState.Remove("ReadyOnly");
+
+            GridView1.PageIndex = 0;
+            LoadPlayerData();
+        }
+
+        protected void Pager_PageChanged(object sender, int newPage)
+        {
+            GridView1.PageIndex = newPage;
+            LoadPlayerData();
+        }
+
+        protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
             {
-                GridView1.DataSource = 
-                    Global.dbManager.GetUserAll(
-                        searchProperty.PageIndex, 
-                        searchProperty.ReadyUser)
-                    ;
+                int no = (GridView1.PageIndex * GridView1.PageSize) + e.Row.RowIndex + 1;
+                e.Row.Cells[0].Text = no.ToString(); // 첫 번째 컬럼에 No 표시
             }
-            else // 검색 결과 리스트
+        }
+
+        private void LoadPlayerData()
+        {
+            var all = Global.dbManager.GetPlayers(); // 전체 사용자 조회
+
+            IEnumerable<UserViewModel> filtered = all;
+
+            // 🔍 검색 필터
+            string field = ViewState["SearchField"] as string;
+            string keyword = ViewState["SearchKeyword"] as string;
+            bool readyOnly = ViewState["ReadyOnly"] != null && (bool)ViewState["ReadyOnly"];
+
+            if (!string.IsNullOrEmpty(keyword) && !string.IsNullOrEmpty(field))
             {
-                GridView1.DataSource = 
-                    Global.dbManager.GetUserSeachAll(
-                        searchProperty.PageIndex, 
-                        searchProperty.ReadyUser, 
-                        searchProperty.SearchField, 
-                        searchProperty.SearchQuery)
-                    ;
+                string lowerKeyword = keyword.ToLower();
+
+                switch (field)
+                {
+                    case "UserId":
+                        filtered = filtered.Where(p => p.UserId.ToLower().Contains(lowerKeyword));
+                        break;
+                    case "UserName":
+                        filtered = filtered.Where(p => p.UserName.ToLower().Contains(lowerKeyword));
+                        break;
+                }
             }
-            
+
+            // ✅ 승인대기 필터
+            if (readyOnly)
+                filtered = filtered.Where(p => p.UserWClass == "승인대기");
+
+            // 📊 바인딩
+            GridView1.DataSource = filtered.ToList();
             GridView1.DataBind();
+
+            // 📄 총 건수 출력
+            lblTotalRecord.Text = filtered.Count().ToString();
+
+            // 📦 페이징 연동
+            pager.CurrentPage = GridView1.PageIndex;
+            pager.TotalPages = GridView1.PageCount;
         }
 
-        //사용하진 않지만 행의 번호를 확인하는 방법이라 지우지 않음.
-        protected void MyButtonClick(object sender, System.EventArgs e)
-        {
-            Button btn = (Button)sender;
-
-            GridViewRow gvr = (GridViewRow)btn.NamingContainer;
-            int x = gvr.RowIndex;
-            GridView1.Rows[x].BackColor = Color.AliceBlue;
-
-            string userid = GridView1.Rows[x].Cells[1].Text;
-            
-            Response.Redirect("~/Sites/Admin/Player Information.aspx?UserId=" + userid);
-        }
     }
 }

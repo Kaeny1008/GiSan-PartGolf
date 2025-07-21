@@ -79,8 +79,8 @@ namespace GiSanParkGolf
                 else
                 {
                     Debug.WriteLine("파기일자가 미도래하여 인증완료.");
-                    Global.uvm.UserID = abcd[0];
-                    Global.uvm.Password = abcd[1];
+                    Global.uvm.UserId = abcd[0];
+                    Global.uvm.UserPassword = abcd[1];
                     Global.uvm.UserName = abcd[2];
                     Global.uvm.UserWClass = abcd[3];
                     Global.uvm.UserClass = int.Parse(abcd[4]);

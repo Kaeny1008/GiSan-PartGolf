@@ -24,6 +24,15 @@ namespace GiSanParkGolf.Sites.Player
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl MainContent;
 
         /// <summary>
+        /// search 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::GiSanParkGolf.Controls.NewSearchControl search;
+
+        /// <summary>
         /// GameList 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -31,6 +40,24 @@ namespace GiSanParkGolf.Sites.Player
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView GameList;
+
+        /// <summary>
+        /// lblTotalRecord 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal lblTotalRecord;
+
+        /// <summary>
+        /// pager 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::GiSanParkGolf.Controls.NewPagingControl pager;
 
         /// <summary>
         /// GameContent 컨트롤입니다.

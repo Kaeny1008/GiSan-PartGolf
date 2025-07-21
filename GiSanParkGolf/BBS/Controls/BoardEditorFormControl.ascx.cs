@@ -147,8 +147,8 @@ namespace GiSanParkGolf.BBS.Controls
                 if (Page.User.Identity.IsAuthenticated)
                 {
                     note.Name = Global.uvm.UserName;
-                    note.Password = Global.uvm.Password;
-                    note.UserID = Global.uvm.UserID;
+                    note.Password = Global.uvm.UserPassword;
+                    note.UserID = Global.uvm.UserId;
                 }
                 else
                 {

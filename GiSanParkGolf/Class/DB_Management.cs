@@ -155,31 +155,6 @@ namespace GiSanParkGolf.Class
         }
 
         /// <summary>
-        /// 대회 리스트
-        /// </summary>
-        /// <param name="page">페이지 번호</param>
-        public DataTable GetGameALL(int page)
-        {
-            SqlCommand sqlCMD = new SqlCommand
-            {
-                Connection = DB_Connection,
-                CommandText = "sp_GameList",
-                CommandType = CommandType.StoredProcedure
-            };
-            sqlCMD.Parameters.AddWithValue("@Page", page);
-
-            DB_Connection.Open();
-
-            SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
-            DataSet dataSet = new DataSet();
-            adapter.Fill(dataSet);
-
-            DB_Connection.Close();
-
-            return dataSet.Tables["Table"];
-        }
-
-        /// <summary>
         /// 대회 검색 검색 리스트
         /// </summary>
         public DataTable GetGameSeachAll(int page, string searchField, string searchQuery)
@@ -330,16 +305,16 @@ namespace GiSanParkGolf.Class
             SqlDataReader sqlDR = sqlCMD.ExecuteReader();
             while (sqlDR.Read())
             {
-                Global.uvm.UserID = sqlDR.GetString(0);
-                Global.uvm.Password = sqlDR.GetString(1);
+                Global.uvm.UserId = sqlDR.GetString(0);
+                Global.uvm.UserPassword = sqlDR.GetString(1);
                 Global.uvm.UserName = sqlDR.GetString(2);
                 Global.uvm.UserWClass = sqlDR.GetString(3);
                 Global.uvm.UserClass = sqlDR.GetInt32(4);
             }
             DB_Connection.Close();
 
-            SetCookie(Global.uvm.UserID,
-                Global.uvm.Password,
+            SetCookie(Global.uvm.UserId,
+                Global.uvm.UserPassword,
                 Global.uvm.UserName,
                 Global.uvm.UserWClass,
                 Global.uvm.UserClass
@@ -542,7 +517,7 @@ namespace GiSanParkGolf.Class
         /// </summary>
         public List<GameListModel> GetGameReadyList()
         {
-            return DB_Connection.Query<GameListModel>("sp_GameList_Ready", null,
+            return DB_Connection.Query<GameListModel>("sp_Get_Game_ReadyList", null,
                 commandType: CommandType.StoredProcedure).ToList();
         }
 
@@ -585,7 +560,7 @@ namespace GiSanParkGolf.Class
         public List<GameListModel> GetMyGameList(string userID)
         {
             var parameters = new DynamicParameters(new { UserId = userID });
-            return DB_Connection.Query<GameListModel>("sp_Player_MyGame", parameters,
+            return DB_Connection.Query<GameListModel>("sp_Get_Player_MyGame", parameters,
                 commandType: CommandType.StoredProcedure).ToList();
         }
 
@@ -689,7 +664,6 @@ namespace GiSanParkGolf.Class
             });
         }
 
-
         // ✅ 나이 계산 유틸리티
         private int CalculateAge(string userNumber)
         {
@@ -751,6 +725,30 @@ namespace GiSanParkGolf.Class
             ";
 
             return DB_Connection.Query<HandicapChangeLog>(sql).AsList();
+        }
+
+        public List<UserViewModel> GetPlayers()
+        {
+            var parameters = new DynamicParameters(new
+            {
+                //GameCode = gameCode
+            });
+
+            return DB_Connection.Query<UserViewModel>("sp_Get_SYS_Users", parameters, commandType: CommandType.StoredProcedure).ToList();
+        }
+
+        /// <summary>
+        /// 대회 리스트
+        /// </summary>
+        /// <param name="page">페이지 번호</param>
+        public List<GameListModel> GetGames()
+        {
+            var parameters = new DynamicParameters(new
+            {
+                //GameCode = gameCode
+            });
+
+            return DB_Connection.Query<GameListModel>("sp_Get_GameList", parameters, commandType: CommandType.StoredProcedure).ToList();
         }
     }
 }

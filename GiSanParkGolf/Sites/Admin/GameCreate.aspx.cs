@@ -66,7 +66,7 @@ namespace GiSanParkGolf.Sites.Admin
             strSQL += ", '" + TB_HoleMaximum.Text + "'";
             strSQL += ", '" + TB_Note.Text + "'";
             strSQL += ", '" + ipaddr + "'";
-            strSQL += ", '" + Global.uvm.UserID + "'";
+            strSQL += ", '" + Global.uvm.UserId + "'";
             strSQL += ");";
 
             SaveLastStep(strSQL);
@@ -84,7 +84,7 @@ namespace GiSanParkGolf.Sites.Admin
             strSQL += ", HoleMaximum = '" + TB_HoleMaximum.Text + "'";
             strSQL += ", GameNote = '" + TB_Note.Text + "'";
             strSQL += ", ModifyIp = '" + ipaddr + "'";
-            strSQL += ", ModifyUser = '" + Global.uvm.UserID + "'";
+            strSQL += ", ModifyUser = '" + Global.uvm.UserId + "'";
             strSQL += " WHERE GameCode = '" + gameCode + "'";
             strSQL += ";";
 

@@ -1,6 +1,9 @@
 ﻿<%@ Page Title="Handicap 설정" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="GameHandicap.aspx.cs" Inherits="GiSanParkGolf.Sites.Admin.GameHandicap"  %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+<%@ Register TagPrefix="uc" TagName="NewSearchControl" Src="~/Controls/NewSearchControl.ascx" %>
+<%@ Register TagPrefix="uc" TagName="NewPagingControl" Src="~/Controls/NewPagingControl.ascx" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">   
     <script>
         function showMessageModal() {
             var myModal = new bootstrap.Modal(document.getElementById('msgModal'));
@@ -52,19 +55,6 @@
         function clearHandicapTooltip(txtbox) {
             txtbox.value = "";
         }
-        window.addEventListener("DOMContentLoaded", function () {
-        const txt = document.getElementById("<%= txtSearch.ClientID %>");
-        const btn = document.getElementById("<%= btnSearch.ClientID %>");
-
-        if (txt && btn) {
-            txt.addEventListener("keypress", function (e) {
-                if (e.key === "Enter") {
-                    e.preventDefault();  // 폼 자동 제출 방지
-                    btn.click();         // 버튼 클릭 유도
-                }
-            });
-        }
-    });
     </script>
 
     <style>
@@ -93,36 +83,14 @@
 
         <%-- 필터 영역 --%>
         <div class="row mb-4">
-            <!-- 드롭다운 & 검색창 -->
+             <%--드롭다운 & 검색창--%> 
             <div class="col-md-10 d-flex flex-wrap gap-2">
-                <div class="col-md-auto">
-                    <asp:DropDownList ID="ddlSourceFilter" runat="server"
-                        AutoPostBack="true" CssClass="form-select"
-                        OnSelectedIndexChanged="ddlSourceFilter_SelectedIndexChanged">
-                        <asp:ListItem Text="전체" Value="" />
-                        <asp:ListItem Text="자동" Value="자동" />
-                        <asp:ListItem Text="수동" Value="수동" />
-                    </asp:DropDownList>
-                </div>
-                <div class="col-md-auto">
-                    <asp:DropDownList ID="ddlSort" runat="server"
-                        AutoPostBack="true" CssClass="form-select"
-                        OnSelectedIndexChanged="ddlSort_SelectedIndexChanged">
-                        <asp:ListItem Text="이름 오름차순" Value="NameAsc" />
-                        <asp:ListItem Text="이름 내림차순" Value="NameDesc" />
-                        <asp:ListItem Text="핸디캡 낮은순" Value="HandicapAsc" />
-                        <asp:ListItem Text="핸디캡 높은순" Value="HandicapDesc" />
-                </asp:DropDownList>
-                </div>
-                <div class="col-md-auto">
-                    <div class="input-group">
-                        <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control" placeholder="이름 또는 ID로 검색" />
-                        <asp:Button ID="btnSearch" runat="server" CssClass="btn btn-primary" Text="검색" OnClick="btnSearch_Click" />
-                    </div>
-                </div>
+                <uc:NewSearchControl ID="search" runat="server"
+                    OnSearchRequested="Search_SearchRequested"
+                    OnResetRequested="Search_ResetRequested" />
             </div>
 
-            <!-- 오른쪽 버튼 -->
+             <%--오른쪽 버튼--%> 
             <div class="col-md-2 text-end">
                 <a href="GameHandicapLog.aspx" class="btn btn-outline-dark">
                     <i class="bi bi-bar-chart-line"></i> 핸디캡 기록 보기
@@ -130,8 +98,7 @@
             </div>
         </div>
 
-
-        <!-- 일괄 자동 계산 버튼 -->
+         <%--일괄 자동 계산 버튼--%> 
         <asp:Button ID="btnRecalculateAllTrigger" runat="server"
             Text="전체 자동 계산"
             CssClass="btn btn-outline-danger mb-3"
@@ -140,24 +107,15 @@
         <%-- 핸디캡 출력 테이블 --%>
         <asp:GridView ID="gvHandicaps" runat="server"
             AutoGenerateColumns="False"
-            DataKeyNames="UserId,AgeHandicap,Source"
-            PageSize="10"
             AllowPaging="true"
-            PagerSettings-Mode="NumericFirstLast"
-            PagerSettings-PageButtonCount="10"
-            PagerSettings-Position="Bottom"
-            PagerSettings-PreviousPageText="◀"
-            PagerSettings-NextPageText="▶"
-            PagerSettings-FirstPageText="처음"
-            PagerSettings-LastPageText="끝"
-            PagerStyle-HorizontalAlign="Center"
-            PagerStyle-CssClass="custom-pager"
+            PageSize="10"
+            PagerSettings-Visible="false"
+            CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
             ShowHeaderWhenEmpty="true"
-            CssClass="gridview-pager grid-center table table-bordered table-hover table-condensed table-striped table-responsive"
-            OnPageIndexChanging="gvHandicaps_PageIndexChanging"
+            DataKeyNames="UserId,AgeHandicap,Source"
             OnRowEditing="gvHandicaps_RowEditing"
-            OnRowCancelingEdit="gvHandicaps_RowCancelingEdit"
-            OnRowUpdating="gvHandicaps_RowUpdating">
+            OnRowUpdating="gvHandicaps_RowUpdating"
+            OnRowCancelingEdit="gvHandicaps_RowCancelingEdit">
 
           <Columns>
             <asp:BoundField DataField="UserId"     HeaderText="ID"       ReadOnly="True" />
@@ -190,7 +148,6 @@
                     SelectedValue='<%# Bind("Source") %>'
                     onchange="toggleHandicap(this)"
                     onfocus="hideAllOption(this); toggleHandicap(this);">
-                    <asp:ListItem Text="전체" Value="" />
                     <asp:ListItem Text="자동" Value="자동" />
                     <asp:ListItem Text="수동" Value="수동" />
                 </asp:DropDownList>
@@ -228,6 +185,9 @@
             </div>
           </EmptyDataTemplate>
         </asp:GridView>
+
+        <uc:NewPagingControl ID="pager" runat="server"
+            OnPageChanged="Pager_PageChanged" />
     </div>
 
     <%-- ✅ 메시지 모달 --%>
@@ -273,6 +233,4 @@
         </div>
       </div>
     </div>
-
-
 </asp:Content>

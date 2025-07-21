@@ -1,11 +1,27 @@
-﻿using static GiSanParkGolf.Global;
+﻿using GiSanParkGolf.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI;
+using System.Web.UI.WebControls;
+using static GiSanParkGolf.Global;
 
 namespace GiSanParkGolf.Sites.Admin
 {
     public partial class GameList : System.Web.UI.Page
     {
+        private string SearchField
+        {
+            get => ViewState["SearchField"]?.ToString();
+            set => ViewState["SearchField"] = value;
+        }
+
+        private string SearchKeyword
+        {
+            get => ViewState["SearchKeyword"]?.ToString();
+            set => ViewState["SearchKeyword"] = value;
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!Global.uvm.UserClass.Equals(1))
@@ -14,84 +30,77 @@ namespace GiSanParkGolf.Sites.Admin
                 return;
             }
 
-            // 검색 모드 결정
-            searchProperty.SearchMode =
-                    (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
-                        !string.IsNullOrEmpty(Request.QueryString["SearchQuery"]));
-            if (searchProperty.SearchMode)
-            {
-                searchProperty.SearchField = Request.QueryString["SearchField"];
-                searchProperty.SearchQuery = Request.QueryString["SearchQuery"];
-            }
-
-            // 쿼리스트링에 따른 페이지 보여주기
-            if (Request["Page"] != null)
-            {
-                // Page는 보여지는 쪽은 1, 2, 3, ... 코드단에서는 0, 1, 2, ...
-                searchProperty.PageIndex = Convert.ToInt32(Request["Page"]) - 1;
-            }
-            else
-            {
-                searchProperty.PageIndex = 0; // 1페이지
-            }
-
-            // 쿠키를 사용한 리스트 페이지 번호 유지 적용: 
-            // 100번째 페이지의 글 보고, 다시 리스트 왔을 때 100번째 페이지 표시
-            if (Request.Cookies["GameList"] != null)
-            {
-                if (!String.IsNullOrEmpty(
-                    Request.Cookies["GameList"]["PageNum"]))
-                {
-                    searchProperty.PageIndex = Convert.ToInt32(
-                        Request.Cookies["GameList"]["PageNum"]);
-                }
-                else
-                {
-                    searchProperty.PageIndex = 0;
-                }
-            }
-
-            //레코드 카운트 출력
-            if (searchProperty.SearchMode == false)
-            {
-                // 테이블의 전체 레코드
-                searchProperty.RecordCount =
-                    Global.dbManager.GetGameCountAll();
-            }
-            else
-            {
-                // Notes 테이블 중 searchProperty.SearchField+searchProperty.SearchQuery에 해당하는 레코드 수
-                searchProperty.RecordCount =
-                    Global.dbManager.GetGameCountBySearch(searchProperty.SearchField, searchProperty.SearchQuery);
-            }
-            lblTotalRecord.Text = searchProperty.RecordCount.ToString();
-
             if (!Page.IsPostBack)
             {
-                Load_GameList();
+                LoadGameList();
             }
         }
 
-        protected void Load_GameList()
+        protected void Search_SearchRequested(object sender, EventArgs e)
         {
-            if (searchProperty.SearchMode == false) // 기본 리스트
+            SearchField = search.SelectedField;
+            SearchKeyword = search.Keyword;
+            GridView1.PageIndex = 0;
+            LoadGameList();
+        }
+
+        protected void Search_ResetRequested(object sender, EventArgs e)
+        {
+            ViewState.Remove("SearchField");
+            ViewState.Remove("SearchKeyword");
+            GridView1.PageIndex = 0;
+            LoadGameList();
+        }
+
+        protected void Pager_PageChanged(object sender, int newPage)
+        {
+            GridView1.PageIndex = newPage;
+            LoadGameList();
+        }
+
+        private void LoadGameList()
+        {
+            List<GameListModel> games = Global.dbManager.GetGames(); // 반환형 명확히 지정
+
+            IEnumerable<GameListModel> filtered = games;
+
+            // 🔍 검색 조건 적용
+            if (!string.IsNullOrEmpty(SearchField) && !string.IsNullOrEmpty(SearchKeyword))
             {
-                GridView1.DataSource = 
-                    Global.dbManager.GetGameALL(
-                        searchProperty.PageIndex
-                        );
-            }
-            else
-            {
-                GridView1.DataSource =
-                    Global.dbManager.GetGameSeachAll(
-                        searchProperty.PageIndex,
-                        searchProperty.SearchField,
-                        searchProperty.SearchQuery
-                        );
+                string kw = SearchKeyword.ToLower();
+
+                switch (SearchField)
+                {
+                    case "GameName":
+                        filtered = filtered.Where(g => !string.IsNullOrEmpty(g.GameName) && g.GameName.ToLower().Contains(kw));
+                        break;
+                    case "StadiumName":
+                        filtered = filtered.Where(g => !string.IsNullOrEmpty(g.StadiumName) && g.StadiumName.ToLower().Contains(kw));
+                        break;
+                    case "GameHost":
+                        filtered = filtered.Where(g => !string.IsNullOrEmpty(g.GameHost) && g.GameHost.ToLower().Contains(kw));
+                        break;
+                }
             }
 
-                GridView1.DataBind();
+            var result = filtered.ToList();
+
+            // 📊 바인딩 및 출력
+            GridView1.DataSource = result;
+            GridView1.DataBind();
+
+            lblTotalRecord.Text = result.Count.ToString();
+            pager.CurrentPage = GridView1.PageIndex;
+            pager.TotalPages = GridView1.PageCount;
+        }
+
+        protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                int no = (GridView1.PageIndex * GridView1.PageSize) + e.Row.RowIndex + 1;
+                e.Row.Cells[0].Text = no.ToString(); // No. 컬럼 출력
+            }
         }
     }
 }

@@ -1,6 +1,10 @@
-﻿using GiSanParkGolf.Class;
+﻿using Antlr.Runtime;
+using GiSanParkGolf.Class;
+using GiSanParkGolf.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -10,6 +14,18 @@ namespace GiSanParkGolf.Sites.Admin
 {
     public partial class GameUserSetting : System.Web.UI.Page
     {
+        private string SearchField
+        {
+            get => ViewState["SearchField"]?.ToString();
+            set => ViewState["SearchField"] = value;
+        }
+
+        private string SearchKeyword
+        {
+            get => ViewState["SearchKeyword"]?.ToString();
+            set => ViewState["SearchKeyword"] = value;
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!Global.uvm.UserClass.Equals(1))
@@ -18,90 +34,86 @@ namespace GiSanParkGolf.Sites.Admin
                 return;
             }
 
-            // 검색 모드 결정
-            searchProperty.SearchMode =
-                    (!string.IsNullOrEmpty(Request.QueryString["SearchField"]) &&
-                        !string.IsNullOrEmpty(Request.QueryString["SearchQuery"]));
-            if (searchProperty.SearchMode)
+            if (!IsPostBack)
             {
-                searchProperty.SearchField = Request.QueryString["SearchField"];
-                searchProperty.SearchQuery = Request.QueryString["SearchQuery"];
-            }
-
-            // 쿼리스트링에 따른 페이지 보여주기
-            if (Request["Page"] != null)
-            {
-                // Page는 보여지는 쪽은 1, 2, 3, ... 코드단에서는 0, 1, 2, ...
-                searchProperty.PageIndex = Convert.ToInt32(Request["Page"]) - 1;
-            }
-            else
-            {
-                searchProperty.PageIndex = 0; // 1페이지
-            }
-
-            // 쿠키를 사용한 리스트 페이지 번호 유지 적용: 
-            // 100번째 페이지의 글 보고, 다시 리스트 왔을 때 100번째 페이지 표시
-            if (Request.Cookies["GameUserSetting"] != null)
-            {
-                if (!String.IsNullOrEmpty(
-                    Request.Cookies["GameUserSetting"]["PageNum"]))
-                {
-                    searchProperty.PageIndex = Convert.ToInt32(
-                        Request.Cookies["GameUserSetting"]["PageNum"]);
-                }
-                else
-                {
-                    searchProperty.PageIndex = 0;
-                }
-            }
-
-            //레코드 카운트 출력
-            if (searchProperty.SearchMode == false)
-            {
-                // 테이블의 전체 레코드
-                searchProperty.RecordCount =
-                    Global.dbManager.GetGameCountAll();
-            }
-            else
-            {
-                // 해당하는 레코드 수
-                searchProperty.RecordCount =
-                    Global.dbManager.GetGameCountBySearch(searchProperty.SearchField, searchProperty.SearchQuery);
-            }
-            lblTotalRecord.Text = searchProperty.RecordCount.ToString();
-
-            if (!Page.IsPostBack)
-            {
-                Load_GameList();
+                SearchField = null;
+                SearchKeyword = null;
+                GameList.PageIndex = 0;
+                LoadGameList();
             }
         }
 
-        protected void Load_GameList()
+        protected void Search_SearchRequested(object sender, EventArgs e)
         {
-            if (searchProperty.SearchMode == false) // 기본 리스트
+            SearchField = search.SelectedField;
+            SearchKeyword = search.Keyword;
+
+            GameList.PageIndex = 0;
+            LoadGameList();
+        }
+
+        protected void Search_ResetRequested(object sender, EventArgs e)
+        {
+            ViewState.Remove("SearchField");
+            ViewState.Remove("SearchKeyword");
+
+            GameList.PageIndex = 0;
+            LoadGameList();
+        }
+
+        protected void Pager_PageChanged(object sender, int newPage)
+        {
+            GameList.PageIndex = newPage;
+            LoadGameList();
+        }
+
+        private void LoadGameList()
+        {
+            List<GameListModel> all = Global.dbManager.GetGames();
+
+            IEnumerable<GameListModel> filtered = all;
+
+            if (!string.IsNullOrEmpty(SearchField) && !string.IsNullOrEmpty(SearchKeyword))
             {
-                GameList.DataSource =
-                    Global.dbManager.GetGameALL(
-                        searchProperty.PageIndex
-                        );
+                string kw = SearchKeyword.ToLower();
+
+                switch (SearchField)
+                {
+                    case "Name":
+                        filtered = filtered.Where(g => g.GameName?.ToLower().Contains(kw) == true);
+                        break;
+                    case "Stadium":
+                        filtered = filtered.Where(g => g.StadiumName?.ToLower().Contains(kw) == true);
+                        break;
+                    case "Host":
+                        filtered = filtered.Where(g => g.GameHost?.ToLower().Contains(kw) == true);
+                        break;
+                }
             }
-            else
-            {
-                GameList.DataSource =
-                    Global.dbManager.GetGameSeachAll(
-                        searchProperty.PageIndex,
-                        searchProperty.SearchField,
-                        searchProperty.SearchQuery
-                        );
-            }
+
+            var result = filtered.ToList();
+
+            GameList.DataSource = result;
             GameList.DataBind();
+
+            lblTotalRecord.Text = result.Count.ToString();
+            pager.CurrentPage = GameList.PageIndex;
+            pager.TotalPages = GameList.PageCount;
+        }
+
+        protected void GameList_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                int no = (GameList.PageIndex * GameList.PageSize) + e.Row.RowIndex + 1;
+                e.Row.Cells[0].Text = no.ToString(); // No 컬럼 처리
+            }
         }
 
         protected void LnkGame_Click(object sender, EventArgs e)
         {
             LinkButton btn = (LinkButton)sender;
-            //Debug.WriteLine("선택된 GameCode : " + btn.ToolTip.ToString());
-            LoadGame(btn.ToolTip.ToString());
+            LoadGame(btn.ToolTip.ToString()); // 기존 LoadGame 흐름 유지
         }
 
         protected void LoadGame(string gameCode)

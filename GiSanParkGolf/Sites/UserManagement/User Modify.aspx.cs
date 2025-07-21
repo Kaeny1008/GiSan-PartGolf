@@ -15,7 +15,7 @@ namespace GiSanParkGolf.Sites.UserManagement
             {
                 prePage = Request.ServerVariables["HTTP_REFERER"];
                 Debug.WriteLine("이전 위치 : " + prePage);
-                UserInformationLoad(Global.uvm.UserID);
+                UserInformationLoad(Global.uvm.UserId);
             }               
         }
 
@@ -28,7 +28,7 @@ namespace GiSanParkGolf.Sites.UserManagement
             txtName.Text = Global.suvm.UserName;
             txtBirthDay.Text = Global.suvm.UserNumber.ToString();
             txtGender.Text = Global.suvm.UserGender.ToString();
-            txtAddress.Text = Global.suvm.UserAddress2;
+            txtAddress.Text = Global.suvm.UserAddress;
             txtAddress2.Text = Global.suvm.UserAddress2;
             txtMemo.Text = Global.suvm.UserNote;
 

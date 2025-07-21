@@ -1,36 +1,38 @@
 ﻿<%@ Page Title="선수정보 관리" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Player Management.aspx.cs" 
     Inherits="GiSanParkGolf.Sites.Admin.Player_Management" EnableEventValidation="false" %>
 
-<%@ Register Src="~/Controls/PagingControl.ascx" TagPrefix="uc1" TagName="PagingControl" %>
-<%@ Register Src="~/Controls/SearchControl.ascx" TagPrefix="uc1" TagName="SearchControl" %>
+<%@ Register Src="~/Controls/NewSearchControl.ascx" TagPrefix="uc" TagName="NewSearchControl" %>
+<%@ Register Src="~/Controls/NewPagingControl.ascx" TagPrefix="uc" TagName="NewPagingControl" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <div>
-        <uc1:SearchControl runat="server" ID="SearchControl" />
+        <h12>(선수이름을 클릭하여 수정)</h12><br />
+        <uc:NewSearchControl ID="search" runat="server"
+            OnSearchRequested="Search_SearchRequested"
+            OnResetRequested="Search_ResetRequested" />
         <hr />
         <div style="font-style: italic; text-align: right; font-size: 8pt;">
             Total Record:
             <asp:Literal ID="lblTotalRecord" runat="server"></asp:Literal>
         </div>
-        <asp:Label ID="LabelResult" runat="server" Text="선택정보" Visible="false"></asp:Label>
-        <h12>(선수이름을 클릭하여 수정)</h12><br />
 
-        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False"
+        <asp:GridView ID="GridView1" runat="server" 
+            AutoGenerateColumns="False"
             CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+            AllowPaging="true"
+            PageSize="10"
+            PagerSettings-Visible="false"
+            OnRowDataBound="GridView1_RowDataBound"
             ShowHeaderWhenEmpty="true">
         <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
         <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
         <FooterStyle BackColor="#CCCCCC" />                     
             <Columns>       
-                <asp:TemplateField>
-                    <HeaderTemplate>
-                        <asp:Label ID="LB_No" runat="server" Text="No."></asp:Label>
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%#Eval("RowNumber")%>
-                    </ItemTemplate>
+                <%-- No 컬럼: RowDataBound에서 처리 --%>
+                <asp:TemplateField HeaderText="No">
+                    <ItemTemplate />
+                    <ItemStyle HorizontalAlign="Center" Width="5%" />
                     <HeaderStyle Width="5%" />
-                    <ItemStyle Width="5%" />
                 </asp:TemplateField>
                 <asp:TemplateField>
                     <HeaderTemplate>
@@ -97,7 +99,8 @@
 
         <div class="center_container">
             <div>
-                <uc1:PagingControl runat="server" ID="PagingControl" />
+                <uc:NewPagingControl ID="pager" runat="server"
+                    OnPageChanged="Pager_PageChanged" />
             </div>
         </div>
     </div>
