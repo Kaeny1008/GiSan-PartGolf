@@ -15,11 +15,7 @@ namespace GiSanParkGolf.Sites.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!Global.uvm.UserClass.Equals(1))
-            {
-                Response.Redirect("~/Sites/Login/Admin Alert.aspx");
-                return;
-            }
+            Helper.RequireAdmin(this); // 관리자 확인
 
             if (!Page.IsPostBack)
             {

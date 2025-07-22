@@ -1,4 +1,5 @@
-﻿using GiSanParkGolf.Models;
+﻿using GiSanParkGolf.Class;
+using GiSanParkGolf.Models;
 using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -9,6 +10,8 @@ namespace GiSanParkGolf.Sites.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Helper.RequireAdmin(this); // 관리자 확인
+
             if (!IsPostBack)
                 LoadHandicapData();  // 최초 로딩 시 호출
         }

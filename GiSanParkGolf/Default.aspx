@@ -1,139 +1,131 @@
 ﻿<%@ Page Title="기산 파크골프" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="GiSanParkGolf.Default" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <style>
-        /*한번이상 클릭*/
-        .HyperLink:visited {
-	        color:blue; 
-        }
-        .NoneDeco {
-          color: Black;
-          text-decoration: none;
-        }
-    </style>
-    <div class="row g-3">
-        <div class="col" style="background-color:aliceblue; border-radius:0.375rem;">
-            <br />
-            <asp:LinkButton ID="LinkButton1" runat="server" PostBackUrl="~/BBS/BoardView.aspx?bbsId=notice" CssClass="NoneDeco text-center">
-                <h5 style="color:cadetblue">[공지사항]</h5>
-            </asp:LinkButton>
-            <asp:GridView ID="NoticeList"
-                runat="server" AutoGenerateColumns="False"
-                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-                ShowHeaderWhenEmpty="true">
-                <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
-                <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
-                <Columns>
-                    <asp:TemplateField>
-                        <HeaderTemplate>
-                            <asp:Label ID="LB_No" runat="server" Text="No."></asp:Label>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <%#Eval("RowNumber")%>
-                        </ItemTemplate>
-                        <HeaderStyle Width="50px" />
-                        <ItemStyle Width="50px" />
-                    </asp:TemplateField>
-                    <asp:TemplateField>
-                        <HeaderTemplate>
-                            <asp:Label ID="LB_Name" runat="server" Text="제목"></asp:Label>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
-                                NavigateUrl='<%# "~/BBS/BoardView.aspx?bbsId=notice&Id=" + Eval("Id") %>'>
-                                <%# Dul.StringLibrary.CutStringUnicode(Eval("Title").ToString(), 30) %>
-                                <a style="font-size:13px"><%# Dul.BoardLibrary.EmptyCommentCount(Eval("CommentCount")) %></a>
-                            </asp:HyperLink>
-                        </ItemTemplate>
-                        <HeaderStyle Width="350px" />
-                        <ItemStyle Width="350px" HorizontalAlign="Left" />
-                    </asp:TemplateField>
-                    <asp:TemplateField>
-                        <HeaderTemplate>
-                            <asp:Label ID="LB_Writer" runat="server" Text="작성자"></asp:Label>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <%#Eval("Name")%>
-                        </ItemTemplate>
-                        <HeaderStyle Width="60px" />
-                        <ItemStyle Width="60px" />
-                    </asp:TemplateField>
-                    <asp:TemplateField>
-                        <HeaderTemplate>
-                            <asp:Label ID="LB_WriteDate" runat="server" Text="작성일"></asp:Label>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <%# Dul.BoardLibrary.FuncShowTime(Eval("PostDate")) %>
-                        </ItemTemplate>
-                        <HeaderStyle Width="90px" />
-                        <ItemStyle Width="90px" />
-                    </asp:TemplateField>
-                </Columns>
-                <EmptyDataTemplate>데이터가 없습니다.</EmptyDataTemplate>
-            </asp:GridView>
-        </div>
-        <div class="col" style="background-color:antiquewhite; border-radius:0.375rem;">
-            <br />
-            <asp:LinkButton ID="LinkButton2" runat="server" PostBackUrl="~/Sites/Player/JoinGame" CssClass="NoneDeco text-center">
-                <h5 style="color:brown">[대회목록]</h5>
-            </asp:LinkButton>
-            <asp:GridView ID="GameList"
-                runat="server" AutoGenerateColumns="False"
-                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-                ShowHeaderWhenEmpty="true">
-                <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
-                <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
-                <Columns>
-                    <asp:TemplateField>
-                        <HeaderTemplate>
-                            <asp:Label ID="LB_No" runat="server" Text="No."></asp:Label>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <%#Eval("RowNumber")%>
-                        </ItemTemplate>
-                        <HeaderStyle Width="50px" />
-                        <ItemStyle Width="50px" />
-                    </asp:TemplateField>
-                    <asp:TemplateField>
-                        <HeaderTemplate>
-                            <asp:Label ID="LB_Name" runat="server" Text="대회명"></asp:Label>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink" 
-                                NavigateUrl=<%# "~/Sites/Player/JoinGame.aspx?GameCode=" + Eval("GameCode")%>>
-                                <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 30) %>
-                            </asp:HyperLink>
-                        </ItemTemplate>
-                        <HeaderStyle Width="290px" />
-                        <ItemStyle Width="290px" />
-                    </asp:TemplateField>
-                    <asp:TemplateField>
-                        <HeaderTemplate>
-                            <asp:Label ID="LB_Writer" runat="server" Text="개최지"></asp:Label>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <%#Eval("StadiumName")%>
-                        </ItemTemplate>
-                        <HeaderStyle Width="120px" />
-                        <ItemStyle Width="120px" />
-                    </asp:TemplateField>
-                    <asp:TemplateField>
-                        <HeaderTemplate>
-                            <asp:Label ID="LB_WriteDate" runat="server" Text="상태"></asp:Label>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <%#Eval("GameStatus").ToString().Equals("모집중") ?
-                                "<a style=\"color:blue;\">모집중</a>"
-                                :
-                                "<a>" + Eval("GameStatus") + "</a>"
-                            %>
-                        </ItemTemplate>
-                        <HeaderStyle Width="90px" />
-                        <ItemStyle Width="90px" />
-                    </asp:TemplateField>
-                </Columns>
-                <EmptyDataTemplate>대회가 없습니다.</EmptyDataTemplate>
-            </asp:GridView>
+
+    <%-- Bootstrap Icons CDN --%>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <%-- 전체 레이아웃 컨테이너 --%>
+    <div class="container-fluid px-4 py-4">
+        <div class="row g-4">
+
+            <%-- 공지사항 섹션 --%>
+            <div class="col-md-6">
+                <div class="card custom-card border-start border-primary">
+                    <%-- 카드 헤더 --%>
+                    <div class="card-header bg-white">
+                        <h5 class="card-title">
+                            <i class="bi bi-megaphone-fill me-2 text-primary"></i>
+                            <asp:LinkButton ID="LinkButton1" runat="server"
+                                CssClass="NoneDeco link-hover text-primary fw-bold"
+                                PostBackUrl="~/BBS/BoardView.aspx?bbsId=notice">
+                                공지사항
+                            </asp:LinkButton>
+                        </h5>
+                    </div>
+
+                    <%-- 공지사항 목록 테이블 --%>
+                    <div class="card-body">
+                        <asp:GridView ID="NoticeList" runat="server" AutoGenerateColumns="False"
+                            CssClass="table table-sm table-borderless" ShowHeaderWhenEmpty="true">
+                            <HeaderStyle CssClass="text-center text-muted border-bottom" />
+                            <RowStyle CssClass="text-center hover-row align-middle" />
+                            <Columns>
+                                <%-- 번호 열 --%>
+                                <asp:TemplateField HeaderText="No.">
+                                    <ItemTemplate><%#Eval("RowNumber")%></ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 제목 열 --%>
+                                <asp:TemplateField HeaderText="제목">
+                                    <ItemTemplate>
+                                        <asp:HyperLink ID="lnkTitle" runat="server"
+                                            CssClass="HyperLink link-hover fw-semibold text-dark"
+                                            NavigateUrl='<%# "~/BBS/BoardView.aspx?bbsId=notice&Id=" + Eval("Id") %>'>
+                                            <%# Dul.StringLibrary.CutStringUnicode(Eval("Title").ToString(), 30) %>
+                                        </asp:HyperLink>
+                                        <%-- 댓글 수 --%>
+                                        <span class="text-muted small">
+                                            <%# Dul.BoardLibrary.EmptyCommentCount(Eval("CommentCount")) %>
+                                        </span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 작성자 --%>
+                                <asp:TemplateField HeaderText="작성자">
+                                    <ItemTemplate><%#Eval("Name")%></ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 작성일 --%>
+                                <asp:TemplateField HeaderText="작성일">
+                                    <ItemTemplate><%# Dul.BoardLibrary.FuncShowTime(Eval("PostDate")) %></ItemTemplate>
+                                </asp:TemplateField>
+                            </Columns>
+                            <EmptyDataTemplate>데이터가 없습니다.</EmptyDataTemplate>
+                        </asp:GridView>
+                    </div>
+                </div>
+            </div>
+
+            <%-- 대회목록 섹션 --%>
+            <div class="col-md-6">
+                <div class="card custom-card border-start border-success">
+                    <%-- 카드 헤더 --%>
+                    <div class="card-header bg-white">
+                        <h5 class="card-title">
+                            <i class="bi bi-calendar-event me-2 text-success"></i>
+                            <asp:LinkButton ID="LinkButton2" runat="server"
+                                CssClass="NoneDeco link-hover text-success fw-bold"
+                                PostBackUrl="~/Sites/Player/JoinGame">
+                                대회목록
+                            </asp:LinkButton>
+                        </h5>
+                    </div>
+
+                    <%-- 대회 목록 테이블 --%>
+                    <div class="card-body">
+                        <asp:GridView ID="GameList" runat="server" AutoGenerateColumns="False"
+                            CssClass="table table-sm table-borderless" ShowHeaderWhenEmpty="true">
+                            <HeaderStyle CssClass="text-center text-muted border-bottom" />
+                            <RowStyle CssClass="text-center hover-row align-middle" />
+                            <Columns>
+                                <%-- 번호 --%>
+                                <asp:TemplateField HeaderText="No.">
+                                    <ItemTemplate><%#Eval("RowNumber")%></ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 대회명: 모집중일 때만 링크 출력 --%>
+                                <asp:TemplateField HeaderText="대회명">
+                                    <ItemTemplate>
+                                        <%# Eval("GameStatus").ToString() == "모집중"
+                                            ? "<a class='HyperLink link-hover fw-semibold text-dark' href='/Sites/Player/JoinGame.aspx?GameCode=" + Eval("GameCode") + "'>" +
+                                                "<i class='bi bi-box-arrow-in-right me-1'></i>" +
+                                                Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 30) +
+                                            "</a>"
+                                            : "<span class='text-muted'>" + Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 30) + "</span>" %>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 개최지 --%>
+                                <asp:TemplateField HeaderText="개최지">
+                                    <ItemTemplate><%#Eval("StadiumName")%></ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 상태 텍스트 --%>
+                                <asp:TemplateField HeaderText="상태">
+                                    <ItemTemplate>
+                                        <%# Eval("GameStatus").ToString() == "모집중"
+                                            ? "<span style='color:blue;'><i class='bi bi-check-circle-fill me-1'></i>모집중</span>"
+                                            : "<span style='color:gray;'>" + Eval("GameStatus") + "</span>" %>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                            </Columns>
+                            <EmptyDataTemplate>대회가 없습니다.</EmptyDataTemplate>
+                        </asp:GridView>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </asp:Content>

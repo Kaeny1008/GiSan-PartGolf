@@ -22,7 +22,7 @@
             } else {
                 txt.removeAttribute("disabled");
 
-                // ✨ title 유지 → 포커스 이벤트에서 제거
+                // title 유지 → 포커스 이벤트에서 제거
                 txt.classList.remove("bg-light");
             }
         }
@@ -74,6 +74,9 @@
         .changed-cell {
             background-color: #f9ecec !important;
             transition: background-color 0.5s ease-in-out;
+        }
+        input[type="hidden"] {
+            display: none;
         }
     </style>
 
@@ -162,20 +165,20 @@
             </asp:BoundField>
 
             <asp:TemplateField>
-              <ItemTemplate>
-                <asp:Button ID="btnEdit" runat="server" Text="편집"
-                    CommandName="Edit"
-                    CssClass="btn btn-sm btn-outline-primary" />
-              </ItemTemplate>
-              <EditItemTemplate>
-                <asp:Button ID="btnUpdate" runat="server" Text="저장"
-                    CommandName="Update"
-                    CssClass="btn btn-sm btn-success me-2" />
+                <ItemTemplate>
+                    <asp:Button ID="btnEdit" runat="server" Text="편집"
+                        CommandName="Edit"
+                        CssClass="btn btn-xs btn-outline-primary" />
+                </ItemTemplate>
+                <EditItemTemplate>
+                    <asp:Button ID="btnUpdate" runat="server" Text="저장"
+                        CommandName="Update"
+                        CssClass="btn btn-xs btn-success me-1" />
 
-                <asp:Button ID="btnCancel" runat="server" Text="취소"
-                    CommandName="Cancel"
-                    CssClass="btn btn-sm btn-secondary" />
-              </EditItemTemplate>
+                    <asp:Button ID="btnCancel" runat="server" Text="취소"
+                        CommandName="Cancel"
+                        CssClass="btn btn-xs btn-secondary" />
+                </EditItemTemplate>
             </asp:TemplateField>
           </Columns>
 

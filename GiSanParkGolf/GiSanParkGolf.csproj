@@ -388,6 +388,7 @@
       <DependentUpon>ThumbNail.aspx</DependentUpon>
     </Compile>
     <Compile Include="Class\BaseProperty.cs" />
+    <Compile Include="Class\Helper.cs" />
     <Compile Include="Controls\NewPagingControl.ascx.cs">
       <DependentUpon>NewPagingControl.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

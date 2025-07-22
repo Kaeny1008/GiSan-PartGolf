@@ -1,178 +1,150 @@
 ﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="GiSanParkGolf.SiteMaster" %>
-
 <!DOCTYPE html>
-
 <html lang="ko">
-    <head runat="server">
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title><%: Page.Title %> - 25. 06. 19</title>
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%: Page.Title %></title>
 
-        <asp:PlaceHolder runat="server">
-            <%: Scripts.Render("~/bundles/modernizr") %>
-            <%: Styles.Render("~/Content/bootstrap.min.css") %>    
-            <%: Scripts.Render("~/Scripts/bootstrap.bundle.min.js") %>
-        </asp:PlaceHolder>
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/bundles/modernizr") %>
+        <%: Styles.Render("~/Content/bootstrap.min.css") %>
+        <%: Scripts.Render("~/Scripts/bootstrap.bundle.min.js") %>
+    </asp:PlaceHolder>
 
-        <webopt:bundlereference runat="server" path="~/Content/css" />
-        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-        <link rel="Stylesheet" type="text/css" href="/Class/StyleSheet.css?after" />
-    </head>
+    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <link rel="stylesheet" href="/Class/StyleSheet.css?after" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+    <form id="frm" runat="server">
+        <asp:ScriptManager runat="server">
+            <Scripts>
+                <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
+                <%--Framework Scripts--%>
+                <asp:ScriptReference Name="MsAjaxBundle" />
+                <asp:ScriptReference Name="jquery" />
+                <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
+                <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
+                <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
+                <asp:ScriptReference Name="GridView.js" Assembly="System.Web" Path="~/Scripts/WebForms/GridView.js" />
+                <asp:ScriptReference Name="DetailsView.js" Assembly="System.Web" Path="~/Scripts/WebForms/DetailsView.js" />
+                <asp:ScriptReference Name="TreeView.js" Assembly="System.Web" Path="~/Scripts/WebForms/TreeView.js" />
+                <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
+                <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
+                <asp:ScriptReference Name="WebFormsBundle" />
+                <%--Site Scripts--%>
+            </Scripts>
+        </asp:ScriptManager>
 
-    <body>
-        <form id="frm" runat="server" defaultbutton="btnNull">
-            <asp:ScriptManager runat="server">
-                <Scripts>
-                    <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
-                    <%--Framework Scripts--%>
-                    <asp:ScriptReference Name="MsAjaxBundle" />
-                    <asp:ScriptReference Name="jquery" />
-                    <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
-                    <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
-                    <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
-                    <asp:ScriptReference Name="GridView.js" Assembly="System.Web" Path="~/Scripts/WebForms/GridView.js" />
-                    <asp:ScriptReference Name="DetailsView.js" Assembly="System.Web" Path="~/Scripts/WebForms/DetailsView.js" />
-                    <asp:ScriptReference Name="TreeView.js" Assembly="System.Web" Path="~/Scripts/WebForms/TreeView.js" />
-                    <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
-                    <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
-                    <asp:ScriptReference Name="WebFormsBundle" />
-                    <%--Site Scripts--%>
-                </Scripts>
-            </asp:ScriptManager>
-        
-            <script type="text/javascript" language="javascript">
-                function go_loginpage() {
-                    location.href = "/Login";
-                    return false;
-                }
-                function go_logoutpage() {
-                    location.href = "/Sites/Login/Logout";
-                    return false;
-                }
-                function go_usermodify() {
-                    location.href = "/Sites/UserManagement/User Modify";
-                    return false;
-                }
-            </script>
-            <style>
-                .hidden{
-                    display: none;
-                }
-            </style>
+        <script type="text/javascript">
+            function go_loginpage() {
+                location.href = "/Login";
+                return false;
+            }
 
-            <asp:Button ID="btnNull" runat="server" ClientIDMode="Static" OnClientClick="javascript:return false;" CssClass="hidden"/>
+            function go_logoutpage() {
+                location.href = "/Sites/Login/Logout";
+                return false;
+            }
 
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-                <div class="container">
-                    <% if (Page.User.Identity.IsAuthenticated)
-                        {
-                    %>
-                        <a class="navbar-brand" href="/">
-                    <% 
-                        }
-                        else
-                        {
-                    %>
-                        <a class="navbar-brand" href="/Login">
-                    <% 
-                        }
-                    %>
-                    기산 파크골프
-                    </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            function go_usermodify() {
+                location.href = "/Sites/UserManagement/User Modify";
+                return false;
+            }
+        </script>
 
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" id="navbarDropdown1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    관리자 페이지
-                                </a>
-                                <% if (Page.User.Identity.IsAuthenticated)
-                                    {
-                                %>
-                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                        <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
-                                        <li><a class="dropdown-item" href="/Sites/Admin/GameHandicap">Handicap 설정</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="/Sites/Admin/GameList">대회개최</a></li>
-                                        <li><a class="dropdown-item" href="/Sites/Admin/GameUserSetting">인원 코스 및 배치</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="/TempHint">대회결과 입력</a></li>
-                                    </ul>
-                                <% 
-                                    }
-                                %>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    선수 페이지
-                                </a>
-                                <% if (Page.User.Identity.IsAuthenticated)
-                                    {
-                                %>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="/Sites/Player/JoinGame">대회참가 신청</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="/Sites/Player/MyGame">내 대회</a></li>
-                                </ul>
-                                <% 
-                                    } 
-                                %>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    게시판
-                                </a>
-                                <% if (Page.User.Identity.IsAuthenticated)
-                                    {
-                                %>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="/BBS/Default.aspx?bbsId=notice">공지사항</a></li>
-                                </ul>
-                                <% 
-                                    } 
-                                %>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
-
+        <%-- 네비게이션 영역 --%>
+        <nav class="navbar navbar-expand-lg navbar-custom">
             <div class="container">
-                <br />
-                <asp:Label ID="lblName" runat="server" Text="손님"></asp:Label>
-                <asp:Label ID="Label1" runat="server" Text="님, 반갑습니다."></asp:Label>
-              
-                <asp:LoginView ID="LoginView1" runat="server">
-                    <AnonymousTemplate>
-                        <!-- 로그인 전 -->
-                        <asp:Button ID="Login" runat="server" class="btn btn-primary btn-sm" OnClientClick="return go_loginpage();" Text="로그인" />
-                    </AnonymousTemplate>
-                    <LoggedInTemplate>
-                        <!-- 로그인 후 -->
-                        <%--<a href="/Sites/Login/Logout">로그아웃</a>--%>
-                        <asp:Button ID="LogOut" runat="server" class="btn btn-warning btn-sm" OnClientClick="return go_logoutpage();" Text="로그아웃" />
-                        <asp:Button ID="UserInformation" runat="server" class="btn btn-secondary btn-sm" OnClientClick="return go_usermodify();" Text="정보수정" />
-                    </LoggedInTemplate>
-                </asp:LoginView>
-            </div>
-        
-            <div class="container body-content">
-                <hr />
-                <div class="column">
-                    <asp:ContentPlaceHolder ID="MainContent" runat="server">
-                    </asp:ContentPlaceHolder>
+                <%-- 브랜드 링크 --%>
+                <a class="navbar-brand" href='<%: Page.User.Identity.IsAuthenticated ? "/" : "/Login" %>'>
+                    기산 파크골프
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <%-- 관리자 메뉴 --%>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">관리자 페이지</a>
+                            <% if (Page.User.Identity.IsAuthenticated) { %>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
+                                <li><a class="dropdown-item" href="/Sites/Admin/GameHandicap">Handicap 설정</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" href="/Sites/Admin/GameList">대회개최</a></li>
+                                <li><a class="dropdown-item" href="/Sites/Admin/GameUserSetting">인원 코스 및 배치</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" href="/TempHint">대회결과 입력</a></li>
+                            </ul>
+                            <% } %>
+                        </li>
+
+                        <%-- 선수 메뉴 --%>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">선수 페이지</a>
+                            <% if (Page.User.Identity.IsAuthenticated) { %>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/Sites/Player/JoinGame">대회참가 신청</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" href="/Sites/Player/MyGame">내 대회</a></li>
+                            </ul>
+                            <% } %>
+                        </li>
+
+                        <%-- 게시판 메뉴 --%>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">게시판</a>
+                            <% if (Page.User.Identity.IsAuthenticated) { %>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/BBS/Default.aspx?bbsId=notice">공지사항</a></li>
+                            </ul>
+                            <% } %>
+                        </li>
+                    </ul>
                 </div>
-                <hr />
             </div>
-            <div class="container body-content">
-                <footer>
-                    <p>&copy; 2025 - 기산 파크골프</p>
-                </footer>
+        </nav>
+
+        <%-- 사용자 인사 및 로그인 영역 --%>
+        <div class="container mt-3">
+            <div class="card-welcome d-flex flex-wrap align-items-center gap-3">
+                <%-- 라벨 그룹 --%>
+                <div class="d-flex align-items-center gap-2">
+                    <asp:Label ID="lblName" runat="server" Text="손님" />
+                    <asp:Label ID="Label1" runat="server" Text="님, 반갑습니다." />
+                </div>
+
+                <%-- 버튼 그룹 --%>
+                <div class="d-flex align-items-center gap-2">
+                    <asp:LoginView ID="LoginView1" runat="server">
+                        <AnonymousTemplate>
+                            <asp:Button ID="Login" runat="server" CssClass="btn btn-outline-primary btn-sm" Text="로그인" OnClientClick="return go_loginpage();" />
+                        </AnonymousTemplate>
+                        <LoggedInTemplate>
+                            <asp:Button ID="LogOut" runat="server" CssClass="btn btn-outline-danger btn-sm" Text="로그아웃" OnClientClick="return go_logoutpage();" />
+                            <asp:Button ID="UserInformation" runat="server" CssClass="btn btn-outline-secondary btn-sm" Text="정보수정" OnClientClick="return go_usermodify();" />
+                        </LoggedInTemplate>
+                    </asp:LoginView>
+                </div>
             </div>
-        </form>
-    </body>
+        </div>
+
+        <%-- 메인 콘텐츠 영역 --%>
+        <div class="container body-content">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+        </div>
+
+        <%-- 푸터 영역 --%>
+        <div class="container mt-5 mb-4">
+            <footer>
+                <p>&copy; 2025 기산 파크골프 · 경북 칠곡군</p>
+            </footer>
+        </div>
+    </form>
+</body>
 </html>

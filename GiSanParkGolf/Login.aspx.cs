@@ -11,7 +11,6 @@ namespace GiSanParkGolf
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            Console.WriteLine("콘솔 테스트");
             // [!] 인증 여부 확인 : 로그인했으면 참, 그렇지 않으면 거짓을 반환
             if (!Page.User.Identity.IsAuthenticated)
             {
@@ -41,8 +40,18 @@ namespace GiSanParkGolf
             }
         }
 
-        protected void BtnLogin_Click(object sender, EventArgs e)
+        protected void btnLogin_Click(object sender, EventArgs e)
         {
+            Page.Validate("UserLogin");  // 수동 그룹 유효성 검사
+            if (!Page.IsValid)
+            {
+                //ScriptManager.RegisterStartupScript(this, GetType(), "validationModalScript", "ShowValidationModal();", true);
+                //ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal();", true);
+                ScriptManager.RegisterStartupScript(this, GetType(), "validationModalScript", "showValidat();", true);
+
+                return;
+            }
+
             string result = Global.dbManager.IsCorrectUser(txtUserID.Text, txtPassword.Text, 0);
 
             switch (result)
@@ -69,7 +78,7 @@ namespace GiSanParkGolf
                     ShowAlert("이미 로그인된 사용자입니다.");
                     break;
                 case "Ready":
-                    ShowAlert("승인 대기중입니다.");
+                    ShowAlert("승인 대기중입니다. 관리자 승인을 기다려주세요.");
                     break;
                 default:
                     ShowAlert("아이디 또는 비밀번호가 틀렸습니다.");
@@ -79,7 +88,8 @@ namespace GiSanParkGolf
 
         protected void ShowAlert(string message)
         {
-            Page.ClientScript.RegisterStartupScript(this.GetType(), "showMsg", "<script>alert('" + message + "');</script>");
+            ScriptManager.RegisterStartupScript(this, GetType(), "msgModal", @"
+                showMessage('" + message + "');", true);
         }
 
         protected void BtnRegister_Click(object sender, EventArgs e)

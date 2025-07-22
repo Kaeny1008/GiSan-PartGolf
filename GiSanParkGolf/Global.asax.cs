@@ -17,7 +17,6 @@ namespace GiSanParkGolf
         public static GameListModel gameList = new GameListModel();
         public static Search_Property searchProperty = new Search_Property();
         public static GameJoinUserModel GameJoinUser = new GameJoinUserModel();
-        public static HelpClass Helper = new HelpClass();
 
         void Application_Start(object sender, EventArgs e)
         {

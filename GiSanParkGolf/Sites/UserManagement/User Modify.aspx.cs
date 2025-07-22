@@ -36,6 +36,7 @@ namespace GiSanParkGolf.Sites.UserManagement
 
         protected void BTN_Register_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("수정 버튼이 눌렸다.");
             if (Page.IsValid)
             {
                 Debug.WriteLine(txtName.Text);

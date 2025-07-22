@@ -13,6 +13,8 @@ namespace GiSanParkGolf.Sites.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            Helper.RequireAdmin(this); // 관리자 확인
+
             if (!IsPostBack)
                 LoadHandicapLogs();
         }

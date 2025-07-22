@@ -35,11 +35,13 @@
         function ValidateCheck() {
             var isValid = false;
             isValid = Page_ClientValidate('NewUser');
-            if (isValid) {
-                isValid = Page_ClientValidate('NewUser');
-            }
+            console.log("체크완료? : " + isValid);
+            //if (isValid) {
+            //    isValid = Page_ClientValidate('NewUser');
+            //}
 
             if (isValid) {
+                console.log("모달띄운다");
                 ShowModal();
             }
         }
@@ -48,6 +50,7 @@
             $("#SaveModal").modal("hide");
         }
         function ShowModal() {
+            console.log("모달띄운다2");
             $("#SaveModal").modal("show");
         }
     </script>
@@ -246,21 +249,5 @@
             HeaderText="다음 사항을 확인하여 주십시오."
             runat="server"
             ValidationGroup="NewUser"/>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </div>
 </asp:Content>

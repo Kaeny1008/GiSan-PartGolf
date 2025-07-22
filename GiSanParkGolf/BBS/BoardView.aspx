@@ -174,7 +174,7 @@
                 //로그인 되어 있으면
                 if (Page.User.Identity.IsAuthenticated)
                 {
-                    if (lbUserId.Text.Equals(global_asax.uvm.UserID))
+                    if (lbUserId.Text.Equals(global_asax.uvm.UserId))
                     {
                         //내가 작성한 글이면
         %>

@@ -8,17 +8,6 @@ using System.Web;
 
 namespace GiSanParkGolf.Class
 {
-    public class HelpClass
-    {
-        public string ConvertDate(DateTime datetime)
-        {
-            DateTime now = datetime;
-            string formattedDate = now.ToString("yyyy-MM-dd");
-
-            return formattedDate;
-        }
-    }
-
     /// <summary>
     /// BaseProperty 클래스: 공통으로 사용되는 속성모음
     /// </summary>

@@ -66,7 +66,7 @@
                         {
                             System.Diagnostics.Debug.WriteLine("관리자 아닌사람이 로그인이다.");
                 %>
-                            <%# Eval("UserId").ToString().Equals(global_asax.uvm.UserID) ? 
+                            <%# Eval("UserId").ToString().Equals(global_asax.uvm.UserId) ? 
                                     "<button type=\"button\" class=\"btn btn-outline-secondary btn-sm\" onclick=\"ShowModal('" + Request["Id"] + "','" + Eval("Id") + "','" + Request["bbsId"] + "','true')\">삭제</button>" 
                                     : 
                                     "" 
