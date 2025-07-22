@@ -27,7 +27,8 @@
                     <%-- 공지사항 목록 테이블 --%>
                     <div class="card-body">
                         <asp:GridView ID="NoticeList" runat="server" AutoGenerateColumns="False"
-                            CssClass="table table-sm table-borderless" ShowHeaderWhenEmpty="true">
+                            CssClass="table table-bordered table-hover table-condensed table-striped table-responsive" 
+                            ShowHeaderWhenEmpty="true">
                             <HeaderStyle CssClass="text-center text-muted border-bottom" />
                             <RowStyle CssClass="text-center hover-row align-middle" />
                             <Columns>
@@ -40,7 +41,7 @@
                                 <asp:TemplateField HeaderText="제목">
                                     <ItemTemplate>
                                         <asp:HyperLink ID="lnkTitle" runat="server"
-                                            CssClass="HyperLink link-hover fw-semibold text-dark"
+                                            CssClass="HyperLink link-hover"
                                             NavigateUrl='<%# "~/BBS/BoardView.aspx?bbsId=notice&Id=" + Eval("Id") %>'>
                                             <%# Dul.StringLibrary.CutStringUnicode(Eval("Title").ToString(), 30) %>
                                         </asp:HyperLink>
@@ -85,7 +86,8 @@
                     <%-- 대회 목록 테이블 --%>
                     <div class="card-body">
                         <asp:GridView ID="GameList" runat="server" AutoGenerateColumns="False"
-                            CssClass="table table-sm table-borderless" ShowHeaderWhenEmpty="true">
+                            CssClass="table table-bordered table-hover table-condensed table-striped table-responsive" 
+                            ShowHeaderWhenEmpty="true">
                             <HeaderStyle CssClass="text-center text-muted border-bottom" />
                             <RowStyle CssClass="text-center hover-row align-middle" />
                             <Columns>
@@ -98,7 +100,7 @@
                                 <asp:TemplateField HeaderText="대회명">
                                     <ItemTemplate>
                                         <%# Eval("GameStatus").ToString() == "모집중"
-                                            ? "<a class='HyperLink link-hover fw-semibold text-dark' href='/Sites/Player/JoinGame.aspx?GameCode=" + Eval("GameCode") + "'>" +
+                                            ? "<a class='HyperLink link-hover' href='/Sites/Player/JoinGame.aspx?GameCode=" + Eval("GameCode") + "'>" +
                                                 "<i class='bi bi-box-arrow-in-right me-1'></i>" +
                                                 Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 30) +
                                             "</a>"

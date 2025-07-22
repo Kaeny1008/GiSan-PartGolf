@@ -129,6 +129,9 @@ namespace GiSanParkGolf.Models
 
         [Display(Name = "UserNumber")]
         public string UserNumber { get; set; }
+
+        public string GameCode { get; set; }
+        public string GameName { get; set; }
     }
 
     public class PlayerHandicapViewModel

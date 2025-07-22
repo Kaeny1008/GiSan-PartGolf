@@ -1,18 +1,17 @@
-﻿using Antlr.Runtime;
-using GiSanParkGolf.Class;
+﻿using GiSanParkGolf.Class;
 using GiSanParkGolf.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
 using System.Text;
+using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using static GiSanParkGolf.Global;
 
 namespace GiSanParkGolf.Sites.Admin
 {
-    public partial class GameUserSetting : System.Web.UI.Page
+    public partial class GameSetup : System.Web.UI.Page
     {
         private string SearchField
         {
@@ -28,7 +27,7 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            Helper.RequireAdmin(this); // 관리자 확인
+            Helper.RequireAdmin(this);
 
             if (!IsPostBack)
             {
@@ -36,6 +35,9 @@ namespace GiSanParkGolf.Sites.Admin
                 SearchKeyword = null;
                 GameList.PageIndex = 0;
                 LoadGameList();
+
+                gvPlayerList.DataSource = new List<GameJoinUserList>();
+                gvPlayerList.DataBind();
             }
         }
 
@@ -65,14 +67,11 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void LoadGameList()
         {
-            // 검색 조건 준비
             string field = SearchField;
             string keyword = SearchKeyword;
 
-            // SQL에서 조건 필터링 → 결과만 받아옴
             List<GameListModel> result = Global.dbManager.GetGames(field, keyword);
 
-            // 바인딩
             GameList.DataSource = result;
             GameList.DataBind();
 
@@ -86,17 +85,20 @@ namespace GiSanParkGolf.Sites.Admin
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
                 int no = (GameList.PageIndex * GameList.PageSize) + e.Row.RowIndex + 1;
-                e.Row.Cells[0].Text = no.ToString(); // No 컬럼 처리
+                e.Row.Cells[0].Text = no.ToString();
             }
         }
 
         protected void LnkGame_Click(object sender, EventArgs e)
         {
-            LinkButton btn = (LinkButton)sender;
+            var btn = (LinkButton)sender;
             LoadGame(btn.ToolTip.ToString());
+
+            gvPlayerList.DataSource = Global.dbManager.GetGameUserList(btn.ToolTip.ToString());
+            gvPlayerList.DataBind();
         }
 
-        protected void LoadGame(string gameCode)
+        private void LoadGame(string gameCode)
         {
             var gameinfo = Global.dbManager.GetGameInformation(gameCode);
 
@@ -116,7 +118,6 @@ namespace GiSanParkGolf.Sites.Admin
                 TB_StartDate.Text = TB_EndDate.Text = TB_HoleMaximum.Text = TB_Note.Text =
                 TB_User.Text = TB_GameStatus.Text = TB_GameCode.Text = string.Empty;
 
-                BTN_EarlyClose.Disabled = BTN_PlayerCheck.Disabled = BTN_Setting.Disabled = true;
                 return;
             }
 
@@ -131,53 +132,94 @@ namespace GiSanParkGolf.Sites.Admin
             TB_User.Text = gameinfo.ParticipantNumber.ToString();
             TB_GameStatus.Text = gameinfo.GameStatus;
             TB_GameCode.Text = gameinfo.GameCode;
-
-            BTN_EarlyClose.Disabled = BTN_PlayerCheck.Disabled = BTN_Setting.Disabled = false;
-
-            switch (gameinfo.GameStatus)
-            {
-                case "조기마감":
-                    BTN_EarlyClose.Disabled = true;
-                    break;
-                case "코스배치 완료":
-                    BTN_EarlyClose.Disabled = true;
-                    BTN_PlayerCheck.Disabled = true;
-                    break;
-                case "대회종료":
-                    BTN_EarlyClose.Disabled = true;
-                    BTN_PlayerCheck.Disabled = true;
-                    BTN_Setting.Disabled = true;
-                    break;
-            }
         }
-
-        protected void DbWrite(string strSQL)
-        {
-            try
-            {
-                Global.dbManager.DB_Write(strSQL);
-                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '확인', '저장되었습니다.', true);", true);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("DB Write Error: " + ex.Message);
-                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '오류', '데이터베이스에 오류가 발생했습니다. 관리자에게 문의하세요.', true);", true);
-            }
-        }
-
-        protected void BTN_EarlyCloseYes_Click(object sender, EventArgs e)
-        {
-            string strSQL = "UPDATE Game_List SET GameStatus = 'EarlyClose'";
-            strSQL += " WHERE GameCode = '" + TB_GameCode.Text + "';";
-
-            DbWrite(strSQL);
-        }
-
 
         protected void BTN_SettingYes_Click(object sender, EventArgs e)
         {
-            Debug.WriteLine("2")
-;
+            Debug.WriteLine("코스배치 로직 준비 중");
+            // 추후 코스배치 구현
+        }
+
+        protected void BTN_ToExcel_Click(object sender, EventArgs e)
+        {
+            //Create a dummy GridView.
+            GridView gvCustomers = new GridView();
+            gvCustomers.AutoGenerateColumns = false;
+
+            // 컬럼 수동 지정
+            gvCustomers.Columns.Add(new BoundField
+            {
+                DataField = "RowNumber",
+                HeaderText = "No",
+                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+            });
+            gvCustomers.Columns.Add(new BoundField
+            {
+                DataField = "UserId",
+                HeaderText = "ID",
+                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+            });
+            gvCustomers.Columns.Add(new BoundField
+            {
+                DataField = "UserName",
+                HeaderText = "성명",
+                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+            });
+            gvCustomers.Columns.Add(new BoundField
+            {
+                DataField = "UserNumber",
+                HeaderText = "생년월일",
+                DataFormatString = "{0:yyyy-MM-dd}",
+                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+            });
+
+            gvCustomers.DataSource = Global.dbManager.GetGameUserList(TB_GameCode.Text);
+            gvCustomers.DataBind();
+
+            string fileName = HttpUtility.UrlEncode("PlayerList.xls", new UTF8Encoding());
+
+            Response.Clear();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", "attachment;filename=" + fileName);
+            Response.Charset = "";
+            Response.ContentType = "application/vnd.ms-excel";
+            Response.ContentEncoding = Encoding.UTF8;
+            using (StringWriter sw = new StringWriter())
+            {
+                using (HtmlTextWriter hw = new HtmlTextWriter(sw))
+                {
+                    foreach (GridViewRow row in gvCustomers.Rows)
+                    {
+                        //Apply text style to each Row.
+                        row.Attributes.Add("class", "textmode");
+                    }
+                    gvCustomers.RenderControl(hw);
+
+                    //Style to format numbers to string.
+                    //string style = @"<style> .textmode { mso-number-format:\@; } </style>";
+                    string style = @"<meta http-equiv='Content-Type' content='text/html; charset=utf-8' /> 
+                                    <style> .textmode { mso-number-format:\@; } </style>";
+                    Response.Write(style);
+                    Response.Write(style);
+                    Response.Output.Write(sw.ToString());
+                    Response.Flush();
+                    Response.End();
+                }
+            }
+        }
+
+        public override void VerifyRenderingInServerForm(Control control)
+        {
+            // GridView 등 서버 컨트롤을 직접 렌더링할 때 예외 방지
+        }
+
+        protected void BTN_RefreshResult_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

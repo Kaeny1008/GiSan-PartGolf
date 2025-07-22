@@ -29,11 +29,8 @@ body {
     cursor: pointer;
 }
 
-/* 카드 및 컨텐츠 */
-.custom-card,
-.card-welcome,
-.body-content,
-.panel {
+/* 콘텐츠 박스 카드 스타일 */
+.custom-card {
     background-color: #ffffff;
     border: 1px solid #d8d8d8;
     border-left: 4px solid #bbb;
@@ -42,6 +39,31 @@ body {
     padding: 1rem;
     margin-bottom: 1.5rem;
 }
+
+/* 사용자 인사 카드 */
+.card-welcome {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+/* 콘텐츠 본문 영역 */
+.body-content {
+    background-color: #f4f4f4;
+    padding-top: 10px;
+}
+
+/* 패널 컴포넌트 */
+.panel {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
 
 /* 카드 제목 */
 .card-title {
@@ -181,4 +203,14 @@ footer {
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
     border-radius: 0.2rem;
+}
+
+.header-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1050;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #dcdcdc;
 }

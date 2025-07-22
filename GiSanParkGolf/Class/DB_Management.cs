@@ -612,7 +612,8 @@ namespace GiSanParkGolf.Class
                 GameCode = gameCode
             });
 
-            return DB_Connection.Query<GameJoinUserList>("sp_GameJoinUser", parameters, commandType: CommandType.StoredProcedure).ToList();
+            return DB_Connection.Query<GameJoinUserList>("sp_GameJoinUser", 
+                parameters, commandType: CommandType.StoredProcedure).ToList();
         }
 
         /// <summary>

@@ -52,84 +52,95 @@
                 location.href = "/Sites/UserManagement/User Modify";
                 return false;
             }
+            window.addEventListener("DOMContentLoaded", function () {
+                const header = document.querySelector(".header-fixed");
+                const bodyContent = document.querySelector(".body-content");
+                if (header && bodyContent) {
+                    bodyContent.style.marginTop = header.offsetHeight + "px";
+                }
+            });
         </script>
 
-        <%-- 네비게이션 영역 --%>
-        <nav class="navbar navbar-expand-lg navbar-custom">
-            <div class="container">
-                <%-- 브랜드 링크 --%>
-                <a class="navbar-brand" href='<%: Page.User.Identity.IsAuthenticated ? "/" : "/Login" %>'>
-                    기산 파크골프
-                </a>
+        <%-- 상단 고정 전체 영역 시작 --%>
+        <div class="header-fixed">
+            <%-- 네비게이션 영역 --%>
+            <nav class="navbar navbar-expand-lg navbar-custom">
+                <div class="container">
+                    <%-- 브랜드 링크 --%>
+                    <a class="navbar-brand" href='<%: Page.User.Identity.IsAuthenticated ? "/" : "/Login" %>'>
+                        기산 파크골프
+                    </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-                <div class="collapse navbar-collapse" id="mainNavbar">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <%-- 관리자 메뉴 --%>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">관리자 페이지</a>
-                            <% if (Page.User.Identity.IsAuthenticated) { %>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
-                                <li><a class="dropdown-item" href="/Sites/Admin/GameHandicap">Handicap 설정</a></li>
-                                <li><hr class="dropdown-divider" /></li>
-                                <li><a class="dropdown-item" href="/Sites/Admin/GameList">대회개최</a></li>
-                                <li><a class="dropdown-item" href="/Sites/Admin/GameUserSetting">인원 코스 및 배치</a></li>
-                                <li><hr class="dropdown-divider" /></li>
-                                <li><a class="dropdown-item" href="/TempHint">대회결과 입력</a></li>
-                            </ul>
-                            <% } %>
-                        </li>
+                    <div class="collapse navbar-collapse" id="mainNavbar">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <%-- 관리자 메뉴 --%>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">관리자 페이지</a>
+                                <% if (Page.User.Identity.IsAuthenticated) { %>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/Sites/Admin/Player Management">선수 정보관리</a></li>
+                                    <li><a class="dropdown-item" href="/Sites/Admin/GameHandicap">Handicap 설정</a></li>
+                                    <li><a class="dropdown-item" href="/Sites/Admin/StadiumManager">경기장 설정</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" href="/Sites/Admin/GameList">대회개최</a></li>
+                                    <li><a class="dropdown-item" href="/Sites/Admin/GameSetup">인원 코스 및 배치</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" href="/TempHint">대회결과 입력</a></li>
+                                </ul>
+                                <% } %>
+                            </li>
 
-                        <%-- 선수 메뉴 --%>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">선수 페이지</a>
-                            <% if (Page.User.Identity.IsAuthenticated) { %>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/Sites/Player/JoinGame">대회참가 신청</a></li>
-                                <li><hr class="dropdown-divider" /></li>
-                                <li><a class="dropdown-item" href="/Sites/Player/MyGame">내 대회</a></li>
-                            </ul>
-                            <% } %>
-                        </li>
+                            <%-- 선수 메뉴 --%>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">선수 페이지</a>
+                                <% if (Page.User.Identity.IsAuthenticated) { %>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/Sites/Player/JoinGame">대회참가 신청</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" href="/Sites/Player/MyGame">내 대회</a></li>
+                                </ul>
+                                <% } %>
+                            </li>
 
-                        <%-- 게시판 메뉴 --%>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">게시판</a>
-                            <% if (Page.User.Identity.IsAuthenticated) { %>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/BBS/Default.aspx?bbsId=notice">공지사항</a></li>
-                            </ul>
-                            <% } %>
-                        </li>
-                    </ul>
+                            <%-- 게시판 메뉴 --%>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">게시판</a>
+                                <% if (Page.User.Identity.IsAuthenticated) { %>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/BBS/Default.aspx?bbsId=notice">공지사항</a></li>
+                                </ul>
+                                <% } %>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
 
-        <%-- 사용자 인사 및 로그인 영역 --%>
-        <div class="container mt-3">
-            <div class="card-welcome d-flex flex-wrap align-items-center gap-3">
-                <%-- 라벨 그룹 --%>
-                <div class="d-flex align-items-center gap-2">
-                    <asp:Label ID="lblName" runat="server" Text="손님" />
-                    <asp:Label ID="Label1" runat="server" Text="님, 반갑습니다." />
-                </div>
+            <%-- 사용자 인사 및 로그인 영역 --%>
+            <div class="container mt-1">
+                <div class="card-welcome d-flex flex-wrap align-items-center gap-3">
+                    <%-- 라벨 그룹 --%>
+                    <div class="d-flex align-items-center gap-2">
+                        <asp:Label ID="lblName" runat="server" Text="손님" />
+                        <asp:Label ID="Label1" runat="server" Text="님, 반갑습니다." />
+                    </div>
 
-                <%-- 버튼 그룹 --%>
-                <div class="d-flex align-items-center gap-2">
-                    <asp:LoginView ID="LoginView1" runat="server">
-                        <AnonymousTemplate>
-                            <asp:Button ID="Login" runat="server" CssClass="btn btn-outline-primary btn-sm" Text="로그인" OnClientClick="return go_loginpage();" />
-                        </AnonymousTemplate>
-                        <LoggedInTemplate>
-                            <asp:Button ID="LogOut" runat="server" CssClass="btn btn-outline-danger btn-sm" Text="로그아웃" OnClientClick="return go_logoutpage();" />
-                            <asp:Button ID="UserInformation" runat="server" CssClass="btn btn-outline-secondary btn-sm" Text="정보수정" OnClientClick="return go_usermodify();" />
-                        </LoggedInTemplate>
-                    </asp:LoginView>
+                    <%-- 버튼 그룹 --%>
+                    <div class="d-flex align-items-center gap-2">
+                        <asp:LoginView ID="LoginView1" runat="server">
+                            <AnonymousTemplate>
+                                <asp:Button ID="Login" runat="server" CssClass="btn btn-outline-primary btn-sm" Text="로그인" OnClientClick="return go_loginpage();" />
+                            </AnonymousTemplate>
+                            <LoggedInTemplate>
+                                <asp:Button ID="LogOut" runat="server" CssClass="btn btn-outline-danger btn-sm" Text="로그아웃" OnClientClick="return go_logoutpage();" />
+                                <asp:Button ID="UserInformation" runat="server" CssClass="btn btn-outline-secondary btn-sm" Text="정보수정" OnClientClick="return go_usermodify();" />
+                            </LoggedInTemplate>
+                        </asp:LoginView>
+                    </div>
                 </div>
             </div>
         </div>

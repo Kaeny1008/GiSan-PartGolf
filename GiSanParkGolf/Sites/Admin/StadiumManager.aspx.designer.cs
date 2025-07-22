@@ -11,107 +11,44 @@ namespace GiSanParkGolf.Sites.Admin
 {
 
 
-    public partial class GameUserSetting
+    public partial class StadiumManager
     {
 
         /// <summary>
-        /// search 컨트롤입니다.
+        /// BTN_ShowStadiumForm 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::GiSanParkGolf.Controls.NewSearchControl search;
+        protected global::System.Web.UI.WebControls.Button BTN_ShowStadiumForm;
 
         /// <summary>
-        /// GameList 컨트롤입니다.
+        /// GV_StadiumList 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView GameList;
+        protected global::System.Web.UI.WebControls.GridView GV_StadiumList;
 
         /// <summary>
-        /// lblTotalRecord 컨트롤입니다.
+        /// Panel_StadiumForm 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal lblTotalRecord;
+        protected global::System.Web.UI.WebControls.Panel Panel_StadiumForm;
 
         /// <summary>
-        /// pager 컨트롤입니다.
+        /// TB_StadiumCode 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::GiSanParkGolf.Controls.NewPagingControl pager;
-
-        /// <summary>
-        /// BTN_EarlyCloseYes 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button BTN_EarlyCloseYes;
-
-        /// <summary>
-        /// BTN_PlayerCheckYes 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button BTN_PlayerCheckYes;
-
-        /// <summary>
-        /// BTN_SettingYes 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button BTN_SettingYes;
-
-        /// <summary>
-        /// TB_GameStatus 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_GameStatus;
-
-        /// <summary>
-        /// TB_GameCode 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_GameCode;
-
-        /// <summary>
-        /// TB_GameName 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_GameName;
-
-        /// <summary>
-        /// TB_GameDate 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_GameDate;
+        protected global::System.Web.UI.WebControls.TextBox TB_StadiumCode;
 
         /// <summary>
         /// TB_StadiumName 컨트롤입니다.
@@ -123,84 +60,102 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.TextBox TB_StadiumName;
 
         /// <summary>
-        /// TB_GameHost 컨트롤입니다.
+        /// DDL_StadiumActive 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_GameHost;
+        protected global::System.Web.UI.WebControls.DropDownList DDL_StadiumActive;
 
         /// <summary>
-        /// TB_HoleMaximum 컨트롤입니다.
+        /// TB_StadiumNote 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_HoleMaximum;
+        protected global::System.Web.UI.WebControls.TextBox TB_StadiumNote;
 
         /// <summary>
-        /// TB_User 컨트롤입니다.
+        /// BTN_InsertStadium 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_User;
+        protected global::System.Web.UI.WebControls.Button BTN_InsertStadium;
 
         /// <summary>
-        /// TB_StartDate 컨트롤입니다.
+        /// Panel_CourseForm 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_StartDate;
+        protected global::System.Web.UI.WebControls.Panel Panel_CourseForm;
 
         /// <summary>
-        /// TB_EndDate 컨트롤입니다.
+        /// TB_CourseName 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_EndDate;
+        protected global::System.Web.UI.WebControls.TextBox TB_CourseName;
 
         /// <summary>
-        /// TB_Note 컨트롤입니다.
+        /// TB_MaxHoleCount 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_Note;
+        protected global::System.Web.UI.WebControls.TextBox TB_MaxHoleCount;
 
         /// <summary>
-        /// BTN_EarlyClose 컨트롤입니다.
+        /// DDL_CourseActive 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlButton BTN_EarlyClose;
+        protected global::System.Web.UI.WebControls.DropDownList DDL_CourseActive;
 
         /// <summary>
-        /// BTN_PlayerCheck 컨트롤입니다.
+        /// BTN_InsertCourse 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlButton BTN_PlayerCheck;
+        protected global::System.Web.UI.WebControls.Button BTN_InsertCourse;
 
         /// <summary>
-        /// BTN_Setting 컨트롤입니다.
+        /// Panel_HoleForm 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlButton BTN_Setting;
+        protected global::System.Web.UI.WebControls.Panel Panel_HoleForm;
+
+        /// <summary>
+        /// GV_HoleDetail 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView GV_HoleDetail;
+
+        /// <summary>
+        /// BTN_SaveHoleDetail 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button BTN_SaveHoleDetail;
     }
 }
