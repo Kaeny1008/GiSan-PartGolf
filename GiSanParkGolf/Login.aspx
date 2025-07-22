@@ -13,7 +13,7 @@
             });
         });
 
-        function showValidat() {
+        function showValidate() {
             var modal = new bootstrap.Modal(document.getElementById("validationModal"));
             modal.show();
         }

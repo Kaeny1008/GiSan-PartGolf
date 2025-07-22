@@ -19,8 +19,8 @@ namespace GiSanParkGolf.Models
         [Required(ErrorMessage = "* 대회일자를 입력하여 주십시오.")]
         public DateTime GameDate { get; set; }
 
-        [Display(Name = "개최지")]
-        [Required(ErrorMessage = "* 개최지를 입력하여 주십시오.")]
+        [Display(Name = "경기장")]
+        [Required(ErrorMessage = "* 경기장를 입력하여 주십시오.")]
         public string StadiumName { get; set; }
 
         [Display(Name = "개최주관")]
@@ -182,5 +182,32 @@ namespace GiSanParkGolf.Models
         public string ChangedBy { get; set; }
         public DateTime ChangedAt { get; set; }
         public string Reason { get; set; }
+    }
+
+    public class StadiumDTO
+    {
+        public string StadiumCode { get; set; }
+        public string StadiumName { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class HoleDTO
+    {
+        public int HoleId { get; set; }           // 자동 증가 기본 키
+        public int CourseCode { get; set; }       // FK: 어떤 코스에 속한 홀인지
+        public string HoleName { get; set; }      // 홀 이름 ("1번", "A1" 등)
+        public int Distance { get; set; }         // 거리 (단위: m)
+        public int Par { get; set; }              // 기준 타수 (예: 3)
+    }
+
+    public class CourseDTO
+    {
+        public int CourseCode { get; set; }        // 코스 고유 번호 (PK, int)
+        public string CourseName { get; set; }     // 코스 이름
+        public int HoleCount { get; set; }         // 코스에 포함된 홀 수
+        public bool IsActive { get; set; }         // 사용 여부
+        public string StadiumCode { get; set; }    // 어떤 경기장에 속하는 코스인지 (FK)
+
+        public string UseStatus { get; set; }     // "사용" / "미사용"
     }
 }

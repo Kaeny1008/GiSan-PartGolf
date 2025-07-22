@@ -28,7 +28,7 @@ namespace GiSanParkGolf.Controls
             //{
             //    CB_ReadyUser.Visible = false;
             //    DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
-            //    DDL_SearchField.Items.Add(new ListItem("개최지", "Stadium"));
+            //    DDL_SearchField.Items.Add(new ListItem("경기장", "Stadium"));
             //}
 
             switch (Request.ServerVariables["SCRIPT_NAME"])
@@ -41,13 +41,13 @@ namespace GiSanParkGolf.Controls
                 case "/Sites/Admin/GameUserSetting":
                     CheckControl.Visible = false;
                     DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
-                    DDL_SearchField.Items.Add(new ListItem("개최지", "Stadium"));
+                    DDL_SearchField.Items.Add(new ListItem("경기장", "Stadium"));
                     DDL_SearchField.Items.Add(new ListItem("주최", "Host"));
                     break;
                 default:
                     CheckControl.Visible = false;
                     DDL_SearchField.Items.Add(new ListItem("대회명", "Name"));
-                    DDL_SearchField.Items.Add(new ListItem("개최지", "Stadium"));
+                    DDL_SearchField.Items.Add(new ListItem("경기장", "Stadium"));
                     DDL_SearchField.Items.Add(new ListItem("주최", "Host"));
                     break;
             }

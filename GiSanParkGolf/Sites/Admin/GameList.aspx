@@ -66,7 +66,7 @@
             </asp:TemplateField>
             <asp:TemplateField>
                 <HeaderTemplate>
-                    <asp:Label ID="LB_Place" runat="server" Text="개최지"></asp:Label>
+                    <asp:Label ID="LB_Place" runat="server" Text="경기장"></asp:Label>
                 </HeaderTemplate>
                 <ItemTemplate>
                     <%#Eval("StadiumName")%>

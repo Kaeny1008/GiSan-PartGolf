@@ -47,7 +47,7 @@ namespace GiSanParkGolf
             {
                 //ScriptManager.RegisterStartupScript(this, GetType(), "validationModalScript", "ShowValidationModal();", true);
                 //ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal();", true);
-                ScriptManager.RegisterStartupScript(this, GetType(), "validationModalScript", "showValidat();", true);
+                ScriptManager.RegisterStartupScript(this, GetType(), "validationModalScript", "showValidate();", true);
 
                 return;
             }

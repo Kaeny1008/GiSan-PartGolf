@@ -108,8 +108,8 @@
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
-                                <%-- 개최지 --%>
-                                <asp:TemplateField HeaderText="개최지">
+                                <%-- 경기장 --%>
+                                <asp:TemplateField HeaderText="경기장">
                                     <ItemTemplate><%#Eval("StadiumName")%></ItemTemplate>
                                 </asp:TemplateField>
 

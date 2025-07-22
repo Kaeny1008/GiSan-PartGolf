@@ -768,5 +768,236 @@ namespace GiSanParkGolf.Class
                 commandType: CommandType.StoredProcedure
             ).ToList();
         }
+
+        public List<StadiumDTO> GetStadiumList()
+        {
+            string query = @"
+        SELECT StadiumCode, StadiumName, IsActive
+        FROM SYS_StadiumList
+        ORDER BY StadiumCode";  // 필요에 따라 StadiumName 정렬 가능
+
+            return DB_Connection.Query<StadiumDTO>(query).ToList();
+        }
+
+        public string GenerateNextCode(string table, string column, string prefix, int digits)
+        {
+            string sql = $"SELECT MAX({column}) FROM {table}";
+
+            string maxCode = DB_Connection.QueryFirstOrDefault<string>(sql);
+            int nextNumber = 1;
+
+            if (!string.IsNullOrEmpty(maxCode) && maxCode.StartsWith(prefix))
+            {
+                string numericPart = maxCode.Substring(prefix.Length);
+                if (int.TryParse(numericPart, out int current))
+                {
+                    nextNumber = current + 1;
+                }
+            }
+
+            return $"{prefix}{nextNumber.ToString($"D{digits}")}";
+        }
+
+        public bool InsertStadium(string stadiumCode, string stadiumName, bool isActive)
+        {
+            string query = @"
+        INSERT INTO SYS_StadiumList (StadiumCode, StadiumName, IsActive)
+        VALUES (@StadiumCode, @StadiumName, @IsActive)";
+
+            var param = new DynamicParameters();
+            param.Add("@StadiumCode", stadiumCode);
+            param.Add("@StadiumName", stadiumName);
+            param.Add("@IsActive", isActive);
+
+            try
+            {
+                int rowsAffected = DB_Connection.Execute(query, param);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                // 예외 로깅이나 오류 메시지 전달 처리 가능
+                Console.WriteLine($"InsertStadium 오류: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool InsertCourse(string stadiumCode, string courseName, int holeCount, bool isActive)
+        {
+            string query = @"
+        INSERT INTO SYS_CourseList (StadiumCode, CourseName, HoleCount, IsActive)
+        VALUES (@StadiumCode, @CourseName, @HoleCount, @IsActive)";
+
+            var param = new DynamicParameters();
+            param.Add("@StadiumCode", stadiumCode);
+            param.Add("@CourseName", courseName);
+            param.Add("@HoleCount", holeCount);
+            param.Add("@IsActive", isActive);
+
+            try
+            {
+                int rowsAffected = DB_Connection.Execute(query, param);
+                return rowsAffected > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"InsertCourse 오류: {ex.Message}");
+                return false;
+            }
+        }
+
+        public bool InsertHoleList(int courseCode, List<HoleDTO> holeList)
+        {
+            string query = @"
+        INSERT INTO SYS_HoleInfo (CourseCode, HoleName, Distance, Par)
+        VALUES (@CourseCode, @HoleName, @Distance, @Par)";
+
+            try
+            {
+                foreach (var hole in holeList)
+                {
+                    var param = new DynamicParameters();
+                    param.Add("@CourseCode", courseCode);
+                    param.Add("@HoleName", hole.HoleName);
+                    param.Add("@Distance", hole.Distance);
+                    param.Add("@Par", hole.Par);
+
+                    DB_Connection.Execute(query, param);  // 개별 실행
+                }
+
+                return true;  // 전체 성공 처리
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"InsertHoleList 오류: {ex.Message}");
+                return false;
+            }
+        }
+
+        public List<CourseDTO> GetCourseListByStadium(string stadiumCode)
+        {
+            string query = @"
+        SELECT CourseCode,
+               CourseName,
+               HoleCount,
+               CASE WHEN IsActive = 1 THEN N'사용' ELSE N'미사용' END AS UseStatus,
+               StadiumCode
+        FROM SYS_CourseList
+        WHERE StadiumCode = @StadiumCode
+        ORDER BY CourseCode";
+
+            var param = new DynamicParameters();
+            param.Add("@StadiumCode", stadiumCode);
+
+            return DB_Connection.Query<CourseDTO>(query, param).ToList();
+        }
+
+        public List<HoleDTO> GetHoleListByCourse(int courseCode)
+        {
+            string query = @"
+        SELECT HoleId, HoleName, Distance, Par, CourseCode
+        FROM SYS_HoleInfo
+        WHERE CourseCode = @CourseCode
+        ORDER BY HoleId";
+
+            var param = new DynamicParameters();
+            param.Add("@CourseCode", courseCode);
+
+            return DB_Connection.Query<HoleDTO>(query, param).ToList();
+        }
+
+        public int GetHoleCountByCourse(int courseCode)
+        {
+            string query = "SELECT HoleCount FROM SYS_CourseList WHERE CourseCode = @CourseCode";
+
+            var param = new DynamicParameters();
+            param.Add("@CourseCode", courseCode);
+
+            using (var connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString))
+            {
+                connection.Open();
+                return connection.QueryFirstOrDefault<int>(query, param);
+            }
+        }
+
+        public int CountStadiums(string field, string keyword)
+        {
+            // ⚠ 필드명은 반드시 사전 검증된 값이어야 해! (SQL Injection 방지)
+            var allowedFields = new HashSet<string> { "StadiumName", "StadiumCode" };
+            if (!allowedFields.Contains(field))
+                field = "StadiumName";  // 기본 필드로 fallback
+
+            string query = $@"
+        SELECT COUNT(*)
+        FROM SYS_StadiumList
+        WHERE {field} LIKE @Keyword";
+
+            var param = new DynamicParameters();
+            param.Add("@Keyword", "%" + keyword + "%");
+
+            return DB_Connection.QueryFirstOrDefault<int>(query, param);
+        }
+
+        public List<StadiumDTO> SearchStadiumsPaged(string field, string keyword, int pageIndex, int pageSize)
+        {
+            // ⚠ 필드명 검증: SQL Injection 방지
+            var allowedFields = new HashSet<string> { "StadiumName", "StadiumCode" };
+            if (!allowedFields.Contains(field))
+                field = "StadiumName";  // 기본 필드 설정
+
+            string query = $@"
+        SELECT StadiumCode, StadiumName
+        FROM SYS_StadiumList
+        WHERE {field} LIKE @Keyword
+        ORDER BY StadiumCode
+        OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+            var param = new DynamicParameters();
+            param.Add("@Keyword", "%" + keyword + "%");
+            param.Add("@Offset", pageIndex * pageSize);  // 페이지 시작 위치
+            param.Add("@PageSize", pageSize);            // 한 페이지당 항목 수
+
+            return DB_Connection.Query<StadiumDTO>(query, param).ToList();
+        }
+
+        public bool UpdateHoleList(int courseCode, List<HoleDTO> holes)
+        {
+            string query = @"
+        UPDATE SYS_HoleInfo
+        SET HoleName = @HoleName, Distance = @Distance, Par = @Par
+        WHERE HoleId = @HoleId AND CourseCode = @CourseCode";
+
+            var connection = DB_Connection;
+
+            if (connection.State != ConnectionState.Open)
+                connection.Open();
+
+            var transaction = connection.BeginTransaction();
+
+            try
+            {
+                foreach (var hole in holes)
+                {
+                    var parameters = new
+                    {
+                        HoleName = hole.HoleName,
+                        Distance = hole.Distance,
+                        Par = hole.Par,
+                        HoleId = hole.HoleId,
+                        CourseCode = courseCode
+                    };
+
+                    connection.Execute(query, parameters, transaction);
+                }
+
+                transaction.Commit();
+                return true;
+            }
+            catch
+            {
+                transaction.Rollback();
+                return false;
+            }
+        }
     }
 }
