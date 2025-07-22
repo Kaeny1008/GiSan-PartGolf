@@ -133,28 +133,7 @@ namespace GiSanParkGolf.Sites.Player
 
         private void LoadGameList()
         {
-            var games = Global.dbManager.GetGameReadyList(); // 모집중 + 신청 가능 대회 목록
-
-            IEnumerable<GameListModel> filtered = games;
-
-            if (!string.IsNullOrEmpty(SearchField) && !string.IsNullOrEmpty(SearchKeyword))
-            {
-                string kw = SearchKeyword.ToLower();
-                switch (SearchField)
-                {
-                    case "Name":
-                        filtered = filtered.Where(g => g.GameName?.ToLower().Contains(kw) == true);
-                        break;
-                    case "Stadium":
-                        filtered = filtered.Where(g => g.StadiumName?.ToLower().Contains(kw) == true);
-                        break;
-                    case "Host":
-                        filtered = filtered.Where(g => g.GameHost?.ToLower().Contains(kw) == true);
-                        break;
-                }
-            }
-
-            var result = filtered.ToList();
+            var result = Global.dbManager.GetGameReadyList(SearchField, SearchKeyword);
 
             GameList.DataSource = result;
             GameList.DataBind();

@@ -515,10 +515,17 @@ namespace GiSanParkGolf.Class
         /// <summary>
         /// 활성화된 대회 리스트(최근 글 5개 리스트)
         /// </summary>
-        public List<GameListModel> GetGameReadyList()
+        public List<GameListModel> GetGameReadyList(string field, string keyword)
         {
-            return DB_Connection.Query<GameListModel>("sp_Get_Game_ReadyList", null,
-                commandType: CommandType.StoredProcedure).ToList();
+            var parameters = new DynamicParameters();
+            parameters.Add("@Field", field);
+            parameters.Add("@Keyword", keyword);
+
+            return DB_Connection.Query<GameListModel>(
+                "sp_Get_Game_ReadyList",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            ).ToList();
         }
 
         public string GetEarlyJoin(string gameCode, string userID)
@@ -621,20 +628,23 @@ namespace GiSanParkGolf.Class
                 commandType: CommandType.StoredProcedure);
         }
 
-        // ✅ 사용자 + 핸디캡 JOIN 조회
-        public List<UserWithHandicap> GetUserHandicaps()
+        public List<UserWithHandicap> GetUserHandicaps(string field, string keyword)
         {
-            string sql = @"
-                SELECT 
-                    u.UserId, u.UserName, u.UserNumber,
-                    h.AgeHandicap, h.Source, h.LastUpdated, h.LastUpdatedBy
-                FROM SYS_Users u
-                LEFT JOIN SYS_Handicap h ON u.UserId = h.UserId";
+            var parameters = new DynamicParameters();
+            parameters.Add("@Field", field);
+            parameters.Add("@Keyword", keyword);
 
-            var result = DB_Connection.Query<UserWithHandicap>(sql).AsList();
+            var result = DB_Connection.Query<UserWithHandicap>(
+                "sp_Get_UserHandicaps",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            ).ToList();
 
+            // 나이 계산 후 모델에 주입
             foreach (var user in result)
-                user.Age = CalculateAge(user.UserNumber);
+            {
+                user.Age = CalculateAge(user.UserNumber.ToString());
+            }
 
             return result;
         }
@@ -665,7 +675,7 @@ namespace GiSanParkGolf.Class
         }
 
         // ✅ 나이 계산 유틸리티
-        private int CalculateAge(string userNumber)
+        public int CalculateAge(string userNumber)
         {
             if (string.IsNullOrWhiteSpace(userNumber) || userNumber.Length != 6)
                 return 0;
@@ -714,41 +724,48 @@ namespace GiSanParkGolf.Class
             DB_Connection.Execute(sql, log);
         }
 
-        public List<HandicapChangeLog> GetHandicapChangeLogs()
+        public List<HandicapChangeLog> GetHandicapChangeLogs(string field, string keyword)
         {
-            string sql = @"
-                SELECT l.LogId, l.UserId, u.UserName, l.Age, l.PrevHandicap, l.NewHandicap,
-                        l.PrevSource, l.NewSource, l.ChangedBy, l.ChangedAt, l.Reason
-                FROM SYS_HandicapLog l
-                LEFT JOIN SYS_Users u ON l.UserId = u.UserId
-                ORDER BY l.ChangedAt DESC
-            ";
+            var parameters = new DynamicParameters();
+            parameters.Add("@Field", field);
+            parameters.Add("@Keyword", keyword);
 
-            return DB_Connection.Query<HandicapChangeLog>(sql).AsList();
+            return DB_Connection.Query<HandicapChangeLog>(
+                "sp_Get_HandicapChangeLogs",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            ).ToList();
         }
 
-        public List<UserViewModel> GetPlayers()
+        public List<UserViewModel> GetPlayers(string field, string keyword, bool readyOnly)
         {
-            var parameters = new DynamicParameters(new
-            {
-                //GameCode = gameCode
-            });
+            var parameters = new DynamicParameters();
+            parameters.Add("@Field", field);
+            parameters.Add("@Keyword", keyword);
+            parameters.Add("@ReadyOnly", readyOnly ? 1 : 0);
 
-            return DB_Connection.Query<UserViewModel>("sp_Get_SYS_Users", parameters, commandType: CommandType.StoredProcedure).ToList();
+            return DB_Connection.Query<UserViewModel>(
+                "sp_Get_SYS_Users",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            ).ToList();
         }
 
         /// <summary>
         /// 대회 리스트
         /// </summary>
         /// <param name="page">페이지 번호</param>
-        public List<GameListModel> GetGames()
+        public List<GameListModel> GetGames(string field, string keyword)
         {
-            var parameters = new DynamicParameters(new
-            {
-                //GameCode = gameCode
-            });
+            var parameters = new DynamicParameters();
+            parameters.Add("@Field", field);
+            parameters.Add("@Keyword", keyword);
 
-            return DB_Connection.Query<GameListModel>("sp_Get_GameList", parameters, commandType: CommandType.StoredProcedure).ToList();
+            return DB_Connection.Query<GameListModel>(
+                "sp_Get_GameList",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            ).ToList();
         }
     }
 }

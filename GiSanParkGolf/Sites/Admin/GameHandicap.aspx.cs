@@ -17,45 +17,47 @@ namespace GiSanParkGolf.Sites.Admin
         {
             try
             {
-                var userList = Global.dbManager.GetUserHandicaps();
+                var userList = Global.dbManager.GetUserHandicaps(null, null);
                 int updatedCount = 0;
+                string admin = Global.uvm.UserName;
 
                 foreach (var user in userList)
                 {
-                    int prev = user.AgeHandicap;
-                    string prevSource = user.Source;
+                    // 나이 계산 (핸디캡 계산에 필요)
+                    int age = Global.dbManager.CalculateAge(user.UserNumber.ToString());
+                    int newHandicap = CalculateHandicapByAge(age);
 
-                    int newValue = CalculateHandicapByAge(user.Age);
-                    string newSource = "자동";
+                    // 이전 상태 비교
+                    bool isChanged = user.AgeHandicap != newHandicap || user.Source != "자동";
+                    if (!isChanged) continue;
 
-                    // 핸디캡 업데이트
-                    Global.dbManager.UpdateHandicap(user.UserId, newValue, newSource, Global.uvm.UserName);
+                    // DB 업데이트
+                    Global.dbManager.UpdateHandicap(user.UserId, newHandicap, "자동", admin);
                     updatedCount++;
 
-                    // 변경 로그 기록
+                    // 변경 로그 저장
                     var log = new HandicapChangeLog
                     {
                         UserId = user.UserId,
-                        Age = user.Age,
-                        PrevHandicap = prev,
-                        NewHandicap = newValue,
-                        PrevSource = prevSource,
-                        NewSource = newSource,
+                        Age = age,
+                        PrevHandicap = user.AgeHandicap,
+                        NewHandicap = newHandicap,
+                        PrevSource = user.Source,
+                        NewSource = "자동",
                         Reason = "전체 자동 재계산",
-                        ChangedBy = Global.uvm.UserName
+                        ChangedBy = admin
                     };
                     Global.dbManager.InsertHandicapChangeLog(log);
                 }
 
-                lblModalMessage.Text = $"✅ 총 {updatedCount}명의 핸디캡이 자동으로 재산정되고 기록되었습니다.";
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "showMsg", "showMessageModal();", true);
+                lblModalMessage.Text = $"총 {updatedCount}명의 핸디캡이 자동으로 재산정되었습니다.";
             }
             catch (Exception ex)
             {
-                lblModalMessage.Text = $"⚠️ 자동 계산 중 오류가 발생했습니다: {ex.Message}";
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "showMsg", "showMessageModal();", true);
+                lblModalMessage.Text = $"자동 계산 중 오류가 발생했습니다: {ex.Message}";
             }
 
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "showMsg", "showMessageModal();", true);
             LoadHandicapData();
         }
 
@@ -110,8 +112,6 @@ namespace GiSanParkGolf.Sites.Admin
                 int prevHandicap = Convert.ToInt32(gvHandicaps.DataKeys[e.RowIndex].Values["AgeHandicap"]);
                 string prevSource = gvHandicaps.DataKeys[e.RowIndex].Values["Source"].ToString();
 
-
-
                 // 2️⃣ 새 핸디캡 계산
                 int finalHandicap = 0;
                 if (selectedSource == "자동")
@@ -159,33 +159,15 @@ namespace GiSanParkGolf.Sites.Admin
         }
         private void LoadHandicapData()
         {
-            var all = Global.dbManager.GetUserHandicaps();
-
-            // 🔍 검색 조건 적용
+            // 검색 조건 준비
             string field = ViewState["SearchField"] as string;
             string keyword = ViewState["SearchKeyword"] as string;
-            bool readyOnly = ViewState["ReadyOnly"] != null && (bool)ViewState["ReadyOnly"];
 
-            if (!string.IsNullOrEmpty(keyword) && !string.IsNullOrEmpty(field))
-            {
-                string lower = keyword.ToLower();
-                switch (field)
-                {
-                    case "UserId":
-                        all = all.FindAll(u => u.UserId.ToLower().Contains(lower));
-                        break;
-                    case "UserName":
-                        all = all.FindAll(u => u.UserName.ToLower().Contains(lower));
-                        break;
-                }
-            }
+            // SQL 조건 기반 핸디캡 조회
+            var result = Global.dbManager.GetUserHandicaps(field, keyword);
 
-            if (readyOnly)
-            {
-                all = all.FindAll(u => u.Source == "승인대기"); // 필요시 값 수정
-            }
-
-            gvHandicaps.DataSource = all;
+            // 바인딩
+            gvHandicaps.DataSource = result;
             gvHandicaps.DataBind();
 
             // 페이징 연결
@@ -193,9 +175,9 @@ namespace GiSanParkGolf.Sites.Admin
             pager.TotalPages = gvHandicaps.PageCount;
 
             // 안내 메시지
-            if (all.Count == 0)
+            if (result.Count == 0)
             {
-                lblModalMessage.Text = "⚠️ 현재 조건에 맞는 핸디캡 데이터가 없습니다.";
+                lblModalMessage.Text = "현재 조건에 맞는 핸디캡 데이터가 없습니다.";
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "noData", "showMessageModal();", true);
             }
         }

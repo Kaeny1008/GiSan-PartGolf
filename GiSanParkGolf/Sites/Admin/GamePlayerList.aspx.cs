@@ -32,6 +32,39 @@ namespace GiSanParkGolf.Sites.Admin
         {
             //Create a dummy GridView.
             GridView gvCustomers = new GridView();
+            gvCustomers.AutoGenerateColumns = false;
+
+            // 컬럼 수동 지정
+            gvCustomers.Columns.Add(new BoundField
+            {
+                DataField = "RowNumber",
+                HeaderText = "No",
+                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+            });
+            gvCustomers.Columns.Add(new BoundField
+            {
+                DataField = "UserId",
+                HeaderText = "아이디",
+                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+            });
+            gvCustomers.Columns.Add(new BoundField
+            {
+                DataField = "UserName",
+                HeaderText = "성명",
+                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+            });
+            gvCustomers.Columns.Add(new BoundField
+            {
+                DataField = "UserNumber",
+                HeaderText = "생년월일",
+                DataFormatString = "{0:yyyy-MM-dd}",
+                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+            });
+
             gvCustomers.DataSource = Global.dbManager.GetGameUserList(Request.QueryString["GameCode"]);
             gvCustomers.DataBind();
 
@@ -42,6 +75,7 @@ namespace GiSanParkGolf.Sites.Admin
             Response.AddHeader("content-disposition", "attachment;filename=" + fileName);
             Response.Charset = "";
             Response.ContentType = "application/vnd.ms-excel";
+            Response.ContentEncoding = Encoding.UTF8;
             using (StringWriter sw = new StringWriter())
             {
                 using (HtmlTextWriter hw = new HtmlTextWriter(sw))
@@ -54,7 +88,10 @@ namespace GiSanParkGolf.Sites.Admin
                     gvCustomers.RenderControl(hw);
 
                     //Style to format numbers to string.
-                    string style = @"<style> .textmode { mso-number-format:\@; } </style>";
+                    //string style = @"<style> .textmode { mso-number-format:\@; } </style>";
+                    string style = @"<meta http-equiv='Content-Type' content='text/html; charset=utf-8' /> 
+                                    <style> .textmode { mso-number-format:\@; } </style>";
+                    Response.Write(style);
                     Response.Write(style);
                     Response.Output.Write(sw.ToString());
                     Response.Flush();

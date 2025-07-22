@@ -81,45 +81,24 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void LoadPlayerData()
         {
-            var all = Global.dbManager.GetPlayers(); // 전체 사용자 조회
-
-            IEnumerable<UserViewModel> filtered = all;
-
-            // 🔍 검색 필터
+            // 검색 조건 준비
             string field = ViewState["SearchField"] as string;
             string keyword = ViewState["SearchKeyword"] as string;
             bool readyOnly = ViewState["ReadyOnly"] != null && (bool)ViewState["ReadyOnly"];
 
-            if (!string.IsNullOrEmpty(keyword) && !string.IsNullOrEmpty(field))
-            {
-                string lowerKeyword = keyword.ToLower();
+            // 조건 기반 데이터 조회 (SQL 필터링)
+            var result = Global.dbManager.GetPlayers(field, keyword, readyOnly);
 
-                switch (field)
-                {
-                    case "UserId":
-                        filtered = filtered.Where(p => p.UserId.ToLower().Contains(lowerKeyword));
-                        break;
-                    case "UserName":
-                        filtered = filtered.Where(p => p.UserName.ToLower().Contains(lowerKeyword));
-                        break;
-                }
-            }
-
-            // ✅ 승인대기 필터
-            if (readyOnly)
-                filtered = filtered.Where(p => p.UserWClass == "승인대기");
-
-            // 📊 바인딩
-            GridView1.DataSource = filtered.ToList();
+            // 바인딩
+            GridView1.DataSource = result;
             GridView1.DataBind();
 
-            // 📄 총 건수 출력
-            lblTotalRecord.Text = filtered.Count().ToString();
+            // 총 건수 출력
+            lblTotalRecord.Text = result.Count.ToString();
 
-            // 📦 페이징 연동
+            // 페이징 연동
             pager.CurrentPage = GridView1.PageIndex;
             pager.TotalPages = GridView1.PageCount;
         }
-
     }
 }

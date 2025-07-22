@@ -69,30 +69,14 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void LoadGameList()
         {
-            List<GameListModel> all = Global.dbManager.GetGames();
+            // 검색 조건 준비
+            string field = SearchField;
+            string keyword = SearchKeyword;
 
-            IEnumerable<GameListModel> filtered = all;
+            // SQL에서 조건 필터링 → 결과만 받아옴
+            List<GameListModel> result = Global.dbManager.GetGames(field, keyword);
 
-            if (!string.IsNullOrEmpty(SearchField) && !string.IsNullOrEmpty(SearchKeyword))
-            {
-                string kw = SearchKeyword.ToLower();
-
-                switch (SearchField)
-                {
-                    case "GameName":
-                        filtered = filtered.Where(g => g.GameName?.ToLower().Contains(kw) == true);
-                        break;
-                    case "StadiumName":
-                        filtered = filtered.Where(g => g.StadiumName?.ToLower().Contains(kw) == true);
-                        break;
-                    case "GameHost":
-                        filtered = filtered.Where(g => g.GameHost?.ToLower().Contains(kw) == true);
-                        break;
-                }
-            }
-
-            var result = filtered.ToList();
-
+            // 바인딩
             GameList.DataSource = result;
             GameList.DataBind();
 
@@ -113,7 +97,7 @@ namespace GiSanParkGolf.Sites.Admin
         protected void LnkGame_Click(object sender, EventArgs e)
         {
             LinkButton btn = (LinkButton)sender;
-            LoadGame(btn.ToolTip.ToString()); // 기존 LoadGame 흐름 유지
+            LoadGame(btn.ToolTip.ToString());
         }
 
         protected void LoadGame(string gameCode)

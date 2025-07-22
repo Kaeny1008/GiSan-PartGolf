@@ -60,32 +60,14 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void LoadGameList()
         {
-            List<GameListModel> games = Global.dbManager.GetGames(); // 반환형 명확히 지정
+            // 검색 조건 준비
+            string field = SearchField;
+            string keyword = SearchKeyword;
 
-            IEnumerable<GameListModel> filtered = games;
+            // SQL 조건 전달 → 필터된 결과만 가져오기
+            var result = Global.dbManager.GetGames(field, keyword);
 
-            // 🔍 검색 조건 적용
-            if (!string.IsNullOrEmpty(SearchField) && !string.IsNullOrEmpty(SearchKeyword))
-            {
-                string kw = SearchKeyword.ToLower();
-
-                switch (SearchField)
-                {
-                    case "GameName":
-                        filtered = filtered.Where(g => !string.IsNullOrEmpty(g.GameName) && g.GameName.ToLower().Contains(kw));
-                        break;
-                    case "StadiumName":
-                        filtered = filtered.Where(g => !string.IsNullOrEmpty(g.StadiumName) && g.StadiumName.ToLower().Contains(kw));
-                        break;
-                    case "GameHost":
-                        filtered = filtered.Where(g => !string.IsNullOrEmpty(g.GameHost) && g.GameHost.ToLower().Contains(kw));
-                        break;
-                }
-            }
-
-            var result = filtered.ToList();
-
-            // 📊 바인딩 및 출력
+            // 바인딩
             GridView1.DataSource = result;
             GridView1.DataBind();
 

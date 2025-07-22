@@ -17,37 +17,27 @@ namespace GiSanParkGolf.Sites.Admin
                 LoadHandicapLogs();
         }
 
-        private void LoadHandicapLogs(string field = null, string keyword = null, bool readyOnly = false)
+        private void LoadHandicapLogs(string field = null, string keyword = null)
         {
             try
             {
-                var logs = Global.dbManager.GetHandicapChangeLogs()
-                    .OrderByDescending(log => log.ChangedAt);
+                var logs = Global.dbManager.GetHandicapChangeLogs(field, keyword);
 
-                IEnumerable<HandicapChangeLog> filtered = logs;
-
-                if (!string.IsNullOrEmpty(keyword) && !string.IsNullOrEmpty(field))
-                {
-                    switch (field)
-                    {
-                        case "UserId":
-                            filtered = filtered.Where(log => log.UserId?.Contains(keyword) ?? false);
-                            break;
-                        case "UserName":
-                            filtered = filtered.Where(log => log.UserName?.Contains(keyword) ?? false);
-                            break;
-                    }
-                }
-
-                gvLog.DataSource = filtered.ToList();
+                gvLog.DataSource = logs;
                 gvLog.DataBind();
 
                 pager.CurrentPage = gvLog.PageIndex;
                 pager.TotalPages = gvLog.PageCount;
+
+                if (!logs.Any())
+                {
+                    lblModalMessage.Text = "핸디캡 변경 로그가 없습니다.";
+                    ScriptManager.RegisterStartupScript(this, GetType(), "showModalScript", "showModal();", true);
+                }
             }
             catch (Exception ex)
             {
-                lblModalMessage.Text = $"⚠️ 조회 중 오류 발생: {ex.Message}";
+                lblModalMessage.Text = $"조회 중 오류 발생: {ex.Message}";
                 ScriptManager.RegisterStartupScript(this, GetType(), "showModalScript", "showModal();", true);
             }
         }
@@ -56,16 +46,14 @@ namespace GiSanParkGolf.Sites.Admin
         {
             ViewState["SearchField"] = search.SelectedField;
             ViewState["SearchKeyword"] = search.Keyword;
-            ViewState["ReadyOnly"] = search.ReadyOnly;
 
-            LoadHandicapLogs(search.SelectedField, search.Keyword, search.ReadyOnly);
+            LoadHandicapLogs(search.SelectedField, search.Keyword);
         }
 
         protected void Search_ResetRequested(object sender, EventArgs e)
         {
             ViewState.Remove("SearchField");
             ViewState.Remove("SearchKeyword");
-            ViewState.Remove("ReadyOnly");
 
             LoadHandicapLogs(); // 전체 조회
         }
@@ -91,9 +79,8 @@ namespace GiSanParkGolf.Sites.Admin
 
             string field = ViewState["SearchField"] as string;
             string keyword = ViewState["SearchKeyword"] as string;
-            bool readyOnly = ViewState["ReadyOnly"] != null && (bool)ViewState["ReadyOnly"];
 
-            LoadHandicapLogs(field, keyword, readyOnly);
+            LoadHandicapLogs(field, keyword);
         }
     }
 }
