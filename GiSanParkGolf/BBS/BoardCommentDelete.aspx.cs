@@ -1,4 +1,5 @@
 ﻿using BBS.Models;
+using GiSanParkGolf.Class;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,9 +32,9 @@ namespace GiSanParkGolf.BBS
 
             bbsId = Request.QueryString["bbsId"];
 
-            if (!string.IsNullOrEmpty(Global.uvm.UserClass.ToString()))
+            if (!string.IsNullOrEmpty(Helper.CurrentUser?.UserClass.ToString()))
             {
-                if (Global.uvm.UserClass.Equals("Administrator"))
+                if (Helper.CurrentUser.UserClass.Equals(1))
                 {
                     //관리자 권한으로 온거라면 무조건 삭제
                     ImmediatelyDelete();

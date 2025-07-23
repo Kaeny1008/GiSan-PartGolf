@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GiSanParkGolf.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,7 +11,7 @@ namespace GiSanParkGolf.Class
     {
         public static void RequireAdmin(Page page)
         {
-            if (Global.uvm == null || Global.uvm.UserClass != 1)
+            if (Helper.CurrentUser?.UserClass != 1)
             {
                 page.Response.Redirect("~/Sites/Login/Admin Alert.aspx");
             }
@@ -22,6 +23,14 @@ namespace GiSanParkGolf.Class
             string formattedDate = now.ToString("yyyy-MM-dd");
 
             return formattedDate;
+        }
+
+        public static UserViewModel CurrentUser
+        {
+            get
+            {
+                return HttpContext.Current.Session["UserInfo"] as UserViewModel;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using GiSanParkGolf.Class;
+using GiSanParkGolf.Models;
 using System;
 using System.Diagnostics;
 using System.Web;
@@ -40,15 +41,58 @@ namespace GiSanParkGolf
             }
         }
 
+        //protected void btnLogin_Click(object sender, EventArgs e)
+        //{
+        //    Page.Validate("UserLogin");  // 수동 그룹 유효성 검사
+        //    if (!Page.IsValid)
+        //    {
+        //        //ScriptManager.RegisterStartupScript(this, GetType(), "validationModalScript", "ShowValidationModal();", true);
+        //        //ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal();", true);
+        //        ScriptManager.RegisterStartupScript(this, GetType(), "validationModalScript", "showValidate();", true);
+
+        //        return;
+        //    }
+
+        //    string result = Global.dbManager.IsCorrectUser(txtUserID.Text, txtPassword.Text, 0);
+
+        //    switch (result)
+        //    {
+        //        case "OK":
+        //            // 로그인 인증 되었으면 유저 정보를 불러온다.
+        //            // 쿠기도 생성
+        //            Global.uvm = Global.dbManager.GetUserByUserID(txtUserID.Text);
+
+        //            if (!String.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
+        //            {
+        //                // 인증 쿠키값 부여(돌아가는 곳이 있는 경우)
+        //                //FormsAuthentication.RedirectFromLoginPage(txtUserID.Text, false);
+        //                Response.Redirect(Request.QueryString["ReturnUrl"]);
+        //            }
+        //            else
+        //            {
+        //                // 인증 쿠키값 부여(돌아가는 곳이 없을 경우)
+        //                //FormsAuthentication.SetAuthCookie(txtUserID.Text, false);
+        //                Response.Redirect("~/Default.aspx");
+        //            }
+        //            break;
+        //        case "Logged in":
+        //            ShowAlert("이미 로그인된 사용자입니다.");
+        //            break;
+        //        case "Ready":
+        //            ShowAlert("승인 대기중입니다. 관리자 승인을 기다려주세요.");
+        //            break;
+        //        default:
+        //            ShowAlert("아이디 또는 비밀번호가 틀렸습니다.");
+        //            break;
+        //    }
+        //}
+
         protected void btnLogin_Click(object sender, EventArgs e)
         {
-            Page.Validate("UserLogin");  // 수동 그룹 유효성 검사
+            Page.Validate("UserLogin");
             if (!Page.IsValid)
             {
-                //ScriptManager.RegisterStartupScript(this, GetType(), "validationModalScript", "ShowValidationModal();", true);
-                //ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal();", true);
                 ScriptManager.RegisterStartupScript(this, GetType(), "validationModalScript", "showValidate();", true);
-
                 return;
             }
 
@@ -57,34 +101,38 @@ namespace GiSanParkGolf
             switch (result)
             {
                 case "OK":
-                    // 로그인 인증 되었으면 유저 정보를 불러온다.
-                    // 쿠기도 생성
-                    Global.uvm = Global.dbManager.GetUserByUserID(txtUserID.Text);
+                    var userInfo = Global.dbManager.GetUserByUserID(txtUserID.Text);
+                    if (userInfo == null)
+                    {
+                        ShowAlert("사용자 정보를 불러오는 데 실패했습니다.");
+                        return;
+                    }
 
-                    if (!String.IsNullOrEmpty(Request.QueryString["ReturnUrl"]))
-                    {
-                        // 인증 쿠키값 부여(돌아가는 곳이 있는 경우)
-                        //FormsAuthentication.RedirectFromLoginPage(txtUserID.Text, false);
-                        Response.Redirect(Request.QueryString["ReturnUrl"]);
-                    }
-                    else
-                    {
-                        // 인증 쿠키값 부여(돌아가는 곳이 없을 경우)
-                        //FormsAuthentication.SetAuthCookie(txtUserID.Text, false);
-                        Response.Redirect("~/Default.aspx");
-                    }
+                                     // Session 또는 Claims 기반으로 저장 가능
+                    Session["UserInfo"] = userInfo;
+
+                                    // 인증 쿠키 발급
+                                    //여기 주석 GetUserByUserID 여기에서 먼저 쿠키 발급이 일어난다.
+                    //FormsAuthentication.SetAuthCookie(txtUserID.Text, false);
+
+                    string returnUrl = Request.QueryString["ReturnUrl"];
+                    Response.Redirect(string.IsNullOrEmpty(returnUrl) ? "~/Default.aspx" : returnUrl);
                     break;
+
                 case "Logged in":
                     ShowAlert("이미 로그인된 사용자입니다.");
                     break;
+
                 case "Ready":
                     ShowAlert("승인 대기중입니다. 관리자 승인을 기다려주세요.");
                     break;
+
                 default:
                     ShowAlert("아이디 또는 비밀번호가 틀렸습니다.");
                     break;
             }
         }
+
 
         protected void ShowAlert(string message)
         {
@@ -97,27 +145,19 @@ namespace GiSanParkGolf
             Response.Redirect("~/Sites/UserManagement/UserRepositories.aspx");
         }
 
-        protected Boolean LoadCookie()
+        protected bool LoadCookie()
         {
             string cookieName = FormsAuthentication.FormsCookieName;
             HttpCookie authCookie = Context.Request.Cookies[cookieName];
+
             if (authCookie != null)
             {
-                FormsAuthenticationTicket authTicket = null;
-                authTicket = FormsAuthentication.Decrypt(authCookie.Value);
-
-                string userName = authTicket.Name; //userName
+                FormsAuthenticationTicket authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+                string userName = authTicket.Name;
                 string userData = authTicket.UserData;
-                DateTime issueDate = authTicket.IssueDate; //cookie created date
-                DateTime expiredDate = authTicket.Expiration; //cookie expired date
                 bool expired = authTicket.Expired;
 
-                Debug.WriteLine("로그인 ID: " + userName);
-                Debug.WriteLine("Cookie Data: " + userData);
-                Debug.WriteLine("만든날짜: " + issueDate);
-                Debug.WriteLine("파기날짜: " + expiredDate);
                 string[] abcd = userData.Split(':');
-
                 if (expired)
                 {
                     Debug.WriteLine("파기일자가 도래하여 인증거부.");
@@ -126,20 +166,27 @@ namespace GiSanParkGolf
                 else
                 {
                     Debug.WriteLine("파기일자가 미도래하여 인증완료.");
-                    Global.uvm.UserId = abcd[0];
-                    Global.uvm.UserPassword = abcd[1];
-                    Global.uvm.UserName = abcd[2];
-                    Global.uvm.UserWClass = abcd[3];
-                    Global.uvm.UserClass = int.Parse(abcd[4]);
 
-                    //파기 시간을 2일 연장한다.
+                    var user = new UserViewModel
+                    {
+                        UserId = abcd[0],
+                        UserPassword = abcd[1],
+                        UserName = abcd[2],
+                        UserWClass = abcd[3],
+                        UserClass = int.Parse(abcd[4])
+                    };
+
+                    Session["UserInfo"] = user;  // ← 여기로 전역 대신 저장!
+
+                    // 쿠키 갱신
                     DB_Management userRepo = new DB_Management();
-                    userRepo.SetCookie(abcd[0], abcd[1], abcd[2], abcd[3], int.Parse(abcd[4]), 2);
+                    userRepo.SetCookie(user.UserId, user.UserPassword, user.UserName, user.UserWClass, user.UserClass, 2);
 
-                    //DB에 로그인 기록을 남긴다.
-                    //Global.dbManager.IsCorrectUser(abcd[0], abcd[1], 1);
+                    // 로그인 기록 남기기
+                    Global.dbManager.IsCorrectUser(user.UserId, user.UserPassword, 1);
+
+                    return true;
                 }
-                return true;
             }
             return false;
         }

@@ -1,4 +1,5 @@
 ﻿using GiSanParkGolf.Class;
+using GiSanParkGolf.Models;
 using System;
 using System.Diagnostics;
 using System.Web.UI;
@@ -15,7 +16,7 @@ namespace GiSanParkGolf.Sites.UserManagement
             {
                 prePage = Request.ServerVariables["HTTP_REFERER"];
                 Debug.WriteLine("이전 위치 : " + prePage);
-                UserInformationLoad(Global.uvm.UserId);
+                UserInformationLoad(Helper.CurrentUser?.UserId);
             }               
         }
 
@@ -81,7 +82,13 @@ namespace GiSanParkGolf.Sites.UserManagement
             {
                 //모달을 닫을때 사용(근데 자동으로 닫히는데?)
                 //ClientScript.RegisterStartupScript(this.GetType(), "alert", "CloseModal();", true);
-                Global.uvm.UserName = txtName.Text;
+                var user = Session["UserInfo"] as UserViewModel;
+
+                if (user != null)
+                {
+                    user.UserName = txtName.Text;
+                    Session["UserInfo"] = user;  // 다시 세션에 반영!
+                }
                 Debug.WriteLine("이전 위치로 이동한다. : " + prePage);
                 Response.Redirect(prePage);
                 //string strJs = "<script>alert('수정 되었습니다.'); location.href='/Default';</script>";

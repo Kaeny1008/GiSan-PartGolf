@@ -1,4 +1,5 @@
 ﻿using BBS.Models;
+using GiSanParkGolf.Class;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -40,9 +41,9 @@ namespace GiSanParkGolf.BBS.Controls
 
             if (Page.User.Identity.IsAuthenticated)
             {
-                comment.Name = Global.uvm.UserName; // 이름
-                comment.Password = Global.uvm.UserPassword; // 암호
-                comment.UserId = Global.uvm.UserId;
+                comment.Name = Helper.CurrentUser?.UserName; // 이름
+                comment.Password = Helper.CurrentUser?.UserPassword; // 암호
+                comment.UserId = Helper.CurrentUser?.UserId;
             } 
             else
             {

@@ -22,7 +22,7 @@ namespace GiSanParkGolf.Sites.Admin
             {
                 var userList = Global.dbManager.GetUserHandicaps(null, null);
                 int updatedCount = 0;
-                string admin = Global.uvm.UserName;
+                string admin = Helper.CurrentUser?.UserName;
 
                 foreach (var user in userList)
                 {
@@ -102,7 +102,7 @@ namespace GiSanParkGolf.Sites.Admin
         {
             try
             {
-                string modifiedBy = Global.uvm.UserName;
+                string modifiedBy = Helper.CurrentUser?.UserName;
                 GridViewRow row = gvHandicaps.Rows[e.RowIndex];
                 string userId = gvHandicaps.DataKeys[e.RowIndex].Value.ToString();
 

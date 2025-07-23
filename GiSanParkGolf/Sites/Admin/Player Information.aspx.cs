@@ -28,26 +28,21 @@ namespace GiSanParkGolf.Sites.Admin
         }
         protected void UserInformationLoad(string userID)
         {
-            DB_Management userRepo = new DB_Management();
-            Global.suvm = userRepo.GetSelectUserByUserID(userID);
+            SelectUserViewModel user = Global.dbManager.GetSelectUserByUserID(userID);
 
-            txtID.Text = Global.suvm.UserID;
-            txtName.Text = Global.suvm.UserName;
-            txtBirthDay.Text = Global.suvm.UserNumber.ToString();
-            txtGender.Text = Global.suvm.UserGender.ToString();
-            txtAddress.Text = Global.suvm.UserAddress;
-            txtAddress2.Text = Global.suvm.UserAddress2;
-            txtMemo.Text = Global.suvm.UserNote;
-            if (Global.suvm.UserWClass.Equals("승인"))
-            {
-                switchCheckDefault.Checked = true;
+            if (user == null)
+                return; // 또는 오류 처리
 
-            } else
-            {
-                switchCheckDefault.Checked = false;
-            }
-            DropDownList1.Text = Global.suvm.UserClass.ToString();
-            //txtID.Text = Global.suvm.UserWClass;
+            txtID.Text = user.UserID;
+            txtName.Text = user.UserName;
+            txtBirthDay.Text = user.UserNumber.ToString();
+            txtGender.Text = user.UserGender.ToString();
+            txtAddress.Text = user.UserAddress;
+            txtAddress2.Text = user.UserAddress2;
+            txtMemo.Text = user.UserNote;
+
+            switchCheckDefault.Checked = user.UserWClass == "승인";
+            DropDownList1.Text = user.UserClass.ToString();
         }
 
         protected void BTN_Register_Click(object sender, EventArgs e)

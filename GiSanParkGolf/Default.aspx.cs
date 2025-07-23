@@ -1,4 +1,5 @@
 ﻿using GiSanParkGolf.Class;
+using GiSanParkGolf.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,27 +51,19 @@ namespace GiSanParkGolf
             GameList.DataBind();
         }
 
-        protected Boolean LoadCookie()
+        protected bool LoadCookie()
         {
             string cookieName = FormsAuthentication.FormsCookieName;
             HttpCookie authCookie = Context.Request.Cookies[cookieName];
+
             if (authCookie != null)
             {
-                FormsAuthenticationTicket authTicket = null;
-                authTicket = FormsAuthentication.Decrypt(authCookie.Value);
-
-                string userName = authTicket.Name; //userName
+                FormsAuthenticationTicket authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+                string userName = authTicket.Name;
                 string userData = authTicket.UserData;
-                DateTime issueDate = authTicket.IssueDate; //cookie created date
-                DateTime expiredDate = authTicket.Expiration; //cookie expired date
                 bool expired = authTicket.Expired;
 
-                Debug.WriteLine("로그인 ID: " + userName);
-                Debug.WriteLine("Cookie Data: " + userData);
-                Debug.WriteLine("만든날짜: " + issueDate);
-                Debug.WriteLine("파기날짜: " + expiredDate);
                 string[] abcd = userData.Split(':');
-
                 if (expired)
                 {
                     Debug.WriteLine("파기일자가 도래하여 인증거부.");
@@ -79,20 +72,27 @@ namespace GiSanParkGolf
                 else
                 {
                     Debug.WriteLine("파기일자가 미도래하여 인증완료.");
-                    Global.uvm.UserId = abcd[0];
-                    Global.uvm.UserPassword = abcd[1];
-                    Global.uvm.UserName = abcd[2];
-                    Global.uvm.UserWClass = abcd[3];
-                    Global.uvm.UserClass = int.Parse(abcd[4]);
 
-                    //파기 시간을 2일 연장한다.
+                    var user = new UserViewModel
+                    {
+                        UserId = abcd[0],
+                        UserPassword = abcd[1],
+                        UserName = abcd[2],
+                        UserWClass = abcd[3],
+                        UserClass = int.Parse(abcd[4])
+                    };
+
+                    Session["UserInfo"] = user;  // ← 여기로 전역 대신 저장!
+
+                    // 쿠키 갱신
                     DB_Management userRepo = new DB_Management();
-                    userRepo.SetCookie(abcd[0], abcd[1], abcd[2], abcd[3], int.Parse(abcd[4]), 2);
+                    userRepo.SetCookie(user.UserId, user.UserPassword, user.UserName, user.UserWClass, user.UserClass, 2);
 
-                    //DB에 로그인 기록을 남긴다.
-                    Global.dbManager.IsCorrectUser(abcd[0], abcd[1], 1);
+                    // 로그인 기록 남기기
+                    //Global.dbManager.IsCorrectUser(user.UserId, user.UserPassword, 1);
+
+                    return true;
                 }
-                return true;
             }
             return false;
         }

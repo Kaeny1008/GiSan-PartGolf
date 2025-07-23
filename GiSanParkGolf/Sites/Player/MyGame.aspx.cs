@@ -57,7 +57,7 @@ namespace GiSanParkGolf.Sites.Player
 
         protected void GameCancel()
         {
-            string dbWrite = Global.dbManager.MyGameCancel(gamecode, Global.uvm.UserId);
+            string dbWrite = Global.dbManager.MyGameCancel(gamecode, Helper.CurrentUser?.UserId);
             if (dbWrite.Equals("Success"))
             {
                 Response.Redirect(string.Format("~/Sites/Player/MyGame.aspx"));
@@ -118,7 +118,7 @@ namespace GiSanParkGolf.Sites.Player
 
         private void LoadGameList()
         {
-            var games = Global.dbManager.GetMyGameList(Global.uvm.UserId);
+            var games = Global.dbManager.GetMyGameList(Helper.CurrentUser?.UserId);
 
             IEnumerable<GameListModel> filtered = games;
 

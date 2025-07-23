@@ -127,7 +127,7 @@
                     if (Page.User.Identity.IsAuthenticated)
                     {
                         System.Diagnostics.Debug.WriteLine("게시판 : 로그인 되어 있다.");
-                        if (global_asax.uvm.UserClass.Equals(1))
+                        if (GiSanParkGolf.Class.Helper.CurrentUser.UserClass.Equals(1))
                         {
                             System.Diagnostics.Debug.WriteLine("현재 유저등급 OK");
             %>

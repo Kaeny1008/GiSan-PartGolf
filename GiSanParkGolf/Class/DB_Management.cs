@@ -35,27 +35,32 @@ namespace GiSanParkGolf.Class
         /// SYS_Users 리스트: GetAll, FindAll 
         /// </summary>
         /// <param name="page">페이지 번호</param>
-        public DataTable GetUserAll(int page, string readyUser)
+        public List<SelectUserViewModel> GetUserAll(int page, string readyUser)
         {
-            SqlCommand sqlCMD = new SqlCommand
+            var parameters = new DynamicParameters();
+            parameters.Add("@Page", page);
+            parameters.Add("@ReadyUser", readyUser);
+
+            try
             {
-                Connection = DB_Connection,
-                CommandText = "sp_SYS_UserList",
-                CommandType = CommandType.StoredProcedure
-            };
-            sqlCMD.Parameters.AddWithValue("@Page", page);
-            sqlCMD.Parameters.AddWithValue("@ReadyUser", readyUser);
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-            DB_Connection.Open();
-
-            SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
-            DataSet dataSet = new DataSet();
-            adapter.Fill(dataSet);
-
-            DB_Connection.Close();
-
-            return dataSet.Tables["Table"];
-
+                return DB_Connection.Query<SelectUserViewModel>(
+                    "sp_SYS_UserList",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetUserAll] 오류: {ex.Message}");
+                return new List<SelectUserViewModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         /// <summary>
@@ -88,34 +93,33 @@ namespace GiSanParkGolf.Class
         /// <summary>
         /// SYS_Users 테이블의 모든 레코드 수
         /// </summary>
-        public int GetUserCountAll(string readyUser)
+        public List<SelectUserViewModel> GetUserSearchAll(int page, string readyUser, string searchField, string searchQuery)
         {
+            var parameters = new DynamicParameters();
+            parameters.Add("@Page", page);
+            parameters.Add("@SearchField", searchField);
+            parameters.Add("@SearchQuery", searchQuery);
+            parameters.Add("@ReadyUser", readyUser);
+
             try
             {
-                int userCount = 0;
-                SqlCommand sqlCMD = new SqlCommand
-                {
-                    Connection = DB_Connection,
-                    CommandText = "sp_SYS_UserCountALL",
-                    CommandType = CommandType.StoredProcedure
-                };
-                sqlCMD.Parameters.AddWithValue("@ReadyUser", readyUser);
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-                DB_Connection.Open();
-
-                SqlDataReader sqlDR = sqlCMD.ExecuteReader();
-
-                while (sqlDR.Read())
-                {
-                    userCount = sqlDR.GetInt32(0);
-                }
-
-                DB_Connection.Close();
-                return userCount;
+                return DB_Connection.Query<SelectUserViewModel>(
+                    "sp_SYS_UserSearch",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
             }
-            catch (System.Exception)
+            catch (Exception ex)
             {
-                return -1;
+                Console.WriteLine($"[GetUserSearchAll] 오류: {ex.Message}");
+                return new List<SelectUserViewModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
             }
         }
 
@@ -124,61 +128,59 @@ namespace GiSanParkGolf.Class
         /// </summary>
         public int GetUserCountBySearch(string searchField, string searchQuery, string readyUser)
         {
+            var parameters = new DynamicParameters();
+            parameters.Add("@SearchField", searchField);
+            parameters.Add("@SearchQuery", searchQuery);
+            parameters.Add("@ReadyUser", readyUser);
+
             try
             {
-                int userCount = 0;
-                SqlCommand sqlCMD = new SqlCommand
-                {
-                    Connection = DB_Connection,
-                    CommandText = "sp_SYS_UserCount",
-                    CommandType = CommandType.StoredProcedure
-                };
-                sqlCMD.Parameters.AddWithValue("@SearchField", searchField);
-                sqlCMD.Parameters.AddWithValue("@SearchQuery", searchQuery);
-                sqlCMD.Parameters.AddWithValue("@ReadyUser", readyUser);
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-                DB_Connection.Open();
-
-                SqlDataReader sqlDR = sqlCMD.ExecuteReader();
-
-                while (sqlDR.Read())
-                {
-                    userCount = sqlDR.GetInt32(0);
-                }
-
-                DB_Connection.Close();
-                return userCount;
+                return DB_Connection.ExecuteScalar<int>(
+                    "sp_SYS_UserCount", parameters, commandType: CommandType.StoredProcedure
+                );
             }
-            catch (System.Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"[GetUserCountBySearch] 오류: {ex.Message}");
                 return -1;
+            }
+            finally
+            {
+                DB_Connection.Close();
             }
         }
 
         /// <summary>
         /// 대회 검색 검색 리스트
         /// </summary>
-        public DataTable GetGameSeachAll(int page, string searchField, string searchQuery)
+        public List<GameListModel> GetGameSearchAll(int page, string searchField, string searchQuery)
         {
-            SqlCommand sqlCMD = new SqlCommand
+            var parameters = new DynamicParameters();
+            parameters.Add("@Page", page);
+            parameters.Add("@SearchField", searchField);
+            parameters.Add("@SearchQuery", searchQuery);
+
+            try
             {
-                Connection = DB_Connection,
-                CommandText = "sp_GameSearch",
-                CommandType = CommandType.StoredProcedure
-            };
-            sqlCMD.Parameters.AddWithValue("@Page", page);
-            sqlCMD.Parameters.AddWithValue("@SearchField", searchField);
-            sqlCMD.Parameters.AddWithValue("@SearchQuery", searchQuery);
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-            DB_Connection.Open();
-
-            SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
-            DataSet dataSet = new DataSet();
-            adapter.Fill(dataSet);
-
-            DB_Connection.Close();
-
-            return dataSet.Tables["Table"];
+                return DB_Connection.Query<GameListModel>(
+                    "sp_GameSearch", parameters, commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetGameSearchAll] 오류: {ex.Message}");
+                return new List<GameListModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         /// <summary>
@@ -188,29 +190,21 @@ namespace GiSanParkGolf.Class
         {
             try
             {
-                int gameCount = 0;
-                SqlCommand sqlCMD = new SqlCommand
-                {
-                    Connection = DB_Connection,
-                    CommandText = "sp_GameCountALL",
-                    CommandType = CommandType.StoredProcedure
-                };
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-                DB_Connection.Open();
-
-                SqlDataReader sqlDR = sqlCMD.ExecuteReader();
-
-                while (sqlDR.Read())
-                {
-                    gameCount = sqlDR.GetInt32(0);
-                }
-
-                DB_Connection.Close();
-                return gameCount;
+                return DB_Connection.ExecuteScalar<int>(
+                    "sp_GameCountALL", null, commandType: CommandType.StoredProcedure
+                );
             }
-            catch (System.Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"[GetGameCountAll] 오류: {ex.Message}");
                 return -1;
+            }
+            finally
+            {
+                DB_Connection.Close();
             }
         }
 
@@ -219,33 +213,27 @@ namespace GiSanParkGolf.Class
         /// </summary>
         public int GetGameCountBySearch(string searchField, string searchQuery)
         {
+            var parameters = new DynamicParameters();
+            parameters.Add("@SearchField", searchField);
+            parameters.Add("@SearchQuery", searchQuery);
+
             try
             {
-                int userCount = 0;
-                SqlCommand sqlCMD = new SqlCommand
-                {
-                    Connection = DB_Connection,
-                    CommandText = "sp_GameCountSearch",
-                    CommandType = CommandType.StoredProcedure
-                };
-                sqlCMD.Parameters.AddWithValue("@SearchField", searchField);
-                sqlCMD.Parameters.AddWithValue("@SearchQuery", searchQuery);
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-                DB_Connection.Open();
-
-                SqlDataReader sqlDR = sqlCMD.ExecuteReader();
-
-                while (sqlDR.Read())
-                {
-                    userCount = sqlDR.GetInt32(0);
-                }
-
-                DB_Connection.Close();
-                return userCount;
+                return DB_Connection.ExecuteScalar<int>(
+                    "sp_GameCountSearch", parameters, commandType: CommandType.StoredProcedure
+                );
             }
-            catch (System.Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"[GetGameCountBySearch] 오류: {ex.Message}");
                 return -1;
+            }
+            finally
+            {
+                DB_Connection.Close();
             }
         }
 
@@ -254,27 +242,31 @@ namespace GiSanParkGolf.Class
         /// </summary>
         /// <param name="UserName">사용자명 검색</param>
         /// <param name="onlyReady">승인대기 중인 사용자만</param>
-        public DataTable GetUserList(string userName, int onlyReady, int pageIndex)
+        public List<SelectUserViewModel> GetUserList(string userName, int onlyReady, int pageIndex)
         {
-            SqlCommand sqlCMD = new SqlCommand
+            var parameters = new DynamicParameters();
+            parameters.Add("@UserName", userName);
+            parameters.Add("@OnlyReady", onlyReady);
+            parameters.Add("@Page", pageIndex);
+
+            try
             {
-                Connection = DB_Connection,
-                CommandText = "sp_SYS_UserList",
-                CommandType = CommandType.StoredProcedure
-            };
-            sqlCMD.Parameters.AddWithValue("@UserName", userName);
-            sqlCMD.Parameters.AddWithValue("@OnlyReady", onlyReady);
-            sqlCMD.Parameters.AddWithValue("@Page", pageIndex);
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-            DB_Connection.Open();
-
-            SqlDataAdapter adapter = new SqlDataAdapter(sqlCMD);
-            DataSet dataSet = new DataSet();
-            adapter.Fill(dataSet);
-
-            DB_Connection.Close();
-
-            return dataSet.Tables["Table"];
+                return DB_Connection.Query<SelectUserViewModel>(
+                    "sp_SYS_UserList", parameters, commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetUserList] 오류: {ex.Message}");
+                return new List<SelectUserViewModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         /// <summary>
@@ -283,45 +275,107 @@ namespace GiSanParkGolf.Class
         /// <param name="gameCode">GameCode</param>
         public GameListModel GetGameInformation(string gameCode)
         {
+            var query = "sp_GameInformation";
             var parameters = new DynamicParameters(new { GameCode = gameCode });
-            return DB_Connection.Query<GameListModel>("sp_GameInformation", parameters,
-                commandType: CommandType.StoredProcedure).SingleOrDefault();
+
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<GameListModel>(
+                    query, parameters, commandType: CommandType.StoredProcedure
+                ).SingleOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetGameInformation] 오류: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
+
+        //public UserViewModel GetUserByUserID(string userID)
+        //{
+
+        //    string strSQL = "SELECT UserId, UserPassword, UserName, UserWClass, UserClass";
+        //    strSQL += " FROM SYS_Users";
+        //    strSQL += " WHERE UserId = @UserID";
+        //    strSQL += ";";
+
+        //    SqlCommand sqlCMD = new SqlCommand(strSQL, DB_Connection);
+        //    sqlCMD.CommandType = CommandType.Text;
+
+        //    sqlCMD.Parameters.AddWithValue("@UserID", userID);
+
+        //    DB_Connection.Open();
+
+        //    SqlDataReader sqlDR = sqlCMD.ExecuteReader();
+        //    while (sqlDR.Read())
+        //    {
+        //        Helper.CurrentUser?.UserId = sqlDR.GetString(0);
+        //        Helper.CurrentUser?.UserPassword = sqlDR.GetString(1);
+        //        Helper.CurrentUser?.UserName = sqlDR.GetString(2);
+        //        Global.uvm.UserWClass = sqlDR.GetString(3);
+        //        Global.uvm.UserClass = sqlDR.GetInt32(4);
+        //    }
+        //    DB_Connection.Close();
+
+        //    SetCookie(Helper.CurrentUser?.UserId,
+        //        Helper.CurrentUser?.UserPassword,
+        //        Helper.CurrentUser?.UserName,
+        //        Global.uvm.UserWClass,
+        //        Global.uvm.UserClass
+        //        , 2);
+
+        //    return Global.uvm;
+        //}
 
         public UserViewModel GetUserByUserID(string userID)
         {
+            string query = @"
+                SELECT UserId, UserPassword, UserName, UserWClass, UserClass
+                FROM SYS_Users
+                WHERE UserId = @UserID
+            ";
 
-            string strSQL = "SELECT UserId, UserPassword, UserName, UserWClass, UserClass";
-            strSQL += " FROM SYS_Users";
-            strSQL += " WHERE UserId = @UserID";
-            strSQL += ";";
+            var parameters = new { UserID = userID };
 
-            SqlCommand sqlCMD = new SqlCommand(strSQL, DB_Connection);
-            sqlCMD.CommandType = CommandType.Text;
-
-            sqlCMD.Parameters.AddWithValue("@UserID", userID);
-
-            DB_Connection.Open();
-
-            SqlDataReader sqlDR = sqlCMD.ExecuteReader();
-            while (sqlDR.Read())
+            try
             {
-                Global.uvm.UserId = sqlDR.GetString(0);
-                Global.uvm.UserPassword = sqlDR.GetString(1);
-                Global.uvm.UserName = sqlDR.GetString(2);
-                Global.uvm.UserWClass = sqlDR.GetString(3);
-                Global.uvm.UserClass = sqlDR.GetInt32(4);
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                var user = DB_Connection.QueryFirstOrDefault<UserViewModel>(
+                    query, parameters
+                );
+
+                if (user != null)
+                {
+                    SetCookie(user.UserId,
+                              user.UserPassword,
+                              user.UserName,
+                              user.UserWClass,
+                              user.UserClass,
+                              2); // 2시간 유지 등
+
+                    return user;
+                }
+
+                return null;
             }
-            DB_Connection.Close();
-
-            SetCookie(Global.uvm.UserId,
-                Global.uvm.UserPassword,
-                Global.uvm.UserName,
-                Global.uvm.UserWClass,
-                Global.uvm.UserClass
-                , 2);
-
-            return Global.uvm;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetUserByUserID] 오류: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public void SetCookie(string userID, string userPassword, string userName, string userWClass, int userClass, int expireDayAdd)
@@ -341,153 +395,149 @@ namespace GiSanParkGolf.Class
 
         public SelectUserViewModel GetSelectUserByUserID(string userID)
         {
-            string strSQL = "SELECT UserId, UserName, UserPassword, UserNumber";
-            strSQL += ", UserGender, UserAddress, UserAddress2";
-            strSQL += ", UserRegistrationDate, UserNote, UserWClass, UserClass";
-            strSQL += " FROM SYS_Users";
-            strSQL += " WHERE UserId = @UserID";
-            strSQL += ";";
+            string query = @"
+                SELECT UserId, UserName, UserPassword, UserNumber,
+                       UserGender, UserAddress, UserAddress2,
+                       UserRegistrationDate, UserNote, UserWClass, UserClass
+                FROM SYS_Users
+                WHERE UserId = @UserID
+            ";
 
-            SqlCommand sqlCMD = new SqlCommand(strSQL, DB_Connection);
-            sqlCMD.CommandType = CommandType.Text;
+            var parameters = new { UserID = userID };
 
-            sqlCMD.Parameters.AddWithValue("@UserID", userID);
-
-            DB_Connection.Open();
-
-            SqlDataReader sqlDR = sqlCMD.ExecuteReader();
-            while (sqlDR.Read())
+            try
             {
-                Global.suvm.UserID = sqlDR.GetString(0);
-                Global.suvm.UserName = sqlDR.GetString(1);
-                Global.suvm.UserPassword = sqlDR.GetString(2);
-                Global.suvm.UserNumber = sqlDR.GetInt32(3);
-                Global.suvm.UserGender = sqlDR.GetInt32(4);
-                Global.suvm.UserAddress = sqlDR.GetString(5);
-                Global.suvm.UserAddress2 = sqlDR.GetString(6);
-                Global.suvm.UserRegistrationDate = sqlDR.GetDateTime(7);
-                Global.suvm.UserNote = sqlDR.GetString(8);
-                Global.suvm.UserWClass = sqlDR.GetString(9);
-                Global.suvm.UserClass = sqlDR.GetInt32(10);
-            }
-            DB_Connection.Close();
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-            return Global.suvm;
+                return DB_Connection.QueryFirstOrDefault<SelectUserViewModel>(
+                    query, parameters
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetSelectUserByUserID] 오류: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public string IsCorrectUser(string userID, string password, int onlyInsert)
         {
             string result = string.Empty;
 
-            Cryptography newCrypt = new Cryptography();
-            String cryptPassword = newCrypt.GetEncoding("ParkGolf", password);
+            var crypt = new Cryptography();
+            string encryptedPassword = crypt.GetEncoding("ParkGolf", password);
 
-            DB_Connection.Open();
+            var parameters = new DynamicParameters();
+            parameters.Add("@UserID", userID);
+            parameters.Add("@Password", encryptedPassword);
+            parameters.Add("@OnlyInsert", onlyInsert);
 
-            SqlCommand cmd = new SqlCommand
+            try
             {
-                Connection = DB_Connection,
-                CommandText = "sp_SYS_UserLogin",
-                CommandType = CommandType.StoredProcedure
-            };
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-            cmd.Parameters.AddWithValue("@UserID", userID);
-            cmd.Parameters.AddWithValue("@Password", cryptPassword);
-            cmd.Parameters.AddWithValue("@OnlyInsert", onlyInsert);
+                var loginStatus = DB_Connection.QueryFirstOrDefault<string>(
+                    "sp_SYS_UserLogin", parameters, commandType: CommandType.StoredProcedure
+                );
 
-            SqlDataReader sqlDR = cmd.ExecuteReader();
-            if (sqlDR.Read())
-            {
-                if (sqlDR.GetString(0).Equals("승인"))
+                switch (loginStatus)
                 {
-                    result = "OK";
+                    case "승인": result = "OK"; break;
+                    case "승인대기": result = "Ready"; break;
+                    case "Logged in": result = "Logged in"; break;
+                    default: result = string.Empty; break;
                 }
-                else if (sqlDR.GetString(0).Equals("승인대기"))
-                {
-                    result = "Ready";
-                }
-                else if (sqlDR.GetString(0).Equals("Logged in"))
-                {
-                    result = "Logged in";
-                }
-                else
-                {
-                    result = string.Empty;
-                }
+
+                Console.WriteLine($"[IsCorrectUser] 로그인 결과 : {result}");
+                return result;
             }
-            sqlDR.Close();
-
-            DB_Connection.Close();
-
-            Debug.WriteLine("로그인 기록을 남긴다. 로그인 결과 : " + result);
-            return result;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[IsCorrectUser] 오류: {ex.Message}");
+                return $"Error: {ex.Message}";
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public void LogoutUser(string userID)
         {
-            DB_Connection.Open();
+            var parameters = new DynamicParameters();
+            parameters.Add("@UserID", userID);
 
-            SqlCommand cmd = new SqlCommand
+            try
             {
-                Connection = DB_Connection,
-                CommandText = "sp_SYS_UserLogOut",
-                CommandType = CommandType.StoredProcedure
-            };
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-            cmd.Parameters.AddWithValue("@UserID", userID);
-            cmd.ExecuteNonQuery();
-
-            DB_Connection.Close();
+                DB_Connection.Execute("sp_SYS_UserLogOut", parameters, commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[LogoutUser] 오류: {ex.Message}");
+                // 필요 시: 로그 저장 또는 경고 처리
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public string DB_Write(string strSQL)
         {
             try
             {
-                DB_Connection.Open();
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-                SqlCommand cmd = new SqlCommand
-                {
-                    Connection = DB_Connection,
-                    CommandText = strSQL,
-                    CommandType = System.Data.CommandType.Text
-                };
-                cmd.ExecuteNonQuery();
+                DB_Connection.Execute(strSQL); // 텍스트 쿼리 직접 실행
 
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DB_Write] 오류: {ex.Message}");
+                return $"Error: {ex.Message}";
+            }
+            finally
+            {
                 DB_Connection.Close();
             }
-            catch (OleDbException ex)
-            {
-                return ex.ToString();
-            }
-
-            return "Success";
         }
 
-        public Boolean ID_DuplicateCheck(string userID)
+        public bool ID_DuplicateCheck(string userID)
         {
-            bool result = true;
+            string query = @"
+                SELECT COUNT(*) 
+                FROM SYS_Users 
+                WHERE UserID = @UserId
+            ";
 
-            DB_Connection.Open();
-
-            string strSQL = "SELECT * FROM SYS_Users WHERE UserID = @UserId";
-            SqlCommand cmd = new SqlCommand
+            try
             {
-                Connection = DB_Connection,
-                CommandText = strSQL,
-                CommandType = CommandType.Text
-            };
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-            cmd.Parameters.AddWithValue("@UserID", userID);
-
-            SqlDataReader dr = cmd.ExecuteReader();
-            if (dr.Read())
-                result = false;
-
-            dr.Close();
-            DB_Connection.Close();
-
-            return result;
+                int count = DB_Connection.ExecuteScalar<int>(query, new { UserId = userID });
+                return count == 0; // 중복 없으면 true
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ID_DuplicateCheck] 오류: {ex.Message}");
+                return false; // 실패 시 보호 처리
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         /// <summary>
@@ -495,11 +545,32 @@ namespace GiSanParkGolf.Class
         /// </summary>
         public List<Note> GetNoticeRecentPosts(string bbsId)
         {
-            string sql = "SELECT TOP 5 [Id], [Title], [Name], [PostDate]"
-                + ", ROW_NUMBER() Over (Order By Id) As 'RowNumber'"
-                + " FROM BBS_Notes"
-                + " Where Category = @Category Order By Id Desc";
-            return DB_Connection.Query<Note>(sql, new { Category = bbsId }).ToList();
+            string sql = @"
+                SELECT TOP 5 [Id], [Title], [Name], [PostDate],
+                       ROW_NUMBER() OVER (ORDER BY Id) AS RowNumber
+                FROM BBS_Notes
+                WHERE Category = @Category
+                ORDER BY Id DESC
+            ";
+
+            var parameters = new { Category = bbsId };
+
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<Note>(sql, parameters).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetNoticeRecentPosts] 오류: {ex.Message}");
+                return new List<Note>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         /// <summary>
@@ -509,8 +580,27 @@ namespace GiSanParkGolf.Class
         public List<GameListModel> GetGameList(int topcount)
         {
             var parameters = new DynamicParameters(new { TopCount = topcount });
-            return DB_Connection.Query<GameListModel>("sp_GameList_Recent", parameters,
-                commandType: CommandType.StoredProcedure).ToList();
+
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<GameListModel>(
+                    "sp_GameList_Recent",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetGameList] 오류: {ex.Message}");
+                return new List<GameListModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         /// <summary>
@@ -522,43 +612,85 @@ namespace GiSanParkGolf.Class
             parameters.Add("@Field", field);
             parameters.Add("@Keyword", keyword);
 
-            return DB_Connection.Query<GameListModel>(
-                "sp_Get_Game_ReadyList",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            ).ToList();
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<GameListModel>(
+                    "sp_Get_Game_ReadyList",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetGameReadyList] 오류: {ex.Message}");
+                return new List<GameListModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public string GetEarlyJoin(string gameCode, string userID)
         {
-            string strSQL = "SELECT JoinStatus FROM Game_JoinUser WHERE UserId = @Id AND GameCode = @GameCode";
-            var parameters = new DynamicParameters(new
+            string query = @"
+                SELECT JoinStatus
+                FROM Game_JoinUser
+                WHERE UserId = @Id AND GameCode = @GameCode
+            ";
+
+            var parameters = new
             {
                 Id = userID,
                 GameCode = gameCode
-            });
+            };
 
-            return DB_Connection.Query<string>(strSQL, parameters, commandType: CommandType.Text).SingleOrDefault();
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<string>(
+                    query, parameters, commandType: CommandType.Text
+                ).SingleOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetEarlyJoin] 오류: {ex.Message}");
+                return null; // 또는 "Unknown", "Error" 등 정의된 기본 값
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public string GameJoin(GameJoinUserModel n)
         {
+            var p = new DynamicParameters();
+            p.Add("@UserId", n.UserId, DbType.String);
+            p.Add("@JoinIP", n.JoinIP, DbType.String);
+            p.Add("@GameCode", n.GameCode, DbType.String);
+
             try
             {
-                // 파라미터 추가
-                var p = new DynamicParameters();
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-                //[a] 공통
-                p.Add("@UserId", value: n.UserId, dbType: DbType.String);
-                p.Add("@JoinIP", value: n.JoinIP, dbType: DbType.String);
-                p.Add("@GameCode", value: n.GameCode, dbType: DbType.String);
                 DB_Connection.Execute("sp_Player_GameJoin", p, commandType: CommandType.StoredProcedure);
-
                 return "Success";
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                throw new System.Exception(ex.Message);
+                Console.WriteLine($"[GameJoin] 오류: {ex.Message}");
+                return $"Error: {ex.Message}";
+            }
+            finally
+            {
+                DB_Connection.Close();
             }
         }
 
@@ -568,43 +700,75 @@ namespace GiSanParkGolf.Class
         public List<GameListModel> GetMyGameList(string userID)
         {
             var parameters = new DynamicParameters(new { UserId = userID });
-            return DB_Connection.Query<GameListModel>("sp_Get_Player_MyGame", parameters,
-                commandType: CommandType.StoredProcedure).ToList();
+
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<GameListModel>(
+                    "sp_Get_Player_MyGame",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetMyGameList] 오류: {ex.Message}");
+                return new List<GameListModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public string MyGameCancel(string gameCode, string userID)
         {
             string result = "Success";
+
+            var parameters = new DynamicParameters(new
+            {
+                UserId = userID,
+                GameCode = gameCode
+            });
+
             try
             {
-                var parameters = new DynamicParameters(new
-                {
-                    UserId = userID,
-                    GameCode = gameCode
-                });
-                DB_Connection.Query("sp_Player_GameCancel",
-                    parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                DB_Connection.Query(
+                    "sp_Player_GameCancel",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).SingleOrDefault();
             }
             catch (Exception ex)
             {
                 result = ex.Message;
             }
+            finally
+            {
+                DB_Connection.Close();
+            }
+
             return result;
         }
 
-        public List<GameListModel> GetReadyGame(int readyOnly)
-        {
-            string strSQL = "SELECT *";
-            strSQL += " FROM Game_List";
-            strSQL += " WHERE UserId = @Id AND GameCode = @GameCode";
+        //public List<GameListModel> GetReadyGame(int readyOnly)
+        //{
+        //    string strSQL = "SELECT *";
+        //    strSQL += " FROM Game_List";
+        //    strSQL += " WHERE UserId = @Id AND GameCode = @GameCode";
 
-            var parameters = new DynamicParameters(new
-            {
-                ReadyOnly = readyOnly
-            });
+        //    var parameters = new DynamicParameters(new
+        //    {
+        //        ReadyOnly = readyOnly
+        //    });
 
-            return DB_Connection.Query<GameListModel>(strSQL, parameters, commandType: CommandType.Text).ToList();
-        }
+        //    return DB_Connection.Query<GameListModel>(strSQL, parameters, commandType: CommandType.Text).ToList();
+        //}
 
         public List<GameJoinUserList> GetGameUserList(string gameCode)
         {
@@ -613,21 +777,53 @@ namespace GiSanParkGolf.Class
                 GameCode = gameCode
             });
 
-            return DB_Connection.Query<GameJoinUserList>("sp_GameJoinUser", 
-                parameters, commandType: CommandType.StoredProcedure).ToList();
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<GameJoinUserList>(
+                    "sp_GameJoinUser",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetGameUserList] 오류: {ex.Message}");
+                return new List<GameJoinUserList>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         /// <summary>
         /// 지정 게임의 핸디캡 목록 조회 (검색어 옵션)
         /// </summary>
-        public IEnumerable<PlayerHandicapViewModel> GetHandicaps(
-            string gameCode,
-            string searchTerm = null)
+        public IEnumerable<PlayerHandicapViewModel> GetHandicaps(string gameCode, string searchTerm = null)
         {
-            return DB_Connection.Query<PlayerHandicapViewModel>(
-                "sp_GetGameHandicaps",
-                new { GameCode = gameCode, SearchTerm = searchTerm },
-                commandType: CommandType.StoredProcedure);
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<PlayerHandicapViewModel>(
+                    "sp_GetGameHandicaps",
+                    new { GameCode = gameCode, SearchTerm = searchTerm },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetHandicaps] 오류: {ex.Message}");
+                return Enumerable.Empty<PlayerHandicapViewModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public List<UserWithHandicap> GetUserHandicaps(string field, string keyword)
@@ -636,19 +832,34 @@ namespace GiSanParkGolf.Class
             parameters.Add("@Field", field);
             parameters.Add("@Keyword", keyword);
 
-            var result = DB_Connection.Query<UserWithHandicap>(
-                "sp_Get_UserHandicaps",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            ).ToList();
-
-            // 나이 계산 후 모델에 주입
-            foreach (var user in result)
+            try
             {
-                user.Age = CalculateAge(user.UserNumber.ToString());
-            }
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-            return result;
+                var result = DB_Connection.Query<UserWithHandicap>(
+                    "sp_Get_UserHandicaps",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+
+                             // 나이 계산 후 모델에 주입
+                foreach (var user in result)
+                {
+                    user.Age = CalculateAge(user.UserNumber.ToString());
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetUserHandicaps] 오류: {ex.Message}");
+                return new List<UserWithHandicap>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         // ✅ 핸디캡 정보 저장 (업데이트 또는 신규)
@@ -665,15 +876,31 @@ namespace GiSanParkGolf.Class
                                LastUpdatedBy = @UpdatedBy
                 WHEN NOT MATCHED THEN
                     INSERT (UserId, AgeHandicap, Source, LastUpdated, LastUpdatedBy)
-                    VALUES (@UserId, @Handicap, @Source, GETDATE(), @UpdatedBy);";
+                    VALUES (@UserId, @Handicap, @Source, GETDATE(), @UpdatedBy);
+            ";
 
-            DB_Connection.Execute(sql, new
+            try
             {
-                UserId = userId,
-                Handicap = handicap,
-                Source = source,
-                UpdatedBy = updatedBy
-            });
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                DB_Connection.Execute(sql, new
+                {
+                    UserId = userId,
+                    Handicap = handicap,
+                    Source = source,
+                    UpdatedBy = updatedBy
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[UpdateHandicap] 오류: {ex.Message}");
+                            // 필요한 경우: 로깅 or 에러 핸들링 추가 가능
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         // ✅ 나이 계산 유틸리티
@@ -721,9 +948,25 @@ namespace GiSanParkGolf.Class
             string sql = @"
                 INSERT INTO SYS_HandicapLog
                 (UserId, Age, PrevHandicap, NewHandicap, PrevSource, NewSource, Reason, ChangedBy)
-                VALUES (@UserId, @Age, @PrevHandicap, @NewHandicap, @PrevSource, @NewSource, @Reason, @ChangedBy);";
+                VALUES (@UserId, @Age, @PrevHandicap, @NewHandicap, @PrevSource, @NewSource, @Reason, @ChangedBy);
+            ";
 
-            DB_Connection.Execute(sql, log);
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                DB_Connection.Execute(sql, log);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[InsertHandicapChangeLog] 오류: {ex.Message}");
+                            // 필요 시: 에러 로그 DB 저장 or 재시도 로직
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public List<HandicapChangeLog> GetHandicapChangeLogs(string field, string keyword)
@@ -732,11 +975,26 @@ namespace GiSanParkGolf.Class
             parameters.Add("@Field", field);
             parameters.Add("@Keyword", keyword);
 
-            return DB_Connection.Query<HandicapChangeLog>(
-                "sp_Get_HandicapChangeLogs",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            ).ToList();
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<HandicapChangeLog>(
+                    "sp_Get_HandicapChangeLogs",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetHandicapChangeLogs] 오류: {ex.Message}");
+                return new List<HandicapChangeLog>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         public List<UserViewModel> GetPlayers(string field, string keyword, bool readyOnly)
@@ -746,11 +1004,26 @@ namespace GiSanParkGolf.Class
             parameters.Add("@Keyword", keyword);
             parameters.Add("@ReadyOnly", readyOnly ? 1 : 0);
 
-            return DB_Connection.Query<UserViewModel>(
-                "sp_Get_SYS_Users",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            ).ToList();
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<UserViewModel>(
+                    "sp_Get_SYS_Users",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetPlayers] 오류: {ex.Message}");
+                return new List<UserViewModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         /// <summary>
@@ -763,26 +1036,42 @@ namespace GiSanParkGolf.Class
             parameters.Add("@Field", field);
             parameters.Add("@Keyword", keyword);
 
-            return DB_Connection.Query<GameListModel>(
-                "sp_Get_GameList",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            ).ToList();
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<GameListModel>(
+                    "sp_Get_GameList",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetGames] 오류: {ex.Message}");
+                return new List<GameListModel>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
 
         // 경기장 목록 조회
         public List<StadiumList> GetStadiumList()
         {
             string query = @"
-            SELECT StadiumCode AS Code, StadiumName AS Name, IsActive, Note, CreatedAt
-            FROM SYS_StadiumList
-            ORDER BY StadiumCode
-        ";
-
-            DB_Connection.Open();
+                SELECT StadiumCode AS Code, StadiumName AS Name, IsActive, Note, CreatedAt
+                FROM SYS_StadiumList
+                ORDER BY StadiumCode
+            ";
 
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 return DB_Connection.Query<StadiumList>(query).ToList();
             }
             catch (Exception ex)
@@ -800,14 +1089,15 @@ namespace GiSanParkGolf.Class
         public bool InsertStadium(StadiumList stadium)
         {
             string query = @"
-            INSERT INTO SYS_StadiumList (StadiumCode, StadiumName, IsActive, Note)
-            VALUES (@StadiumCode, @StadiumName, @IsActive, @Note)
-        ";
-
-            DB_Connection.Open();
+                INSERT INTO SYS_StadiumList (StadiumCode, StadiumName, IsActive, Note)
+                VALUES (@StadiumCode, @StadiumName, @IsActive, @Note)
+            ";
 
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 return DB_Connection.Execute(query, stadium) > 0;
             }
             catch (Exception ex)
@@ -831,10 +1121,11 @@ namespace GiSanParkGolf.Class
                 ORDER BY CourseCode
             ";
 
-            DB_Connection.Open();
-
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 return DB_Connection
                     .Query<CourseList>(query, new { StadiumCode = stadiumCode })
                     .ToList();
@@ -854,15 +1145,16 @@ namespace GiSanParkGolf.Class
         public int InsertCourseAndGetId(CourseList course)
         {
             string query = @"
-        INSERT INTO SYS_CourseList (StadiumCode, CourseName, HoleCount, IsActive, CreatedAt)
-        VALUES (@StadiumCode, @CourseName, @HoleCount, @IsActive, SYSDATETIME());
-        SELECT CAST(SCOPE_IDENTITY() AS INT);
-    ";
-
-            DB_Connection.Open();
+                INSERT INTO SYS_CourseList (StadiumCode, CourseName, HoleCount, IsActive, CreatedAt)
+                VALUES (@StadiumCode, @CourseName, @HoleCount, @IsActive, SYSDATETIME());
+                SELECT CAST(SCOPE_IDENTITY() AS INT);
+            ";
 
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 return DB_Connection.ExecuteScalar<int>(query, course);
             }
             catch (Exception ex)
@@ -876,41 +1168,45 @@ namespace GiSanParkGolf.Class
             }
         }
 
-
         // 홀 목록 저장 (신규 등록)
         public bool SaveHoleList(string courseCode, List<HoleList> holes)
         {
             string query = @"
-            INSERT INTO SYS_HoleInfo (CourseCode, HoleName, Distance, Par)
-            VALUES (@CourseCode, @HoleName, @Distance, @Par)
-        ";
-
-            DB_Connection.Open();
-            SqlTransaction tx = DB_Connection.BeginTransaction();
+                INSERT INTO SYS_HoleInfo (CourseCode, HoleName, Distance, Par)
+                VALUES (@CourseCode, @HoleName, @Distance, @Par)
+            ";
 
             try
             {
-                foreach (var hole in holes)
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                SqlTransaction tx = DB_Connection.BeginTransaction();
+
+                try
                 {
-                    var param = new
+                    foreach (var hole in holes)
                     {
-                        CourseCode = courseCode,
-                        HoleName = hole.HoleName,
-                        Distance = hole.Distance,
-                        Par = hole.Par
-                    };
+                        var param = new
+                        {
+                            CourseCode = courseCode,
+                            HoleName = hole.HoleName,
+                            Distance = hole.Distance,
+                            Par = hole.Par
+                        };
 
-                    DB_Connection.Execute(query, param, tx);
+                        DB_Connection.Execute(query, param, tx);
+                    }
+
+                    tx.Commit();
+                    return true;
                 }
-
-                tx.Commit();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                tx.Rollback();
-                Console.WriteLine($"[SaveHoleList] 오류: {ex.Message}");
-                return false;
+                catch (Exception ex)
+                {
+                    tx.Rollback();
+                    Console.WriteLine($"[SaveHoleList] 오류: {ex.Message}");
+                    return false;
+                }
             }
             finally
             {
@@ -932,42 +1228,45 @@ namespace GiSanParkGolf.Class
                 VALUES (@CourseCode, @HoleName, @Distance, @Par)
             ";
 
-            DB_Connection.Open();
-            SqlTransaction tx = DB_Connection.BeginTransaction();
-
             try
             {
-                foreach (var hole in holes)
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                SqlTransaction tx = DB_Connection.BeginTransaction();
+
+                try
                 {
-                    var param = new
+                    foreach (var hole in holes)
                     {
-                        HoleId = hole.HoleId,
-                        CourseCode = courseCode,
-                        HoleName = hole.HoleName,
-                        Distance = hole.Distance,
-                        Par = hole.Par
-                    };
+                        var param = new
+                        {
+                            HoleId = hole.HoleId,
+                            CourseCode = courseCode,
+                            HoleName = hole.HoleName,
+                            Distance = hole.Distance,
+                            Par = hole.Par
+                        };
 
-                    if (hole.HoleId > 0)
-                    {
-                        // 기존 홀이면 UPDATE
-                        DB_Connection.Execute(updateQuery, param, tx);
+                        if (hole.HoleId > 0)
+                        {
+                            DB_Connection.Execute(updateQuery, param, tx);
+                        }
+                        else
+                        {
+                            DB_Connection.Execute(insertQuery, param, tx);
+                        }
                     }
-                    else
-                    {
-                        // 신규 홀이면 INSERT
-                        DB_Connection.Execute(insertQuery, param, tx);
-                    }
+
+                    tx.Commit();
+                    return true;
                 }
-
-                tx.Commit();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                tx.Rollback();
-                Console.WriteLine($"[UpdateHoleList] 오류: {ex.Message}");
-                return false;
+                catch (Exception ex)
+                {
+                    tx.Rollback();
+                    Console.WriteLine($"[UpdateHoleList] 오류: {ex.Message}");
+                    return false;
+                }
             }
             finally
             {
@@ -975,21 +1274,21 @@ namespace GiSanParkGolf.Class
             }
         }
 
-
         // 특정 코스의 홀 목록 조회
         public List<HoleList> GetHoleListByCourse(string courseCode)
         {
             string query = @"
-            SELECT HoleId, CourseCode, HoleName, Distance, Par
-            FROM SYS_HoleInfo
-            WHERE CourseCode = @CourseCode
-            ORDER BY HoleId
-        ";
-
-            DB_Connection.Open();
+                SELECT HoleId, CourseCode, HoleName, Distance, Par
+                FROM SYS_HoleInfo
+                WHERE CourseCode = @CourseCode
+                ORDER BY HoleId
+            ";
 
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 return DB_Connection
                     .Query<HoleList>(query, new { CourseCode = courseCode })
                     .ToList();
@@ -1008,18 +1307,19 @@ namespace GiSanParkGolf.Class
         public string CreateCode(string tableName, string columnName, string prefix, int digits)
         {
             string query = $@"
-        SELECT TOP 1 {columnName}
-        FROM {tableName}
-        WHERE {columnName} LIKE @Pattern
-        ORDER BY {columnName} DESC
-    ";
+                SELECT TOP 1 {columnName}
+                FROM {tableName}
+                WHERE {columnName} LIKE @Pattern
+                ORDER BY {columnName} DESC
+            ";
 
             string pattern = $"{prefix}%";
 
-            DB_Connection.Open();
-
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 string lastCode = DB_Connection.QueryFirstOrDefault<string>(
                     query,
                     new { Pattern = pattern }
@@ -1031,9 +1331,7 @@ namespace GiSanParkGolf.Class
                 {
                     string numericPart = lastCode.Substring(prefix.Length);
                     if (int.TryParse(numericPart, out int parsed))
-                    {
                         number = parsed + 1;
-                    }
                 }
 
                 return $"{prefix}{number.ToString().PadLeft(digits, '0')}";
@@ -1075,10 +1373,11 @@ namespace GiSanParkGolf.Class
                 OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
             ";
 
-            DB_Connection.Open();
-
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 return DB_Connection.Query<StadiumList>(query, param).ToList();
             }
             catch (Exception ex)
@@ -1100,12 +1399,12 @@ namespace GiSanParkGolf.Class
                 WHERE CourseCode = @CourseCode
             ";
 
-            DB_Connection.Open();
-
             try
             {
-                return DB_Connection
-                    .QueryFirstOrDefault<CourseList>(query, new { CourseCode = courseCode });
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.QueryFirstOrDefault<CourseList>(query, new { CourseCode = courseCode });
             }
             catch (Exception ex)
             {
@@ -1126,10 +1425,11 @@ namespace GiSanParkGolf.Class
                 WHERE CourseCode = @CourseCode
             ";
 
-            DB_Connection.Open();
-
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 int affectedRows = DB_Connection.Execute(query, new { HoleCount = holeCount, CourseCode = courseCode });
                 return affectedRows > 0;
             }
@@ -1151,10 +1451,11 @@ namespace GiSanParkGolf.Class
                 WHERE HoleId = @HoleId
             ";
 
-            DB_Connection.Open();
-
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 int rows = DB_Connection.Execute(query, new { HoleId = holeId });
                 return rows > 0;
             }
@@ -1179,10 +1480,11 @@ namespace GiSanParkGolf.Class
                 WHERE CourseCode = @CourseCode
             ";
 
-            DB_Connection.Open();
-
             try
             {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
                 int rows = DB_Connection.Execute(query, new { CourseCode = courseCode });
                 return rows > -1;
             }

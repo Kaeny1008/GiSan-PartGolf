@@ -1,5 +1,6 @@
 ﻿using BBS.Models;
 using Dul;
+using GiSanParkGolf.Class;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -146,9 +147,9 @@ namespace GiSanParkGolf.BBS.Controls
 
                 if (Page.User.Identity.IsAuthenticated)
                 {
-                    note.Name = Global.uvm.UserName;
-                    note.Password = Global.uvm.UserPassword;
-                    note.UserID = Global.uvm.UserId;
+                    note.Name = Helper.CurrentUser?.UserName;
+                    note.Password = Helper.CurrentUser?.UserPassword;
+                    note.UserID = Helper.CurrentUser?.UserId;
                 }
                 else
                 {

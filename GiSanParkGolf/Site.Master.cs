@@ -1,4 +1,6 @@
-﻿using System;
+﻿using GiSanParkGolf.Class;
+using GiSanParkGolf.Models;
+using System;
 using System.Web.UI;
 
 namespace GiSanParkGolf
@@ -7,13 +9,13 @@ namespace GiSanParkGolf
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Global.uvm.UserName == null)
+            if (Session["UserInfo"] == null)
             {
                 lblName.Text = "손님";
             }
             else
             {
-                lblName.Text = Global.uvm.UserName;
+                lblName.Text = Helper.CurrentUser?.UserName;
             }
         }
     }

@@ -490,20 +490,20 @@ namespace GiSanParkGolf.Sites.Admin
             }
             else
             { 
-                ShowToast("삭제 실패", "삭제 중 오류가 발생했습니다.", true); 
+                ShowToast("삭제 실패", "삭제 중 오류가 발생했습니다.", showOk: true); 
             }
         }
 
         protected void BTN_ServerStadiumDelete_Click(object sender, EventArgs e)
         {
-            string stadiumCode = Request.Form["HF_TargetStadiumCode"];
+            string stadiumCode = HF_TargetStadiumCode.Value;
 
             bool success = Global.dbManager.DeleteStadium(stadiumCode);
 
             if (success)
                 ShowToast("경기장 삭제 완료", "해당 경기장이 삭제되었습니다.");
             else
-                ShowToast("삭제 실패", "삭제 중 오류가 발생했습니다.", true);
+                ShowToast("삭제 실패", "삭제 중 오류가 발생했습니다.", showOk: true);
 
             InitializePage(); // 필요 시 경기장 목록 다시 불러오기
         }

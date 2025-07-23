@@ -52,7 +52,8 @@
                     if (Page.User.Identity.IsAuthenticated)
                     {
                         System.Diagnostics.Debug.WriteLine("로그인 되어 있다.");
-                        if (global_asax.uvm.UserClass.Equals(1))
+                        
+                        if (GiSanParkGolf.Class.Helper.CurrentUser.UserClass.Equals(1))
                         {
                             System.Diagnostics.Debug.WriteLine("관리자가 로그인이다.");
                 %>

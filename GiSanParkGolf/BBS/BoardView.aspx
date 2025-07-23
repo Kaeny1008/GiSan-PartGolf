@@ -144,9 +144,9 @@
             //공지사항일때는 Administrator만 답쓰기 가능
             if (Request.QueryString["bbsId"].Equals("notice"))
             {
-                if (!String.IsNullOrEmpty(global_asax.uvm.UserClass.ToString()))
+                if (!String.IsNullOrEmpty(GiSanParkGolf.Class.Helper.CurrentUser.UserClass.ToString()))
                 {
-                    if (global_asax.uvm.UserClass.Equals(1))
+                    if (GiSanParkGolf.Class.Helper.CurrentUser.UserClass.Equals(1))
                     {
         %>
                         <asp:HyperLink ID="lnkReply" runat="server" 

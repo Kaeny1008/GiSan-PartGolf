@@ -63,7 +63,7 @@ namespace GiSanParkGolf.Sites.Player
         protected void EarlyJoin()
         {
             // 기존 참가 신청했는지 확인
-            string earlyJoinCheck = Global.dbManager.GetEarlyJoin(gameCode, Global.uvm.UserId);
+            string earlyJoinCheck = Global.dbManager.GetEarlyJoin(gameCode, Helper.CurrentUser?.UserId);
             if (!string.IsNullOrEmpty(earlyJoinCheck))
             {
                 if (earlyJoinCheck.Equals("Join"))
@@ -90,7 +90,7 @@ namespace GiSanParkGolf.Sites.Player
 
             GameJoinUserModel gjum = new GameJoinUserModel
             {
-                UserId = Global.uvm.UserId
+                UserId = Helper.CurrentUser?.UserId
                 , JoinIP = ipaddr
                 , GameCode = gameCode
             };

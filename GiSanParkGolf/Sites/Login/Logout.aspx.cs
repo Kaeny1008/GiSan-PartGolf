@@ -16,14 +16,14 @@ namespace GiSanParkGolf
             // [!] 로그아웃
 
             DB_Management userRepo = new DB_Management();
-            userRepo.LogoutUser(Global.uvm.UserId);
+            userRepo.LogoutUser(Helper.CurrentUser?.UserId);
 
             FormsAuthentication.SignOut();
-            Global.uvm.UserId = null;
-            Global.uvm.UserPassword = null;
-            Global.uvm.UserName = null;
-            Global.uvm.UserWClass = null;
-            Global.uvm.UserClass = 0;
+            //Helper.CurrentUser?.UserId = null;
+            //Helper.CurrentUser?.UserPassword = null;
+            //Helper.CurrentUser?.UserName = null;
+            //Global.uvm.UserWClass = null;
+            //Global.uvm.UserClass = 0;
 
             //쿠키값 삭제
             var cookie = new HttpCookie(FormsAuthentication.FormsCookieName)

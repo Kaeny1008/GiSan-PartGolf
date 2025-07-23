@@ -61,7 +61,7 @@
         function handleCourseConfirm() {
             __doPostBack('<%= BTN_ServerCourseDelete.UniqueID %>', '');
         }
-이부분 수정
+
         function promptStadiumDelete(stadiumCode) {
             console.log("삭제할 경기장코드 : " + stadiumCode);
             document.getElementById("HF_TargetStadiumCode").value = stadiumCode;
@@ -77,9 +77,9 @@
 
             return false;
         }
-        이부분 수정
-        function handleCourseConfirm() {
-            __doPostBack('<%= BTN_ServerCourseDelete.UniqueID %>', '');
+
+        function handleStadiumConfirm() {
+            __doPostBack('<%= BTN_ServerStadiumDelete.UniqueID %>', '');
         }
 
         function launchModal(title, message, options = {}) {
@@ -201,7 +201,7 @@
                             <button type="button"
                                 class="btn btn-sm btn-outline-danger"
                                 onclick='<%# "return promptStadiumDelete(\"" + Eval("StadiumCode") + "\");" %>'>
-                                삭제
+                                                        삭제
                             </button>
                         </ItemTemplate>
                     </asp:TemplateField>
@@ -209,7 +209,7 @@
 
                 <EmptyDataTemplate>
                     <div class="text-center text-muted p-4 fs-5">
-                        ⚠️ 현재 등록된 경기장 정보가 없습니다.
+                                        ⚠️ 현재 등록된 경기장 정보가 없습니다.
                     </div>
                 </EmptyDataTemplate>
             </asp:GridView>
@@ -224,7 +224,7 @@
                 <div class="border rounded p-3 bg-light">
                     <div class="input-group mb-2">
                         <span class="input-group-text">경기장 코드</span>
-                        <asp:TextBox ID="TB_StadiumCode" runat="server" CssClass="form-control" />
+                        <asp:TextBox ID="TB_StadiumCode" runat="server" CssClass="form-control" Enabled="false" />
                     </div>
                     <div class="input-group mb-2">
                         <span class="input-group-text">경기장 이름</span>
