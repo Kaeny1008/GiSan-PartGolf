@@ -61,7 +61,7 @@
         function handleCourseConfirm() {
             __doPostBack('<%= BTN_ServerCourseDelete.UniqueID %>', '');
         }
-
+이부분 수정
         function promptStadiumDelete(stadiumCode) {
             console.log("삭제할 경기장코드 : " + stadiumCode);
             document.getElementById("HF_TargetStadiumCode").value = stadiumCode;
@@ -77,7 +77,7 @@
 
             return false;
         }
-
+        이부분 수정
         function handleCourseConfirm() {
             __doPostBack('<%= BTN_ServerCourseDelete.UniqueID %>', '');
         }

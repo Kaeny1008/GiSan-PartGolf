@@ -800,8 +800,8 @@ namespace GiSanParkGolf.Class
         public bool InsertStadium(StadiumList stadium)
         {
             string query = @"
-            INSERT INTO SYS_StadiumList (StadiumCode, StadiumName, IsActive, Note, CreatedAt)
-            VALUES (@Code, @Name, @IsActive, @Note, @CreatedAt)
+            INSERT INTO SYS_StadiumList (StadiumCode, StadiumName, IsActive, Note)
+            VALUES (@StadiumCode, @StadiumName, @IsActive, @Note)
         ";
 
             DB_Connection.Open();

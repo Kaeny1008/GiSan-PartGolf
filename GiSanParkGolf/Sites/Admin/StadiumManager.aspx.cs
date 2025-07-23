@@ -119,8 +119,7 @@ namespace GiSanParkGolf.Sites.Admin
                 StadiumCode = newCode,
                 StadiumName = name,
                 IsActive = isActive,
-                Note = note,
-                CreatedAt = DateTime.Now
+                Note = note
             };
 
             bool success = Global.dbManager.InsertStadium(stadium);
