@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Configuration;
+using System.Web.Razor.Tokenizer.Symbols;
 using System.Web.Security;
 using System.Web.UI.WebControls;
 using T_Engine;
@@ -769,235 +770,507 @@ namespace GiSanParkGolf.Class
             ).ToList();
         }
 
-        public List<StadiumDTO> GetStadiumList()
+        // 경기장 목록 조회
+        public List<StadiumList> GetStadiumList()
         {
             string query = @"
-        SELECT StadiumCode, StadiumName, IsActive
-        FROM SYS_StadiumList
-        ORDER BY StadiumCode";  // 필요에 따라 StadiumName 정렬 가능
+            SELECT StadiumCode AS Code, StadiumName AS Name, IsActive, Note, CreatedAt
+            FROM SYS_StadiumList
+            ORDER BY StadiumCode
+        ";
 
-            return DB_Connection.Query<StadiumDTO>(query).ToList();
-        }
-
-        public string GenerateNextCode(string table, string column, string prefix, int digits)
-        {
-            string sql = $"SELECT MAX({column}) FROM {table}";
-
-            string maxCode = DB_Connection.QueryFirstOrDefault<string>(sql);
-            int nextNumber = 1;
-
-            if (!string.IsNullOrEmpty(maxCode) && maxCode.StartsWith(prefix))
-            {
-                string numericPart = maxCode.Substring(prefix.Length);
-                if (int.TryParse(numericPart, out int current))
-                {
-                    nextNumber = current + 1;
-                }
-            }
-
-            return $"{prefix}{nextNumber.ToString($"D{digits}")}";
-        }
-
-        public bool InsertStadium(string stadiumCode, string stadiumName, bool isActive)
-        {
-            string query = @"
-        INSERT INTO SYS_StadiumList (StadiumCode, StadiumName, IsActive)
-        VALUES (@StadiumCode, @StadiumName, @IsActive)";
-
-            var param = new DynamicParameters();
-            param.Add("@StadiumCode", stadiumCode);
-            param.Add("@StadiumName", stadiumName);
-            param.Add("@IsActive", isActive);
+            DB_Connection.Open();
 
             try
             {
-                int rowsAffected = DB_Connection.Execute(query, param);
-                return rowsAffected > 0;
+                return DB_Connection.Query<StadiumList>(query).ToList();
             }
             catch (Exception ex)
             {
-                // 예외 로깅이나 오류 메시지 전달 처리 가능
-                Console.WriteLine($"InsertStadium 오류: {ex.Message}");
-                return false;
+                Console.WriteLine($"[GetStadiumList] 오류: {ex.Message}");
+                return new List<StadiumList>();
+            }
+            finally
+            {
+                DB_Connection.Close();
             }
         }
 
-        public bool InsertCourse(string stadiumCode, string courseName, int holeCount, bool isActive)
+        // 경기장 등록
+        public bool InsertStadium(StadiumList stadium)
         {
             string query = @"
-        INSERT INTO SYS_CourseList (StadiumCode, CourseName, HoleCount, IsActive)
-        VALUES (@StadiumCode, @CourseName, @HoleCount, @IsActive)";
+            INSERT INTO SYS_StadiumList (StadiumCode, StadiumName, IsActive, Note, CreatedAt)
+            VALUES (@Code, @Name, @IsActive, @Note, @CreatedAt)
+        ";
 
-            var param = new DynamicParameters();
-            param.Add("@StadiumCode", stadiumCode);
-            param.Add("@CourseName", courseName);
-            param.Add("@HoleCount", holeCount);
-            param.Add("@IsActive", isActive);
+            DB_Connection.Open();
 
             try
             {
-                int rowsAffected = DB_Connection.Execute(query, param);
-                return rowsAffected > 0;
+                return DB_Connection.Execute(query, stadium) > 0;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"InsertCourse 오류: {ex.Message}");
+                Console.WriteLine($"[InsertStadium] 오류: {ex.Message}");
                 return false;
+            }
+            finally
+            {
+                DB_Connection.Close();
             }
         }
 
-        public bool InsertHoleList(int courseCode, List<HoleDTO> holeList)
+        // 특정 경기장의 코스 목록 조회
+        public List<CourseList> GetCourseListByStadium(string stadiumCode)
         {
             string query = @"
-        INSERT INTO SYS_HoleInfo (CourseCode, HoleName, Distance, Par)
-        VALUES (@CourseCode, @HoleName, @Distance, @Par)";
+                SELECT CourseCode, StadiumCode, CourseName, HoleCount, IsActive, CreatedAt
+                FROM SYS_CourseList
+                WHERE StadiumCode = @StadiumCode
+                ORDER BY CourseCode
+            ";
+
+            DB_Connection.Open();
 
             try
             {
-                foreach (var hole in holeList)
-                {
-                    var param = new DynamicParameters();
-                    param.Add("@CourseCode", courseCode);
-                    param.Add("@HoleName", hole.HoleName);
-                    param.Add("@Distance", hole.Distance);
-                    param.Add("@Par", hole.Par);
-
-                    DB_Connection.Execute(query, param);  // 개별 실행
-                }
-
-                return true;  // 전체 성공 처리
+                return DB_Connection
+                    .Query<CourseList>(query, new { StadiumCode = stadiumCode })
+                    .ToList();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"InsertHoleList 오류: {ex.Message}");
-                return false;
+                Console.WriteLine($"[GetCourseListByStadium] 오류: {ex.Message}");
+                return new List<CourseList>();
             }
-        }
-
-        public List<CourseDTO> GetCourseListByStadium(string stadiumCode)
-        {
-            string query = @"
-        SELECT CourseCode,
-               CourseName,
-               HoleCount,
-               CASE WHEN IsActive = 1 THEN N'사용' ELSE N'미사용' END AS UseStatus,
-               StadiumCode
-        FROM SYS_CourseList
-        WHERE StadiumCode = @StadiumCode
-        ORDER BY CourseCode";
-
-            var param = new DynamicParameters();
-            param.Add("@StadiumCode", stadiumCode);
-
-            return DB_Connection.Query<CourseDTO>(query, param).ToList();
-        }
-
-        public List<HoleDTO> GetHoleListByCourse(int courseCode)
-        {
-            string query = @"
-        SELECT HoleId, HoleName, Distance, Par, CourseCode
-        FROM SYS_HoleInfo
-        WHERE CourseCode = @CourseCode
-        ORDER BY HoleId";
-
-            var param = new DynamicParameters();
-            param.Add("@CourseCode", courseCode);
-
-            return DB_Connection.Query<HoleDTO>(query, param).ToList();
-        }
-
-        public int GetHoleCountByCourse(int courseCode)
-        {
-            string query = "SELECT HoleCount FROM SYS_CourseList WHERE CourseCode = @CourseCode";
-
-            var param = new DynamicParameters();
-            param.Add("@CourseCode", courseCode);
-
-            using (var connection = new SqlConnection(WebConfigurationManager.ConnectionStrings["ParkGolfDB"].ConnectionString))
+            finally
             {
-                connection.Open();
-                return connection.QueryFirstOrDefault<int>(query, param);
+                DB_Connection.Close();
             }
         }
 
-        public int CountStadiums(string field, string keyword)
-        {
-            // ⚠ 필드명은 반드시 사전 검증된 값이어야 해! (SQL Injection 방지)
-            var allowedFields = new HashSet<string> { "StadiumName", "StadiumCode" };
-            if (!allowedFields.Contains(field))
-                field = "StadiumName";  // 기본 필드로 fallback
-
-            string query = $@"
-        SELECT COUNT(*)
-        FROM SYS_StadiumList
-        WHERE {field} LIKE @Keyword";
-
-            var param = new DynamicParameters();
-            param.Add("@Keyword", "%" + keyword + "%");
-
-            return DB_Connection.QueryFirstOrDefault<int>(query, param);
-        }
-
-        public List<StadiumDTO> SearchStadiumsPaged(string field, string keyword, int pageIndex, int pageSize)
-        {
-            // ⚠ 필드명 검증: SQL Injection 방지
-            var allowedFields = new HashSet<string> { "StadiumName", "StadiumCode" };
-            if (!allowedFields.Contains(field))
-                field = "StadiumName";  // 기본 필드 설정
-
-            string query = $@"
-        SELECT StadiumCode, StadiumName
-        FROM SYS_StadiumList
-        WHERE {field} LIKE @Keyword
-        ORDER BY StadiumCode
-        OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-
-            var param = new DynamicParameters();
-            param.Add("@Keyword", "%" + keyword + "%");
-            param.Add("@Offset", pageIndex * pageSize);  // 페이지 시작 위치
-            param.Add("@PageSize", pageSize);            // 한 페이지당 항목 수
-
-            return DB_Connection.Query<StadiumDTO>(query, param).ToList();
-        }
-
-        public bool UpdateHoleList(int courseCode, List<HoleDTO> holes)
+        // 코스 등록
+        public int InsertCourseAndGetId(CourseList course)
         {
             string query = @"
-        UPDATE SYS_HoleInfo
-        SET HoleName = @HoleName, Distance = @Distance, Par = @Par
-        WHERE HoleId = @HoleId AND CourseCode = @CourseCode";
+        INSERT INTO SYS_CourseList (StadiumCode, CourseName, HoleCount, IsActive, CreatedAt)
+        VALUES (@StadiumCode, @CourseName, @HoleCount, @IsActive, SYSDATETIME());
+        SELECT CAST(SCOPE_IDENTITY() AS INT);
+    ";
 
-            var connection = DB_Connection;
+            DB_Connection.Open();
 
-            if (connection.State != ConnectionState.Open)
-                connection.Open();
+            try
+            {
+                return DB_Connection.ExecuteScalar<int>(query, course);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[InsertCourseAndGetId] 오류: {ex.Message}");
+                return -1; // 실패 시 음수 반환
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
 
-            var transaction = connection.BeginTransaction();
+
+        // 홀 목록 저장 (신규 등록)
+        public bool SaveHoleList(string courseCode, List<HoleList> holes)
+        {
+            string query = @"
+            INSERT INTO SYS_HoleInfo (CourseCode, HoleName, Distance, Par)
+            VALUES (@CourseCode, @HoleName, @Distance, @Par)
+        ";
+
+            DB_Connection.Open();
+            SqlTransaction tx = DB_Connection.BeginTransaction();
 
             try
             {
                 foreach (var hole in holes)
                 {
-                    var parameters = new
+                    var param = new
                     {
+                        CourseCode = courseCode,
                         HoleName = hole.HoleName,
                         Distance = hole.Distance,
-                        Par = hole.Par,
-                        HoleId = hole.HoleId,
-                        CourseCode = courseCode
+                        Par = hole.Par
                     };
 
-                    connection.Execute(query, parameters, transaction);
+                    DB_Connection.Execute(query, param, tx);
                 }
 
-                transaction.Commit();
+                tx.Commit();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                transaction.Rollback();
+                tx.Rollback();
+                Console.WriteLine($"[SaveHoleList] 오류: {ex.Message}");
                 return false;
             }
+            finally
+            {
+                DB_Connection.Close();
+            }
         }
+
+        // 홀 목록 수정
+        public bool UpdateHoleList(string courseCode, List<HoleList> holes)
+        {
+            string updateQuery = @"
+                UPDATE SYS_HoleInfo
+                SET HoleName = @HoleName, Distance = @Distance, Par = @Par
+                WHERE HoleId = @HoleId AND CourseCode = @CourseCode
+            ";
+
+            string insertQuery = @"
+                INSERT INTO SYS_HoleInfo (CourseCode, HoleName, Distance, Par)
+                VALUES (@CourseCode, @HoleName, @Distance, @Par)
+            ";
+
+            DB_Connection.Open();
+            SqlTransaction tx = DB_Connection.BeginTransaction();
+
+            try
+            {
+                foreach (var hole in holes)
+                {
+                    var param = new
+                    {
+                        HoleId = hole.HoleId,
+                        CourseCode = courseCode,
+                        HoleName = hole.HoleName,
+                        Distance = hole.Distance,
+                        Par = hole.Par
+                    };
+
+                    if (hole.HoleId > 0)
+                    {
+                        // 기존 홀이면 UPDATE
+                        DB_Connection.Execute(updateQuery, param, tx);
+                    }
+                    else
+                    {
+                        // 신규 홀이면 INSERT
+                        DB_Connection.Execute(insertQuery, param, tx);
+                    }
+                }
+
+                tx.Commit();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                tx.Rollback();
+                Console.WriteLine($"[UpdateHoleList] 오류: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+
+        // 특정 코스의 홀 목록 조회
+        public List<HoleList> GetHoleListByCourse(string courseCode)
+        {
+            string query = @"
+            SELECT HoleId, CourseCode, HoleName, Distance, Par
+            FROM SYS_HoleInfo
+            WHERE CourseCode = @CourseCode
+            ORDER BY HoleId
+        ";
+
+            DB_Connection.Open();
+
+            try
+            {
+                return DB_Connection
+                    .Query<HoleList>(query, new { CourseCode = courseCode })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetHoleListByCourse] 오류: {ex.Message}");
+                return new List<HoleList>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public string CreateCode(string tableName, string columnName, string prefix, int digits)
+        {
+            string query = $@"
+        SELECT TOP 1 {columnName}
+        FROM {tableName}
+        WHERE {columnName} LIKE @Pattern
+        ORDER BY {columnName} DESC
+    ";
+
+            string pattern = $"{prefix}%";
+
+            DB_Connection.Open();
+
+            try
+            {
+                string lastCode = DB_Connection.QueryFirstOrDefault<string>(
+                    query,
+                    new { Pattern = pattern }
+                );
+
+                int number = 1;
+
+                if (!string.IsNullOrEmpty(lastCode) && lastCode.Length > prefix.Length)
+                {
+                    string numericPart = lastCode.Substring(prefix.Length);
+                    if (int.TryParse(numericPart, out int parsed))
+                    {
+                        number = parsed + 1;
+                    }
+                }
+
+                return $"{prefix}{number.ToString().PadLeft(digits, '0')}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CreateCode] 오류: {ex.Message}");
+                return $"{prefix}{new string('0', digits)}";
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public List<StadiumList> SearchStadiumList(string field, string keyword, bool readyOnly, int pageIndex, int pageSize)
+        {
+            string condition = "";
+            var param = new DynamicParameters();
+
+            int offset = pageIndex * pageSize;
+            param.Add("Offset", offset);
+            param.Add("PageSize", pageSize);
+
+            if (!string.IsNullOrEmpty(field) && !string.IsNullOrEmpty(keyword))
+            {
+                condition += $" AND {field} LIKE @Keyword";
+                param.Add("Keyword", $"%{keyword}%");
+            }
+
+            if (readyOnly)
+                condition += " AND IsActive = 1";
+
+            string query = $@"
+                SELECT StadiumCode, StadiumName, IsActive, Note, CreatedAt
+                FROM SYS_StadiumList
+                WHERE 1 = 1 {condition}
+                ORDER BY StadiumCode
+                OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
+            ";
+
+            DB_Connection.Open();
+
+            try
+            {
+                return DB_Connection.Query<StadiumList>(query, param).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SearchStadiumList] 오류: {ex.Message}");
+                return new List<StadiumList>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public CourseList GetCourseByCode(string courseCode)
+        {
+            string query = @"
+                SELECT CourseCode, StadiumCode, CourseName, HoleCount, IsActive, CreatedAt
+                FROM SYS_CourseList
+                WHERE CourseCode = @CourseCode
+            ";
+
+            DB_Connection.Open();
+
+            try
+            {
+                return DB_Connection
+                    .QueryFirstOrDefault<CourseList>(query, new { CourseCode = courseCode });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetCourseByCode] 오류: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public bool UpdateHoleCount(string courseCode, int holeCount)
+        {
+            string query = @"
+                UPDATE SYS_CourseList
+                SET HoleCount = @HoleCount
+                WHERE CourseCode = @CourseCode
+            ";
+
+            DB_Connection.Open();
+
+            try
+            {
+                int affectedRows = DB_Connection.Execute(query, new { HoleCount = holeCount, CourseCode = courseCode });
+                return affectedRows > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[UpdateHoleCount] 오류: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public bool DeleteHoleById(int holeId)
+        {
+            string query = @"
+                DELETE FROM SYS_HoleInfo
+                WHERE HoleId = @HoleId
+            ";
+
+            DB_Connection.Open();
+
+            try
+            {
+                int rows = DB_Connection.Execute(query, new { HoleId = holeId });
+                return rows > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DeleteHoleById] 오류: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public bool DeleteAllHolesByCourse(string courseCode)
+        {
+            if (string.IsNullOrWhiteSpace(courseCode))
+                return false;
+
+            string query = @"
+                DELETE FROM SYS_HoleInfo
+                WHERE CourseCode = @CourseCode
+            ";
+
+            DB_Connection.Open();
+
+            try
+            {
+                int rows = DB_Connection.Execute(query, new { CourseCode = courseCode });
+                return rows > -1;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DeleteAllHolesByCourse] 오류: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public bool DeleteCourse(int courseCode)
+        {
+            string deleteHoles = "DELETE FROM SYS_HoleInfo WHERE CourseCode = @CourseCode";
+            string deleteCourse = "DELETE FROM SYS_CourseList WHERE CourseCode = @CourseCode";
+
+            DB_Connection.Open();
+
+            try
+            {
+                // 1. 홀 먼저 삭제
+                DB_Connection.Execute(deleteHoles, new { CourseCode = courseCode });
+
+                // 2. 코스 삭제
+                int rows = DB_Connection.Execute(deleteCourse, new { CourseCode = courseCode });
+
+                return rows > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DeleteCourse] 오류: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public bool DeleteStadium(string stadiumCode)
+        {
+            if (string.IsNullOrWhiteSpace(stadiumCode))
+                return false;
+
+            string deleteHoles = @"
+                DELETE FROM SYS_HoleInfo
+                WHERE CourseCode IN (
+                    SELECT CourseCode FROM SYS_CourseList WHERE StadiumCode = @StadiumCode
+                )";
+
+            string deleteCourses = @"
+                DELETE FROM SYS_CourseList
+                WHERE StadiumCode = @StadiumCode
+            ";
+
+            string deleteStadium = @"
+                DELETE FROM SYS_StadiumList
+                WHERE StadiumCode = @StadiumCode
+            ";
+
+            DB_Connection.Open();
+
+            try
+            {
+                // 1. 해당 경기장에 속한 홀들 삭제
+                DB_Connection.Execute(deleteHoles, new { StadiumCode = stadiumCode });
+
+                // 2. 해당 경기장에 속한 코스들 삭제
+                DB_Connection.Execute(deleteCourses, new { StadiumCode = stadiumCode });
+
+                // 3. 경기장 자체 삭제
+                int rows = DB_Connection.Execute(deleteStadium, new { StadiumCode = stadiumCode });
+
+                return rows > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DeleteStadium] 오류: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
     }
 }

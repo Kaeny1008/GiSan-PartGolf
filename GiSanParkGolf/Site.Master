@@ -153,8 +153,10 @@
         <%-- 푸터 영역 --%>
         <div class="container mt-5 mb-4">
             <footer class="text-muted small mt-5 text-center">
-                &copy; 2025 기산파크골프 시스템.  
+                &copy; 2025 기산파크골프 시스템.
+                <br />
                 이 페이지는 Bootstrap 5 및 Dapper를 기반으로 구축되었습니다.  
+                <br />
                 Microsoft Copilot 기능이 포함되어 있습니다.
             </footer>
         </div>

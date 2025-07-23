@@ -184,30 +184,34 @@ namespace GiSanParkGolf.Models
         public string Reason { get; set; }
     }
 
-    public class StadiumDTO
+    public class StadiumList
     {
-        public string StadiumCode { get; set; }
+        public string StadiumCode { get; set; }          // STD0001
         public string StadiumName { get; set; }
         public bool IsActive { get; set; }
+        public string Note { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
-    public class HoleDTO
+    public class CourseList
     {
-        public int HoleId { get; set; }           // 자동 증가 기본 키
-        public int CourseCode { get; set; }       // FK: 어떤 코스에 속한 홀인지
-        public string HoleName { get; set; }      // 홀 이름 ("1번", "A1" 등)
-        public int Distance { get; set; }         // 거리 (단위: m)
-        public int Par { get; set; }              // 기준 타수 (예: 3)
+        public string CourseCode { get; set; }          // CO001
+        public string StadiumCode { get; set; }
+        public string CourseName { get; set; }
+        public int HoleCount { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        public string ActiveStatus => IsActive ? "사용" : "미사용";
     }
 
-    public class CourseDTO
+    public class HoleList
     {
-        public int CourseCode { get; set; }        // 코스 고유 번호 (PK, int)
-        public string CourseName { get; set; }     // 코스 이름
-        public int HoleCount { get; set; }         // 코스에 포함된 홀 수
-        public bool IsActive { get; set; }         // 사용 여부
-        public string StadiumCode { get; set; }    // 어떤 경기장에 속하는 코스인지 (FK)
-
-        public string UseStatus { get; set; }     // "사용" / "미사용"
+        public int HoleId { get; set; }               // PK
+        public string CourseCode { get; set; }
+        public string HoleName { get; set; }
+        public int Distance { get; set; }
+        public int Par { get; set; }
     }
+
 }

@@ -15,6 +15,42 @@ namespace GiSanParkGolf.Sites.Admin
     {
 
         /// <summary>
+        /// BTN_ServerHoleDelete 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton BTN_ServerHoleDelete;
+
+        /// <summary>
+        /// BTN_ServerDeleteAllHoles 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton BTN_ServerDeleteAllHoles;
+
+        /// <summary>
+        /// BTN_ServerCourseDelete 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton BTN_ServerCourseDelete;
+
+        /// <summary>
+        /// BTN_ServerStadiumDelete 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton BTN_ServerStadiumDelete;
+
+        /// <summary>
         /// LB_StepGuide1 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -60,13 +96,22 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.Button BTN_ShowStadiumForm;
 
         /// <summary>
-        /// SearchControl_Stadium 컨트롤입니다.
+        /// StadiumSearch 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::GiSanParkGolf.Controls.NewSearchControl SearchControl_Stadium;
+        protected global::GiSanParkGolf.Controls.NewSearchControl StadiumSearch;
+
+        /// <summary>
+        /// HF_TargetStadiumCode 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField HF_TargetStadiumCode;
 
         /// <summary>
         /// GV_StadiumList 컨트롤입니다.
@@ -78,13 +123,13 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.GridView GV_StadiumList;
 
         /// <summary>
-        /// Paging_Stadium 컨트롤입니다.
+        /// StadiumPaging 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::GiSanParkGolf.Controls.NewPagingControl Paging_Stadium;
+        protected global::GiSanParkGolf.Controls.NewPagingControl StadiumPaging;
 
         /// <summary>
         /// Panel_StadiumForm 컨트롤입니다.
@@ -112,6 +157,15 @@ namespace GiSanParkGolf.Sites.Admin
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox TB_StadiumName;
+
+        /// <summary>
+        /// RFV_StadiumName 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator RFV_StadiumName;
 
         /// <summary>
         /// DDL_StadiumActive 컨트롤입니다.
@@ -204,6 +258,15 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.Button BTN_InsertCourse;
 
         /// <summary>
+        /// HF_TargetCourseCode 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField HF_TargetCourseCode;
+
+        /// <summary>
         /// GV_CourseList 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -220,6 +283,24 @@ namespace GiSanParkGolf.Sites.Admin
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel Panel_HoleForm;
+
+        /// <summary>
+        /// BTN_AddHoleRow 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button BTN_AddHoleRow;
+
+        /// <summary>
+        /// HF_TargetHoleId 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField HF_TargetHoleId;
 
         /// <summary>
         /// GV_HoleDetail 컨트롤입니다.
@@ -249,13 +330,13 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.Button BTN_UpdateHoleDetail;
 
         /// <summary>
-        /// RFV_StadiumName 컨트롤입니다.
+        /// ValidationSummary2 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator RFV_StadiumName;
+        protected global::System.Web.UI.WebControls.ValidationSummary ValidationSummary2;
 
         /// <summary>
         /// ValidationSummaryCourse 컨트롤입니다.
@@ -265,14 +346,5 @@ namespace GiSanParkGolf.Sites.Admin
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.ValidationSummary ValidationSummaryCourse;
-
-        /// <summary>
-        /// ValidationSummary2 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.ValidationSummary ValidationSummary2;
     }
 }
