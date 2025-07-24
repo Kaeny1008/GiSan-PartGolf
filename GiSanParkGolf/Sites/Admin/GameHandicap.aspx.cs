@@ -27,7 +27,7 @@ namespace GiSanParkGolf.Sites.Admin
                 foreach (var user in userList)
                 {
                     // 나이 계산 (핸디캡 계산에 필요)
-                    int age = Global.dbManager.CalculateAge(user.UserNumber.ToString());
+                    int age = Global.dbManager.CalculateAge(user.UserNumber, user.UserGender);
                     int newHandicap = CalculateHandicapByAge(age);
 
                     // 이전 상태 비교

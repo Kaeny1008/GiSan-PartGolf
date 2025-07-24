@@ -69,7 +69,29 @@ namespace GiSanParkGolf.Models
         public int UserClass { get; set; }
         public string UserNote { get; set; }
         public DateTime UserRegistrationDate { get; set; }
-        public int UserNumber { get; set; }
+
+        public int UserNumber { get; set; }     // YYMMDD
+        public int UserGender { get; set; }     // 주민번호 뒷자리 성별코드
+
+        public string FormattedBirthDate => UserNumber.ToString().PadLeft(6, '0');
+
+        public string GenderText
+        {
+            get
+            {
+                switch (UserGender)
+                {
+                    case 1:
+                    case 3:
+                        return "남자";
+                    case 2:
+                    case 4:
+                        return "여자";
+                    default:
+                        return "확인불가";
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -160,7 +182,9 @@ namespace GiSanParkGolf.Models
     {
         public string UserId { get; set; }
         public string UserName { get; set; }
-        public string UserNumber { get; set; }
+        public int UserNumber { get; set; }
+
+        public int UserGender { get; set; }
 
         public int Age { get; set; }              // 생년월일 → 계산된 나이
         public int AgeHandicap { get; set; }      // 핸디캡 점수

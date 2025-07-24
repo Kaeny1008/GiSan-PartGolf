@@ -59,7 +59,6 @@ namespace GiSanParkGolf
             if (authCookie != null)
             {
                 FormsAuthenticationTicket authTicket = FormsAuthentication.Decrypt(authCookie.Value);
-                string userName = authTicket.Name;
                 string userData = authTicket.UserData;
                 bool expired = authTicket.Expired;
 

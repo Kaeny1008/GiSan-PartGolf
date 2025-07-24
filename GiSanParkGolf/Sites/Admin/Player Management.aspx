@@ -24,47 +24,37 @@
             PagerSettings-Visible="false"
             OnRowDataBound="GridView1_RowDataBound"
             ShowHeaderWhenEmpty="true">
-        <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
-        <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
-        <FooterStyle BackColor="#CCCCCC" />                     
+    
+            <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
+            <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
+            <FooterStyle BackColor="#CCCCCC" />                     
+
             <Columns>       
-                <%-- No 컬럼: RowDataBound에서 처리 --%>
                 <asp:TemplateField HeaderText="No">
                     <ItemTemplate />
                     <ItemStyle HorizontalAlign="Center" Width="5%" />
                     <HeaderStyle Width="5%" />
                 </asp:TemplateField>
+        
                 <asp:TemplateField>
-                    <HeaderTemplate>
-                        <asp:Label ID="LB_No" runat="server" Text="상태"></asp:Label>
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%#Eval("UserWClass")%>
-                    </ItemTemplate>
+                    <HeaderTemplate><asp:Label ID="LB_State" runat="server" Text="상태" /></HeaderTemplate>
+                    <ItemTemplate><%# Eval("UserWClass") %></ItemTemplate>
+                    <HeaderStyle Width="8%" />
+                    <ItemStyle Width="8%" />
+                </asp:TemplateField>
+
+                <asp:TemplateField>
+                    <HeaderTemplate><asp:Label ID="LB_Id" runat="server" Text="ID" /></HeaderTemplate>
+                    <ItemTemplate><%# Eval("UserId") %></ItemTemplate>
                     <HeaderStyle Width="10%" />
                     <ItemStyle Width="10%" />
                 </asp:TemplateField>
+
                 <asp:TemplateField>
-                    <HeaderTemplate>
-                        <asp:Label ID="LB_No" runat="server" Text="ID"></asp:Label>
-                    </HeaderTemplate>
+                    <HeaderTemplate><asp:Label ID="LB_Name" runat="server" Text="이름" /></HeaderTemplate>
                     <ItemTemplate>
-                        <%#Eval("UserId")%>
-                    </ItemTemplate>
-                    <HeaderStyle Width="10%" />
-                    <ItemStyle Width="10%" />
-                </asp:TemplateField>
-                <asp:TemplateField>
-                    <HeaderTemplate>
-                        <asp:Label ID="LB_No" runat="server" Text="이름"></asp:Label>
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%# Eval("UserWClass").Equals("승인대기") ? 
-                                "<span class=\"badge text-bg-secondary\">New</span>" 
-                                : 
-                                "" 
-                        %>
-                        <asp:HyperLink ID="lnkTitle" runat="server" Class="HyperLink"
+                        <%# Eval("UserWClass").Equals("승인대기") ? "<span class='badge text-bg-secondary'>New</span>" : "" %>
+                        <asp:HyperLink ID="lnkTitle" runat="server" CssClass="HyperLink"
                             NavigateUrl='<%# "~/Sites/Admin/Player Information.aspx?UserId=" + Eval("UserId") %>'>
                             <%# Dul.StringLibrary.CutStringUnicode(Eval("UserName").ToString(), 30) %>
                         </asp:HyperLink>
@@ -72,28 +62,30 @@
                     <HeaderStyle Width="15%" />
                     <ItemStyle Width="15%" />
                 </asp:TemplateField>
+
                 <asp:TemplateField>
-                    <HeaderTemplate>
-                        <asp:Label ID="LB_No" runat="server" Text="생년월일"></asp:Label>
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%#Eval("UserNumber")%>
-                    </ItemTemplate>
+                    <HeaderTemplate><asp:Label ID="LB_Birth" runat="server" Text="생년월일" /></HeaderTemplate>
+                    <ItemTemplate><%# Eval("FormattedBirthDate") %></ItemTemplate>
                     <HeaderStyle Width="10%" />
                     <ItemStyle Width="10%" />
                 </asp:TemplateField>
+
                 <asp:TemplateField>
-                    <HeaderTemplate>
-                        <asp:Label ID="LB_No" runat="server" Text="비고"></asp:Label>
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <%#Eval("UserNote")%>
-                    </ItemTemplate>
-                    <HeaderStyle Width="50%" />
-                    <ItemStyle Width="50%" HorizontalAlign="left"/>
+                    <HeaderTemplate><asp:Label ID="LB_Gender" runat="server" Text="성별" /></HeaderTemplate>
+                    <ItemTemplate><%# Eval("GenderText") %></ItemTemplate>
+                    <HeaderStyle Width="7%" />
+                    <ItemStyle Width="7%" />
+                </asp:TemplateField>
+
+                <asp:TemplateField>
+                    <HeaderTemplate><asp:Label ID="LB_Note" runat="server" Text="비고" /></HeaderTemplate>
+                    <ItemTemplate><%# Eval("UserNote") %></ItemTemplate>
+                    <HeaderStyle Width="45%" />
+                    <ItemStyle Width="45%" HorizontalAlign="Left" />
                 </asp:TemplateField>
             </Columns>
-                <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
+
+            <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
             <EmptyDataTemplate>선수가 없습니다.</EmptyDataTemplate>
         </asp:GridView>
 
