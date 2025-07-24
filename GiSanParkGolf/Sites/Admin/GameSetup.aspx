@@ -33,7 +33,7 @@
             showmodal.find(".modal-body").text(modalConfig.body);
 
             // 모든 버튼 초기화
-            showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes").hide().off("click");
+            showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final").hide().off("click");
 
             // 예 버튼 설정 - switch 문으로 변경
             switch (modalConfig.yesButtonType) {
@@ -46,6 +46,9 @@
                     showmodal.find("#MainContent_BTN_SettingYes").show();
                     break;
 
+                case 2:
+                    showmodal.find("#BTN_No").show();
+                    showmodal.find("#MainContent_BTN_SaveAssignment_Final").show();
                 default:
                     break;
             }
@@ -100,6 +103,7 @@
                         CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
                         AutoGenerateColumns="False"
                         DataKeyNames="GameCode"
+                        OnSelectedIndexChanged="GameList_SelectedIndexChanged"
                         OnRowDataBound="GameList_RowDataBound">
                         <Columns>
                             <%-- No 컬럼 --%>
@@ -115,9 +119,8 @@
                                     <asp:LinkButton ID="LnkGame" runat="server"
                                         CssClass="HyperLink"
                                         ToolTip='<%# Eval("GameCode") %>'
-                                        CommandName="select"
-                                        OnClick="LnkGame_Click">
-                                        <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 25) %>
+                                        CommandName="Select"
+                                        Text='<%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 25) %>'>
                                     </asp:LinkButton>
                                 </ItemTemplate>
                                 <HeaderStyle Width="200px" />
@@ -131,6 +134,11 @@
                                 </ItemTemplate>
                                 <HeaderStyle Width="90px" />
                                 <ItemStyle Width="90px" />
+                            </asp:TemplateField>
+                            <asp:TemplateField HeaderText="GameCode" Visible="False">
+                                <ItemTemplate>
+                                    <%# Eval("GameCode") %>
+                                </ItemTemplate>
                             </asp:TemplateField>
                         </Columns>
                         <EmptyDataTemplate>데이터가 없습니다.</EmptyDataTemplate>
@@ -216,7 +224,9 @@
                                     <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px" />
                                     <Columns>
                                         <asp:TemplateField HeaderText="No.">
-                                            <ItemTemplate><%# Eval("RowNumber") %></ItemTemplate>
+                                            <ItemTemplate>
+                                                <%-- 번호는 서버 코드에서 삽입하므로 비워둠 --%>
+                                            </ItemTemplate>
                                             <ItemStyle Width="8%" />
                                             <HeaderStyle Width="8%" />
                                         </asp:TemplateField>
@@ -282,14 +292,21 @@
                                     CssClass="btn btn-outline-info btn-sm"
                                     Text="새로고침"
                                     OnClick="BTN_RefreshResult_Click" />
+                                <asp:Button ID="BTN_SaveAssignment" runat="server"
+                                    CssClass="btn btn-primary btn-sm"
+                                    Text="배정 결과 저장"
+                                    OnClick="BTN_SaveAssignment_Click" />
                             </div>
 
                             <asp:GridView ID="gvCourseResult" runat="server"
                                 AutoGenerateColumns="False"
+                                OnRowDataBound="gvCourseResult_RowDataBound"
                                 CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
                                 EmptyDataText="배치된 코스가 없습니다. 먼저 코스배치를 실행하세요.">
                                 <Columns>
+                                    <asp:BoundField DataField="UserId" HeaderText="ID" />
                                     <asp:BoundField DataField="UserName" HeaderText="성명" />
+                                    <asp:BoundField DataField="GenderText" HeaderText="성별" />
                                     <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
                                     <asp:BoundField DataField="HoleNumber" HeaderText="배정홀" />
                                     <asp:BoundField DataField="TeamNumber" HeaderText="팀번호" />
@@ -332,6 +349,10 @@
                     <button id="BTN_Close" type="button" class="btn btn-secondary" data-bs-dismiss="modal">확인</button>
                     <asp:Button ID="BTN_SettingYes" runat="server" Text="예" CssClass="btn btn-primary"
                         OnClick="BTN_SettingYes_Click" />
+                    <asp:Button ID="BTN_SaveAssignment_Final" runat="server"
+                                CssClass="btn btn-primary" 
+                                Text="예"
+                                OnClick="BTN_SaveAssignment_Final_Click" />
                 </div>
             </div>
         </div>

@@ -1561,5 +1561,136 @@ namespace GiSanParkGolf.Class
             }
         }
 
+        public List<AssignedPlayer> GetAssignmentResult(string gameCode)
+        {
+            string query = @"
+                SELECT A.GameCode, A.UserId, U.UserName, U.UserGender,
+                       CASE U.UserGender 
+                           WHEN 1 THEN '남성'
+                           WHEN 2 THEN '여성'
+                           WHEN 3 THEN '남성'
+                           WHEN 4 THEN '여성'
+                           ELSE '기타'
+                       END AS GenderText,
+                       A.CourseName, A.HoleNumber, A.TeamNumber,
+                       A.GroupNumber, A.CourseOrder, A.AgeHandicap
+                FROM Game_UserAssignment A
+                INNER JOIN SYS_Users U ON A.UserId = U.UserId
+                WHERE A.GameCode = @GameCode
+                ORDER BY 
+                    CASE 
+                        WHEN A.TeamNumber LIKE 'M%' THEN 0
+                        WHEN A.TeamNumber LIKE 'F%' THEN 1
+                        ELSE 2
+                    END,
+                    A.TeamNumber ASC,
+                    A.CourseOrder ASC
+            ";
+
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                return DB_Connection.Query<AssignedPlayer>(query, new { GameCode = gameCode }).ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetAssignmentResult] 오류: {ex.Message}");
+                return new List<AssignedPlayer>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public bool SaveAssignmentResult(List<AssignedPlayer> assignments)
+        {
+            if (assignments == null || assignments.Count == 0)
+                return false;
+
+            string gameCode = assignments.First().GameCode;
+
+            string deleteQuery = "DELETE FROM Game_UserAssignment WHERE GameCode = @GameCode";
+
+            string insertQuery = @"
+                INSERT INTO Game_UserAssignment (
+                    GameCode, UserId, CourseName, HoleNumber,
+                    TeamNumber, GroupNumber, CourseOrder,
+                    AgeHandicap, AssignedDate
+                ) VALUES (
+                    @GameCode, @UserId, @CourseName, @HoleNumber,
+                    @TeamNumber, @GroupNumber, @CourseOrder,
+                    @AgeHandicap, GETDATE()
+                )
+            ";
+
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                // 🧹 기존 기록 삭제
+                DB_Connection.Execute(deleteQuery, new { GameCode = gameCode });
+
+                // 📝 새 배정 저장
+                foreach (var player in assignments)
+                {
+                    DB_Connection.Execute(insertQuery, new
+                    {
+                        GameCode = player.GameCode,
+                        UserId = player.UserId,
+                        CourseName = player.CourseName,
+                        HoleNumber = player.HoleNumber,
+                        TeamNumber = player.TeamNumber,
+                        GroupNumber = player.GroupNumber,
+                        CourseOrder = player.CourseOrder,
+                        AgeHandicap = player.AgeHandicap
+                    });
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SaveAssignmentResult] 저장 실패: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
+        public void UpdateGameSetting(string gameCode, string settingCode)
+        {
+            string query = @"
+                UPDATE Game_List
+                SET GameSetting = @SettingCode
+                WHERE GameCode = @GameCode
+            ";
+
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                DB_Connection.Execute(query, new
+                {
+                    SettingCode = settingCode,
+                    GameCode = gameCode
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[UpdateGameSetting] 오류: {ex.Message}");
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
     }
 }

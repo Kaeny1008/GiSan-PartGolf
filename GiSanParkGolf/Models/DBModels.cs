@@ -57,6 +57,7 @@ namespace GiSanParkGolf.Models
 
         [Display(Name = "참가인원 수")]
         public int ParticipantNumber { get; set; }
+         public string GameSetting { get; set; }
     }
 
     /// <summary>
@@ -266,6 +267,7 @@ namespace GiSanParkGolf.Models
         public int Par { get; set; }
     }
 
+    [Serializable]
     public class AssignedPlayer
     {
         public string UserId { get; set; }           // 참가자 ID

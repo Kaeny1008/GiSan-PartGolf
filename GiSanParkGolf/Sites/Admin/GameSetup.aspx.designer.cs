@@ -213,6 +213,15 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.Button BTN_RefreshResult;
 
         /// <summary>
+        /// BTN_SaveAssignment 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button BTN_SaveAssignment;
+
+        /// <summary>
         /// gvCourseResult 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -229,5 +238,14 @@ namespace GiSanParkGolf.Sites.Admin
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button BTN_SettingYes;
+
+        /// <summary>
+        /// BTN_SaveAssignment_Final 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button BTN_SaveAssignment_Final;
     }
 }
