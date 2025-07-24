@@ -15,22 +15,13 @@ namespace GiSanParkGolf.Sites.Admin
     {
 
         /// <summary>
-        /// TextBox2 컨트롤입니다.
+        /// MainTitle 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox2;
-
-        /// <summary>
-        /// IDResult 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label IDResult;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl MainTitle;
 
         /// <summary>
         /// txtID 컨트롤입니다.
@@ -177,6 +168,15 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.Button Button2;
 
         /// <summary>
+        /// ValidationSummary_SignupForm 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ValidationSummary ValidationSummary_SignupForm;
+
+        /// <summary>
         /// RegularExpressionValidator2 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -265,14 +265,5 @@ namespace GiSanParkGolf.Sites.Admin
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.CustomValidator CustomValidator2;
-
-        /// <summary>
-        /// ValidationSummary_SignupForm 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.ValidationSummary ValidationSummary_SignupForm;
     }
 }

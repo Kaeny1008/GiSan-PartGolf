@@ -37,44 +37,53 @@
             }
         }
     </script>
+
+    <!-- 상단 카드: 페이지 설명 영역 -->
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2" id="MainTitle" runat="server">핸디캡 변경 이력 조회</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">
+            변경된 핸디캡의 이력을 조회 할 수 있습니다.
+        </p>
+    </div>
+
     <div class="container mt-4">
-        <h2 class="mb-3">🔍 핸디캡 변경 이력 조회</h2>
+        <div class="custom-card">
+            <uc:NewSearchControl ID="search" runat="server"
+                OnSearchRequested="Search_SearchRequested"
+                OnResetRequested="Search_ResetRequested" />
 
-        <uc:NewSearchControl ID="search" runat="server"
-            OnSearchRequested="Search_SearchRequested"
-            OnResetRequested="Search_ResetRequested" />
+            <asp:GridView ID="gvLog" runat="server"
+                AutoGenerateColumns="False"
+                AllowPaging="true"
+                PageSize="10"
+                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                ShowHeaderWhenEmpty="true"
+                OnPageIndexChanging="gvLog_PageIndexChanging"
+                OnRowDataBound="gvLog_RowDataBound"
+                PagerSettings-Visible="false">
 
-        <asp:GridView ID="gvLog" runat="server"
-            AutoGenerateColumns="False"
-            AllowPaging="true"
-            PageSize="10"
-            CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-            ShowHeaderWhenEmpty="true"
-            OnPageIndexChanging="gvLog_PageIndexChanging"
-            OnRowDataBound="gvLog_RowDataBound"
-            PagerSettings-Visible="false">
+                <Columns>
+                    <%-- No 컬럼: RowDataBound에서 처리 --%>
+                    <asp:TemplateField HeaderText="No">
+                        <ItemTemplate />
+                        <ItemStyle HorizontalAlign="Center" />
+                    </asp:TemplateField>
 
-            <Columns>
-                <%-- No 컬럼: RowDataBound에서 처리 --%>
-                <asp:TemplateField HeaderText="No">
-                    <ItemTemplate />
-                    <ItemStyle HorizontalAlign="Center" />
-                </asp:TemplateField>
+                    <asp:BoundField DataField="UserId" HeaderText="ID" />
+                    <asp:BoundField DataField="UserName" HeaderText="이름" />
+                    <asp:BoundField DataField="Age" HeaderText="나이" />
+                    <asp:BoundField DataField="PrevHandicap" HeaderText="이전 핸디캡" />
+                    <asp:BoundField DataField="NewHandicap" HeaderText="변경 핸디캡" />
+                    <asp:BoundField DataField="PrevSource" HeaderText="이전 방식" />
+                    <asp:BoundField DataField="NewSource" HeaderText="변경 방식" />
+                    <asp:BoundField DataField="ChangedBy" HeaderText="수정자" />
+                    <asp:BoundField DataField="ChangedAt" HeaderText="변경일시" DataFormatString="{0:yyyy-MM-dd HH:mm}" />
+                    <asp:BoundField DataField="Reason" HeaderText="변경 사유" />
+                </Columns>
+            </asp:GridView>
 
-                <asp:BoundField DataField="UserId" HeaderText="ID" />
-                <asp:BoundField DataField="UserName" HeaderText="이름" />
-                <asp:BoundField DataField="Age" HeaderText="나이" />
-                <asp:BoundField DataField="PrevHandicap" HeaderText="이전 핸디캡" />
-                <asp:BoundField DataField="NewHandicap" HeaderText="변경 핸디캡" />
-                <asp:BoundField DataField="PrevSource" HeaderText="이전 방식" />
-                <asp:BoundField DataField="NewSource" HeaderText="변경 방식" />
-                <asp:BoundField DataField="ChangedBy" HeaderText="수정자" />
-                <asp:BoundField DataField="ChangedAt" HeaderText="변경일시" DataFormatString="{0:yyyy-MM-dd HH:mm}" />
-                <asp:BoundField DataField="Reason" HeaderText="변경 사유" />
-            </Columns>
-        </asp:GridView>
-
-        <uc:NewPagingControl ID="pager" runat="server" OnPageChanged="Pager_PageChanged" />
+            <uc:NewPagingControl ID="pager" runat="server" OnPageChanged="Pager_PageChanged" />
+        </div>
     </div>
 
     <div class="modal fade" id="msgModal" tabindex="-1" aria-labelledby="msgModalLabel" aria-hidden="true">

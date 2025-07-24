@@ -85,12 +85,15 @@
     </style>
 
     <div id="MainContent" runat="server">
-        <div class="center_container">
-            <div style="width:100%">
-                <div style="text-align:left;">
-                    <h4 style="color:cornflowerblue">참여가능 대회 목록</h4>
-                    <p>참가하려는 대회명을 선택하여 참가신청을 하십시오.</p>
-                </div>
+        <!-- 상단 카드: 페이지 설명 영역 -->
+        <div class="mb-3 text-center">
+            <h4 class="fw-bold mb-2" id="MainTitle" runat="server">참여가능 대회 목록</h4>
+            <p class="text-muted" style="font-size: 0.95rem;">
+                참가하려는 대회명을 선택하여 참가신청을 하십시오.
+            </p>
+        </div>
+        <div class="container mt-4">
+            <div class="custom-card">
                 <div style="width:40%">
                     <uc:NewSearchControl ID="search" runat="server"
                         OnSearchRequested="Search_SearchRequested"
@@ -204,12 +207,15 @@
     </div>
 
     <div id="GameContent" runat="server">
-        <div class="center_container">
-            <div style="width:40%">
-                <div style="text-align:left;">
-                    <h4 style="color:cornflowerblue">선택된 대회정보입니다.</h4>
-                    <p>확인 후 '참가신청' 버튼을 눌러주십시오.</p>
-                </div>
+        <!-- 상단 카드: 페이지 설명 영역 -->
+        <div class="mb-3 text-center">
+            <h4 class="fw-bold mb-2" id="H1" runat="server">선택된 대회정보입니다.</h4>
+            <p class="text-muted" style="font-size: 0.95rem;">
+                확인 후 '참가신청' 버튼을 눌러주십시오.
+            </p>
+        </div>
+        <div class="container mt-4">
+            <div class="custom-card" style="width: 40%">
                 <div class="input-group mb-3">
                     <span class="input-group-text redfont">대회명</span>
                     <asp:TextBox ID="TB_GameName" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>

@@ -23,6 +23,8 @@ namespace GiSanParkGolf.Models
         [Required(ErrorMessage = "* 경기장를 입력하여 주십시오.")]
         public string StadiumName { get; set; }
 
+        public string StadiumCode { get; set; }
+
         [Display(Name = "개최주관")]
         [Required(ErrorMessage = "* 개최주관을 입력하여 주십시오.")]
         public string GameHost { get; set; }
@@ -68,6 +70,8 @@ namespace GiSanParkGolf.Models
         public string UserWClass { get; set; }
         public int UserClass { get; set; }
         public string UserNote { get; set; }
+        public string UserAddress { get; set; }
+        public string UserAddress2 { get; set; }
         public DateTime UserRegistrationDate { get; set; }
 
         public int UserNumber { get; set; }     // YYMMDD
@@ -150,10 +154,34 @@ namespace GiSanParkGolf.Models
         public string UserName { get; set; }
 
         [Display(Name = "UserNumber")]
-        public string UserNumber { get; set; }
+        public int UserNumber { get; set; }
+
+        public int UserGender { get; set; }
 
         public string GameCode { get; set; }
         public string GameName { get; set; }
+
+        public string FormattedBirthDate => UserNumber.ToString().PadLeft(6, '0');
+
+        public string GenderText
+        {
+            get
+            {
+                switch (UserGender)
+                {
+                    case 1:
+                    case 3:
+                        return "남자";
+                    case 2:
+                    case 4:
+                        return "여자";
+                    default:
+                        return "확인불가";
+                }
+            }
+        }
+
+        public int AgeHandicap { get; set; }    // 핸디캡 점수
     }
 
     public class PlayerHandicapViewModel
@@ -236,6 +264,25 @@ namespace GiSanParkGolf.Models
         public string HoleName { get; set; }
         public int Distance { get; set; }
         public int Par { get; set; }
+    }
+
+    public class AssignedPlayer
+    {
+        public string UserId { get; set; }           // 참가자 ID
+        public string UserName { get; set; }         // 참가자 이름
+        public int AgeHandicap { get; set; }         // 핸디캡
+        public string GameCode { get; set; }         // 대회 코드
+        public string CourseName { get; set; }       // 배정된 코스명
+        public int CourseOrder { get; set; }         // 코스 내 순서
+        public int GroupNumber { get; set; }         // 그룹 번호 (optional)
+        public string GenderText { get; set; }       // 성별 텍스트
+        public string HoleNumber { get; set; }
+
+        public string TeamNumber { get; set; }
+
+        // 보조 필드 (출력용)
+        public string Summary =>
+            $"{UserName} (핸디캡 {AgeHandicap}) → {CourseName} {CourseOrder}번";
     }
 
 }

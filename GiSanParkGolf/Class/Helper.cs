@@ -32,5 +32,43 @@ namespace GiSanParkGolf.Class
                 return HttpContext.Current.Session["UserInfo"] as UserViewModel;
             }
         }
+
+        // 나이 계산 유틸리티
+        public static int CalculateAge(int userNumber, int userGender)
+        {
+            // 6자리 생년월일 입력 보정 (예: 851010 → "851010")
+            string birthPart = userNumber.ToString().PadLeft(6, '0');
+
+            // YYMMDD → YY만 추출
+            if (!int.TryParse(birthPart.Substring(0, 2), out int yy))
+                return 0;
+
+            // 성별 코드 기반 세기 구분
+            int birthYear;
+            switch (userGender)
+            {
+                case 1:
+                case 2:
+                    birthYear = 1900 + yy;
+                    break;
+                case 3:
+                case 4:
+                    birthYear = 2000 + yy;
+                    break;
+                case 5:
+                case 6: // 외국인 등록번호 (1900 또는 2000 구분 없음)
+                    birthYear = (yy >= 25) ? 1900 + yy : 2000 + yy;
+                    break;
+                default:
+                    return 0; // 알 수 없는 성별 코드
+            }
+
+            // 한국식 나이 계산: 올해 - 출생연도 + 1
+            int currentYear = DateTime.Today.Year;
+            int age = currentYear - birthYear + 1;
+
+            // 현실적인 나이만 반환
+            return (age >= 0 && age <= 130) ? age : 0;
+        }
     }
 }

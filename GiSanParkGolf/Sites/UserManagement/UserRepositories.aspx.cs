@@ -78,20 +78,24 @@ namespace GiSanParkGolf.Sites.UserManagement
             txtReCheck.Attributes.Add("value", txtReCheck.Text);
 
             DB_Management IDCheck = new DB_Management();
-            Boolean checkResult = IDCheck.ID_DuplicateCheck(txtID.Text);
+            bool checkResult = IDCheck.ID_DuplicateCheck(txtID.Text);
 
-            if (checkResult == false)
+            if (!checkResult)
             {
-                IDResult.Text = "ID를 사용 할 수 없습니다.";
-                IDResult.ForeColor = Color.Red;
+                Label_IDCheckResult.Text = "해당 아이디는 이미 사용 중입니다.";
+                Label_IDCheckResult.CssClass = "text-danger";
                 TextBox2.Text = "Ready";
             }
             else
             {
-                IDResult.Text = "ID를 사용 할 수 있습니다.";
-                IDResult.ForeColor = Color.Black;
+                Label_IDCheckResult.Text = "사용 가능한 아이디입니다!";
+                Label_IDCheckResult.CssClass = "text-success";
                 TextBox2.Text = "OK";
             }
+
+            // 모달 띄우기 위한 스크립트 등록
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "IDCheckResultModalScript",
+                "var modal = new bootstrap.Modal(document.getElementById('IDCheckResultModal')); modal.show();", true);
         }
     }
 }

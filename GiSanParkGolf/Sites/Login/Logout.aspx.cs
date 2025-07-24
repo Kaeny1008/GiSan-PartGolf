@@ -18,14 +18,14 @@ namespace GiSanParkGolf
             DB_Management userRepo = new DB_Management();
             userRepo.LogoutUser(Helper.CurrentUser?.UserId);
 
-            FormsAuthentication.SignOut();
-            //Helper.CurrentUser?.UserId = null;
-            //Helper.CurrentUser?.UserPassword = null;
-            //Helper.CurrentUser?.UserName = null;
-            //Global.uvm.UserWClass = null;
-            //Global.uvm.UserClass = 0;
+            // 세션 제거
+            Session.Remove("UserInfo");      // 특정 키만 제거
+            Session.Clear();                 // 전체 세션 제거
+            Session.Abandon();               // 세션 무효화
 
-            //쿠키값 삭제
+            // 인증 쿠키 제거
+            FormsAuthentication.SignOut();
+
             var cookie = new HttpCookie(FormsAuthentication.FormsCookieName)
             {
                 Expires = DateTime.Now.AddDays(-1)
@@ -34,5 +34,6 @@ namespace GiSanParkGolf
 
             Response.Redirect("~/Login.aspx");
         }
+
     }
 }

@@ -15,6 +15,15 @@ namespace GiSanParkGolf.Sites.Admin
     {
 
         /// <summary>
+        /// MainTitle 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl MainTitle;
+
+        /// <summary>
         /// TB_GameName 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -33,13 +42,22 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.TextBox TB_GameDate;
 
         /// <summary>
-        /// TB_StadiumName 컨트롤입니다.
+        /// TB_GameTime 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TB_StadiumName;
+        protected global::System.Web.UI.WebControls.TextBox TB_GameTime;
+
+        /// <summary>
+        /// DDL_Stadium 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList DDL_Stadium;
 
         /// <summary>
         /// TB_GameHost 컨트롤입니다.
@@ -69,6 +87,15 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.TextBox TB_StartDate;
 
         /// <summary>
+        /// TB_StartTime 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox TB_StartTime;
+
+        /// <summary>
         /// TB_EndDate 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -76,6 +103,15 @@ namespace GiSanParkGolf.Sites.Admin
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox TB_EndDate;
+
+        /// <summary>
+        /// TB_EndTime 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox TB_EndTime;
 
         /// <summary>
         /// TB_Note 컨트롤입니다.
@@ -87,31 +123,31 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.TextBox TB_Note;
 
         /// <summary>
-        /// BTN_ModalShow 컨트롤입니다.
+        /// ButtonSave 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button BTN_ModalShow;
+        protected global::System.Web.UI.WebControls.Button ButtonSave;
 
         /// <summary>
-        /// Button1 컨트롤입니다.
+        /// ButtonUpdate 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button Button1;
+        protected global::System.Web.UI.WebControls.Button ButtonUpdate;
 
         /// <summary>
-        /// BTN_ModalShow2 컨트롤입니다.
+        /// ButtonCancel 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button BTN_ModalShow2;
+        protected global::System.Web.UI.WebControls.Button ButtonCancel;
 
         /// <summary>
         /// RequiredFieldValidator1 컨트롤입니다.
@@ -123,13 +159,13 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.RequiredFieldValidator RequiredFieldValidator1;
 
         /// <summary>
-        /// RequiredFieldValidator2 컨트롤입니다.
+        /// RequiredFieldValidator_Stadium 컨트롤입니다.
         /// </summary>
         /// <remarks>
         /// 자동 생성 필드입니다.
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator RequiredFieldValidator2;
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator RequiredFieldValidator_Stadium;
 
         /// <summary>
         /// RequiredFieldValidator3 컨트롤입니다.

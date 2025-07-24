@@ -36,13 +36,18 @@
         }
     </style>
 
+
+
     <div id="MainContent" runat="server">
-        <div class="center_container">
-            <div style="width:100%">
-                <div style="text-align:left;">
-                    <h4 style="color:cornflowerblue">참여 대회 목록</h4>
-                    <p>내 대회의 결과 및 참가여부 수정을 할 수 있습니다.</p>
-                </div>
+        <!-- 상단 카드: 페이지 설명 영역 -->
+        <div class="mb-3 text-center">
+            <h4 class="fw-bold mb-2" id="H1" runat="server">참여 대회 목록</h4>
+            <p class="text-muted" style="font-size: 0.95rem;">
+                내 대회의 결과 및 참가여부 수정을 할 수 있습니다.
+            </p>
+        </div>
+        <div class="container mt-4">
+            <div class="custom-card">
                 <div style="width:40%">
                     <uc:NewSearchControl ID="search" runat="server"
                         OnSearchRequested="Search_SearchRequested"
@@ -179,6 +184,13 @@
     </div>
 
     <div id="GameContent" runat="server">
+        <!-- 상단 카드: 페이지 설명 영역 -->
+        <div class="mb-3 text-center">
+            <h4 class="fw-bold mb-2" id="H2" runat="server">참여 대회 목록</h4>
+            <p class="text-muted" style="font-size: 0.95rem;">
+                내 대회의 결과 및 정보를 확인 할 수 있습니다.
+            </p>
+        </div>
         <div class="row">
             <div class="col-md-4" style="background-color:aliceblue; border-top-left-radius:1rem; border-bottom-left-radius:1rem;">
                 <div class="center_container">

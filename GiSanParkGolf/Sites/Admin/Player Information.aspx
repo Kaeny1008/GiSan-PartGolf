@@ -42,16 +42,21 @@
         }
 
         function ValidateCheck() {
-            var isValid = false;
-            isValid = Page_ClientValidate('NewUser');
-            //if (isValid) {
-            //    isValid = Page_ClientValidate('NewUser');
-            //}
+            var isValid = Page_ClientValidate('NewUser');
+            console.log("유효성 검사 결과: " + isValid);
 
             if (isValid) {
+                // 검사 통과 → 저장 확인 모달
+                console.log("유효성 통과 → ShowModal 실행");
                 ShowModal();
+            } else {
+                // 검사 실패 → 유효성 안내 모달 띄우기
+                console.log("유효성 실패 → ValidationModal 실행");
+                var modal = new bootstrap.Modal(document.getElementById('ValidationModal'));
+                modal.show();
             }
         }
+
         function CloseModal() {
             $("#SaveModal").modal("hide");
         }
@@ -65,26 +70,16 @@
         }
     </style>
 
-    <div class="center_container">
-        <div>
-            <div class="alert alert-success d-flex align-items-center" role="alert">
-                <svg xmlns="http://www.w3.org/2000/svg" 
-                    width="50" height="50" 
-                    fill="currentColor" 
-                    class="bi bi-check-circle-fill flex-shrink-0 me-2" 
-                    viewBox="0 0 16 16" 
-                    role="img" 
-                    aria-label="Success:">
-                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                </svg>
-                <div>
-                    <strong>선수 정보관리</strong><br />
-                    선수의 정보를 수정합니다.
-                </div>
-            </div>
-            
-            <asp:TextBox ID="TextBox2" runat="server" ValidationGroup="NewUser" Text="Ready" Enabled="false" Width="150px" BorderStyle="None" ForeColor="white" BackColor="white" /><br />
-            <asp:Label ID="IDResult" runat="server" Text=""></asp:Label><br />
+    <!-- 상단 카드: 페이지 설명 영역 -->
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2" id="MainTitle" runat="server">선수 정보관리</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">
+            선수의 정보를 수정합니다.
+        </p>
+    </div>
+
+    <div class="center_container mt-4">
+        <div class="custom-card">
             <div class="input-group mb-3">
                 <span class="input-group-text" id="basic-addon1">ID</span>
                 <asp:TextBox ID="txtID" runat="server" class="form-control" ValidationGroup="IDCheck" ReadOnly="true" onkeypress="reCheckID()"></asp:TextBox>
@@ -148,123 +143,147 @@
                     <asp:ListItem Value="3" Text="Member"></asp:ListItem>
                 </asp:DropDownList>
             </div>
-
-            <div style="align-items: center"> 
-                <asp:Button ID="BTN_Modify" 
-                    Font-Bold="true" 
-                    runat="server" 
-                    Text="수정하기" 
-                    class="btn btn-primary" 
-                    ValidationGroup="NewUser" 
-                    height="40px"
-                    OnClientClick="ValidateCheck();return false;" />
-            </div>
         </div>
+    </div>
+    <div class="text-center mt-4">
+        <asp:Button ID="BTN_Modify" 
+            Font-Bold="true" 
+            runat="server" 
+            Text="수정하기" 
+            class="btn btn-primary" 
+            ValidationGroup="NewUser" 
+            height="40px"
+            OnClientClick="ValidateCheck();return false;" />
+    </div>
 
-        <!-- Modal -->
-        <div class="modal fade" id="SaveModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered"> <%--modal-dialog-centered 를 옆에 넣으면 화면 중앙에 나타난다.--%>
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">저장확인</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        회원정보를 수정 하시겠습니까?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
-                        <asp:Button ID="Button2" 
-                            runat="server" 
-                            OnClick="BTN_Register_Click" 
-                            class="btn btn-primary" 
-                            Text="예" />
-                    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="SaveModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">저장확인</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    회원정보를 수정 하시겠습니까?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
+                    <asp:Button ID="Button2" 
+                        runat="server" 
+                        OnClick="BTN_Register_Click" 
+                        class="btn btn-primary" 
+                        Text="예" />
                 </div>
             </div>
         </div>
-
-        <asp:RegularExpressionValidator ID="RegularExpressionValidator2" 
-            runat="server" 
-            ControlToValidate="txtPassword" 
-            ValidationExpression=".*[!@#$%^&*/].*"
-            ErrorMessage="비밀번호는 반드시 !@#$%^&*/. 문자 중 하나를 포함해야 합니다." 
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
-        <asp:RegularExpressionValidator ID="RegularExpressionValidator3" 
-            runat="server" 
-            ControlToValidate="txtPassword" 
-            ValidationExpression="[^\s]{4,12}"
-            ErrorMessage="비밀번호는 반드시 4~12자리의 공백 없는 문자로 이루어져야 합니다." 
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
-        <asp:CompareValidator ID="CompareValidator1" 
-            runat="server" 
-            ControlToValidate="txtPassword" 
-            ControlToCompare="txtReCheck" 
-            ErrorMessage="비밀번호가 일치하지 않습니다." 
-            Display="None" ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
-        <asp:RequiredFieldValidator ID="RequiredFieldValidator5" 
-            runat="server"
-            ErrorMessage="이름은 필 수 입력 항목입니다." 
-            ControlToValidate="txtName"
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
-        <asp:RequiredFieldValidator ID="RequiredFieldValidator3" 
-            runat="server"
-            ErrorMessage="생년월일은 필 수 입력 항목입니다." 
-            ControlToValidate="txtBirthDay"
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
-        <asp:RegularExpressionValidator ID="RegularExpressionValidator6" 
-            runat="server" 
-            ControlToValidate="txtBirthDay" 
-            ValidationExpression="[0-9]{6}" 
-            ErrorMessage="생년월일은 6자리로 입력하여 주십시오." 
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
-        <asp:CustomValidator id="CustomValidator3"
-            ControlToValidate="txtBirthDay"
-            ClientValidationFunction="MonthValidate"
-            Display="None"
-            ErrorMessage="주민등록번호 월 입력이 잘못되었습니다."
-            ForeColor="red"
-            runat="server" 
-            ValidationGroup="NewUser"/>
-        <asp:CustomValidator id="CustomValidator1"
-            ControlToValidate="txtBirthDay"
-            ClientValidationFunction="DayValidate"
-            Display="None"
-            ErrorMessage="주민등록번호 일 입력이 잘못되었습니다."
-            ForeColor="red"
-            runat="server" 
-            ValidationGroup="NewUser"/>
-        <asp:RequiredFieldValidator ID="RequiredFieldValidator6" 
-            runat="server"
-            ErrorMessage="성별은 필 수 입력 항목입니다." 
-            ControlToValidate="txtGender"
-            Display="None" 
-            ForeColor="red" 
-            ValidationGroup="NewUser"/><br />
-        <asp:CustomValidator id="CustomValidator2"
-            ControlToValidate="DropDownList1"
-            ClientValidationFunction="ClassValidate"
-            Display="None"
-            ErrorMessage="회원등급을 선택하여 주십시오."
-            ForeColor="red"
-            runat="server" 
-            ValidationGroup="NewUser"/>
-
-        <asp:ValidationSummary ID="ValidationSummary_SignupForm"
-            ShowMessageBox="true" 
-            ShowSummary="false"
-            HeaderText="다음 사항을 확인하여 주십시오."
-            runat="server" ValidationGroup="NewUser" />
     </div>
+    <!-- 유효성 검사 결과 안내 모달 -->
+    <div class="modal fade" id="ValidationModal" tabindex="-1" aria-labelledby="ValidationModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+          <!-- 모달 상단 -->
+          <div class="modal-header">
+            <h5 class="modal-title text-danger fw-bold" id="ValidationModalLabel">⚠ 입력 오류 안내</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+          </div>
+
+          <!-- 모달 내용: ValidationSummary -->
+          <div class="modal-body">
+            <asp:ValidationSummary ID="ValidationSummary_SignupForm"
+                runat="server"
+                ValidationGroup="NewUser"
+                ShowMessageBox="false"          
+                ShowSummary="true"              
+                CssClass="text-danger small"
+                HeaderText="다음 사항을 확인하여 주십시오." />
+          </div>
+
+          <!-- 모달 하단 -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">확인</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <asp:RegularExpressionValidator ID="RegularExpressionValidator2" 
+        runat="server" 
+        ControlToValidate="txtPassword" 
+        ValidationExpression=".*[!@#$%^&*/].*"
+        ErrorMessage="비밀번호는 반드시 !@#$%^&*/. 문자 중 하나를 포함해야 합니다." 
+        Display="None" 
+        ForeColor="red" 
+        ValidationGroup="NewUser"/>
+    <asp:RegularExpressionValidator ID="RegularExpressionValidator3" 
+        runat="server" 
+        ControlToValidate="txtPassword" 
+        ValidationExpression="[^\s]{4,12}"
+        ErrorMessage="비밀번호는 반드시 4~12자리의 공백 없는 문자로 이루어져야 합니다." 
+        Display="None" 
+        ForeColor="red" 
+        ValidationGroup="NewUser"/>
+    <asp:CompareValidator ID="CompareValidator1" 
+        runat="server" 
+        ControlToValidate="txtPassword" 
+        ControlToCompare="txtReCheck" 
+        ErrorMessage="비밀번호가 일치하지 않습니다." 
+        Display="None" ForeColor="red" 
+        ValidationGroup="NewUser"/>
+    <asp:RequiredFieldValidator ID="RequiredFieldValidator5" 
+        runat="server"
+        ErrorMessage="이름은 필 수 입력 항목입니다." 
+        ControlToValidate="txtName"
+        Display="None" 
+        ForeColor="red" 
+        ValidationGroup="NewUser"/>
+    <asp:RequiredFieldValidator ID="RequiredFieldValidator3" 
+        runat="server"
+        ErrorMessage="생년월일은 필 수 입력 항목입니다." 
+        ControlToValidate="txtBirthDay"
+        Display="None" 
+        ForeColor="red" 
+        ValidationGroup="NewUser"/>
+    <asp:RegularExpressionValidator ID="RegularExpressionValidator6" 
+        runat="server" 
+        ControlToValidate="txtBirthDay" 
+        ValidationExpression="[0-9]{6}" 
+        ErrorMessage="생년월일은 6자리로 입력하여 주십시오." 
+        Display="None" 
+        ForeColor="red" 
+        ValidationGroup="NewUser"/>
+    <asp:CustomValidator id="CustomValidator3"
+        ControlToValidate="txtBirthDay"
+        ClientValidationFunction="MonthValidate"
+        Display="None"
+        ErrorMessage="주민등록번호 월 입력이 잘못되었습니다."
+        ForeColor="red"
+        runat="server" 
+        ValidationGroup="NewUser"/>
+    <asp:CustomValidator id="CustomValidator1"
+        ControlToValidate="txtBirthDay"
+        ClientValidationFunction="DayValidate"
+        Display="None"
+        ErrorMessage="주민등록번호 일 입력이 잘못되었습니다."
+        ForeColor="red"
+        runat="server" 
+        ValidationGroup="NewUser"/>
+    <asp:RequiredFieldValidator ID="RequiredFieldValidator6" 
+        runat="server"
+        ErrorMessage="성별은 필 수 입력 항목입니다." 
+        ControlToValidate="txtGender"
+        Display="None" 
+        ForeColor="red" 
+        ValidationGroup="NewUser"/>
+    <asp:CustomValidator id="CustomValidator2"
+        ControlToValidate="DropDownList1"
+        ClientValidationFunction="ClassValidate"
+        Display="None"
+        ErrorMessage="회원등급을 선택하여 주십시오."
+        ForeColor="red"
+        runat="server" 
+        ValidationGroup="NewUser"/>
 </asp:Content>

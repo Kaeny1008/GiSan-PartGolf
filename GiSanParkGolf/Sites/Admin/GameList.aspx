@@ -1,118 +1,116 @@
 ﻿<%@ Page Title="대회개최" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="GameList.aspx.cs" Inherits="GiSanParkGolf.Sites.Admin.GameList" %>
-
 <%@ Register Src="~/Controls/NewSearchControl.ascx" TagPrefix="uc" TagName="NewSearchControl" %>
 <%@ Register Src="~/Controls/NewPagingControl.ascx" TagPrefix="uc" TagName="NewPagingControl" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <script language="javascript">
+    <script type="text/javascript">
         function NewGameOpen(strPath) {
-            <%--자바스크립트 새창열기 예제--%>
-            /*window.open(strPath, "_blank", "scrollbars,resizable,width=950,height=800,left=0,top=0");*/
             location.href = strPath;
         }
     </script>
 
-    <div style="text-align: right;">
-        <asp:Button ID="BTN_NewGame" runat="server" Text="신규대회 개최" class="btn btn-outline-success btn-lg" 
-            OnClientClick="NewGameOpen('/Sites/Admin/GameCreate.aspx');return false;" />
-    </div>
-    <hr />
-    <uc:NewSearchControl ID="search" runat="server"
-        OnSearchRequested="Search_SearchRequested"
-        OnResetRequested="Search_ResetRequested" />
-    <hr />
-    <div style="text-align: right; font-style: italic; font-size: 8pt;">
-        Total Record:
-        <asp:Literal ID="lblTotalRecord" runat="server" />
-    </div>
-    <div>
-        <h12>(대회명을 클릭하여 수정 / 확인)</h12><br />
+    <!-- 상단 카드: 페이지 설명 영역 -->
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2" id="MainTitle" runat="server">대회 개최</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">
+            대회를 개최하거나 수정, 경기 취소 등등을 설정할 수 있습니다.<br />
+            ※ 대회명을 클릭하면 수정 / 상세 확인 가능합니다
+        </p>
     </div>
 
-    <asp:GridView ID="GridView1" runat="server"
-        AutoGenerateColumns="False"
-        CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-        ShowHeaderWhenEmpty="true"
-        OnRowDataBound="GridView1_RowDataBound">
-        <HeaderStyle HorizontalAlign="center" BorderStyle="Solid" BorderWidth="1px"/>
-        <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px"/>
-        <FooterStyle BackColor="#CCCCCC" />
-        <Columns>
-            <%-- No 컬럼은 RowDataBound에서 처리 예정 --%>
-            <asp:TemplateField HeaderText="No">
-                <ItemTemplate />
-                <ItemStyle HorizontalAlign="Center" Width="5%" />
-                <HeaderStyle Width="5%" />
-            </asp:TemplateField>
-            <asp:TemplateField HeaderText="대회명">
-                <ItemTemplate>
-                    <asp:HyperLink ID="lnkTitle" runat="server"
-                        NavigateUrl='<%# "GameCreate.aspx?gamecode=" + Eval("GameCode") %>'>
-                        <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 45) %>
-                    </asp:HyperLink>
-                </ItemTemplate>
-                <HeaderStyle Width="35%" />
-                <ItemStyle Width="35%" />
-            </asp:TemplateField>
-            <asp:TemplateField>
-                <HeaderTemplate>
-                    <asp:Label ID="LB_Date" runat="server" Text="개최일자"></asp:Label>
-                </HeaderTemplate>
-                <ItemTemplate>
-                    <%#Eval("GameDate","{0:yyyy-MM-dd}")%>
-                </ItemTemplate>
-                <HeaderStyle Width="10%" />
-                <ItemStyle Width="10%" />
-            </asp:TemplateField>
-            <asp:TemplateField>
-                <HeaderTemplate>
-                    <asp:Label ID="LB_Place" runat="server" Text="경기장"></asp:Label>
-                </HeaderTemplate>
-                <ItemTemplate>
-                    <%#Eval("StadiumName")%>
-                </ItemTemplate>
-                <HeaderStyle Width="10%" />
-                <ItemStyle Width="10%" />
-            </asp:TemplateField>
-            <asp:TemplateField>
-                <HeaderTemplate>
-                    <asp:Label ID="LB_Place" runat="server" Text="주최"></asp:Label>
-                </HeaderTemplate>
-                <ItemTemplate>
-                    <%#Eval("GameHost")%>
-                </ItemTemplate>
-                <HeaderStyle Width="15%" />
-                <ItemStyle Width="15%" />
-            </asp:TemplateField>
-            <asp:TemplateField>
-                <HeaderTemplate>
-                    <asp:Label ID="LB_Place" runat="server" Text="참가인원"></asp:Label>
-                </HeaderTemplate>
-                <ItemTemplate>
-                    <%#Eval("ParticipantNumber")%>
-                </ItemTemplate>
-                <HeaderStyle Width="10%" />
-                <ItemStyle Width="10%" />
-            </asp:TemplateField>
-            <asp:TemplateField>
-                <HeaderTemplate>
-                    <asp:Label ID="LB_Place" runat="server" Text="상태"></asp:Label>
-                </HeaderTemplate>
-                <ItemTemplate>
-                    <%#Eval("GameStatus")%>
-                </ItemTemplate>
-                <HeaderStyle Width="10%" />
-                <ItemStyle Width="10%" />
-            </asp:TemplateField>
-        </Columns>
-        <SelectedRowStyle BackColor="#000099" Font-Bold="True" ForeColor="White" />
-        <EmptyDataTemplate>대회가 없습니다.</EmptyDataTemplate>
-    </asp:GridView>
+    <div class="container mt-4">
+        <div class="custom-card">
+            <!-- 신규 대회 개최 버튼 -->
+            <div class="text-end mb-3">
+                <asp:Button ID="BTN_NewGame" runat="server"
+                    Text="신규 대회 개최"
+                    CssClass="btn btn-outline-success btn-xs"
+                    OnClientClick="NewGameOpen('/Sites/Admin/GameCreate.aspx'); return false;" />
+            </div>
 
-    <div class="center_container">
-        <div>
-            <uc:NewPagingControl ID="pager" runat="server"
-                OnPageChanged="Pager_PageChanged" />
+            <!-- 검색 컨트롤 -->
+            <uc:NewSearchControl ID="search" runat="server"
+                OnSearchRequested="Search_SearchRequested"
+                OnResetRequested="Search_ResetRequested" />
+
+            <!-- 총 레코드 표시 -->
+            <div class="text-end mt-2" style="font-size: 0.75rem; font-style: italic;">
+                전체 대회 수: <asp:Literal ID="lblTotalRecord" runat="server" />
+            </div>
+
+            <!-- 대회 목록 그리드 -->
+            <asp:GridView ID="GridView1" runat="server"
+                AutoGenerateColumns="False"
+                CssClass="table table-bordered table-hover table-responsive"
+                ShowHeaderWhenEmpty="true"
+                OnRowDataBound="GridView1_RowDataBound">
+
+                <HeaderStyle CssClass="table-light" />
+                <RowStyle CssClass="hover-row" />
+
+                <Columns>
+                    <asp:TemplateField HeaderText="No">
+                        <ItemTemplate />
+                        <ItemStyle Width="5%" />
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="대회명">
+                        <ItemTemplate>
+                            <asp:HyperLink ID="lnkTitle" runat="server"
+                                CssClass="link-hover"
+                                NavigateUrl='<%# "GameCreate.aspx?gamecode=" + Eval("GameCode") %>'>
+                                <%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 45) %>
+                            </asp:HyperLink>
+                        </ItemTemplate>
+                        <ItemStyle Width="30%" />
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="개최일시">
+                        <ItemTemplate>
+                            <%# Eval("GameDate", "{0:yyyy-MM-dd HH:mm}") %>
+                        </ItemTemplate>
+                        <ItemStyle Width="13%" />
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="장소">
+                        <ItemTemplate>
+                            <%# Eval("StadiumName") %>
+                        </ItemTemplate>
+                        <ItemStyle Width="12%" />
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="주최">
+                        <ItemTemplate>
+                            <%# Eval("GameHost") %>
+                        </ItemTemplate>
+                        <ItemStyle Width="15%" />
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="참가인원">
+                        <ItemTemplate>
+                            <%# Eval("ParticipantNumber") %>
+                        </ItemTemplate>
+                        <ItemStyle Width="10%" />
+                    </asp:TemplateField>
+
+                    <asp:TemplateField HeaderText="상태">
+                        <ItemTemplate>
+                            <%# Eval("GameStatus") %>
+                        </ItemTemplate>
+                        <ItemStyle Width="10%" />
+                    </asp:TemplateField>
+                </Columns>
+
+                <EmptyDataTemplate>
+                    <div class="text-center text-muted py-3">등록된 대회가 없습니다.</div>
+                </EmptyDataTemplate>
+            </asp:GridView>
+
+            <!-- 페이징 컨트롤 -->
+            <div class="center_container mt-3">
+                <uc:NewPagingControl ID="pager" runat="server"
+                    OnPageChanged="Pager_PageChanged" />
+            </div>
         </div>
     </div>
 </asp:Content>

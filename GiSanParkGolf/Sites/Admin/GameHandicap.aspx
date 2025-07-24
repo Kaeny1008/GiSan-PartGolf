@@ -80,117 +80,124 @@
         }
     </style>
 
+    <!-- 상단 카드: 페이지 설명 영역 -->
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2" id="MainTitle" runat="server">핸디캡 관리</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">
+            각 선수의 핸디캡을 관리 합니다.
+        </p>
+    </div>
+
     <div class="container mt-4">
+        <div class="custom-card">
+            <%-- 필터 영역 --%>
+            <div class="row mb-4">
+                 <%--드롭다운 & 검색창--%> 
+                <div class="col-md-10 d-flex flex-wrap gap-2">
+                    <uc:NewSearchControl ID="search" runat="server"
+                        OnSearchRequested="Search_SearchRequested"
+                        OnResetRequested="Search_ResetRequested" />
+                </div>
 
-        <h2 class="mb-4">🏌️‍♂️ 파크골프 핸디캡 관리</h2>
-
-        <%-- 필터 영역 --%>
-        <div class="row mb-4">
-             <%--드롭다운 & 검색창--%> 
-            <div class="col-md-10 d-flex flex-wrap gap-2">
-                <uc:NewSearchControl ID="search" runat="server"
-                    OnSearchRequested="Search_SearchRequested"
-                    OnResetRequested="Search_ResetRequested" />
+                 <%--오른쪽 버튼--%> 
+                <div class="col-md-2 text-end">
+                    <a href="GameHandicapLog.aspx" class="btn btn-outline-dark">
+                        <i class="bi bi-bar-chart-line"></i> 핸디캡 기록 보기
+                    </a>
+                </div>
             </div>
 
-             <%--오른쪽 버튼--%> 
-            <div class="col-md-2 text-end">
-                <a href="GameHandicapLog.aspx" class="btn btn-outline-dark">
-                    <i class="bi bi-bar-chart-line"></i> 핸디캡 기록 보기
-                </a>
-            </div>
+             <%--일괄 자동 계산 버튼--%> 
+            <asp:Button ID="btnRecalculateAllTrigger" runat="server"
+                Text="전체 자동 계산"
+                CssClass="btn btn-outline-danger mb-3"
+                OnClientClick="showConfirmRecalcModal(); return false;" />
+
+            <%-- 핸디캡 출력 테이블 --%>
+            <asp:GridView ID="gvHandicaps" runat="server"
+                AutoGenerateColumns="False"
+                AllowPaging="true"
+                PageSize="10"
+                PagerSettings-Visible="false"
+                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                ShowHeaderWhenEmpty="true"
+                DataKeyNames="UserId,AgeHandicap,Source"
+                OnRowEditing="gvHandicaps_RowEditing"
+                OnRowUpdating="gvHandicaps_RowUpdating"
+                OnRowCancelingEdit="gvHandicaps_RowCancelingEdit">
+
+              <Columns>
+                <asp:BoundField DataField="UserId"     HeaderText="ID"       ReadOnly="True" />
+                <asp:BoundField DataField="UserName"   HeaderText="이름"     ReadOnly="True" />
+                <asp:BoundField DataField="UserNumber" HeaderText="생년월일" ReadOnly="True" />
+                <asp:BoundField DataField="Age"        HeaderText="나이"     ReadOnly="True" />
+
+                <asp:TemplateField HeaderText="핸디캡">
+                  <ItemTemplate>
+                    <%# Eval("AgeHandicap") %>
+                    <asp:HiddenField ID="hdnPrevHandicap" Value='<%# Eval("AgeHandicap") %>' runat="server" />
+                  </ItemTemplate>
+                  <EditItemTemplate>
+                    <asp:TextBox ID="txtHandicap" runat="server"
+                                 CssClass="form-control"
+                                 Text='<%# Bind("AgeHandicap") %>'
+                                 oninput="markHandicapAsManual(this)"
+                                 onfocus="clearHandicapTooltip(this)"/>
+                  </EditItemTemplate>
+                </asp:TemplateField>
+
+                <asp:TemplateField HeaderText="산정 방식">
+                  <ItemTemplate>
+                    <%# Eval("Source") %>
+                    <asp:HiddenField ID="hdnPrevSource" Value='<%# Eval("Source") %>' runat="server" />
+                  </ItemTemplate>
+                  <EditItemTemplate>
+                    <asp:DropDownList ID="ddlSource" runat="server"
+                        CssClass="form-select"
+                        SelectedValue='<%# Bind("Source") %>'
+                        onchange="toggleHandicap(this)"
+                        onfocus="hideAllOption(this); toggleHandicap(this);">
+                        <asp:ListItem Text="자동" Value="자동" />
+                        <asp:ListItem Text="수동" Value="수동" />
+                    </asp:DropDownList>
+                  </EditItemTemplate>
+                </asp:TemplateField>
+
+                <asp:BoundField DataField="LastUpdated" HeaderText="최종 수정일"
+                                DataFormatString="{0:yyyy-MM-dd}" ReadOnly="True" />
+                <asp:BoundField DataField="LastUpdatedBy" HeaderText="수정자" ReadOnly="True">
+                  <HeaderStyle HorizontalAlign="Center" />
+                  <ItemStyle HorizontalAlign="Center" />
+                </asp:BoundField>
+
+                <asp:TemplateField>
+                    <ItemTemplate>
+                        <asp:Button ID="btnEdit" runat="server" Text="편집"
+                            CommandName="Edit"
+                            CssClass="btn btn-xs btn-outline-primary" />
+                    </ItemTemplate>
+                    <EditItemTemplate>
+                        <asp:Button ID="btnUpdate" runat="server" Text="저장"
+                            CommandName="Update"
+                            CssClass="btn btn-xs btn-success me-1" />
+
+                        <asp:Button ID="btnCancel" runat="server" Text="취소"
+                            CommandName="Cancel"
+                            CssClass="btn btn-xs btn-secondary" />
+                    </EditItemTemplate>
+                </asp:TemplateField>
+              </Columns>
+
+              <EmptyDataTemplate>
+                <div class="text-center text-muted p-4 fs-5">
+                  ⚠️ 현재 등록된 핸디캡 데이터가 없습니다.
+                </div>
+              </EmptyDataTemplate>
+            </asp:GridView>
+
+            <uc:NewPagingControl ID="pager" runat="server"
+                OnPageChanged="Pager_PageChanged" />
         </div>
-
-         <%--일괄 자동 계산 버튼--%> 
-        <asp:Button ID="btnRecalculateAllTrigger" runat="server"
-            Text="전체 자동 계산"
-            CssClass="btn btn-outline-danger mb-3"
-            OnClientClick="showConfirmRecalcModal(); return false;" />
-
-        <%-- 핸디캡 출력 테이블 --%>
-        <asp:GridView ID="gvHandicaps" runat="server"
-            AutoGenerateColumns="False"
-            AllowPaging="true"
-            PageSize="10"
-            PagerSettings-Visible="false"
-            CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-            ShowHeaderWhenEmpty="true"
-            DataKeyNames="UserId,AgeHandicap,Source"
-            OnRowEditing="gvHandicaps_RowEditing"
-            OnRowUpdating="gvHandicaps_RowUpdating"
-            OnRowCancelingEdit="gvHandicaps_RowCancelingEdit">
-
-          <Columns>
-            <asp:BoundField DataField="UserId"     HeaderText="ID"       ReadOnly="True" />
-            <asp:BoundField DataField="UserName"   HeaderText="이름"     ReadOnly="True" />
-            <asp:BoundField DataField="UserNumber" HeaderText="생년월일" ReadOnly="True" />
-            <asp:BoundField DataField="Age"        HeaderText="나이"     ReadOnly="True" />
-
-            <asp:TemplateField HeaderText="핸디캡">
-              <ItemTemplate>
-                <%# Eval("AgeHandicap") %>
-                <asp:HiddenField ID="hdnPrevHandicap" Value='<%# Eval("AgeHandicap") %>' runat="server" />
-              </ItemTemplate>
-              <EditItemTemplate>
-                <asp:TextBox ID="txtHandicap" runat="server"
-                             CssClass="form-control"
-                             Text='<%# Bind("AgeHandicap") %>'
-                             oninput="markHandicapAsManual(this)"
-                             onfocus="clearHandicapTooltip(this)"/>
-              </EditItemTemplate>
-            </asp:TemplateField>
-
-            <asp:TemplateField HeaderText="산정 방식">
-              <ItemTemplate>
-                <%# Eval("Source") %>
-                <asp:HiddenField ID="hdnPrevSource" Value='<%# Eval("Source") %>' runat="server" />
-              </ItemTemplate>
-              <EditItemTemplate>
-                <asp:DropDownList ID="ddlSource" runat="server"
-                    CssClass="form-select"
-                    SelectedValue='<%# Bind("Source") %>'
-                    onchange="toggleHandicap(this)"
-                    onfocus="hideAllOption(this); toggleHandicap(this);">
-                    <asp:ListItem Text="자동" Value="자동" />
-                    <asp:ListItem Text="수동" Value="수동" />
-                </asp:DropDownList>
-              </EditItemTemplate>
-            </asp:TemplateField>
-
-            <asp:BoundField DataField="LastUpdated" HeaderText="최종 수정일"
-                            DataFormatString="{0:yyyy-MM-dd}" ReadOnly="True" />
-            <asp:BoundField DataField="LastUpdatedBy" HeaderText="수정자" ReadOnly="True">
-              <HeaderStyle HorizontalAlign="Center" />
-              <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-            <asp:TemplateField>
-                <ItemTemplate>
-                    <asp:Button ID="btnEdit" runat="server" Text="편집"
-                        CommandName="Edit"
-                        CssClass="btn btn-xs btn-outline-primary" />
-                </ItemTemplate>
-                <EditItemTemplate>
-                    <asp:Button ID="btnUpdate" runat="server" Text="저장"
-                        CommandName="Update"
-                        CssClass="btn btn-xs btn-success me-1" />
-
-                    <asp:Button ID="btnCancel" runat="server" Text="취소"
-                        CommandName="Cancel"
-                        CssClass="btn btn-xs btn-secondary" />
-                </EditItemTemplate>
-            </asp:TemplateField>
-          </Columns>
-
-          <EmptyDataTemplate>
-            <div class="text-center text-muted p-4 fs-5">
-              ⚠️ 현재 등록된 핸디캡 데이터가 없습니다.
-            </div>
-          </EmptyDataTemplate>
-        </asp:GridView>
-
-        <uc:NewPagingControl ID="pager" runat="server"
-            OnPageChanged="Pager_PageChanged" />
     </div>
 
     <%-- ✅ 메시지 모달 --%>

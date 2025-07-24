@@ -23,42 +23,72 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (!Page.IsPostBack)
             {
+                LoadStadiumList();
+
                 if (!string.IsNullOrEmpty(Request.QueryString["gamecode"]))
                 {
-
+                    MainTitle.InnerText = "대회 내용 수정";
                     gameCode = Request.QueryString["gamecode"];
                     LoadGame(gameCode);
                 }
                 else
                 {
+                    MainTitle.InnerText = "신규 대회 개최";
                     DateTime now = DateTime.Now;
-                    string formattedDate = now.ToString("yyyy-MM-dd");
-                    TB_GameDate.Text = formattedDate;
-                    TB_StartDate.Text = formattedDate;
 
-                    DateTime addDay = now.AddDays(15);
-                    string formattedAddDay = addDay.ToString("yyyy-MM-dd");
-                    TB_EndDate.Text = formattedAddDay;
+                    // 대회일자 + 시간
+                    TB_GameDate.Text = now.ToString("yyyy-MM-dd");
+                    TB_GameTime.Text = "10:00";
+
+                    // 모집시작일 + 시간
+                    TB_StartDate.Text = now.ToString("yyyy-MM-dd");
+                    TB_StartTime.Text = "09:00";
+
+                    // 모집종료일 + 시간
+                    DateTime endDate = now.AddDays(15);
+                    TB_EndDate.Text = endDate.ToString("yyyy-MM-dd");
+                    TB_EndTime.Text = "17:00";
 
                     gameCode = null;
                 }
             }
         }
 
+        private void LoadStadiumList()
+        {
+            var stadiumList = Global.dbManager.GetStadiums();  // 우리가 만든 경기장 목록 함수
+
+            DDL_Stadium.DataSource = stadiumList;
+            DDL_Stadium.DataTextField = "StadiumName";   // 사용자에게 보여질 이름
+            DDL_Stadium.DataValueField = "StadiumCode";  // 실제 저장할 코드
+            DDL_Stadium.DataBind();
+
+            DDL_Stadium.Items.Insert(0, new ListItem("경기장을 선택하세요", ""));
+        }
+
+
         protected void BTN_Save_Click(object sender, EventArgs e)
         {
+            // 날짜 + 시간 조합
+            DateTime gameDateTime = DateTime.Parse($"{TB_GameDate.Text} {TB_GameTime.Text}");
+            DateTime recruitStartTime = DateTime.Parse($"{TB_StartDate.Text} {TB_StartTime.Text}");
+            DateTime recruitEndTime = DateTime.Parse($"{TB_EndDate.Text} {TB_EndTime.Text}");
+            string stadiumCode = DDL_Stadium.SelectedValue;
+            string stadiumName = DDL_Stadium.SelectedItem.Text;
+
             string strSQL = "INSERT INTO Game_List(";
-            strSQL += "[GameCode], [GameName], [GameDate], [StadiumName], [GameHost]";
-            strSQL += ", [StartRecruiting], [EndRecruiting], [HoleMaximum], [GameNote]";
-            strSQL += ", [PostIp], [PostUser]";
+            strSQL += "GameCode, GameName, GameDate, StadiumCode ,StadiumName, GameHost";
+            strSQL += ", StartRecruiting, EndRecruiting, HoleMaximum, GameNote";
+            strSQL += ", PostIp, PostUser";
             strSQL += ") VALUES (";
             strSQL += "dbo.fn_GameCode()";
             strSQL += ", '" + TB_GameName.Text + "'";
-            strSQL += ", '" + TB_GameDate.Text + "'";
-            strSQL += ", '" + TB_StadiumName.Text + "'";
+            strSQL += ", '" + gameDateTime.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+            strSQL += ", '" + stadiumCode + "'";
+            strSQL += ", '" + stadiumName + "'";
             strSQL += ", '" + TB_GameHost.Text + "'";
-            strSQL += ", '" + TB_StartDate.Text + "'";
-            strSQL += ", '" + TB_EndDate.Text + "'";
+            strSQL += ", '" + recruitStartTime.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+            strSQL += ", '" + recruitEndTime.ToString("yyyy-MM-dd HH:mm:ss") + "'";
             strSQL += ", '" + TB_HoleMaximum.Text + "'";
             strSQL += ", '" + TB_Note.Text + "'";
             strSQL += ", '" + ipaddr + "'";
@@ -70,19 +100,26 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_Update_Click(object sender, EventArgs e)
         {
+            // 날짜 + 시간 조합
+            DateTime gameDateTime = DateTime.Parse($"{TB_GameDate.Text} {TB_GameTime.Text}");
+            DateTime recruitStartTime = DateTime.Parse($"{TB_StartDate.Text} {TB_StartTime.Text}");
+            DateTime recruitEndTime = DateTime.Parse($"{TB_EndDate.Text} {TB_EndTime.Text}");
+            string stadiumCode = DDL_Stadium.SelectedValue;
+            string stadiumName = DDL_Stadium.SelectedItem.Text;
+
             string strSQL = "UPDATE Game_List SET";
             strSQL += " GameName = '" + TB_GameName.Text + "'";
-            strSQL += ", GameDate = '" + TB_GameDate.Text + "'";
-            strSQL += ", StadiumName = '" + TB_StadiumName.Text + "'";
+            strSQL += ", GameDate = '" + gameDateTime.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+            strSQL += ", StadiumCode = '" + stadiumCode + "'";
+            strSQL += ", StadiumName = '" + stadiumName + "'";
             strSQL += ", GameHost = '" + TB_GameHost.Text + "'";
-            strSQL += ", StartRecruiting = '" + TB_StartDate.Text + "'";
-            strSQL += ", EndRecruiting = '" + TB_EndDate.Text + "'";
+            strSQL += ", StartRecruiting = '" + recruitStartTime.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+            strSQL += ", EndRecruiting = '" + recruitEndTime.ToString("yyyy-MM-dd HH:mm:ss") + "'";
             strSQL += ", HoleMaximum = '" + TB_HoleMaximum.Text + "'";
             strSQL += ", GameNote = '" + TB_Note.Text + "'";
             strSQL += ", ModifyIp = '" + ipaddr + "'";
             strSQL += ", ModifyUser = '" + Helper.CurrentUser?.UserId + "'";
-            strSQL += " WHERE GameCode = '" + gameCode + "'";
-            strSQL += ";";
+            strSQL += " WHERE GameCode = '" + gameCode + "';";
 
             SaveLastStep(strSQL);
         }
@@ -104,27 +141,40 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (writeResult.Equals("Success"))
             {
-                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '확인', '저장 되었습니다.', true);", true);
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '확인', '저장 되었습니다.', 4);", true);
                 //Response.Redirect("/Sites/Admin/GameList.aspx");
             }
             else
             {
-                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', 'Error', '" + writeResult + "', true);", true);
+                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', 'Error', '" + writeResult + "', -1);", true);
             }
         }
 
         protected void LoadGame(string gamecode)
         {
-            var gameinfo = (new DB_Management()).GetGameInformation(gamecode);
+            var gameinfo = new DB_Management().GetGameInformation(gamecode);
 
+            // 경기장 드롭다운 선택 바인딩
+            if (!string.IsNullOrEmpty(gameinfo.StadiumCode))
+            {
+                DDL_Stadium.SelectedValue = gameinfo.StadiumCode;
+            }
+
+            // 대회 정보 바인딩
             TB_GameName.Text = gameinfo.GameName;
-            TB_GameDate.Text = ConvertDate(gameinfo.GameDate);
-            TB_StadiumName.Text = gameinfo.StadiumName;
             TB_GameHost.Text = gameinfo.GameHost;
-            TB_StartDate.Text = ConvertDate(gameinfo.StartRecruiting);
-            TB_EndDate.Text = ConvertDate(gameinfo.EndRecruiting);
             TB_HoleMaximum.Text = gameinfo.HoleMaximum.ToString();
             TB_Note.Text = gameinfo.GameNote;
+
+            // 날짜와 시간 분리 바인딩
+            TB_GameDate.Text = gameinfo.GameDate.ToString("yyyy-MM-dd");
+            TB_GameTime.Text = gameinfo.GameDate.ToString("HH:mm");
+
+            TB_StartDate.Text = gameinfo.StartRecruiting.ToString("yyyy-MM-dd");
+            TB_StartTime.Text = gameinfo.StartRecruiting.ToString("HH:mm");
+
+            TB_EndDate.Text = gameinfo.EndRecruiting.ToString("yyyy-MM-dd");
+            TB_EndTime.Text = gameinfo.EndRecruiting.ToString("HH:mm");
         }
 
         protected string ConvertDate(DateTime datetime)

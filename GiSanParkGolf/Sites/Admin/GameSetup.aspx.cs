@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.UI;
@@ -104,7 +105,9 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (gameinfo == null)
             {
-                ClientScript.RegisterStartupScript(this.GetType(), "key", "launchModal('#MainModal', '오류', '대회 정보를 찾을 수 없습니다.', true);", true);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalError",
+                    "launchModal('#MainModal', '오류', '대회 정보를 찾을 수 없습니다.', 0);", true);
+
                 return;
             }
 
@@ -112,7 +115,9 @@ namespace GiSanParkGolf.Sites.Admin
             if (isClosed)
             {
                 string msg = gameinfo.GameStatus == "대회종료" ? "종료된 대회입니다." : "취소된 대회입니다.";
-                ClientScript.RegisterStartupScript(this.GetType(), "key", $"launchModal('#MainModal', '확인', '{msg}', true);", true);
+                string safeMessage = HttpUtility.JavaScriptStringEncode(msg);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalError",
+                    $"launchModal('#MainModal', '확인', '{safeMessage}', 0);", true);
 
                 TB_GameName.Text = TB_GameDate.Text = TB_StadiumName.Text = TB_GameHost.Text =
                 TB_StartDate.Text = TB_EndDate.Text = TB_HoleMaximum.Text = TB_Note.Text =
@@ -136,9 +141,177 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_SettingYes_Click(object sender, EventArgs e)
         {
-            Debug.WriteLine("코스배치 로직 준비 중");
-            // 추후 코스배치 구현
+            string gameCode = TB_GameCode.Text.Trim();
+            var gameInfo = Global.dbManager.GetGameInformation(gameCode);
+            if (gameInfo == null)
+            {
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalError",
+                    "launchModal('#MainModal', '오류', '대회 정보를 찾을 수 없습니다.', 0);", true);
+                return;
+            }
+
+            int maxPerHole = gameInfo.HoleMaximum;
+            string stadiumCode = gameInfo.StadiumCode;
+            bool useHandicap = Convert.ToBoolean(DDL_HandicapUse.SelectedValue);
+
+            // 참가자 + 핸디캡 포함 데이터 한 번에 가져오기
+            var players = Global.dbManager.GetGameUserList(gameCode);  // AgeHandicap 포함됨
+
+            // 코스 리스트 가져오기
+            var courseList = Global.dbManager.GetCourseListByStadium(stadiumCode);
+            if (courseList == null || courseList.Count == 0)
+            {
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalError",
+                    "launchModal('#MainModal', '오류', '해당 경기장의 코스 정보를 찾을 수 없습니다.', 0);", true);
+                return;
+            }
+
+            // 배정 결과 객체
+            List<AssignedPlayer> groupedPlayers;
+
+            if (useHandicap)
+            {
+                // 핸디캡 기반 배정
+                groupedPlayers = HandicapBasedDistribution(players, courseList, maxPerHole);
+            }
+            else
+            {
+                // 무작위 배정
+                groupedPlayers = RandomDistribution(players, courseList, maxPerHole);
+            }
+
+            // 결과 표시
+            gvCourseResult.DataSource = groupedPlayers;
+            gvCourseResult.DataBind();
+
+            // 완료 안내 모달
+            //ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalComplete",
+            //    "launchModal('#MainModal', '배정 완료', '코스 배치가 성공적으로 완료되었습니다.', 0);", true);
+
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalComplete",
+                @"launchModal('#MainModal', '배정 완료', '코스 배치가 성공적으로 완료되었습니다.', 0);
+                  setTimeout(function() {
+                      var tabTrigger = document.querySelector('a[href=""#tab-result""]');
+                      if (tabTrigger) new bootstrap.Tab(tabTrigger).show();
+                  }, 600);", true);
+
         }
+
+        public List<AssignedPlayer> RandomDistribution(List<GameJoinUserList> players, List<CourseList> courses, int maxPerCourse)
+        {
+            var result = new List<AssignedPlayer>();
+            var rnd = new Random();
+
+            // 참가자 무작위 섞기
+            var shuffledPlayers = players.OrderBy(p => rnd.Next()).ToList();
+
+            // 코스별 버킷 생성
+            var courseBuckets = new Dictionary<string, List<AssignedPlayer>>();
+            foreach (var course in courses)
+                courseBuckets[course.CourseName] = new List<AssignedPlayer>();
+
+            int currentCourseIndex = 0;
+            int totalCourses = courses.Count;
+
+            foreach (var player in shuffledPlayers)
+            {
+                bool assigned = false;
+
+                // 최대 totalCourses번까지 시도해서 배정
+                for (int attempt = 0; attempt < totalCourses; attempt++)
+                {
+                    var course = courses[currentCourseIndex % totalCourses];
+                    var bucket = courseBuckets[course.CourseName];
+
+                    if (bucket.Count < maxPerCourse)
+                    {
+                        int groupNo = bucket.Count / 3 + 1;
+                        int courseOrder = bucket.Count + 1;
+
+                        bucket.Add(new AssignedPlayer
+                        {
+                            UserId = player.UserId,
+                            UserName = player.UserName,
+                            AgeHandicap = player.AgeHandicap,
+                            GameCode = player.GameCode,
+                            CourseName = course.CourseName,
+                            CourseOrder = courseOrder,
+                            GenderText = player.GenderText,
+                            HoleNumber = $"{course.CourseName}-{groupNo}조",
+                            TeamNumber = $"T{groupNo:D2}",
+                            GroupNumber = groupNo
+                        });
+
+                        assigned = true;
+                        break;
+                    }
+
+                    currentCourseIndex++;
+                }
+
+                // 배정 실패 처리 (선택)
+                if (!assigned)
+                {
+                    Console.WriteLine($"[RandomDistribution] 배정 실패: {player.UserName} / {player.UserId}");
+                }
+            }
+
+            // 결과 통합
+            foreach (var bucket in courseBuckets.Values)
+                result.AddRange(bucket);
+
+            return result;
+        }
+
+        public List<AssignedPlayer> HandicapBasedDistribution(List<GameJoinUserList> players, List<CourseList> courses, int maxPerCourse)
+        {
+            var result = new List<AssignedPlayer>();
+
+            // 정렬된 참가자 목록 (핸디 높은 순 → 낮은 순)
+            var sortedPlayers = players.OrderByDescending(p => p.AgeHandicap).ToList();
+
+            // 코스별 그릇 만들기
+            var courseBuckets = new Dictionary<string, List<AssignedPlayer>>();
+            foreach (var course in courses)
+                courseBuckets[course.CourseName] = new List<AssignedPlayer>();
+
+            int courseIndex = 0;
+            int totalCourses = courses.Count;
+
+            foreach (var player in sortedPlayers)
+            {
+                // 순서대로 돌아가면서 균형 배정
+                for (int i = 0; i < totalCourses; i++)
+                {
+                    var courseName = courses[courseIndex % totalCourses].CourseName;
+                    var bucket = courseBuckets[courseName];
+
+                    if (bucket.Count < maxPerCourse)
+                    {
+                        bucket.Add(new AssignedPlayer
+                        {
+                            UserId = player.UserId,
+                            UserName = player.UserName,
+                            AgeHandicap = player.AgeHandicap,
+                            GameCode = player.GameCode,
+                            CourseName = courseName,
+                            CourseOrder = bucket.Count + 1,
+                            GenderText = player.GenderText
+                        });
+                        break;
+                    }
+
+                    courseIndex++;
+                }
+            }
+
+            // 결과 통합
+            foreach (var course in courseBuckets.Values)
+                result.AddRange(course);
+
+            return result;
+        }
+
 
         protected void BTN_ToExcel_Click(object sender, EventArgs e)
         {
@@ -170,9 +343,15 @@ namespace GiSanParkGolf.Sites.Admin
             });
             gvCustomers.Columns.Add(new BoundField
             {
-                DataField = "UserNumber",
+                DataField = "FormattedBirthDate",
                 HeaderText = "생년월일",
-                DataFormatString = "{0:yyyy-MM-dd}",
+                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+            });
+            gvCustomers.Columns.Add(new BoundField
+            {
+                DataField = "GenderText",
+                HeaderText = "성별",
                 ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
                 HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
             });

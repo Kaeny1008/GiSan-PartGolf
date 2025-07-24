@@ -1,7 +1,9 @@
 ﻿using GiSanParkGolf.Class;
 using GiSanParkGolf.Models;
+using Microsoft.Ajax.Utilities;
 using System;
 using System.Diagnostics;
+using System.Web;
 using System.Web.UI;
 using T_Engine;
 
@@ -73,26 +75,30 @@ namespace GiSanParkGolf.Sites.UserManagement
             strSQL += " WHERE UserId = '" + txtID.Text + "'";
             strSQL += ";";
 
-            Debug.WriteLine(strSQL);
-
             DB_Management dbWrite = new DB_Management();
             string writeResult = dbWrite.DB_Write(strSQL);
 
             if (writeResult.Equals("Success"))
             {
-                //모달을 닫을때 사용(근데 자동으로 닫히는데?)
-                //ClientScript.RegisterStartupScript(this.GetType(), "alert", "CloseModal();", true);
-                var user = Session["UserInfo"] as UserViewModel;
-
-                if (user != null)
+                var updatedUser = new UserViewModel
                 {
-                    user.UserName = txtName.Text;
-                    Session["UserInfo"] = user;  // 다시 세션에 반영!
-                }
+                    UserId = txtID.Text,
+                    UserName = txtName.Text,
+                    UserNumber = int.Parse(txtBirthDay.Text),
+                    UserGender = int.Parse(txtGender.Text),
+                    UserAddress = txtAddress.Text,
+                    UserAddress2 = txtAddress2.Text,
+                    UserNote = txtMemo.Text,
+                    UserWClass = Helper.CurrentUser.UserWClass,
+                    UserClass = Helper.CurrentUser.UserClass
+                };
+
+                Global.dbManager.SetCookie(txtID.Text, userPassword, txtName.Text, Helper.CurrentUser.UserWClass, Helper.CurrentUser.UserClass, 2);
+                Session["UserInfo"] = updatedUser;
+
+                Debug.WriteLine("세션 이름 업데이트 후: " + ((UserViewModel)Session["UserInfo"]).UserName);
                 Debug.WriteLine("이전 위치로 이동한다. : " + prePage);
                 Response.Redirect(prePage);
-                //string strJs = "<script>alert('수정 되었습니다.'); location.href='/Default';</script>";
-                //Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
             }
             else
             {

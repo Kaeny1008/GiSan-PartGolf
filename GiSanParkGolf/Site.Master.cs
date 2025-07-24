@@ -9,14 +9,9 @@ namespace GiSanParkGolf
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Session["UserInfo"] == null)
-            {
-                lblName.Text = "손님";
-            }
-            else
-            {
-                lblName.Text = Helper.CurrentUser?.UserName;
-            }
+            var user = Session["UserInfo"] as UserViewModel;
+
+            lblName.Text = user != null ? user.UserName : "손님";
         }
     }
 }

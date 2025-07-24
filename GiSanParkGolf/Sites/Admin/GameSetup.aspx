@@ -4,51 +4,56 @@
 <%@ Register Src="~/Controls/NewPagingControl.ascx" TagPrefix="uc" TagName="NewPagingControl" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <script type="text/javascript"> 
-        let showModalName, showTitle, showBody, onlyYes, showYesButton;
-        let launch = false;
+    <script type="text/javascript">
+        let modalConfig = {
+            name: "",          // 모달 ID
+            title: "",         // 모달 제목
+            body: "",          // 모달 본문 메시지
+            yesButtonType: 0,  // 예 버튼 종류 (0: 확인형, 1: 실행형)
+            launch: false      // 실행 여부
+        };
 
-        function launchModal(modalname, title, body, yes, yesbutton) {
-            showModalName = modalname;
-            showTitle = title;
-            showBody = body;
-            onlyYes = yes;
-            showYesButton = yesbutton;
-            launch = true;
-            pageLoad(); // 바로 실행
+        function launchModal(modalId, title, body, yesButtonType = 0) {
+            modalConfig.name = modalId;
+            modalConfig.title = title;
+            modalConfig.body = body;
+            modalConfig.yesButtonType = yesButtonType;
+            modalConfig.launch = true;
+
+            renderModal();
         }
 
-        function pageLoad() {
-            if (!launch) return;
-            const modal = $(showModalName);
-            modal.find('.modal-title').text(showTitle);
-            modal.find('.modal-body').text(showBody);
+        function renderModal() {
+            if (!modalConfig.launch || !modalConfig.name) return;
 
-            modal.find('#MainContent_BTN_PlayerCheckYes, #MainContent_BTN_SettingYes').hide();
-            modal.find('#BTN_No').text(onlyYes ? "확인" : "아니오");
+            const showmodal = $(modalConfig.name);
 
-            const yesButtons = [
-                "#MainContent_BTN_PlayerCheckYes",
-                "#MainContent_BTN_SettingYes"
-            ];
-            if (!onlyYes && showYesButton >= 0 && showYesButton < yesButtons.length) {
-                modal.find(yesButtons[showYesButton]).show();
+            // 콘텐츠 삽입
+            showmodal.find(".modal-title").text(modalConfig.title);
+            showmodal.find(".modal-body").text(modalConfig.body);
+
+            // 모든 버튼 초기화
+            showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes").hide().off("click");
+
+            // 예 버튼 설정 - switch 문으로 변경
+            switch (modalConfig.yesButtonType) {
+                case 0: // 확인 모드
+                    showmodal.find("#BTN_Close").show();
+                    break;
+
+                case 1: // 실행 모드 (예 / 아니오)
+                    showmodal.find("#BTN_No").show();
+                    showmodal.find("#MainContent_BTN_SettingYes").show();
+                    break;
+
+                default:
+                    break;
             }
 
-            modal.modal("show");
-        }
-        function winPopUPCenter(url, winName, width = 800, height = 600, scroll = "no", resize = "no") {
-            const left = (screen.width - width) / 2;
-            const top = (screen.height - height) / 2;
-            const spec = `toolbar=no,status=no,location=yes,width=${width},height=${height},top=${top},left=${left},scrollbars=${scroll},resizable=${resize}`;
-
-            const gameCode = document.getElementById('MainContent_TB_GameCode').value;
-            const finalUrl = `${url}?GameCode=${gameCode}`;
-
-            const win = window.open(finalUrl, winName, spec);
-            if (win) win.focus();
-
-            $(showModalName).modal("hide"); // 모달 닫기
+            // 모달 실행
+            const modalElement = document.querySelector(modalConfig.name);
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+            modalInstance.show();
         }
     </script>
 
@@ -69,7 +74,15 @@
         }
     </style>
 
-    <div class="container body-content">
+    <!-- 상단 카드: 페이지 설명 영역 -->
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2" id="MainTitle" runat="server">인원 코스 및 배치</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">
+            해당 대회의 선수 배치를 할 수 있습니다.
+        </p>
+    </div>
+
+    <div class="container mt-4">
         <div class="row">
             <!-- 좌측: 대회 목록 -->
             <div class="col-md-5">
@@ -204,23 +217,28 @@
                                     <Columns>
                                         <asp:TemplateField HeaderText="No.">
                                             <ItemTemplate><%# Eval("RowNumber") %></ItemTemplate>
-                                            <ItemStyle Width="10%" />
-                                            <HeaderStyle Width="10%" />
+                                            <ItemStyle Width="8%" />
+                                            <HeaderStyle Width="8%" />
                                         </asp:TemplateField>
                                         <asp:TemplateField HeaderText="ID">
                                             <ItemTemplate><%# Eval("UserId") %></ItemTemplate>
-                                            <ItemStyle Width="30%" />
-                                            <HeaderStyle Width="30%" />
+                                            <ItemStyle Width="15%" />
+                                            <HeaderStyle Width="15%" />
                                         </asp:TemplateField>
                                         <asp:TemplateField HeaderText="성명">
                                             <ItemTemplate><%# Eval("UserName") %></ItemTemplate>
-                                            <ItemStyle Width="30%" />
-                                            <HeaderStyle Width="30%" />
+                                            <ItemStyle Width="15%" />
+                                            <HeaderStyle Width="15%" />
                                         </asp:TemplateField>
                                         <asp:TemplateField HeaderText="생년월일">
-                                            <ItemTemplate><%# Eval("UserNumber") %></ItemTemplate>
-                                            <ItemStyle Width="30%" />
-                                            <HeaderStyle Width="30%" />
+                                            <ItemTemplate><%# Eval("FormattedBirthDate") %></ItemTemplate>
+                                            <ItemStyle Width="12%" />
+                                            <HeaderStyle Width="12%" />
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="성별">
+                                            <ItemTemplate><%# Eval("GenderText") %></ItemTemplate>
+                                            <ItemStyle Width="10%" />
+                                            <HeaderStyle Width="10%" />
                                         </asp:TemplateField>
                                     </Columns>
                                     <EmptyDataTemplate>데이터가 없습니다.</EmptyDataTemplate>
@@ -236,7 +254,7 @@
                                 <asp:Button ID="BTN_Setting" runat="server"
                                     CssClass="btn btn-outline-success btn-sm"
                                     Text="코스 배치 시작"
-                                    OnClientClick="launchModal('#MainModal', '코스배치', '선수 코스배치를 하시겠습니까?', false, 2); return false;" />
+                                    OnClientClick="launchModal('#MainModal', '코스배치', '선수 코스배치를 하시겠습니까?', 1); return false;" />
                             </div>
 
                             <!-- 설정 옵션 카드 -->
@@ -272,7 +290,7 @@
                                 EmptyDataText="배치된 코스가 없습니다. 먼저 코스배치를 실행하세요.">
                                 <Columns>
                                     <asp:BoundField DataField="UserName" HeaderText="성명" />
-                                    <asp:BoundField DataField="UserHandicap" HeaderText="핸디캡" />
+                                    <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
                                     <asp:BoundField DataField="HoleNumber" HeaderText="배정홀" />
                                     <asp:BoundField DataField="TeamNumber" HeaderText="팀번호" />
                                 </Columns>
@@ -311,9 +329,7 @@
                     <button id="BTN_No" type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
 
                     <!-- 기능별 예 버튼 (launchModal에서 조건에 따라 보임 처리) -->
-                    <asp:Button ID="BTN_PlayerCheckYes" runat="server" Text="예" CssClass="btn btn-primary"
-                        OnClientClick="winPopUPCenter('GamePlayerList.aspx', 'User List'); return false;" />
-
+                    <button id="BTN_Close" type="button" class="btn btn-secondary" data-bs-dismiss="modal">확인</button>
                     <asp:Button ID="BTN_SettingYes" runat="server" Text="예" CssClass="btn btn-primary"
                         OnClick="BTN_SettingYes_Click" />
                 </div>

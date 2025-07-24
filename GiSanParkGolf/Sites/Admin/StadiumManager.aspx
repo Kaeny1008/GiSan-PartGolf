@@ -130,6 +130,14 @@
         }
     </script>
 
+    <!-- 상단 카드: 페이지 설명 영역 -->
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2" id="MainTitle" runat="server">경기장 설정</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">
+            경기장을 추가, 수정, 삭제 할 수 있습니다.
+        </p>
+    </div>
+
     <div class="container mt-4">
         <%--홀 삭제할때 쓰이는 버튼--%>
         <asp:LinkButton ID="BTN_ServerHoleDelete" runat="server" OnClick="BTN_ServerHoleDelete_Click" style="display:none" />
