@@ -58,6 +58,23 @@
             const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
             modalInstance.show();
         }
+
+        function switchPanels() {
+            const leftPanel = document.getElementById('leftPanel');
+            const rightPanel = document.getElementById('rightPanel');
+
+            // 좌측 패널 제거
+            leftPanel.classList.add('slide-out');
+            setTimeout(() => {
+                leftPanel.style.display = 'none';
+            }, 50); // transition 시간과 맞춰서 0.5초 후 제거
+
+            // 우측 패널 등장
+            rightPanel.classList.remove('hidden'); // 먼저 보여주기
+            void rightPanel.offsetWidth;           // 리플로우 강제 → transition 인식
+            rightPanel.classList.add('slide-in');  // 슬라이드 인
+        }
+
     </script>
 
     <style type="text/css" media="print">
@@ -75,6 +92,34 @@
             left: 0;
             width: 100%;
         }
+
+        .panel-left {
+          transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .panel-left.slide-out {
+          transform: translateX(-100%);
+          opacity: 0;
+          pointer-events: none;
+          display: none;
+        }
+
+        .panel-right {
+          position: absolute; /* 기존: relative */
+          top: 0;
+          left: 0;
+          width: 100%;
+          z-index: 10;
+        }
+
+        .panel-right.slide-in {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .hidden {
+          display: none;
+        }
     </style>
 
     <!-- 상단 카드: 페이지 설명 영역 -->
@@ -86,9 +131,9 @@
     </div>
 
     <div class="container mt-4">
-        <div class="row">
+        <div class="row position-relative">
             <!-- 좌측: 대회 목록 -->
-            <div class="col-md-5">
+            <div id="leftPanel" class="panel-left">
                 <div class="custom-card">
                     <h4 class="card-title">대회 설정</h4>
                     <p class="mb-2 text-muted">대회명을 클릭하여 세부정보를 확인하세요.</p>
@@ -102,9 +147,10 @@
                     <asp:GridView ID="GameList" runat="server"
                         CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
                         AutoGenerateColumns="False"
-                        DataKeyNames="GameCode"
-                        OnSelectedIndexChanged="GameList_SelectedIndexChanged"
-                        OnRowDataBound="GameList_RowDataBound">
+                        DataKeyNames="GameCode" 
+                        OnRowCommand="GameList_RowCommand"
+                        OnRowDataBound="GameList_RowDataBound"
+                        ShowHeaderWhenEmpty="true" >
                         <Columns>
                             <%-- No 컬럼 --%>
                             <asp:TemplateField HeaderText="No">
@@ -119,7 +165,8 @@
                                     <asp:LinkButton ID="LnkGame" runat="server"
                                         CssClass="HyperLink"
                                         ToolTip='<%# Eval("GameCode") %>'
-                                        CommandName="Select"
+                                        CommandName="SelectRow"
+                                        CommandArgument="<%# Container.DataItemIndex %>"
                                         Text='<%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 25) %>'>
                                     </asp:LinkButton>
                                 </ItemTemplate>
@@ -145,16 +192,16 @@
                     </asp:GridView>
 
                     <!-- 페이징 컨트롤 -->
-                    <div class="d-flex justify-content-between align-items-center mt-2">
+                    <%--<div class="d-flex justify-content-between align-items-center mt-2">--%>
                         <small class="text-muted">총 건수: <asp:Literal ID="lblTotalRecord" runat="server" /></small>
                         <uc:NewPagingControl ID="pager" runat="server"
                             OnPageChanged="Pager_PageChanged" />
-                    </div>
+                    <%--</div>--%>
                 </div>
             </div>
 
             <!-- 우측: 상세정보 탭 카드 -->
-            <div class="col-md-7">
+            <div id="rightPanel" class="panel-right hidden">
                 <div class="custom-card">
                     <h4 class="card-title mb-3">대회 상세정보</h4>
 
@@ -219,7 +266,7 @@
                                     AutoGenerateColumns="False"
                                     DataKeyNames="UserId"
                                     CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-                                    ShowHeaderWhenEmpty="true" OnRowDataBound="GameList_RowDataBound">
+                                    ShowHeaderWhenEmpty="true" OnRowDataBound="gvPlayerList_RowDataBound">
                                     <HeaderStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px" />
                                     <RowStyle HorizontalAlign="Center" BorderStyle="Solid" BorderWidth="1px" />
                                     <Columns>

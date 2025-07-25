@@ -47,7 +47,9 @@ namespace GiSanParkGolf.Sites.Admin
         {
             SearchField = search.SelectedField;
             SearchKeyword = search.Keyword;
+            ViewState["GameList"] = null;
 
+            GameList.SelectedIndex = -1;
             GameList.PageIndex = 0;
             LoadGameList();
         }
@@ -56,7 +58,9 @@ namespace GiSanParkGolf.Sites.Admin
         {
             ViewState.Remove("SearchField");
             ViewState.Remove("SearchKeyword");
-
+            ViewState["GameList"] = null;
+            
+            GameList.SelectedIndex = -1;
             GameList.PageIndex = 0;
             LoadGameList();
         }
@@ -72,7 +76,17 @@ namespace GiSanParkGolf.Sites.Admin
             string field = SearchField;
             string keyword = SearchKeyword;
 
-            List<GameListModel> result = Global.dbManager.GetGames(field, keyword);
+            List<GameListModel> result;
+
+            if (ViewState["GameList"] == null)
+            {
+                result = Global.dbManager.GetGames(field, keyword);
+                ViewState["GameList"] = result;
+            }
+            else
+            {
+                result = (List<GameListModel>)ViewState["GameList"];
+            }
 
             GameList.DataSource = result;
             GameList.DataBind();
@@ -82,6 +96,15 @@ namespace GiSanParkGolf.Sites.Admin
             pager.TotalPages = GameList.PageCount;
         }
 
+        protected void gvPlayerList_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                int no = (gvPlayerList.PageIndex * gvPlayerList.PageSize) + e.Row.RowIndex + 1;
+                e.Row.Cells[0].Text = no.ToString();
+            }
+        }
+
         protected void GameList_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.DataRow)
@@ -89,33 +112,48 @@ namespace GiSanParkGolf.Sites.Admin
                 int no = (GameList.PageIndex * GameList.PageSize) + e.Row.RowIndex + 1;
                 e.Row.Cells[0].Text = no.ToString();
 
-                // 현재 행이 선택된 행인지 확인
                 if (e.Row.RowIndex == GameList.SelectedIndex)
                 {
-                    //이게 안됨.. 해결해 보자.
-                    e.Row.BackColor = System.Drawing.Color.LightGoldenrodYellow;
+                    //e.Row.BackColor = System.Drawing.Color.LightGoldenrodYellow;
                     e.Row.Font.Bold = true;
-                    e.Row.ForeColor = System.Drawing.Color.DarkBlue;
+                    //e.Row.ForeColor = System.Drawing.Color.DarkBlue;
                 }
             }
         }
 
-        protected void GameList_SelectedIndexChanged(object sender, EventArgs e)
+        protected void GameList_RowCommand(object sender, GridViewCommandEventArgs e)
         {
-            string gameCode = GameList.SelectedValue?.ToString();
+            if (e.CommandName == "SelectRow")
+            {
+                int index = Convert.ToInt32(e.CommandArgument);
+                int pageSize = GameList.PageSize;
+                int pageIndex = index / pageSize;
 
-            ViewState["SelectedGameCode"] = gameCode;
+                GameList.PageIndex = pageIndex;
+                GameList.SelectedIndex = index % pageSize;
 
-            LoadGame(gameCode);
+                string gameCode = GameList.DataKeys[index].Value.ToString();
+                ViewState["SelectedGameCode"] = gameCode;
 
-            gvPlayerList.DataSource = Global.dbManager.GetGameUserList(gameCode);
-            gvPlayerList.DataBind();
+                bool loadResult = LoadGame(gameCode);
 
-            gvCourseResult.DataSource = Global.dbManager.GetAssignmentResult(gameCode);
-            gvCourseResult.DataBind();
+                if (loadResult)
+                {
+                    gvPlayerList.DataSource = Global.dbManager.GetGameUserList(gameCode);
+                    gvPlayerList.DataBind();
+
+                    gvCourseResult.DataSource = Global.dbManager.GetAssignmentResult(gameCode);
+                    gvCourseResult.DataBind();
+
+                    GameList.DataSource = ViewState["GameList"];
+                    GameList.DataBind();
+
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ActivatePanels", "switchPanels();", true);
+                }
+            }
         }
 
-        private void LoadGame(string gameCode)
+        private bool LoadGame(string gameCode)
         {
             var gameinfo = Global.dbManager.GetGameInformation(gameCode);
 
@@ -131,7 +169,7 @@ namespace GiSanParkGolf.Sites.Admin
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalError",
                     "launchModal('#MainModal', '오류', '대회 정보를 찾을 수 없습니다.', 0);", true);
 
-                return;
+                return false;
             }
 
             bool isClosed = gameinfo.GameStatus == "대회종료" || gameinfo.GameStatus == "취소";
@@ -146,7 +184,7 @@ namespace GiSanParkGolf.Sites.Admin
                 TB_StartDate.Text = TB_EndDate.Text = TB_HoleMaximum.Text = TB_Note.Text =
                 TB_User.Text = TB_GameStatus.Text = TB_GameCode.Text = string.Empty;
 
-                return;
+                return false;
             }
 
             TB_GameName.Text = gameinfo.GameName;
@@ -160,6 +198,8 @@ namespace GiSanParkGolf.Sites.Admin
             TB_User.Text = gameinfo.ParticipantNumber.ToString();
             TB_GameStatus.Text = gameinfo.GameStatus;
             TB_GameCode.Text = gameinfo.GameCode;
+
+            return true;
         }
 
         private List<AssignedPlayer> cachedAssignment;
@@ -264,12 +304,12 @@ namespace GiSanParkGolf.Sites.Admin
         list.OrderByDescending(p => p.AgeHandicap).ThenBy(p => Guid.NewGuid()).ToList();
 
         public List<AssignedPlayer> DistributePlayers(
-    List<GameJoinUserList> players,
-    List<CourseList> courses,
-    int maxPerHole,
-    string genderPrefix,
-    string gameCode,
-    Func<List<GameJoinUserList>, List<GameJoinUserList>> sortStrategy)
+            List<GameJoinUserList> players,
+            List<CourseList> courses,
+            int maxPerHole,
+            string genderPrefix,
+            string gameCode,
+            Func<List<GameJoinUserList>, List<GameJoinUserList>> sortStrategy)
         {
             var result = new List<AssignedPlayer>();
             var sortedPlayers = sortStrategy(players);

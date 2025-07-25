@@ -9,6 +9,7 @@ namespace GiSanParkGolf.Models
     /// <summary>
     /// GameListModel 클래스: Game_List 테이블과 일대일 매핑되는 ViewModel 클래스
     /// </summary>
+    [Serializable]
     public class GameListModel
     {
         [Display(Name = "GameCode")]
