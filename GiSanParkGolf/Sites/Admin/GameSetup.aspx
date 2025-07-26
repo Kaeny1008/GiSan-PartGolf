@@ -63,18 +63,27 @@
             const leftPanel = document.getElementById('leftPanel');
             const rightPanel = document.getElementById('rightPanel');
 
-            // 좌측 패널 제거
-            leftPanel.classList.add('slide-out');
-            setTimeout(() => {
-                leftPanel.style.display = 'none';
-            }, 50); // transition 시간과 맞춰서 0.5초 후 제거
+            leftPanel.classList.add('fade-out');
+            leftPanel.style.display = 'none'; // 바로 공간 제거
 
-            // 우측 패널 등장
-            rightPanel.classList.remove('hidden'); // 먼저 보여주기
-            void rightPanel.offsetWidth;           // 리플로우 강제 → transition 인식
-            rightPanel.classList.add('slide-in');  // 슬라이드 인
+            rightPanel.classList.remove('hidden');
+            rightPanel.classList.add('fade-in');
         }
 
+        function reversePanels() {
+            const leftPanel = document.getElementById('leftPanel');
+            const rightPanel = document.getElementById('rightPanel');
+
+            // 우측 패널 페이드 아웃
+            rightPanel.classList.remove('fade-in');
+            rightPanel.classList.add('fade-out');
+
+            // 바로 우측 패널 숨기고 좌측 패널 보여주기
+            rightPanel.style.display = 'none';
+            leftPanel.style.display = 'block';
+            leftPanel.classList.remove('fade-out');
+            leftPanel.classList.add('fade-in');
+        }
     </script>
 
     <style type="text/css" media="print">
@@ -94,27 +103,27 @@
         }
 
         .panel-left {
-          transition: transform 0.5s ease, opacity 0.5s ease;
+          opacity: 1;
+          transition: opacity 0.5s ease;
         }
 
-        .panel-left.slide-out {
-          transform: translateX(-100%);
+        .panel-left.fade-out {
           opacity: 0;
           pointer-events: none;
-          display: none;
         }
 
         .panel-right {
-          position: absolute; /* 기존: relative */
+          opacity: 0;
+          transition: opacity 0.5s ease;
+          width: 100%;
+          position: absolute;
           top: 0;
           left: 0;
-          width: 100%;
           z-index: 10;
         }
 
-        .panel-right.slide-in {
+        .panel-right.fade-in {
           opacity: 1;
-          transform: translateX(0);
         }
 
         .hidden {
@@ -164,7 +173,6 @@
                                 <ItemTemplate>
                                     <asp:LinkButton ID="LnkGame" runat="server"
                                         CssClass="HyperLink"
-                                        ToolTip='<%# Eval("GameCode") %>'
                                         CommandName="SelectRow"
                                         CommandArgument="<%# Container.DataItemIndex %>"
                                         Text='<%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 25) %>'>
@@ -182,11 +190,6 @@
                                 <HeaderStyle Width="90px" />
                                 <ItemStyle Width="90px" />
                             </asp:TemplateField>
-                            <asp:TemplateField HeaderText="GameCode" Visible="False">
-                                <ItemTemplate>
-                                    <%# Eval("GameCode") %>
-                                </ItemTemplate>
-                            </asp:TemplateField>
                         </Columns>
                         <EmptyDataTemplate>데이터가 없습니다.</EmptyDataTemplate>
                     </asp:GridView>
@@ -203,8 +206,11 @@
             <!-- 우측: 상세정보 탭 카드 -->
             <div id="rightPanel" class="panel-right hidden">
                 <div class="custom-card">
-                    <h4 class="card-title mb-3">대회 상세정보</h4>
-
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="card-title mb-0">대회 상세정보</h4>
+                        <button class="btn btn-outline-success btn-sm" onclick="reversePanels()">목록으로 이동</button>
+                    </div>
+                    
                     <!-- 탭 메뉴 -->
                     <ul class="nav nav-tabs mb-3">
                         <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-info">기본정보</a></li>
@@ -212,7 +218,7 @@
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-course">코스배치</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-result">코스배치 결과 확인</a></li>
                     </ul>
-
+                    
                     <!-- 탭 콘텐츠 -->
                     <div class="tab-content">
                         <!-- 기본정보 -->

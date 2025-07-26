@@ -273,7 +273,7 @@ namespace GiSanParkGolf.Class
         /// GameCode 결과 리스트
         /// </summary>
         /// <param name="gameCode">GameCode</param>
-        public GameListModel GetGameInformation(string gameCode)
+        public Select_GameList GetGameInformation(string gameCode)
         {
             var query = "sp_Get_GameInformation";
             var parameters = new DynamicParameters(new { GameCode = gameCode });
@@ -283,7 +283,7 @@ namespace GiSanParkGolf.Class
                 if (DB_Connection.State != ConnectionState.Open)
                     DB_Connection.Open();
 
-                return DB_Connection.Query<GameListModel>(
+                return DB_Connection.Query<Select_GameList>(
                     query, parameters, commandType: CommandType.StoredProcedure
                 ).SingleOrDefault();
             }

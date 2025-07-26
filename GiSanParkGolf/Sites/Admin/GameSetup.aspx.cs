@@ -40,6 +40,10 @@ namespace GiSanParkGolf.Sites.Admin
 
                 gvPlayerList.DataSource = new List<GameJoinUserList>();
                 gvPlayerList.DataBind();
+            } else
+            {
+                pager.CurrentPage = GameList.PageIndex;
+                pager.TotalPages = GameList.PageCount;
             }
         }
 
@@ -96,28 +100,12 @@ namespace GiSanParkGolf.Sites.Admin
             pager.TotalPages = GameList.PageCount;
         }
 
-        protected void gvPlayerList_RowDataBound(object sender, GridViewRowEventArgs e)
-        {
-            if (e.Row.RowType == DataControlRowType.DataRow)
-            {
-                int no = (gvPlayerList.PageIndex * gvPlayerList.PageSize) + e.Row.RowIndex + 1;
-                e.Row.Cells[0].Text = no.ToString();
-            }
-        }
-
         protected void GameList_RowDataBound(object sender, GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
                 int no = (GameList.PageIndex * GameList.PageSize) + e.Row.RowIndex + 1;
                 e.Row.Cells[0].Text = no.ToString();
-
-                if (e.Row.RowIndex == GameList.SelectedIndex)
-                {
-                    //e.Row.BackColor = System.Drawing.Color.LightGoldenrodYellow;
-                    e.Row.Font.Bold = true;
-                    //e.Row.ForeColor = System.Drawing.Color.DarkBlue;
-                }
             }
         }
 
@@ -126,14 +114,8 @@ namespace GiSanParkGolf.Sites.Admin
             if (e.CommandName == "SelectRow")
             {
                 int index = Convert.ToInt32(e.CommandArgument);
-                int pageSize = GameList.PageSize;
-                int pageIndex = index / pageSize;
-
-                GameList.PageIndex = pageIndex;
-                GameList.SelectedIndex = index % pageSize;
 
                 string gameCode = GameList.DataKeys[index].Value.ToString();
-                ViewState["SelectedGameCode"] = gameCode;
 
                 bool loadResult = LoadGame(gameCode);
 
@@ -150,6 +132,9 @@ namespace GiSanParkGolf.Sites.Admin
 
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "ActivatePanels", "switchPanels();", true);
                 }
+
+                //pager.CurrentPage = GameList.PageIndex;
+                //pager.TotalPages = GameList.PageCount;
             }
         }
 
@@ -200,6 +185,15 @@ namespace GiSanParkGolf.Sites.Admin
             TB_GameCode.Text = gameinfo.GameCode;
 
             return true;
+        }
+
+        protected void gvPlayerList_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                int no = (gvPlayerList.PageIndex * gvPlayerList.PageSize) + e.Row.RowIndex + 1;
+                e.Row.Cells[0].Text = no.ToString();
+            }
         }
 
         private List<AssignedPlayer> cachedAssignment;
@@ -371,7 +365,6 @@ namespace GiSanParkGolf.Sites.Admin
 
             return result;
         }
-
 
         public List<AssignedPlayer> RandomDistribution(
             List<GameJoinUserList> players,
