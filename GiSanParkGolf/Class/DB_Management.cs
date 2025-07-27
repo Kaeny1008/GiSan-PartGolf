@@ -1692,5 +1692,56 @@ namespace GiSanParkGolf.Class
             }
         }
 
+        public List<dynamic> GetAssignedUserList(string gameCode)
+        {
+            string query = @"
+                SELECT 
+                    ROW_NUMBER() OVER (ORDER BY ua.AssignedDate) AS RowNumber,
+                    u.UserId,
+                    u.UserName,
+                    CASE 
+                        WHEN u.UserGender IN (1, 3) THEN '남'
+                        WHEN u.UserGender IN (2, 4) THEN '여'
+                        ELSE '기타'
+                    END AS GenderText,
+                    CONVERT(varchar(10), 
+                        TRY_CONVERT(date,
+                            CASE 
+                                WHEN u.UserGender IN (1, 2) THEN '19' + FORMAT(u.UserNumber, '000000')
+                                WHEN u.UserGender IN (3, 4) THEN '20' + FORMAT(u.UserNumber, '000000')
+                                ELSE NULL
+                            END
+                        ), 120
+                    ) AS FormattedBirthDate,
+                    ua.CourseName,
+                    ua.CourseOrder,
+                    ua.GroupNumber,
+                    ua.HoleNumber,
+                    ua.TeamNumber,
+                    ua.AgeHandicap
+                FROM Game_UserAssignment ua
+                INNER JOIN SYS_Users u ON ua.UserId = u.UserId
+                WHERE ua.GameCode = @GameCode
+            ";
+
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                var result = DB_Connection.Query(query, new { GameCode = gameCode }).ToList();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetAssignedUserList] 오류: {ex.Message}");
+                return new List<dynamic>();
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
+
     }
 }

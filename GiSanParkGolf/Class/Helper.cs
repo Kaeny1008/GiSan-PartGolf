@@ -1,9 +1,12 @@
 ﻿using GiSanParkGolf.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace GiSanParkGolf.Class
 {
@@ -69,6 +72,56 @@ namespace GiSanParkGolf.Class
 
             // 현실적인 나이만 반환
             return (age >= 0 && age <= 130) ? age : 0;
+        }
+
+        public static List<BoundField> GetExportColumns(Dictionary<string, string> columnHeaders)
+        {
+            var columnList = new List<BoundField>();
+
+            foreach (var entry in columnHeaders)
+            {
+                var column = new BoundField
+                {
+                    DataField = entry.Key,
+                    HeaderText = entry.Value,
+                    ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
+                    HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
+                };
+                columnList.Add(column);
+            }
+
+            return columnList;
+        }
+
+        public static void ExportGridViewToExcel(GridView gridView, string fileName, HttpResponse response)
+        {
+            response.Clear();
+            response.Buffer = true;
+            response.AddHeader("content-disposition", $"attachment;filename={HttpUtility.UrlEncode(fileName, Encoding.UTF8)}");
+            response.Charset = "";
+            response.ContentType = "application/vnd.ms-excel";
+            response.ContentEncoding = Encoding.UTF8;
+
+            using (var sw = new StringWriter())
+            {
+                using (var hw = new HtmlTextWriter(sw))
+                {
+                    foreach (GridViewRow row in gridView.Rows)
+                    {
+                        row.Attributes.Add("class", "textmode");
+                    }
+
+                    gridView.RenderControl(hw);
+
+                    string style = @"<meta http-equiv='Content-Type' content='text/html; charset=utf-8' /> 
+                                     <style> .textmode { mso-number-format:\@; } </style>";
+
+                    response.Write(style);
+                    response.Output.Write(sw.ToString());
+                    response.Flush();
+                    response.End();
+                }
+            }
         }
     }
 }

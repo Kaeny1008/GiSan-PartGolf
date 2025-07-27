@@ -404,80 +404,58 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_ToExcel_Click(object sender, EventArgs e)
         {
-            //Create a dummy GridView.
-            GridView gvCustomers = new GridView();
-            gvCustomers.AutoGenerateColumns = false;
+            GridView gvExport = new GridView();
+            gvExport.AutoGenerateColumns = false;
 
-            // 컬럼 수동 지정
-            gvCustomers.Columns.Add(new BoundField
+            var headers = new Dictionary<string, string>
             {
-                DataField = "RowNumber",
-                HeaderText = "No",
-                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
-                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
-            });
-            gvCustomers.Columns.Add(new BoundField
-            {
-                DataField = "UserId",
-                HeaderText = "ID",
-                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
-                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
-            });
-            gvCustomers.Columns.Add(new BoundField
-            {
-                DataField = "UserName",
-                HeaderText = "성명",
-                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
-                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
-            });
-            gvCustomers.Columns.Add(new BoundField
-            {
-                DataField = "FormattedBirthDate",
-                HeaderText = "생년월일",
-                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
-                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
-            });
-            gvCustomers.Columns.Add(new BoundField
-            {
-                DataField = "GenderText",
-                HeaderText = "성별",
-                ItemStyle = { HorizontalAlign = HorizontalAlign.Center },
-                HeaderStyle = { HorizontalAlign = HorizontalAlign.Center }
-            });
+                { "RowNumber", "No" },
+                { "UserId", "ID" },
+                { "UserName", "성명" },
+                { "FormattedBirthDate", "생년월일" },
+                { "GenderText", "성별" }
+            };
 
-            gvCustomers.DataSource = Global.dbManager.GetGameUserList(TB_GameCode.Text);
-            gvCustomers.DataBind();
-
-            string fileName = HttpUtility.UrlEncode("PlayerList.xls", new UTF8Encoding());
-
-            Response.Clear();
-            Response.Buffer = true;
-            Response.AddHeader("content-disposition", "attachment;filename=" + fileName);
-            Response.Charset = "";
-            Response.ContentType = "application/vnd.ms-excel";
-            Response.ContentEncoding = Encoding.UTF8;
-            using (StringWriter sw = new StringWriter())
+            foreach (var col in Helper.GetExportColumns(headers))
             {
-                using (HtmlTextWriter hw = new HtmlTextWriter(sw))
-                {
-                    foreach (GridViewRow row in gvCustomers.Rows)
-                    {
-                        //Apply text style to each Row.
-                        row.Attributes.Add("class", "textmode");
-                    }
-                    gvCustomers.RenderControl(hw);
-
-                    //Style to format numbers to string.
-                    //string style = @"<style> .textmode { mso-number-format:\@; } </style>";
-                    string style = @"<meta http-equiv='Content-Type' content='text/html; charset=utf-8' /> 
-                                    <style> .textmode { mso-number-format:\@; } </style>";
-                    Response.Write(style);
-                    Response.Write(style);
-                    Response.Output.Write(sw.ToString());
-                    Response.Flush();
-                    Response.End();
-                }
+                gvExport.Columns.Add(col);
             }
+
+            gvExport.DataSource = Global.dbManager.GetGameUserList(TB_GameCode.Text);
+            gvExport.DataBind();
+
+            Helper.ExportGridViewToExcel(gvExport, "PlayerList.xls", Response);
+        }
+
+        protected void BTN_ResultToExcel_Click(object sender, EventArgs e)
+        {
+            GridView gvExport = new GridView();
+            gvExport.AutoGenerateColumns = false;
+
+            var headers = new Dictionary<string, string>
+            {
+                { "RowNumber", "No" },               // 순번
+                { "UserId", "아이디" },
+                { "UserName", "성명" },
+                { "GenderText", "성별" },
+                { "FormattedBirthDate", "생년월일" },
+                { "CourseName", "코스명" },
+                { "CourseOrder", "코스순서" },
+                { "GroupNumber", "홀번호" },
+                { "HoleNumber", "홀표시" },
+                { "TeamNumber", "팀번호" },
+                { "AgeHandicap", "핸디캡" }
+            };
+
+            foreach (var col in Helper.GetExportColumns(headers))
+            {
+                gvExport.Columns.Add(col);
+            }
+
+            gvExport.DataSource = Global.dbManager.GetAssignedUserList(TB_GameCode.Text);
+            gvExport.DataBind();
+
+            Helper.ExportGridViewToExcel(gvExport, "PlayerList.xls", Response);
         }
 
         public override void VerifyRenderingInServerForm(Control control)

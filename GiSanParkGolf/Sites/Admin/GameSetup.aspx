@@ -91,15 +91,16 @@
             visibility: hidden;
         }
 
-        #printArea, #printArea * {
+        #printArea, #resultPrint {
             visibility: visible;
-        }
-
-        #printArea {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
+        }
+
+        #printArea *, #resultPrint * {
+            visibility: visible;
         }
 
         .panel-left {
@@ -339,32 +340,48 @@
 
                         <!-- 코스배치 결과 탭 -->
                         <div class="tab-pane fade" id="tab-result">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="mb-0 text-muted">코스배치 결과 확인</h5>
+                            <h5 class="mb-0 text-muted">코스배치 결과 확인</h5>
+
+                            <div class="mb-3 d-flex gap-2 justify-content-end">
                                 <asp:Button ID="BTN_RefreshResult" runat="server"
-                                    CssClass="btn btn-outline-info btn-sm"
+                                    CssClass="btn btn-info btn-sm"
                                     Text="새로고침"
                                     OnClick="BTN_RefreshResult_Click" />
+
                                 <asp:Button ID="BTN_SaveAssignment" runat="server"
-                                    CssClass="btn btn-primary btn-sm"
+                                    CssClass="btn btn-success btn-sm"
                                     Text="배정 결과 저장"
                                     OnClick="BTN_SaveAssignment_Click" />
+
+                                <div style="width: 40px;"></div>
+
+                                <asp:Button ID="BTN_ResultToExcel" runat="server"
+                                    CssClass="btn btn-warning btn-sm text-white"
+                                    Text="Excel 저장"
+                                    OnClick="BTN_ResultToExcel_Click" />
+
+                                <asp:Button ID="Button2" runat="server"
+                                    CssClass="btn btn-secondary btn-sm"
+                                    Text="프린트 하기"
+                                    OnClientClick="window.print(); return false;" />
                             </div>
 
-                            <asp:GridView ID="gvCourseResult" runat="server"
-                                AutoGenerateColumns="False"
-                                OnRowDataBound="gvCourseResult_RowDataBound"
-                                CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-                                EmptyDataText="배치된 코스가 없습니다. 먼저 코스배치를 실행하세요.">
-                                <Columns>
-                                    <asp:BoundField DataField="UserId" HeaderText="ID" />
-                                    <asp:BoundField DataField="UserName" HeaderText="성명" />
-                                    <asp:BoundField DataField="GenderText" HeaderText="성별" />
-                                    <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
-                                    <asp:BoundField DataField="HoleNumber" HeaderText="배정홀" />
-                                    <asp:BoundField DataField="TeamNumber" HeaderText="팀번호" />
-                                </Columns>
-                            </asp:GridView>
+                            <div id="resultPrint">
+                                <asp:GridView ID="gvCourseResult" runat="server"
+                                    AutoGenerateColumns="False"
+                                    OnRowDataBound="gvCourseResult_RowDataBound"
+                                    CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                                    EmptyDataText="배치된 코스가 없습니다. 먼저 코스배치를 실행하세요.">
+                                    <Columns>
+                                        <asp:BoundField DataField="UserId" HeaderText="ID" />
+                                        <asp:BoundField DataField="UserName" HeaderText="성명" />
+                                        <asp:BoundField DataField="GenderText" HeaderText="성별" />
+                                        <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
+                                        <asp:BoundField DataField="HoleNumber" HeaderText="배정홀" />
+                                        <asp:BoundField DataField="TeamNumber" HeaderText="팀번호" />
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
 
                             <small class="text-muted mt-3 d-block">
                                 ※ 핸디캡 기준으로 코스가 배정된 경우 우선순위, 구간, 홀 번호 등 조건에 맞게 배정됩니다.<br />
