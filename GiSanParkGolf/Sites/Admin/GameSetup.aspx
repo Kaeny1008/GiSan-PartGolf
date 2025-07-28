@@ -59,31 +59,18 @@
             modalInstance.show();
         }
 
-        function switchPanels() {
-            const leftPanel = document.getElementById('leftPanel');
-            const rightPanel = document.getElementById('rightPanel');
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabLinks = document.querySelectorAll('.nav-tabs a.nav-link');
 
-            leftPanel.classList.add('fade-out');
-            leftPanel.style.display = 'none'; // 바로 공간 제거
-
-            rightPanel.classList.remove('hidden');
-            rightPanel.classList.add('fade-in');
-        }
-
-        function reversePanels() {
-            const leftPanel = document.getElementById('leftPanel');
-            const rightPanel = document.getElementById('rightPanel');
-
-            // 우측 패널 페이드 아웃
-            rightPanel.classList.remove('fade-in');
-            rightPanel.classList.add('fade-out');
-
-            // 바로 우측 패널 숨기고 좌측 패널 보여주기
-            rightPanel.style.display = 'none';
-            leftPanel.style.display = 'block';
-            leftPanel.classList.remove('fade-out');
-            leftPanel.classList.add('fade-in');
-        }
+            tabLinks.forEach(function (tab) {
+                tab.addEventListener('click', function () {
+                    const rightPanel = document.getElementById('rightPanel');
+                    if (rightPanel) {
+                        rightPanel.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        });
     </script>
 
     <style type="text/css" media="print">
@@ -102,34 +89,6 @@
         #printArea *, #resultPrint * {
             visibility: visible;
         }
-
-        .panel-left {
-          opacity: 1;
-          transition: opacity 0.5s ease;
-        }
-
-        .panel-left.fade-out {
-          opacity: 0;
-          pointer-events: none;
-        }
-
-        .panel-right {
-          opacity: 0;
-          transition: opacity 0.5s ease;
-          width: 100%;
-          position: absolute;
-          top: 0;
-          left: 0;
-          z-index: 10;
-        }
-
-        .panel-right.fade-in {
-          opacity: 1;
-        }
-
-        .hidden {
-          display: none;
-        }
     </style>
 
     <!-- 상단 카드: 페이지 설명 영역 -->
@@ -143,7 +102,7 @@
     <div class="container mt-4">
         <div class="row position-relative">
             <!-- 좌측: 대회 목록 -->
-            <div id="leftPanel" class="panel-left">
+            <div id="leftPanel">
                 <div class="custom-card">
                     <h4 class="card-title">대회 설정</h4>
                     <p class="mb-2 text-muted">대회명을 클릭하여 세부정보를 확인하세요.</p>
@@ -205,11 +164,13 @@
             </div>
 
             <!-- 우측: 상세정보 탭 카드 -->
-            <div id="rightPanel" class="panel-right hidden">
+            <div id="rightPanel">
                 <div class="custom-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0">대회 상세정보</h4>
-                        <button class="btn btn-outline-success btn-sm" onclick="reversePanels()">목록으로 이동</button>
+                        <asp:Button ID="BTN_BackToList" runat="server" Text="목록으로 이동"
+                            CssClass="btn btn-outline-success btn-sm"
+                            OnClick="BTN_BackToList_Click" />
                     </div>
                     
                     <!-- 탭 메뉴 -->

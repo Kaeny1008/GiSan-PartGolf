@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -124,7 +125,12 @@ namespace GiSanParkGolf.BBS.Controls
             // 보안 문자를 정확히 입력했거나, 로그인이 된 상태라면...
             if (IsImageTextCorrect())
             {
-                UploadProcess(); // 파일 업로드 관련 코드 분리
+                // 파일 업로드 처리
+                if (UploadProcess() == false)
+                {
+                    string script = "alert('파일 업로드에 실패했습니다. 다시 시도해주세요.');";
+                    ScriptManager.RegisterStartupScript(this, GetType(), "UploadFailAlert", script, true);
+                }
 
                 string ipaddr = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
                 if (string.IsNullOrEmpty(ipaddr))
@@ -209,7 +215,7 @@ namespace GiSanParkGolf.BBS.Controls
             }
         }
 
-        private void UploadProcess()
+        private bool UploadProcess()
         {
             // 파일 업로드 처리 시작
             _BaseDir = Server.MapPath("./MyFiles");
@@ -217,45 +223,57 @@ namespace GiSanParkGolf.BBS.Controls
             _FileSize = 0;
             if (txtFileName.PostedFile != null)
             {
-                if (txtFileName.PostedFile.FileName.Trim().Length > 0
-                    && txtFileName.PostedFile.ContentLength > 0)
+                try
                 {
-                    if (FormType == BoardWriteFormType.Modify)
+                    if (txtFileName.PostedFile.FileName.Trim().Length > 0 &&
+                        txtFileName.PostedFile.ContentLength > 0)
                     {
-                        ViewState["FileName"] =
-                            FileUtility.GetFileNameWithNumbering(
-                                _BaseDir, Path.GetFileName(
-                                    txtFileName.PostedFile.FileName));
-                        ViewState["FileSize"] =
-                            txtFileName.PostedFile.ContentLength;
-                        //업로드 처리 : SaveAs()
-                        txtFileName.PostedFile.SaveAs(
-                            Path.Combine(_BaseDir,
-                                ViewState["FileName"].ToString()));
-                    }
-                    else // BoardWrite, BoardReply
-                    {
-                        _FileName =
-                            FileUtility.GetFileNameWithNumbering(
-                                _BaseDir,
-                                    Path.GetFileName(
+                        if (FormType == BoardWriteFormType.Modify)
+                        {
+                            ViewState["FileName"] =
+                                FileUtility.GetFileNameWithNumbering(
+                                    _BaseDir, Path.GetFileName(
                                         txtFileName.PostedFile.FileName));
-                        _FileSize = txtFileName.PostedFile.ContentLength;
-                        // 업로드 처리 : SaveAs()
-                        txtFileName.PostedFile.SaveAs(
-                            Path.Combine(_BaseDir, _FileName));
-                    }
-                    //기존 업로드된 파일이 있다면 삭제
-                    if (lblFileNamePrevious.Visible)
-                    {
-                        var note = (new NoteRepository()).GetNoteById(Convert.ToInt32(_Id));
-                        Debug.WriteLine("Base Dir : " + _BaseDir);
-                        Debug.WriteLine("Pre FileName : " + note.FileName);
-                        Debug.WriteLine("둘이합쳐 : " + Path.Combine(_BaseDir, note.FileName));
-                        File.Delete(Path.Combine(_BaseDir, note.FileName));
+                            ViewState["FileSize"] =
+                                txtFileName.PostedFile.ContentLength;
+
+                            txtFileName.PostedFile.SaveAs(
+                                Path.Combine(_BaseDir,
+                                    ViewState["FileName"].ToString()));
+                        }
+                        else // BoardWrite, BoardReply
+                        {
+                            _FileName =
+                                FileUtility.GetFileNameWithNumbering(
+                                    _BaseDir,
+                                        Path.GetFileName(
+                                            txtFileName.PostedFile.FileName));
+                            _FileSize = txtFileName.PostedFile.ContentLength;
+
+                            txtFileName.PostedFile.SaveAs(
+                                Path.Combine(_BaseDir, _FileName));
+                        }
+
+                        if (lblFileNamePrevious.Visible)
+                        {
+                            var note = (new NoteRepository()).GetNoteById(Convert.ToInt32(_Id));
+                            Debug.WriteLine("Base Dir : " + _BaseDir);
+                            Debug.WriteLine("Pre FileName : " + note.FileName);
+                            Debug.WriteLine("둘이합쳐 : " + Path.Combine(_BaseDir, note.FileName));
+                            File.Delete(Path.Combine(_BaseDir, note.FileName));
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    // 예외 처리: 로그 출력 또는 사용자에게 알림
+                    Debug.WriteLine("파일 업로드 중 오류 발생: " + ex.Message);
+                    return false;
+                    // 필요 시 추가적인 예외 로직 작성
+                }
             }// 파일 업로드 처리 끝
+
+            return true;
         }
 
         /// <summary>

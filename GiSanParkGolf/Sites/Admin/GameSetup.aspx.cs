@@ -130,7 +130,8 @@ namespace GiSanParkGolf.Sites.Admin
                     GameList.DataSource = ViewState["GameList"];
                     GameList.DataBind();
 
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ActivatePanels", "switchPanels();", true);
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ScrollToRightPanel",
+                        @"document.getElementById('rightPanel').scrollIntoView({ behavior: 'smooth' });", true);
                 }
 
                 //pager.CurrentPage = GameList.PageIndex;
@@ -140,6 +141,9 @@ namespace GiSanParkGolf.Sites.Admin
 
         private bool LoadGame(string gameCode)
         {
+
+            ResetRightPanelData();
+
             var gameinfo = Global.dbManager.GetGameInformation(gameCode);
 
             if (gameinfo.GameSetting == "HC")
@@ -164,10 +168,6 @@ namespace GiSanParkGolf.Sites.Admin
                 string safeMessage = HttpUtility.JavaScriptStringEncode(msg);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalError",
                     $"launchModal('#MainModal', '확인', '{safeMessage}', 0);", true);
-
-                TB_GameName.Text = TB_GameDate.Text = TB_StadiumName.Text = TB_GameHost.Text =
-                TB_StartDate.Text = TB_EndDate.Text = TB_HoleMaximum.Text = TB_Note.Text =
-                TB_User.Text = TB_GameStatus.Text = TB_GameCode.Text = string.Empty;
 
                 return false;
             }
@@ -223,7 +223,6 @@ namespace GiSanParkGolf.Sites.Admin
                 }
             }
         }
-
 
         protected void BTN_SettingYes_Click(object sender, EventArgs e)
         {
@@ -281,14 +280,11 @@ namespace GiSanParkGolf.Sites.Admin
             gvCourseResult.DataSource = sortedPlayers;
             gvCourseResult.DataBind();
 
-
             // 완료 안내 모달
             ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalComplete",
                 @"launchModal('#MainModal', '배정 완료', '코스 배치가 성공적으로 완료되었습니다.', 0);
-                  setTimeout(function() {
-                      var tabTrigger = document.querySelector('a[href=""#tab-result""]');
-                      if (tabTrigger) new bootstrap.Tab(tabTrigger).show();
-                  }, 600);", true);
+                new bootstrap.Tab(document.querySelector('a[href=""#tab-result""]')).show();
+                document.getElementById('rightPanel').scrollIntoView({ behavior: 'smooth' });", true);
         }
 
         Func<List<GameJoinUserList>, List<GameJoinUserList>> RandomSort = list => 
@@ -522,5 +518,32 @@ namespace GiSanParkGolf.Sites.Admin
             ScriptManager.RegisterStartupScript(this, this.GetType(), "SaveResult",
                 $"launchModal('#MainModal', '{title}', '{msg}', 0);", true);
         }
+
+        protected void BTN_BackToList_Click(object sender, EventArgs e)
+        {
+            ResetRightPanelData();
+
+            // 탭은 기본정보로 설정하고
+            // 좌측 패널로 스크롤 이동
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "ScrollToLeft",
+                @"new bootstrap.Tab(document.querySelector('a[href=""#tab-info""]')).show();
+                document.getElementById('MainTitle')?.scrollIntoView({ behavior: 'smooth' });", true);
+        }
+
+        private void ResetRightPanelData()
+        {
+            // 1. TextBox 초기화
+            TB_GameName.Text = TB_GameDate.Text = TB_StadiumName.Text = TB_GameHost.Text =
+            TB_StartDate.Text = TB_EndDate.Text = TB_HoleMaximum.Text = TB_Note.Text =
+            TB_User.Text = TB_GameStatus.Text = TB_GameCode.Text = string.Empty;
+
+            // 2. 각 그리드뷰 초기화
+            gvPlayerList.DataSource = null;
+            gvPlayerList.DataBind();
+
+            gvCourseResult.DataSource = null;
+            gvCourseResult.DataBind();
+        }
+
     }
 }

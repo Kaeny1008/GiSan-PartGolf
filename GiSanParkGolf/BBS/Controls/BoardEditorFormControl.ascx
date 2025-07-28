@@ -32,6 +32,17 @@
     function ShowModal() {
         $("#SaveModal").modal("show");
     }
+    window.onload = function () {
+        var fileInput = document.getElementById('<%= txtFileName.ClientID %>');
+
+            fileInput.addEventListener('change', function () {
+                var file = this.files[0];
+                if (file && file.size > 4 * 1024 * 1024) { // 4MB 이상
+                    alert('파일 크기가 4MB 이상은 업로드 할 수 없습니다.');
+                    this.value = ''; // 파일 입력 초기화
+                }
+            });
+        };
 </script>
 
 
@@ -124,7 +135,7 @@
         </td>
     </tr>
     <tr>
-        <td style="text-align:center;">파일첨부</td>
+        <td style="text-align:center;">파일첨부(최대 4Mb)</td>
         <td>
 <%--            <asp:CheckBox ID="chkUpload" runat="server" CssClass="check-inline" 
                 Text="이 체크박스를 선택하면 업로드 화면이 나타납니다." 

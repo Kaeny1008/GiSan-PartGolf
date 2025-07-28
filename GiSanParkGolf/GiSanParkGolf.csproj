@@ -554,6 +554,7 @@
     <Folder Include="BBS\Documents\" />
     <Folder Include="BBS\images\" />
     <Folder Include="BBS\MyFiles\" />
+    <Folder Include="MyFiles\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
