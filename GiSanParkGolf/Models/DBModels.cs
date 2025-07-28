@@ -274,6 +274,8 @@ namespace GiSanParkGolf.Models
                 return (age > 0) ? age + "세" : "정보없음";
             }
         }
+
+        public string TeamNumber { get; set; } // 팀 번호 (optional)
     }
 
     public class PlayerHandicapViewModel
