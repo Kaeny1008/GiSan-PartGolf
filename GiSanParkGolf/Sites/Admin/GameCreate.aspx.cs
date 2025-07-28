@@ -75,11 +75,12 @@ namespace GiSanParkGolf.Sites.Admin
             DateTime recruitEndTime = DateTime.Parse($"{TB_EndDate.Text} {TB_EndTime.Text}");
             string stadiumCode = DDL_Stadium.SelectedValue;
             string stadiumName = DDL_Stadium.SelectedItem.Text;
+            string playMode = rblPlayMode.SelectedValue;
 
             string strSQL = "INSERT INTO Game_List(";
             strSQL += "GameCode, GameName, GameDate, StadiumCode ,StadiumName, GameHost";
             strSQL += ", StartRecruiting, EndRecruiting, HoleMaximum, GameNote";
-            strSQL += ", PostIp, PostUser";
+            strSQL += ", PostIp, PostUser, PlayMode";
             strSQL += ") VALUES (";
             strSQL += "dbo.fn_GameCode()";
             strSQL += ", '" + TB_GameName.Text + "'";
@@ -93,6 +94,7 @@ namespace GiSanParkGolf.Sites.Admin
             strSQL += ", '" + TB_Note.Text + "'";
             strSQL += ", '" + ipaddr + "'";
             strSQL += ", '" + Helper.CurrentUser?.UserId + "'";
+            strSQL += ", '" + playMode + "'";
             strSQL += ");";
 
             SaveLastStep(strSQL);
@@ -106,6 +108,7 @@ namespace GiSanParkGolf.Sites.Admin
             DateTime recruitEndTime = DateTime.Parse($"{TB_EndDate.Text} {TB_EndTime.Text}");
             string stadiumCode = DDL_Stadium.SelectedValue;
             string stadiumName = DDL_Stadium.SelectedItem.Text;
+            string playMode = rblPlayMode.SelectedValue;
 
             string strSQL = "UPDATE Game_List SET";
             strSQL += " GameName = '" + TB_GameName.Text + "'";
@@ -119,6 +122,7 @@ namespace GiSanParkGolf.Sites.Admin
             strSQL += ", GameNote = '" + TB_Note.Text + "'";
             strSQL += ", ModifyIp = '" + ipaddr + "'";
             strSQL += ", ModifyUser = '" + Helper.CurrentUser?.UserId + "'";
+            strSQL += ", PlayMode = '" + playMode + "'";
             strSQL += " WHERE GameCode = '" + gameCode + "';";
 
             SaveLastStep(strSQL);
@@ -175,6 +179,19 @@ namespace GiSanParkGolf.Sites.Admin
 
             TB_EndDate.Text = gameinfo.EndRecruiting.ToString("yyyy-MM-dd");
             TB_EndTime.Text = gameinfo.EndRecruiting.ToString("HH:mm");
+
+            // 경기 방식 바인딩 (RadioButtonList 선택 설정)
+            if (string.IsNullOrEmpty(gameinfo.PlayMode) || gameinfo.PlayMode == "미입력")
+            {
+                foreach (ListItem item in rblPlayMode.Items)
+                    item.Selected = false;
+            }
+            else
+            {
+                var selectedItem = rblPlayMode.Items.FindByValue(gameinfo.PlayMode);
+                if (selectedItem != null)
+                    selectedItem.Selected = true;
+            }
         }
 
         protected string ConvertDate(DateTime datetime)

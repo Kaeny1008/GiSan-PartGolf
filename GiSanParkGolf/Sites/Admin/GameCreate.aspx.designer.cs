@@ -78,6 +78,15 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.TextBox TB_HoleMaximum;
 
         /// <summary>
+        /// rblPlayMode 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButtonList rblPlayMode;
+
+        /// <summary>
         /// TB_StartDate 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -175,6 +184,15 @@ namespace GiSanParkGolf.Sites.Admin
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator RequiredFieldValidator3;
+
+        /// <summary>
+        /// RequiredFieldValidator_PlayMode 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RequiredFieldValidator RequiredFieldValidator_PlayMode;
 
         /// <summary>
         /// ValidationSummary_SignupForm 컨트롤입니다.

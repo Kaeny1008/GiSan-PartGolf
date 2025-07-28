@@ -111,6 +111,7 @@ namespace GiSanParkGolf.Models
         [Display(Name = "참가인원 수")]
         public int ParticipantNumber { get; set; }
         public string GameSetting { get; set; }
+        public string PlayMode { get; set; }
     }
 
     /// <summary>

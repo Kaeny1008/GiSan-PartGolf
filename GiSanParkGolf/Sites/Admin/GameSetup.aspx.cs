@@ -239,7 +239,6 @@ namespace GiSanParkGolf.Sites.Admin
             }
         }
 
-
         protected void BTN_SettingYes_Click(object sender, EventArgs e)
         {
             string gameCode = TB_GameCode.Text.Trim();

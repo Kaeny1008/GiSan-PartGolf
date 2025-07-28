@@ -275,7 +275,7 @@ namespace GiSanParkGolf.Class
         /// <param name="gameCode">GameCode</param>
         public Select_GameList GetGameInformation(string gameCode)
         {
-            var query = "sp_Get_GameInformation";
+            var query = "sp_Get_Game_Information";
             var parameters = new DynamicParameters(new { GameCode = gameCode });
 
             try
