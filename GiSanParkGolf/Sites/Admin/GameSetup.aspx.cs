@@ -130,12 +130,13 @@ namespace GiSanParkGolf.Sites.Admin
                     GameList.DataSource = ViewState["GameList"];
                     GameList.DataBind();
 
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ScrollToRightPanel",
-                        @"document.getElementById('rightPanel').scrollIntoView({ behavior: 'smooth' });", true);
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ActivateRightPanel",
+                        @"document.getElementById('leftPanel')?.classList.add('hidden');
+                         document.getElementById('rightPanel')?.classList.remove('d-none');", true);
                 }
-
                 //pager.CurrentPage = GameList.PageIndex;
                 //pager.TotalPages = GameList.PageCount;
+                HiddenPanelState.Value = "right";
             }
         }
 
@@ -193,6 +194,13 @@ namespace GiSanParkGolf.Sites.Admin
             {
                 int no = (gvPlayerList.PageIndex * gvPlayerList.PageSize) + e.Row.RowIndex + 1;
                 e.Row.Cells[0].Text = no.ToString();
+
+                int userNumber = Convert.ToInt32(DataBinder.Eval(e.Row.DataItem, "UserNumber"));
+                int userGender = Convert.ToInt32(DataBinder.Eval(e.Row.DataItem, "UserGender"));
+
+                int age = Helper.CalculateAge(userNumber, userGender);
+                e.Row.Cells[5].Text = age + "세";  // 셀 인덱스는 나이 컬럼 위치에 맞게 조절
+
             }
         }
 
@@ -203,6 +211,12 @@ namespace GiSanParkGolf.Sites.Admin
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
                 var player = (AssignedPlayer)e.Row.DataItem;
+
+                // 순번 표시 (GridView의 RowIndex는 0부터 시작)
+                e.Row.Cells[0].Text = (e.Row.RowIndex + 1).ToString(); // No 컬럼
+
+                // 연령 표시 (Age 필드에 미리 계산된 값이 있다고 가정)
+                e.Row.Cells[4].Text = player.AgeText; // Age 컬럼
 
                 // ViewState에 없을 경우 초기화
                 if (cachedAssignment == null)
@@ -215,14 +229,16 @@ namespace GiSanParkGolf.Sites.Admin
                     .Where(p => p.TeamNumber == player.TeamNumber)
                     .ToList();
 
+                // 단독팀 강조 처리
                 if (teamPlayers.Count == 1)
                 {
                     e.Row.BackColor = System.Drawing.Color.MistyRose;
                     e.Row.Font.Bold = true;
-                    e.Row.Cells[5].Text += " (단독)";
+                    e.Row.Cells[7].Text += " (단독)"; // 팀번호 옆 표시
                 }
             }
         }
+
 
         protected void BTN_SettingYes_Click(object sender, EventArgs e)
         {
@@ -253,26 +269,27 @@ namespace GiSanParkGolf.Sites.Admin
             }
 
             // 배정 결과 객체
-            List<AssignedPlayer> groupedPlayers;
+            var options = new PlayerAssignmentOptions
+            {
+                UseHandicap = Convert.ToBoolean(DDL_HandicapUse.SelectedValue),
+                UseGender = Convert.ToBoolean(DDL_GenderUse.SelectedValue),
+                UseAgeGroup = Convert.ToBoolean(DDL_AgeGroupUse.SelectedValue),
+                UseAwards = Convert.ToBoolean(DDL_AwardsUse.SelectedValue)
+            };
 
-            if (useHandicap)
-            {
-                // 핸디캡 기반 배정
-                groupedPlayers = HandicapBasedDistribution(players, courseList, maxPerHole, gameCode);
-            }
-            else
-            {
-                // 무작위 배정
-                groupedPlayers = RandomDistribution(players, courseList, maxPerHole, gameCode);
-            }
+            var groupedPlayers = SmartDistribution(players, courseList, maxPerHole, gameCode, options);
 
             // ViewState 저장
             ViewState["AssignmentResult"] = groupedPlayers;
 
             // 팀번호 기준으로 정렬
+            //var sortedPlayers = groupedPlayers
+            //    .OrderByDescending(p => p.GenderText == "남자") // 남자 true면 먼저 나옴
+            //    .ThenBy(p => p.TeamNumber)
+            //    .ThenBy(p => p.CourseOrder)
+            //    .ToList();
             var sortedPlayers = groupedPlayers
-                .OrderByDescending(p => p.GenderText == "남자") // 남자 true면 먼저 나옴
-                .ThenBy(p => p.TeamNumber)
+                .OrderBy(p => p.TeamNumber)
                 .ThenBy(p => p.CourseOrder)
                 .ToList();
 
@@ -286,12 +303,42 @@ namespace GiSanParkGolf.Sites.Admin
                 new bootstrap.Tab(document.querySelector('a[href=""#tab-result""]')).show();
                 document.getElementById('rightPanel').scrollIntoView({ behavior: 'smooth' });", true);
         }
+        public List<AssignedPlayer> SmartDistribution(
+            List<GameJoinUserList> allPlayers,
+            List<CourseList> courses,
+            int maxPerHole,
+            string gameCode,
+            PlayerAssignmentOptions options)
+        {
+            var result = new List<AssignedPlayer>();
 
-        Func<List<GameJoinUserList>, List<GameJoinUserList>> RandomSort = list => 
-        list.OrderBy(p => Guid.NewGuid()).ToList();
+            // 정렬 기준
+            var sorted = allPlayers
+                .OrderByDescending(p => options.UseHandicap ? p.AgeHandicap : 0)
+                .ThenByDescending(p => options.UseAwards ? !string.IsNullOrEmpty(p.AwardsSummary) : false)
+                .ThenBy(p => options.UseAgeGroup ? Helper.CalculateAge(p.UserNumber, p.UserGender) : 0)
+                .ThenBy(p => Guid.NewGuid());
 
-        Func<List<GameJoinUserList>, List<GameJoinUserList>> HandicapSort = list => 
-        list.OrderByDescending(p => p.AgeHandicap).ThenBy(p => Guid.NewGuid()).ToList();
+            // 성별 그룹 정의
+            var maleGroup = new[] { 1, 3 };
+            var femaleGroup = new[] { 2, 4 };
+
+            if (options.UseGender)
+            {
+                var malePlayers = sorted.Where(p => maleGroup.Contains(p.UserGender)).ToList();
+                var femalePlayers = sorted.Where(p => femaleGroup.Contains(p.UserGender)).ToList();
+
+                result.AddRange(DistributePlayers(malePlayers, courses, maxPerHole, "M", gameCode, x => x));
+                result.AddRange(DistributePlayers(femalePlayers, courses, maxPerHole, "F", gameCode, x => x));
+            }
+            else
+            {
+                var unifiedPlayers = sorted.ToList();
+                result.AddRange(DistributePlayers(unifiedPlayers, courses, maxPerHole, "T", gameCode, x => x));
+            }
+
+            return result;
+        }
 
         public List<AssignedPlayer> DistributePlayers(
             List<GameJoinUserList> players,
@@ -351,7 +398,9 @@ namespace GiSanParkGolf.Sites.Admin
                     GenderText = player.GenderText,
                     GroupNumber = holeNo,
                     HoleNumber = holeLabel,
-                    TeamNumber = teamNumber
+                    TeamNumber = teamNumber,
+                    UserNumber = player.UserNumber,
+                    UserGender = player.UserGender
                 };
 
                 bucket.Add(assigned);
@@ -359,42 +408,6 @@ namespace GiSanParkGolf.Sites.Admin
                 playerIndex++;
             }
 
-            return result;
-        }
-
-        public List<AssignedPlayer> RandomDistribution(
-            List<GameJoinUserList> players,
-            List<CourseList> courses,
-            int maxPerHole,
-            string gameCode)
-        {
-            var maleGroup = new[] { 1, 3 };
-            var femaleGroup = new[] { 2, 4 };
-
-            var malePlayers = players.Where(p => maleGroup.Contains(p.UserGender)).ToList();
-            var femalePlayers = players.Where(p => femaleGroup.Contains(p.UserGender)).ToList();
-
-            var result = new List<AssignedPlayer>();
-            result.AddRange(DistributePlayers(malePlayers, courses, maxPerHole, "M", gameCode, RandomSort));
-            result.AddRange(DistributePlayers(femalePlayers, courses, maxPerHole, "F", gameCode, RandomSort));
-            return result;
-        }
-
-        public List<AssignedPlayer> HandicapBasedDistribution(
-            List<GameJoinUserList> players,
-            List<CourseList> courses,
-            int maxPerHole,
-            string gameCode)
-        {
-            var maleGroup = new[] { 1, 3 };
-            var femaleGroup = new[] { 2, 4 };
-
-            var malePlayers = players.Where(p => maleGroup.Contains(p.UserGender)).ToList();
-            var femalePlayers = players.Where(p => femaleGroup.Contains(p.UserGender)).ToList();
-
-            var result = new List<AssignedPlayer>();
-            result.AddRange(DistributePlayers(malePlayers, courses, maxPerHole, "M", gameCode, HandicapSort));
-            result.AddRange(DistributePlayers(femalePlayers, courses, maxPerHole, "F", gameCode, HandicapSort));
             return result;
         }
 
@@ -409,7 +422,9 @@ namespace GiSanParkGolf.Sites.Admin
                 { "UserId", "ID" },
                 { "UserName", "성명" },
                 { "FormattedBirthDate", "생년월일" },
-                { "GenderText", "성별" }
+                { "GenderText", "성별" },
+                { "AgeText", "연령" },
+                { "AwardsSummary", "수상경력" }
             };
 
             foreach (var col in Helper.GetExportColumns(headers))
@@ -523,11 +538,11 @@ namespace GiSanParkGolf.Sites.Admin
         {
             ResetRightPanelData();
 
-            // 탭은 기본정보로 설정하고
-            // 좌측 패널로 스크롤 이동
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "ScrollToLeft",
-                @"new bootstrap.Tab(document.querySelector('a[href=""#tab-info""]')).show();
-                document.getElementById('MainTitle')?.scrollIntoView({ behavior: 'smooth' });", true);
+            HiddenPanelState.Value = "left";
+
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "RestoreLeftPanel",
+                @"document.getElementById('leftPanel')?.classList.remove('hidden');
+                document.getElementById('rightPanel')?.classList.remove('active');", true);
         }
 
         private void ResetRightPanelData()

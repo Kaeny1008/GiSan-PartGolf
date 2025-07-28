@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GiSanParkGolf.Class;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -235,6 +236,33 @@ namespace GiSanParkGolf.Models
         }
 
         public int AgeHandicap { get; set; }    // 핸디캡 점수
+
+        public string AwardType { get; set; }       // 수상 종류 (예: 최우수상)
+        public string AwardLevel { get; set; }      // 수상 등급 (Gold, Silver 등)
+        public DateTime? AwardDate { get; set; }    // 수상 날짜
+        public string AwardNote { get; set; }       // 심사평 혹은 비고
+
+        public string AwardsSummary
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(AwardType) && !string.IsNullOrEmpty(AwardLevel))
+                    return $"{AwardType} ({AwardLevel})";
+                else if (!string.IsNullOrEmpty(AwardType))
+                    return AwardType;
+                else
+                    return "없음";
+            }
+        }
+
+        public string AgeText
+        {
+            get
+            {
+                int age = Helper.CalculateAge(UserNumber, UserGender);
+                return (age > 0) ? age + "세" : "정보없음";
+            }
+        }
     }
 
     public class PlayerHandicapViewModel
@@ -337,6 +365,29 @@ namespace GiSanParkGolf.Models
         // 보조 필드 (출력용)
         public string Summary =>
             $"{UserName} (핸디캡 {AgeHandicap}) → {CourseName} {CourseOrder}번";
+
+        public int No { get; set; } //그리드 번호
+
+        public int UserNumber { get; set; }
+
+        public int UserGender { get; set; }
+        public string AgeText
+        {
+            get
+            {
+                int age = Helper.CalculateAge(UserNumber, UserGender);
+                return (age > 0) ? age + "세" : "정보없음";
+            }
+        }
     }
 
+    public class PlayerAssignmentOptions
+    {
+        public bool UseHandicap { get; set; }
+        public bool UseGender { get; set; }
+        public bool UseAgeGroup { get; set; }
+        public bool UseAwards { get; set; }
+
+        public bool UseSeparateHolePerTeam { get; set; }
+    }
 }

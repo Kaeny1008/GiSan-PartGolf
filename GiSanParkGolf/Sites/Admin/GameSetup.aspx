@@ -59,19 +59,37 @@
             modalInstance.show();
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const tabLinks = document.querySelectorAll('.nav-tabs a.nav-link');
+        // 패널 표시
+        Sys.Application.add_load(function () {
+            var state = document.getElementById("<%= HiddenPanelState.ClientID %>")?.value || "none";
 
-            tabLinks.forEach(function (tab) {
-                tab.addEventListener('click', function () {
-                    const rightPanel = document.getElementById('rightPanel');
-                    if (rightPanel) {
-                        rightPanel.scrollIntoView({ behavior: 'smooth' });
-                    }
-                });
-            });
+            switch (state) {
+              case "right":
+                document.getElementById('leftPanel')?.classList.add('hidden');
+                document.getElementById('rightPanel')?.classList.remove('d-none');
+                break;
+
+              case "left":
+                document.getElementById('leftPanel')?.classList.remove('hidden');
+                document.getElementById('rightPanel')?.classList.add('d-none');
+                break;
+
+              default:
+                // 아무 상태도 지정되지 않았을 경우 (옵션)
+                break;
+            }
         });
     </script>
+
+    <style>
+        #leftPanel.hidden {
+          display: none;
+        }
+
+        #rightPanel.active {
+          display: block;
+        }
+    </style>
 
     <style type="text/css" media="print">
         body * {
@@ -164,7 +182,7 @@
             </div>
 
             <!-- 우측: 상세정보 탭 카드 -->
-            <div id="rightPanel">
+            <div id="rightPanel" class="d-none">
                 <div class="custom-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0">대회 상세정보</h4>
@@ -240,7 +258,7 @@
                                     <Columns>
                                         <asp:TemplateField HeaderText="No.">
                                             <ItemTemplate>
-                                                <%-- 번호는 서버 코드에서 삽입하므로 비워둠 --%>
+                                                <%-- 서버 코드에서 삽입하므로 비워둠 --%>
                                             </ItemTemplate>
                                             <ItemStyle Width="8%" />
                                             <HeaderStyle Width="8%" />
@@ -264,6 +282,18 @@
                                             <ItemTemplate><%# Eval("GenderText") %></ItemTemplate>
                                             <ItemStyle Width="10%" />
                                             <HeaderStyle Width="10%" />
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="연령">
+                                            <ItemTemplate>
+                                                <%-- 서버 코드에서 삽입하므로 비워둠 --%>
+                                            </ItemTemplate>
+                                            <ItemStyle Width="10%" />
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="수상경력">
+                                            <ItemTemplate>
+                                                <%# Eval("AwardsSummary") ?? "없음" %>
+                                            </ItemTemplate>
+                                            <ItemStyle Width="20%" />
                                         </asp:TemplateField>
                                     </Columns>
                                     <EmptyDataTemplate>데이터가 없습니다.</EmptyDataTemplate>
@@ -292,9 +322,33 @@
                                     </asp:DropDownList>
                                 </div>
 
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">성별 기준</span>
+                                    <asp:DropDownList ID="DDL_GenderUse" runat="server" CssClass="form-select">
+                                        <asp:ListItem Text="사용하지 않음" Value="False" />
+                                        <asp:ListItem Text="사용함" Value="True" />
+                                    </asp:DropDownList>
+                                </div>
+
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">연령대 기준</span>
+                                    <asp:DropDownList ID="DDL_AgeGroupUse" runat="server" CssClass="form-select">
+                                        <asp:ListItem Text="사용하지 않음" Value="False" />
+                                        <asp:ListItem Text="사용함" Value="True" />
+                                    </asp:DropDownList>
+                                </div>
+
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">수상경력 기준</span>
+                                    <asp:DropDownList ID="DDL_AwardsUse" runat="server" CssClass="form-select">
+                                        <asp:ListItem Text="사용하지 않음" Value="False" />
+                                        <asp:ListItem Text="사용함" Value="True" />
+                                    </asp:DropDownList>
+                                </div>
+
                                 <small class="text-muted">
-                                    핸디캡 사용 시, 참가자의 개별 핸디 정보를 기준으로 코스를 자동 배치합니다.<br />
-                                    미사용 시에는 무작위 또는 순번 기준으로 배치됩니다.
+                                    위 기준들을 선택하면 참가자 정보를 기반으로 더 정밀한 코스 배치를 할 수 있습니다.<br />
+                                    선택한 기준은 자동 배정에 반영되며, 사용 여부에 따라 결과가 달라질 수 있습니다.
                                 </small>
                             </div>
                         </div>
@@ -334,11 +388,14 @@
                                     CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
                                     EmptyDataText="배치된 코스가 없습니다. 먼저 코스배치를 실행하세요.">
                                     <Columns>
+                                        <asp:BoundField DataField="No" HeaderText="No" />
                                         <asp:BoundField DataField="UserId" HeaderText="ID" />
                                         <asp:BoundField DataField="UserName" HeaderText="성명" />
                                         <asp:BoundField DataField="GenderText" HeaderText="성별" />
+                                        <asp:BoundField DataField="AgeText" HeaderText="연령" />
                                         <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
                                         <asp:BoundField DataField="HoleNumber" HeaderText="배정홀" />
+                                        <asp:BoundField DataField="CourseOrder" HeaderText="코스순번" />
                                         <asp:BoundField DataField="TeamNumber" HeaderText="팀번호" />
                                     </Columns>
                                 </asp:GridView>
@@ -355,6 +412,8 @@
             </div>
         </div>
     </div>
+
+    <asp:HiddenField ID="HiddenPanelState" runat="server" Value="none" />
 
     <!-- 공통 확인 모달 -->
     <div class="modal fade" id="MainModal" tabindex="-1" aria-labelledby="MainModalLabel" aria-hidden="true">

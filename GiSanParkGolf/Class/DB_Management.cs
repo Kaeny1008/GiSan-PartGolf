@@ -782,11 +782,19 @@ namespace GiSanParkGolf.Class
                 if (DB_Connection.State != ConnectionState.Open)
                     DB_Connection.Open();
 
-                return DB_Connection.Query<GameJoinUserList>(
-                    "sp_Get_Game_JoinUser",
+                var result = DB_Connection.Query<GameJoinUserList>(
+                    "sp_Get_Game_User_WithAwards",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 ).ToList();
+
+                // RowNumber 할당
+                for (int i = 0; i < result.Count; i++)
+                {
+                    result[i].RowNumber = i + 1;
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -798,6 +806,7 @@ namespace GiSanParkGolf.Class
                 DB_Connection.Close();
             }
         }
+
 
         /// <summary>
         /// 지정 게임의 핸디캡 목록 조회 (검색어 옵션)
@@ -1564,7 +1573,7 @@ namespace GiSanParkGolf.Class
         public List<AssignedPlayer> GetAssignmentResult(string gameCode)
         {
             string query = @"
-                SELECT A.GameCode, A.UserId, U.UserName, U.UserGender,
+                SELECT A.GameCode, A.UserId, U.UserName, U.UserNumber, U.UserGender,
                        CASE U.UserGender 
                            WHEN 1 THEN '남성'
                            WHEN 2 THEN '여성'
@@ -1573,7 +1582,8 @@ namespace GiSanParkGolf.Class
                            ELSE '기타'
                        END AS GenderText,
                        A.CourseName, A.HoleNumber, A.TeamNumber,
-                       A.GroupNumber, A.CourseOrder, A.AgeHandicap
+                       A.GroupNumber, A.CourseOrder, A.AgeHandicap,
+                       A.CourseOrder
                 FROM Game_UserAssignment A
                 INNER JOIN SYS_Users U ON A.UserId = U.UserId
                 WHERE A.GameCode = @GameCode
@@ -1592,7 +1602,16 @@ namespace GiSanParkGolf.Class
                 if (DB_Connection.State != ConnectionState.Open)
                     DB_Connection.Open();
 
-                return DB_Connection.Query<AssignedPlayer>(query, new { GameCode = gameCode }).ToList();
+                var result = DB_Connection.Query<AssignedPlayer>(query, new { GameCode = gameCode }).ToList();
+
+                // ✅ 순번 & 연령 필드 추가 처리
+                for (int i = 0; i < result.Count; i++)
+                {
+                    var player = result[i];
+                    player.No = i + 1;
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
