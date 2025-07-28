@@ -236,6 +236,8 @@
                             <div class="input-group mb-2">
                                 <span class="input-group-text">비고</span>
                                 <asp:TextBox ID="TB_Note" runat="server" CssClass="form-control note" TextMode="MultiLine" Enabled="false" />
+                                <span class="input-group-text">방식</span>
+                                <asp:TextBox ID="tblPlayMode" runat="server" CssClass="form-control" Enabled="false" />
                             </div>
                         </div>
 

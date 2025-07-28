@@ -121,7 +121,7 @@
                     <asp:TextBox ID="TB_HoleMaximum" runat="server" TextMode="Number" Text="4" CssClass="form-control" />
                 </div>
                 <div class="input-group mb-2 align-items-center">
-                    <span class="input-group-text">경기 방식</span>
+                    <span class="input-group-text">방식</span>
                     <div class="form-control d-flex flex-row justify-content-around">
                         <asp:RadioButtonList ID="rblPlayMode" runat="server" CssClass="d-flex gap-3" RepeatDirection="Horizontal" RepeatLayout="Flow">
                             <asp:ListItem Text="스트로크" Value="Stroke" Selected="True" />
@@ -130,9 +130,10 @@
                     </div>
                 </div>
                 <div class="form-text text-muted mb-2">
-    팀별 분산 출발 방식으로 진행됩니다.  
-    각 팀은 서로 다른 홀에서 동시에 출발하여 전체 코스를 순환하는 형태의 경기입니다.
-</div>
+                    모든 대회는 팀별 분산 출발 방식으로 진행됩니다.<br />
+                    각 팀은 서로 다른 홀에서 동시에 출발하여<br /> 
+                    전체 코스를 순환하는 형태의 경기입니다.
+                </div>
             </div>
 
             <!-- 우측 패널 -->

@@ -184,6 +184,7 @@ namespace GiSanParkGolf.Sites.Admin
             TB_User.Text = gameinfo.ParticipantNumber.ToString();
             TB_GameStatus.Text = gameinfo.GameStatus;
             TB_GameCode.Text = gameinfo.GameCode;
+            tblPlayMode.Text = gameinfo.PlayModeToText;
 
             return true;
         }
@@ -549,7 +550,7 @@ namespace GiSanParkGolf.Sites.Admin
             // 1. TextBox 초기화
             TB_GameName.Text = TB_GameDate.Text = TB_StadiumName.Text = TB_GameHost.Text =
             TB_StartDate.Text = TB_EndDate.Text = TB_HoleMaximum.Text = TB_Note.Text =
-            TB_User.Text = TB_GameStatus.Text = TB_GameCode.Text = string.Empty;
+            TB_User.Text = TB_GameStatus.Text = TB_GameCode.Text = tblPlayMode.Text = string.Empty;
 
             // 2. 각 그리드뷰 초기화
             gvPlayerList.DataSource = null;

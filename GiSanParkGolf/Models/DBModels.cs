@@ -112,6 +112,16 @@ namespace GiSanParkGolf.Models
         public int ParticipantNumber { get; set; }
         public string GameSetting { get; set; }
         public string PlayMode { get; set; }
+
+        public string PlayModeToText
+        {
+            get
+            {
+                if (PlayMode == "Stroke") return "스트로크";
+                if (PlayMode == "Match") return "매치";
+                return "미입력";
+            }
+        }
     }
 
     /// <summary>
@@ -388,7 +398,7 @@ namespace GiSanParkGolf.Models
         public bool UseGender { get; set; }
         public bool UseAgeGroup { get; set; }
         public bool UseAwards { get; set; }
-
         public bool UseSeparateHolePerTeam { get; set; }
+        public string PlayMode { get; set; }  // "Stroke", "Match" 등
     }
 }
