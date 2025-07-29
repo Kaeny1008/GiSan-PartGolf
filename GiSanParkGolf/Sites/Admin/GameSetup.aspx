@@ -342,7 +342,8 @@
 
                                 <div class="input-group mb-2">
                                     <span class="input-group-text">수상경력 기준</span>
-                                    <asp:DropDownList ID="DDL_AwardsUse" runat="server" CssClass="form-select">
+                                    <asp:DropDownList ID="DDL_AwardsUse" runat="server" CssClass="form-select" 
+                                        Enabled="false" ToolTip="현재는 데이터가 없으므로 사용하지 않습니다.">
                                         <asp:ListItem Text="사용하지 않음" Value="False" />
                                         <asp:ListItem Text="사용함" Value="True" />
                                     </asp:DropDownList>
@@ -403,6 +404,23 @@
                                         <asp:BoundField DataField="HoleNumber" HeaderText="배정홀" />
                                         <asp:BoundField DataField="CourseOrder" HeaderText="코스순번" />
                                         <asp:BoundField DataField="TeamNumber" HeaderText="팀번호" />
+                                    </Columns>
+                                </asp:GridView>
+
+
+                                <div id="lblUnassignedNotice" runat="server" class="alert alert-warning" style="margin-bottom:10px;">
+                                    💡 미배정된 인원 목록입니다. 제한으로 인해 배정되지 않은 플레이어들이며, 추후 배치를 위해 확인해주세요.
+                                </div>
+                                <asp:GridView ID="gvUnassignedPlayers" runat="server"
+                                    AutoGenerateColumns="False"
+                                    CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                                    EmptyDataText="미배정된 인원이 없습니다.">
+                                    <Columns>
+                                        <asp:BoundField DataField="UserId" HeaderText="ID" />
+                                        <asp:BoundField DataField="UserName" HeaderText="성명" />
+                                        <asp:BoundField DataField="GenderText" HeaderText="성별" />
+                                        <asp:BoundField DataField="AgeText" HeaderText="연령" />
+                                        <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
                                     </Columns>
                                 </asp:GridView>
                             </div>

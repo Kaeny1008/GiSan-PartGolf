@@ -124,4 +124,11 @@ namespace GiSanParkGolf.Class
             }
         }
     }
+
+    public class CourseAllocationState
+    {
+        public int CourseIndex { get; set; } = 0;
+        public Dictionary<string, int> SharedHoleTracker { get; set; } = new Dictionary<string, int>();
+        public Dictionary<string, int> TeamNumberTracker { get; set; } = new Dictionary<string, int>();
+    }
 }

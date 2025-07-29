@@ -231,7 +231,7 @@ namespace GiSanParkGolf.Sites.Admin
                 {
                     e.Row.BackColor = System.Drawing.Color.MistyRose;
                     e.Row.Font.Bold = true;
-                    e.Row.Cells[7].Text += " (단독)"; // 팀번호 옆 표시
+                    e.Row.Cells[8].Text += " (단독)"; // 팀번호 옆 표시
                 }
             }
         }
@@ -240,227 +240,215 @@ namespace GiSanParkGolf.Sites.Admin
         {
             string gameCode = TB_GameCode.Text.Trim();
             var gameInfo = Global.dbManager.GetGameInformation(gameCode);
-            if (gameInfo == null)
-            {
-                ShowModal("오류", "대회 정보를 찾을 수 없습니다.");
-                return;
-            }
-
-            var courseList = Global.dbManager.GetCourseListByStadium(gameInfo.StadiumCode);
-            if (courseList == null || courseList.Count == 0)
-            {
-                ShowModal("오류", "해당 경기장의 코스 정보를 찾을 수 없습니다.");
-                return;
-            }
+            int maxPerHole = gameInfo.HoleMaximum;
 
             var players = Global.dbManager.GetGameUserList(gameCode);
-            var options = GetAssignmentOptions(gameInfo.PlayMode);
+            if (players == null || players.Count == 0) return;
 
-            var groupedPlayers = SmartDistribution(players, courseList, gameInfo.HoleMaximum, gameCode, options);
-
-            ViewState["AssignmentResult"] = groupedPlayers;
-
-            gvCourseResult.DataSource = groupedPlayers
-                .OrderBy(p => p.CourseName)
-                .ThenBy(p => p.GroupNumber)
-                .ThenBy(p => p.CourseOrder)
-                .ToList();
-            gvCourseResult.DataBind();
+            var sortedPlayers = GetSortedPlayers(players);
+            var teamList = BuildTeams(sortedPlayers, maxPerHole);
+            var holeSlots = GenerateHoleSlots(gameInfo.StadiumCode);
+            var (assignedPlayers, unassignedPlayers) = AssignTeamsToSlots(teamList, holeSlots, maxPerHole, gameCode);
+            BindGridViews(assignedPlayers, unassignedPlayers);
 
             ShowModal("배정 완료", "코스 배치가 성공적으로 완료되었습니다.", true);
         }
 
-        private PlayerAssignmentOptions GetAssignmentOptions(string playMode)
+        private bool DidUseSorting()
         {
-            return new PlayerAssignmentOptions
+            return DDL_HandicapUse.SelectedValue == "True"
+                || DDL_AgeGroupUse.SelectedValue == "True";
+
+            // 성별정렬은 셔플과 상관없어보여 스킵
+            //return DDL_HandicapUse.SelectedValue == "True"
+            //    || DDL_GenderUse.SelectedValue == "True"
+            //    || DDL_AgeGroupUse.SelectedValue == "True";
+        }
+
+        private IEnumerable<GameJoinUserList> GetSortedPlayers(IEnumerable<GameJoinUserList> players)
+        {
+            bool useHandicap = DDL_HandicapUse.SelectedValue == "True";
+            bool useGender = DDL_GenderUse.SelectedValue == "True";
+            bool useAgeGroup = DDL_AgeGroupUse.SelectedValue == "True";
+
+            var query = players.AsEnumerable();
+
+            if (useAgeGroup)
+                query = query.OrderByDescending(p => int.TryParse(p.AgeText?.Replace("세", ""), out int age) ? age : -1);
+
+            if (useHandicap)
+                query = query.OrderByDescending(p => p.AgeHandicap);
+
+            //성별정렬은 어차피 다음메서드에서 셔플 뒤, 남자 여자 구분하니까
+            //if (useGender)
+            //    query = query.OrderBy(p => p.UserGender);
+
+            return query;
+        }
+
+        private List<List<GameJoinUserList>> BuildTeams(IEnumerable<GameJoinUserList> sortedPlayers, int maxPerHole)
+        {
+            bool useGender = DDL_GenderUse.SelectedValue == "True";
+            bool skipShuffle = DidUseSorting(); // 정렬 사용 여부에 따라 셔플 생략
+            var teamList = new List<List<GameJoinUserList>>();
+            var playersList = sortedPlayers.ToList();
+
+            if (!skipShuffle)
+                Shuffle(playersList); // 셔플은 정렬 없을 때만!
+
+            if (useGender)
             {
-                UseHandicap = Convert.ToBoolean(DDL_HandicapUse.SelectedValue),
-                UseGender = Convert.ToBoolean(DDL_GenderUse.SelectedValue),
-                UseAgeGroup = Convert.ToBoolean(DDL_AgeGroupUse.SelectedValue),
-                UseAwards = Convert.ToBoolean(DDL_AwardsUse.SelectedValue),
-                PlayMode = playMode
-            };
-        }
+                var maleList = playersList.Where(p => p.UserGender == 1 || p.UserGender == 3).ToList();
+                var femaleList = playersList.Where(p => p.UserGender == 2 || p.UserGender == 4).ToList();
 
-        public List<AssignedPlayer> SmartDistribution(
-            List<GameJoinUserList> allPlayers,
-            List<CourseList> courses,
-            int maxPerHole,
-            string gameCode,
-            PlayerAssignmentOptions options)
-        {
-            return options.PlayMode == "Match"
-                ? DistributeMatchMode(allPlayers, courses, maxPerHole, gameCode)
-                : DistributeStrokeMode(allPlayers, courses, maxPerHole, gameCode, options);
-        }
+                var genderTeams = new List<List<GameJoinUserList>>();
 
-        public List<AssignedPlayer> DistributeStrokeMode(
-            List<GameJoinUserList> allPlayers,
-            List<CourseList> courses,
-            int maxPerHole,
-            string gameCode,
-            PlayerAssignmentOptions options)
-        {
-            var sorted = allPlayers
-                .OrderByDescending(p => options.UseHandicap ? p.AgeHandicap : 0)
-                .ThenByDescending(p => options.UseAwards && !string.IsNullOrEmpty(p.AwardsSummary))
-                .ThenBy(p => options.UseAgeGroup ? Helper.CalculateAge(p.UserNumber, p.UserGender) : 0)
-                .ThenBy(_ => Guid.NewGuid())
-                .ToList();
+                for (int i = 0; i < maleList.Count; i += maxPerHole)
+                    genderTeams.Add(maleList.Skip(i).Take(maxPerHole).ToList());
 
-            var sharedHoleTracker = courses.ToDictionary(c => c.CourseName, _ => 1);
-            var teamNumberTracker = new Dictionary<string, int>();
+                for (int i = 0; i < femaleList.Count; i += maxPerHole)
+                    genderTeams.Add(femaleList.Skip(i).Take(maxPerHole).ToList());
 
-            if (!options.UseGender)
-                return DistributePlayers(sorted, courses, maxPerHole, gameCode, sharedHoleTracker, teamNumberTracker);
+                // 랜덤 섞기
+                genderTeams = genderTeams.OrderBy(t => Guid.NewGuid()).ToList();
 
-            var maleCodes = new[] { 1, 3 };
-            var femaleCodes = new[] { 2, 4 };
-
-            var malePlayers = sorted.Where(p => maleCodes.Contains(p.UserGender)).ToList();
-            var femalePlayers = sorted.Where(p => femaleCodes.Contains(p.UserGender)).ToList();
-
-            var maleHoleTracker = courses.ToDictionary(c => c.CourseName, _ => 1);
-            var femaleHoleTracker = courses.ToDictionary(c => c.CourseName, _ => 1);
-
-            var result = new List<AssignedPlayer>();
-
-            result.AddRange(DistributePlayers(malePlayers, courses, maxPerHole, gameCode, sharedHoleTracker, teamNumberTracker));
-            result.AddRange(DistributePlayers(femalePlayers, courses, maxPerHole, gameCode, sharedHoleTracker, teamNumberTracker));
-
-            return result;
-        }
-
-        public List<AssignedPlayer> DistributePlayers(
-            List<GameJoinUserList> players,
-            List<CourseList> courses,
-            int maxPerHole,
-            string gameCode,
-            Dictionary<string, int> sharedHoleTracker,
-            Dictionary<string, int> teamNumberTracker)
-        {
-            var result = new List<AssignedPlayer>();
-            int courseIndex = 0;
-
-            string lastCourseName = null;
-
-            foreach (var player in players)
-            {
-                bool assigned = false;
-
-                while (!assigned)
-                {
-                    var course = courses[courseIndex % courses.Count];
-                    string courseName = course.CourseName;
-                    int maxHoleCount = course.HoleCount;
-
-                    if (!sharedHoleTracker.ContainsKey(courseName))
-                        sharedHoleTracker[courseName] = 1;
-
-                    int holeNo = sharedHoleTracker[courseName];
-
-                    string teamKey = $"{courseName}-{holeNo}";
-                    if (!teamNumberTracker.ContainsKey(teamKey))
-                        teamNumberTracker[teamKey] = teamNumberTracker.Values.DefaultIfEmpty(0).Max() + 1;
-
-                    string teamNumber = $"{teamNumberTracker[teamKey]:D2}";
-
-                    string holeLabel = $"{courseName}-{holeNo}";
-
-                    int currentHoleSize = result.Count(p =>
-                        p.CourseName == courseName &&
-                        p.GroupNumber == holeNo
-                    );
-
-                    if (currentHoleSize < maxPerHole)
-                    {
-                        result.Add(new AssignedPlayer
-                        {
-                            UserId = player.UserId,
-                            UserName = player.UserName,
-                            AgeHandicap = player.AgeHandicap,
-                            GameCode = gameCode,
-                            CourseName = courseName,
-                            CourseOrder = currentHoleSize + 1,
-                            GenderText = player.GenderText,
-                            GroupNumber = holeNo,
-                            HoleNumber = holeLabel,
-                            TeamNumber = teamNumber,
-                            UserNumber = player.UserNumber,
-                            UserGender = player.UserGender
-                        });
-
-                        assigned = true;
-                        
-                    }
-                    else
-                    {
-                        if (sharedHoleTracker[courseName] >= maxHoleCount)
-                        {
-                            courseIndex++; // 코스 변경
-                            continue;       // 다음 플레이어 시도
-                        }
-
-                        sharedHoleTracker[courseName]++; // 홀 번호 증가는 유효성 통과 후!
-                    }
-                    lastCourseName = courseName;
-                }
+                // 팀 인원 수 기준 정렬
+                teamList = genderTeams
+                    .OrderByDescending(t => t.Count) 
+                    .ToList();
             }
-            
-            sharedHoleTracker[lastCourseName]++;
+            else
+            {
+                for (int i = 0; i < playersList.Count; i += maxPerHole)
+                    teamList.Add(playersList.Skip(i).Take(maxPerHole).ToList());
 
-            return result;
+                teamList = teamList
+                    .OrderByDescending(t => t.Count == maxPerHole)
+                    .ToList();
+            }
+
+            return teamList;
         }
 
-        public List<AssignedPlayer> DistributeMatchMode(
-            List<GameJoinUserList> players,
-            List<CourseList> courses,
+        private void Shuffle<T>(IList<T> list)
+        {
+            var rng = new Random();
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                (list[k], list[n]) = (list[n], list[k]);
+            }
+        }
+
+        private List<(string CourseName, int HoleNo)> GenerateHoleSlots(string stadiumCode)
+        {
+            var courseList = Global.dbManager.GetCourseListByStadium(stadiumCode);
+            var holeSlots = new List<(string, int)>();
+
+            foreach (var course in courseList)
+            {
+                for (int h = 1; h <= course.HoleCount; h++)
+                    holeSlots.Add((course.CourseName, h));
+            }
+
+            return holeSlots.OrderBy(x => Guid.NewGuid()).ToList();
+        }
+
+        private (List<AssignedPlayer>, List<GameJoinUserList>) AssignTeamsToSlots(
+            List<List<GameJoinUserList>> teamList,
+            List<(string CourseName, int HoleNo)> shuffledSlots,
             int maxPerHole,
             string gameCode)
         {
-            var result = new List<AssignedPlayer>();
+            var slotCapacity = new Dictionary<string, int>();
+            var slotAssignedTeam = new Dictionary<string, string>();
+            var assignedPlayers = new List<AssignedPlayer>();
+            var unassignedPlayers = new List<GameJoinUserList>();
+            int teamNumber = 1;
 
-            // [1] 핸디캡 기준 정렬 후 랜덤성 추가
-            var sorted = players
-                .OrderBy(p => p.AgeHandicap)
-                .ThenBy(p => Guid.NewGuid())
-                .ToList();
-
-            int teamCounter = 1;
-            int courseIndex = 0;
-
-            // [2] 2명씩 매칭하여 코스 배정
-            for (int i = 0; i < sorted.Count; i += 2)
+            foreach (var team in teamList)
             {
-                var player1 = sorted[i];
-                var player2 = (i + 1 < sorted.Count) ? sorted[i + 1] : null;
+                bool assigned = false;
 
-                var course = courses[courseIndex % courses.Count];
-                string teamNumber = $"M{teamCounter++:D2}";
-
-                foreach (var p in new[] { player1, player2 }.Where(p => p != null))
+                foreach (var slot in shuffledSlots)
                 {
-                    result.Add(new AssignedPlayer
+                    string key = $"{slot.CourseName}-{slot.HoleNo}";
+                    if (!slotCapacity.ContainsKey(key)) slotCapacity[key] = 0;
+
+                    if (slotCapacity[key] >= maxPerHole) continue;
+                    if (slotAssignedTeam.ContainsKey(key)) continue;
+
+                    if (slotCapacity[key] + team.Count <= maxPerHole)
                     {
-                        UserId = p.UserId,
-                        UserName = p.UserName,
-                        AgeHandicap = p.AgeHandicap,
-                        GameCode = gameCode,
-                        CourseName = course.CourseName,
-                        TeamNumber = teamNumber,
-                        HoleNumber = $"{course.CourseName}-M",
-                        GroupNumber = 1,
-                        CourseOrder = 1,
-                        GenderText = p.GenderText,
-                        UserNumber = p.UserNumber,
-                        UserGender = p.UserGender
-                    });
+                        int order = 1;
+                        foreach (var player in team)
+                        {
+                            assignedPlayers.Add(new AssignedPlayer
+                            {
+                                UserId = player.UserId,
+                                UserName = player.UserName,
+                                AgeHandicap = player.AgeHandicap,
+                                GameCode = gameCode,
+                                CourseName = slot.CourseName,
+                                CourseOrder = order++,
+                                GroupNumber = slot.HoleNo,
+                                HoleNumber = key,
+                                TeamNumber = $"{teamNumber:D2}",
+                                UserNumber = player.UserNumber,
+                                UserGender = player.UserGender,
+                                AgeText = player.AgeText,
+                                GenderText = player.GenderText
+                            });
+                        }
+
+                        slotCapacity[key] += team.Count;
+                        slotAssignedTeam[key] = $"{teamNumber:D2}";
+                        teamNumber++;
+                        assigned = true;
+                        break;
+                    }
                 }
 
-                courseIndex++;
+                if (!assigned)
+                    unassignedPlayers.AddRange(team);
             }
 
-            return result;
+            return (assignedPlayers, unassignedPlayers);
+        }
+
+        private void BindGridViews(List<AssignedPlayer> assignedPlayers, List<GameJoinUserList> unassignedPlayers)
+        {
+            //gvCourseResult.DataSource = assignedPlayers.Select((p, index) => new
+            //{
+            //    RowNumber = index + 1,
+            //    p.UserId,
+            //    p.UserName,
+            //    GenderTextPrint = p.GenderTextPrint,
+            //    AgeTextPrint = p.AgeTextPrint,
+            //    p.AgeHandicap,
+            //    p.HoleNumber,
+            //    p.CourseOrder,
+            //    p.TeamNumber
+            //}).ToList();
+            gvCourseResult.DataSource = assignedPlayers;
+            gvCourseResult.DataBind();
+            ViewState["AssignmentResult"] = assignedPlayers;
+
+            gvUnassignedPlayers.DataSource = unassignedPlayers.Select(p => new
+            {
+                p.UserId,
+                p.UserName,
+                GenderText = p.GenderText,
+                AgeText = p.AgeText,
+                p.AgeHandicap
+            }).ToList();
+
+            gvUnassignedPlayers.DataBind();
+
+            gvUnassignedPlayers.Visible = unassignedPlayers.Any();
+            lblUnassignedNotice.Visible = unassignedPlayers.Any();
         }
 
         protected void BTN_ToExcel_Click(object sender, EventArgs e)
@@ -554,9 +542,15 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_SaveAssignment_Click(object sender, EventArgs e)
         {
+            if (gvUnassignedPlayers.Rows.Count != 0)
+            {
+                ShowModal("경고", "아직 배정되지 않은 플레이어가 있습니다.", false);
+                return;
+            }
+
             // 모달 띄우기만 하고 저장은 아직 안 함!
             ScriptManager.RegisterStartupScript(this, this.GetType(), "ConfirmSave",
-                    @"launchModal('#MainModal', '확인', '이전에 저장된 배정 결과가 있을 수 있습니다.\r\n덮어씌우시겠습니까?', 2);", true);
+                @"launchModal('#MainModal', '확인', '이전에 저장된 배정 결과가 있을 수 있습니다.\r\n덮어씌우시겠습니까?', 2);", true);
         }
 
         protected void BTN_SaveAssignment_Final_Click(object sender, EventArgs e)
@@ -618,6 +612,12 @@ namespace GiSanParkGolf.Sites.Admin
 
             gvCourseResult.DataSource = null;
             gvCourseResult.DataBind();
+
+            gvUnassignedPlayers.DataSource = null;
+            gvUnassignedPlayers.DataBind();
+
+            gvUnassignedPlayers.Visible = false;
+            lblUnassignedNotice.Visible = false;
         }
 
         private void ShowModal(string title, string message, bool scrollToResult = false)
