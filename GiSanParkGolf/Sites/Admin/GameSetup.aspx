@@ -407,28 +407,25 @@
                                     </Columns>
                                 </asp:GridView>
 
-
-                                <div id="lblUnassignedNotice" runat="server" class="alert alert-warning" style="margin-bottom:10px;">
-                                    💡 미배정된 인원 목록입니다. 제한으로 인해 배정되지 않은 플레이어들이며, 추후 배치를 위해 확인해주세요.
+                                <div id="hiddenBox" runat="server">
+                                    <div id="lblUnassignedNotice" runat="server" class="alert alert-warning" style="margin-bottom:10px;">
+                                        💡 미배정된 인원 목록입니다. 제한으로 인해 배정되지 않은 플레이어들이며, 추가 배치를 위해 확인해주세요.
+                                    </div>
+                                    <asp:GridView ID="gvUnassignedPlayers" runat="server"
+                                        AutoGenerateColumns="False"
+                                        CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                                        EmptyDataText="미배정된 인원이 없습니다.">
+                                        <Columns>
+                                            <asp:BoundField DataField="UserId" HeaderText="ID" />
+                                            <asp:BoundField DataField="UserName" HeaderText="성명" />
+                                            <asp:BoundField DataField="GenderText" HeaderText="성별" />
+                                            <asp:BoundField DataField="AgeText" HeaderText="연령" />
+                                            <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
+                                        </Columns>
+                                    </asp:GridView>
                                 </div>
-                                <asp:GridView ID="gvUnassignedPlayers" runat="server"
-                                    AutoGenerateColumns="False"
-                                    CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
-                                    EmptyDataText="미배정된 인원이 없습니다.">
-                                    <Columns>
-                                        <asp:BoundField DataField="UserId" HeaderText="ID" />
-                                        <asp:BoundField DataField="UserName" HeaderText="성명" />
-                                        <asp:BoundField DataField="GenderText" HeaderText="성별" />
-                                        <asp:BoundField DataField="AgeText" HeaderText="연령" />
-                                        <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
-                                    </Columns>
-                                </asp:GridView>
-                            </div>
 
-                            <small class="text-muted mt-3 d-block">
-                                ※ 핸디캡 기준으로 코스가 배정된 경우 우선순위, 구간, 홀 번호 등 조건에 맞게 배정됩니다.<br />
-                                ※ 배치 결과는 출력 또는 저장 가능합니다.
-                            </small>
+                            </div>
                         </div>
 
                     </div>
@@ -471,5 +468,4 @@
             </div>
         </div>
     </div>
-
 </asp:Content>

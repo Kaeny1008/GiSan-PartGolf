@@ -206,6 +206,7 @@ namespace GiSanParkGolf.Models
         public string GameCode { get; set; }
     }
 
+    [Serializable]
     public class  GameJoinUserList
     {
         public int RowNumber { get; set; }
@@ -223,7 +224,7 @@ namespace GiSanParkGolf.Models
         public int UserNumber { get; set; }
 
         public int UserGender { get; set; }
-
+        public string SuggestedSlotText { get; set; }
         public string GameCode { get; set; }
         public string GameName { get; set; }
 

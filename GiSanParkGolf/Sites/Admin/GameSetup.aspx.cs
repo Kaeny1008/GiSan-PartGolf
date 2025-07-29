@@ -436,19 +436,19 @@ namespace GiSanParkGolf.Sites.Admin
             gvCourseResult.DataBind();
             ViewState["AssignmentResult"] = assignedPlayers;
 
-            gvUnassignedPlayers.DataSource = unassignedPlayers.Select(p => new
-            {
-                p.UserId,
-                p.UserName,
-                GenderText = p.GenderText,
-                AgeText = p.AgeText,
-                p.AgeHandicap
-            }).ToList();
-
+            //gvUnassignedPlayers.DataSource = unassignedPlayers.Select(p => new
+            //{
+            //    p.UserId,
+            //    p.UserName,
+            //    GenderText = p.GenderText,
+            //    AgeText = p.AgeText,
+            //    p.AgeHandicap
+            //}).ToList();
+            gvUnassignedPlayers.DataSource = unassignedPlayers;
             gvUnassignedPlayers.DataBind();
+            ViewState["UnassignedPlayers"] = unassignedPlayers;
 
-            gvUnassignedPlayers.Visible = unassignedPlayers.Any();
-            lblUnassignedNotice.Visible = unassignedPlayers.Any();
+            hiddenBox.Visible = unassignedPlayers.Any();
         }
 
         protected void BTN_ToExcel_Click(object sender, EventArgs e)
@@ -616,8 +616,7 @@ namespace GiSanParkGolf.Sites.Admin
             gvUnassignedPlayers.DataSource = null;
             gvUnassignedPlayers.DataBind();
 
-            gvUnassignedPlayers.Visible = false;
-            lblUnassignedNotice.Visible = false;
+            hiddenBox.Visible = false;
         }
 
         private void ShowModal(string title, string message, bool scrollToResult = false)
