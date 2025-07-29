@@ -147,13 +147,6 @@ namespace GiSanParkGolf.Sites.Admin
 
             var gameinfo = Global.dbManager.GetGameInformation(gameCode);
 
-            if (gameinfo.GameSetting == "HC")
-                DDL_HandicapUse.SelectedValue = "True";
-            else if (gameinfo.GameSetting == "NO")
-                DDL_HandicapUse.SelectedValue = "False";
-            else
-                DDL_HandicapUse.ClearSelection();  // 초기값이면 선택 안함
-
             if (gameinfo == null)
             {
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalError",
@@ -172,6 +165,14 @@ namespace GiSanParkGolf.Sites.Admin
 
                 return false;
             }
+
+            // 기준이 '-'로 연결된 문자열이면 분리
+            var settingParts = gameinfo.GameSetting?.Split('-') ?? new string[0];
+
+            DDL_HandicapUse.SelectedValue = settingParts.Contains("HC") ? "True" : "False";
+            DDL_GenderUse.SelectedValue = settingParts.Contains("GD") ? "True" : "False";
+            DDL_AgeGroupUse.SelectedValue = settingParts.Contains("AGE") ? "True" : "False";
+            DDL_AwardsUse.SelectedValue = settingParts.Contains("AW") ? "True" : "False";
 
             TB_GameName.Text = gameinfo.GameName;
             TB_GameDate.Text = Helper.ConvertDate(gameinfo.GameDate);
@@ -363,10 +364,10 @@ namespace GiSanParkGolf.Sites.Admin
                         sharedHoleTracker[courseName] = 1;
 
                     int holeNo = sharedHoleTracker[courseName];
-                    string teamKey = $"{courseName}-G{holeNo}";
 
+                    string teamKey = $"{courseName}-{holeNo}";
                     if (!teamNumberTracker.ContainsKey(teamKey))
-                        teamNumberTracker[teamKey] = 1;
+                        teamNumberTracker[teamKey] = teamNumberTracker.Values.DefaultIfEmpty(0).Max() + 1;
 
                     string teamNumber = $"{teamNumberTracker[teamKey]:D2}";
 
@@ -396,31 +397,32 @@ namespace GiSanParkGolf.Sites.Admin
                         });
 
                         assigned = true;
-                        lastTeamKey = teamKey;
+                        
                     }
                     else
                     {
                         if (sharedHoleTracker[courseName] >= maxHoleCount)
                         {
-                            courseIndex++; // ✅ 코스 변경
+                            courseIndex++; // 코스 변경
                             continue;       // 다음 플레이어 시도
                         }
 
-                        sharedHoleTracker[courseName]++; // ✅ 홀 번호 증가는 유효성 통과 후!
+                        sharedHoleTracker[courseName]++; // 홀 번호 증가는 유효성 통과 후!
 
-                        string nextTeamKey = $"{courseName}-G{sharedHoleTracker[courseName]}";
+                        //string nextTeamKey = $"{courseName}-{sharedHoleTracker[courseName]}";
 
-                        if (!teamNumberTracker.ContainsKey(nextTeamKey))
-                            teamNumberTracker[nextTeamKey] = teamNumberTracker[teamKey] + 1;
-                        else
-                            teamNumberTracker[nextTeamKey]++;
+                        //if (!teamNumberTracker.ContainsKey(nextTeamKey))
+                        //    teamNumberTracker[nextTeamKey] = teamNumberTracker[teamKey] + 1;
+                        //else
+                        //    teamNumberTracker[nextTeamKey]++;
                     }
+
+                    lastTeamKey = teamKey;
                     lastCourseName = courseName;
-                    //teamNumberTracker[teamKey]++;
                 }
             }
-
-            teamNumberTracker[lastTeamKey]++;
+            
+            //teamNumberTracker[lastTeamKey]++;
             sharedHoleTracker[lastCourseName]++;
 
             return result;
@@ -515,13 +517,11 @@ namespace GiSanParkGolf.Sites.Admin
                 { "UserId", "아이디" },
                 { "UserName", "성명" },
                 { "GenderText", "성별" },
-                { "FormattedBirthDate", "생년월일" },
-                { "CourseName", "코스명" },
-                { "CourseOrder", "코스순서" },
-                { "GroupNumber", "홀번호" },
-                { "HoleNumber", "홀표시" },
-                { "TeamNumber", "팀번호" },
-                { "AgeHandicap", "핸디캡" }
+                { "AgeText", "연령" },
+                { "AgeHandicap", "핸디캡" },
+                { "HoleNumber", "배정홀" },
+                { "CourseOrder", "코스순번" },
+                { "TeamNumber", "팀번호" }
             };
 
             foreach (var col in Helper.GetExportColumns(headers))
@@ -529,7 +529,7 @@ namespace GiSanParkGolf.Sites.Admin
                 gvExport.Columns.Add(col);
             }
 
-            gvExport.DataSource = Global.dbManager.GetAssignedUserList(TB_GameCode.Text);
+            gvExport.DataSource = Global.dbManager.GetAssignmentResult(TB_GameCode.Text);
             gvExport.DataBind();
 
             Helper.ExportGridViewToExcel(gvExport, "PlayerList.xls", Response);
@@ -588,7 +588,18 @@ namespace GiSanParkGolf.Sites.Admin
             }
 
             bool useHandicap = Convert.ToBoolean(DDL_HandicapUse.SelectedValue);
-            string settingCode = useHandicap ? "HC" : "NO";
+            bool useGender = Convert.ToBoolean(DDL_GenderUse.SelectedValue);
+            bool useAgeGroup = Convert.ToBoolean(DDL_AgeGroupUse.SelectedValue);
+            bool useAwards = Convert.ToBoolean(DDL_AwardsUse.SelectedValue);
+
+            List<string> settingParts = new List<string>();
+
+            if (useHandicap) settingParts.Add("HC");
+            if (useGender) settingParts.Add("GD");
+            if (useAgeGroup) settingParts.Add("AGE");
+            if (useAwards) settingParts.Add("AW");
+
+            string settingCode = settingParts.Count > 0 ? string.Join("-", settingParts) : "DEFAULT";
 
             Global.dbManager.UpdateGameSetting(gameCode, settingCode);
             bool success = Global.dbManager.SaveAssignmentResult(assignmentData);

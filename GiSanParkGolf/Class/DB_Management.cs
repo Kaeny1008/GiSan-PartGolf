@@ -1607,8 +1607,13 @@ namespace GiSanParkGolf.Class
                 // ✅ 순번 & 연령 필드 추가 처리
                 for (int i = 0; i < result.Count; i++)
                 {
-                    var player = result[i];
-                    player.No = i + 1;
+                    result[i].RowNumber = i + 1;
+                }
+
+                // RowNumber 할당
+                for (int i = 0; i < result.Count; i++)
+                {
+                    
                 }
 
                 return result;

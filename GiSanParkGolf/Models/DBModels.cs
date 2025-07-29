@@ -363,6 +363,7 @@ namespace GiSanParkGolf.Models
     [Serializable]
     public class AssignedPlayer
     {
+        public int RowNumber { get; set; }         //그리드 번호
         public string UserId { get; set; }           // 참가자 ID
         public string UserName { get; set; }         // 참가자 이름
         public int AgeHandicap { get; set; }         // 핸디캡
@@ -378,8 +379,6 @@ namespace GiSanParkGolf.Models
         // 보조 필드 (출력용)
         public string Summary =>
             $"{UserName} (핸디캡 {AgeHandicap}) → {CourseName} {CourseOrder}번";
-
-        public int No { get; set; } //그리드 번호
 
         public int UserNumber { get; set; }
 

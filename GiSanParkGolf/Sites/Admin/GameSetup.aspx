@@ -153,7 +153,7 @@
                                         CssClass="HyperLink"
                                         CommandName="SelectRow"
                                         CommandArgument="<%# Container.DataItemIndex %>"
-                                        Text='<%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 25) %>'>
+                                        Text='<%# Dul.StringLibrary.CutStringUnicode(Eval("GameName").ToString(), 50) %>'>
                                     </asp:LinkButton>
                                 </ItemTemplate>
                                 <HeaderStyle Width="200px" />
@@ -390,7 +390,7 @@
                                     CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
                                     EmptyDataText="배치된 코스가 없습니다. 먼저 코스배치를 실행하세요.">
                                     <Columns>
-                                        <asp:BoundField DataField="No" HeaderText="No" />
+                                        <asp:BoundField DataField="RowNumber" HeaderText="No" />
                                         <asp:BoundField DataField="UserId" HeaderText="ID" />
                                         <asp:BoundField DataField="UserName" HeaderText="성명" />
                                         <asp:BoundField DataField="GenderText" HeaderText="성별" />
