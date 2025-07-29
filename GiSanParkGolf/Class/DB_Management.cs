@@ -1413,128 +1413,25 @@ namespace GiSanParkGolf.Class
             }
         }
 
-        public bool DeleteHoleById(int holeId)
+        public bool DeleteStadiumCourseHole(string stadiumCode = null, int? courseCode = null, int? holeId = null)
         {
-            string query = @"
-                DELETE FROM SYS_HoleInfo
-                WHERE HoleId = @HoleId
-            ";
+            if (holeId == null && courseCode == null && string.IsNullOrWhiteSpace(stadiumCode))
+                return false; // 최소 1개는 인자 있어야 의미 있음
 
             try
             {
                 if (DB_Connection.State != ConnectionState.Open)
                     DB_Connection.Open();
 
-                int rows = DB_Connection.Execute(query, new { HoleId = holeId });
-                return rows > 0;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[DeleteHoleById] 오류: {ex.Message}");
-                return false;
-            }
-            finally
-            {
-                DB_Connection.Close();
-            }
-        }
-
-        public bool DeleteAllHolesByCourse(string courseCode)
-        {
-            if (string.IsNullOrWhiteSpace(courseCode))
-                return false;
-
-            string query = @"
-                DELETE FROM SYS_HoleInfo
-                WHERE CourseCode = @CourseCode
-            ";
-
-            try
-            {
-                if (DB_Connection.State != ConnectionState.Open)
-                    DB_Connection.Open();
-
-                int rows = DB_Connection.Execute(query, new { CourseCode = courseCode });
-                return rows > -1;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[DeleteAllHolesByCourse] 오류: {ex.Message}");
-                return false;
-            }
-            finally
-            {
-                DB_Connection.Close();
-            }
-        }
-
-        public bool DeleteCourse(int courseCode)
-        {
-            string deleteHoles = "DELETE FROM SYS_HoleInfo WHERE CourseCode = @CourseCode";
-            string deleteCourse = "DELETE FROM SYS_CourseList WHERE CourseCode = @CourseCode";
-
-            DB_Connection.Open();
-
-            try
-            {
-                // 1. 홀 먼저 삭제
-                DB_Connection.Execute(deleteHoles, new { CourseCode = courseCode });
-
-                // 2. 코스 삭제
-                int rows = DB_Connection.Execute(deleteCourse, new { CourseCode = courseCode });
+                int rows = DB_Connection.Execute("sp_Delete_StadiumHierarchy",
+                    new { StadiumCode = stadiumCode, CourseCode = courseCode, HoleId = holeId },
+                    commandType: CommandType.StoredProcedure);
 
                 return rows > 0;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[DeleteCourse] 오류: {ex.Message}");
-                return false;
-            }
-            finally
-            {
-                DB_Connection.Close();
-            }
-        }
-
-        public bool DeleteStadium(string stadiumCode)
-        {
-            if (string.IsNullOrWhiteSpace(stadiumCode))
-                return false;
-
-            string deleteHoles = @"
-                DELETE FROM SYS_HoleInfo
-                WHERE CourseCode IN (
-                    SELECT CourseCode FROM SYS_CourseList WHERE StadiumCode = @StadiumCode
-                )";
-
-            string deleteCourses = @"
-                DELETE FROM SYS_CourseList
-                WHERE StadiumCode = @StadiumCode
-            ";
-
-            string deleteStadium = @"
-                DELETE FROM SYS_StadiumList
-                WHERE StadiumCode = @StadiumCode
-            ";
-
-            DB_Connection.Open();
-
-            try
-            {
-                // 1. 해당 경기장에 속한 홀들 삭제
-                DB_Connection.Execute(deleteHoles, new { StadiumCode = stadiumCode });
-
-                // 2. 해당 경기장에 속한 코스들 삭제
-                DB_Connection.Execute(deleteCourses, new { StadiumCode = stadiumCode });
-
-                // 3. 경기장 자체 삭제
-                int rows = DB_Connection.Execute(deleteStadium, new { StadiumCode = stadiumCode });
-
-                return rows > 0;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[DeleteStadium] 오류: {ex.Message}");
+                Console.WriteLine($"[DeleteEntity] 오류: {ex.Message}");
                 return false;
             }
             finally
@@ -1573,14 +1470,8 @@ namespace GiSanParkGolf.Class
         public List<AssignedPlayer> GetAssignmentResult(string gameCode)
         {
             string query = @"
-                SELECT A.GameCode, A.UserId, U.UserName, U.UserNumber, U.UserGender,
-                       CASE U.UserGender 
-                           WHEN 1 THEN '남성'
-                           WHEN 2 THEN '여성'
-                           WHEN 3 THEN '남성'
-                           WHEN 4 THEN '여성'
-                           ELSE '기타'
-                       END AS GenderText,
+                SELECT A.GameCode, A.UserId, U.UserName, U.UserNumber,
+                       U.UserGender,
                        A.CourseName, A.HoleNumber, A.TeamNumber,
                        A.GroupNumber, A.CourseOrder, A.AgeHandicap,
                        A.CourseOrder
@@ -1588,11 +1479,6 @@ namespace GiSanParkGolf.Class
                 INNER JOIN SYS_Users U ON A.UserId = U.UserId
                 WHERE A.GameCode = @GameCode
                 ORDER BY 
-                    CASE 
-                        WHEN A.TeamNumber LIKE 'M%' THEN 0
-                        WHEN A.TeamNumber LIKE 'F%' THEN 1
-                        ELSE 2
-                    END,
                     A.TeamNumber ASC,
                     A.CourseOrder ASC
             ";
@@ -1604,16 +1490,10 @@ namespace GiSanParkGolf.Class
 
                 var result = DB_Connection.Query<AssignedPlayer>(query, new { GameCode = gameCode }).ToList();
 
-                // ✅ 순번 & 연령 필드 추가 처리
+                // 순번 & 연령 필드 추가 처리
                 for (int i = 0; i < result.Count; i++)
                 {
                     result[i].RowNumber = i + 1;
-                }
-
-                // RowNumber 할당
-                for (int i = 0; i < result.Count; i++)
-                {
-                    
                 }
 
                 return result;
@@ -1629,56 +1509,51 @@ namespace GiSanParkGolf.Class
             }
         }
 
-        public bool SaveAssignmentResult(List<AssignedPlayer> assignments)
+        public bool ProcessGameTransaction(string gameCode, string settingCode, List<AssignedPlayer> assignments)
         {
-            if (assignments == null || assignments.Count == 0)
-                return false;
-
-            string gameCode = assignments.First().GameCode;
-
-            string deleteQuery = "DELETE FROM Game_UserAssignment WHERE GameCode = @GameCode";
-
-            string insertQuery = @"
-                INSERT INTO Game_UserAssignment (
-                    GameCode, UserId, CourseName, HoleNumber,
-                    TeamNumber, GroupNumber, CourseOrder,
-                    AgeHandicap, AssignedDate
-                ) VALUES (
-                    @GameCode, @UserId, @CourseName, @HoleNumber,
-                    @TeamNumber, @GroupNumber, @CourseOrder,
-                    @AgeHandicap, GETDATE()
-                )
-            ";
-
             try
             {
                 if (DB_Connection.State != ConnectionState.Open)
                     DB_Connection.Open();
 
-                // 🧹 기존 기록 삭제
-                DB_Connection.Execute(deleteQuery, new { GameCode = gameCode });
+                // 1. assignments → DataTable 변환 (TVP용)
+                var tvp = new DataTable();
+                tvp.Columns.Add("GameCode", typeof(string));        // varchar(50)
+                tvp.Columns.Add("UserId", typeof(string));          // varchar(50)
+                tvp.Columns.Add("CourseName", typeof(string));      // varchar(50)
+                tvp.Columns.Add("HoleNumber", typeof(string));      // varchar(50) ← 수정됨
+                tvp.Columns.Add("TeamNumber", typeof(string));      // varchar(10) ← 수정됨
+                tvp.Columns.Add("GroupNumber", typeof(int));        // int
+                tvp.Columns.Add("CourseOrder", typeof(int));        // int
+                tvp.Columns.Add("AgeHandicap", typeof(int));        // int
 
-                // 📝 새 배정 저장
                 foreach (var player in assignments)
                 {
-                    DB_Connection.Execute(insertQuery, new
-                    {
-                        GameCode = player.GameCode,
-                        UserId = player.UserId,
-                        CourseName = player.CourseName,
-                        HoleNumber = player.HoleNumber,
-                        TeamNumber = player.TeamNumber,
-                        GroupNumber = player.GroupNumber,
-                        CourseOrder = player.CourseOrder,
-                        AgeHandicap = player.AgeHandicap
-                    });
+                    tvp.Rows.Add(
+                        player.GameCode,
+                        player.UserId,
+                        player.CourseName,
+                        player.HoleNumber,
+                        player.TeamNumber,
+                        player.GroupNumber,
+                        player.CourseOrder,
+                        player.AgeHandicap
+                    );
                 }
+
+                // 2. 프로시저 호출
+                var parameters = new DynamicParameters();
+                parameters.Add("@GameCode", gameCode, DbType.String);
+                parameters.Add("@SettingCode", settingCode, DbType.String);
+                parameters.Add("@AssignedPlayers", tvp.AsTableValuedParameter("TVP_AssignedPlayer"));
+
+                DB_Connection.Execute("sp_Set_GameConfiguration", parameters, commandType: CommandType.StoredProcedure);
 
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[SaveAssignmentResult] 저장 실패: {ex.Message}");
+                Console.WriteLine($"[ProcessGameTransaction] 프로시저 호출 오류: {ex.Message}");
                 return false;
             }
             finally
@@ -1686,86 +1561,5 @@ namespace GiSanParkGolf.Class
                 DB_Connection.Close();
             }
         }
-
-        public void UpdateGameSetting(string gameCode, string settingCode)
-        {
-            string query = @"
-                UPDATE Game_List
-                SET GameSetting = @SettingCode
-                WHERE GameCode = @GameCode
-            ";
-
-            try
-            {
-                if (DB_Connection.State != ConnectionState.Open)
-                    DB_Connection.Open();
-
-                DB_Connection.Execute(query, new
-                {
-                    SettingCode = settingCode,
-                    GameCode = gameCode
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[UpdateGameSetting] 오류: {ex.Message}");
-            }
-            finally
-            {
-                DB_Connection.Close();
-            }
-        }
-
-        public List<dynamic> GetAssignedUserList(string gameCode)
-        {
-            string query = @"
-                SELECT 
-                    ROW_NUMBER() OVER (ORDER BY ua.AssignedDate) AS RowNumber,
-                    u.UserId,
-                    u.UserName,
-                    CASE 
-                        WHEN u.UserGender IN (1, 3) THEN '남'
-                        WHEN u.UserGender IN (2, 4) THEN '여'
-                        ELSE '기타'
-                    END AS GenderText,
-                    CONVERT(varchar(10), 
-                        TRY_CONVERT(date,
-                            CASE 
-                                WHEN u.UserGender IN (1, 2) THEN '19' + FORMAT(u.UserNumber, '000000')
-                                WHEN u.UserGender IN (3, 4) THEN '20' + FORMAT(u.UserNumber, '000000')
-                                ELSE NULL
-                            END
-                        ), 120
-                    ) AS FormattedBirthDate,
-                    ua.CourseName,
-                    ua.CourseOrder,
-                    ua.GroupNumber,
-                    ua.HoleNumber,
-                    ua.TeamNumber,
-                    ua.AgeHandicap
-                FROM Game_UserAssignment ua
-                INNER JOIN SYS_Users u ON ua.UserId = u.UserId
-                WHERE ua.GameCode = @GameCode
-            ";
-
-            try
-            {
-                if (DB_Connection.State != ConnectionState.Open)
-                    DB_Connection.Open();
-
-                var result = DB_Connection.Query(query, new { GameCode = gameCode }).ToList();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[GetAssignedUserList] 오류: {ex.Message}");
-                return new List<dynamic>();
-            }
-            finally
-            {
-                DB_Connection.Close();
-            }
-        }
-
     }
 }

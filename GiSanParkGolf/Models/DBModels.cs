@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 
@@ -371,19 +372,14 @@ namespace GiSanParkGolf.Models
         public string CourseName { get; set; }       // 배정된 코스명
         public int CourseOrder { get; set; }         // 코스 내 순서
         public int GroupNumber { get; set; }         // 그룹 번호 (optional)
-        public string GenderText { get; set; }       // 성별 텍스트
         public string HoleNumber { get; set; }
-
         public string TeamNumber { get; set; }
-
-        // 보조 필드 (출력용)
-        public string Summary =>
-            $"{UserName} (핸디캡 {AgeHandicap}) → {CourseName} {CourseOrder}번";
-
         public int UserNumber { get; set; }
-
         public int UserGender { get; set; }
-        public string AgeText
+        public string AgeText { get; set; }
+        public string GenderText { get; set; }
+
+        public string AgeTextPrint
         {
             get
             {
@@ -391,6 +387,26 @@ namespace GiSanParkGolf.Models
                 return (age > 0) ? age + "세" : "정보없음";
             }
         }
+
+        public string GenderTextPrint
+        {
+            get
+            {
+                switch (UserGender)
+                {
+                    case 1:
+                    case 3:
+                        return "남자";
+                    case 2:
+                    case 4:
+                        return "여자";
+                    default:
+                        return "확인불가";
+                }
+            }
+        }
+        public string Summary =>
+            $"{UserName} (핸디캡 {AgeHandicap}) → {CourseName} {CourseOrder}번";
     }
 
     public class PlayerAssignmentOptions

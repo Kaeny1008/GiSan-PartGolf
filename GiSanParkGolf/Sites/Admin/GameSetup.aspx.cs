@@ -134,8 +134,6 @@ namespace GiSanParkGolf.Sites.Admin
                         @"document.getElementById('leftPanel')?.classList.add('hidden');
                          document.getElementById('rightPanel')?.classList.remove('d-none');", true);
                 }
-                //pager.CurrentPage = GameList.PageIndex;
-                //pager.TotalPages = GameList.PageCount;
                 HiddenPanelState.Value = "right";
             }
         }
@@ -216,9 +214,6 @@ namespace GiSanParkGolf.Sites.Admin
 
                 // 순번 표시 (GridView의 RowIndex는 0부터 시작)
                 e.Row.Cells[0].Text = (e.Row.RowIndex + 1).ToString(); // No 컬럼
-
-                // 연령 표시 (Age 필드에 미리 계산된 값이 있다고 가정)
-                e.Row.Cells[4].Text = player.AgeText; // Age 컬럼
 
                 // ViewState에 없을 경우 초기화
                 if (cachedAssignment == null)
@@ -348,7 +343,6 @@ namespace GiSanParkGolf.Sites.Admin
             int courseIndex = 0;
 
             string lastCourseName = null;
-            string lastTeamKey = null;
 
             foreach (var player in players)
             {
@@ -408,21 +402,11 @@ namespace GiSanParkGolf.Sites.Admin
                         }
 
                         sharedHoleTracker[courseName]++; // 홀 번호 증가는 유효성 통과 후!
-
-                        //string nextTeamKey = $"{courseName}-{sharedHoleTracker[courseName]}";
-
-                        //if (!teamNumberTracker.ContainsKey(nextTeamKey))
-                        //    teamNumberTracker[nextTeamKey] = teamNumberTracker[teamKey] + 1;
-                        //else
-                        //    teamNumberTracker[nextTeamKey]++;
                     }
-
-                    lastTeamKey = teamKey;
                     lastCourseName = courseName;
                 }
             }
             
-            //teamNumberTracker[lastTeamKey]++;
             sharedHoleTracker[lastCourseName]++;
 
             return result;
@@ -601,8 +585,7 @@ namespace GiSanParkGolf.Sites.Admin
 
             string settingCode = settingParts.Count > 0 ? string.Join("-", settingParts) : "DEFAULT";
 
-            Global.dbManager.UpdateGameSetting(gameCode, settingCode);
-            bool success = Global.dbManager.SaveAssignmentResult(assignmentData);
+            bool success = Global.dbManager.ProcessGameTransaction(gameCode, settingCode, assignmentData);
 
             string title = success ? "저장 완료" : "실패";
             string msg = success ? "배정 결과가 성공적으로 저장되었습니다." : "저장 중 오류가 발생했습니다.";

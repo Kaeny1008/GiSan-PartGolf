@@ -27,21 +27,6 @@
             __doPostBack('<%= BTN_ServerHoleDelete.UniqueID %>', '');
         }
 
-        function promptDeleteAllHoles() {
-            launchModal("전체 삭제 확인", "정말 이 코스의 모든 홀을 삭제하시겠습니까?\r\n(복구할 수 없습니다.)", {
-                showDeleteAll: true,
-                showCancel: true,
-                showOk: false,
-                showDelete: false,
-                showCourseDelete: false,
-                showStadiumDelete: false
-            });
-        }
-
-        function handleDeleteAllHoles() {
-            __doPostBack('<%= BTN_ServerDeleteAllHoles.UniqueID %>', '');
-        }
-
         function promptCourseDelete(courseCode) {
             console.log("삭제할 코스코드 : " + courseCode);
             document.getElementById("HF_TargetCourseCode").value = courseCode;
@@ -141,7 +126,6 @@
     <div class="container mt-4">
         <%--홀 삭제할때 쓰이는 버튼--%>
         <asp:LinkButton ID="BTN_ServerHoleDelete" runat="server" OnClick="BTN_ServerHoleDelete_Click" style="display:none" />
-        <asp:LinkButton ID="BTN_ServerDeleteAllHoles" runat="server" OnClick="BTN_ServerDeleteAllHoles_Click" style="display:none" />
         <asp:LinkButton ID="BTN_ServerCourseDelete" runat="server" OnClick="BTN_ServerCourseDelete_Click" style="display:none" />
         <asp:LinkButton ID="BTN_ServerStadiumDelete" runat="server" OnClick="BTN_ServerStadiumDelete_Click" style="display:none" />
 
@@ -368,12 +352,6 @@
                     Text="홀 추가" 
                     CssClass="btn btn-outline-primary btn-sm" 
                     OnClick="BTN_AddHoleRow_Click" />
-                <%--홀 전체삭제는 만들기는 했지만 쓰진 않을것 같다.--%>
-                <%--<asp:Button ID="BTN_DeleteAllHoles"
-                    runat="server"
-                    Text="홀 전체 삭제"
-                    CssClass="btn btn-outline-danger btn-sm ms-2"
-                    OnClientClick="promptDeleteAllHoles(); return false;" />--%>
 
                 <asp:HiddenField ID="HF_TargetHoleId" runat="server" ClientIDMode="Static" />
 

@@ -393,8 +393,12 @@
                                         <asp:BoundField DataField="RowNumber" HeaderText="No" />
                                         <asp:BoundField DataField="UserId" HeaderText="ID" />
                                         <asp:BoundField DataField="UserName" HeaderText="성명" />
-                                        <asp:BoundField DataField="GenderText" HeaderText="성별" />
-                                        <asp:BoundField DataField="AgeText" HeaderText="연령" />
+                                        <asp:BoundField DataField="GenderTextPrint" HeaderText="성별" />
+                                        <asp:TemplateField HeaderText="연령">
+                                            <ItemTemplate>
+                                                <%# Eval("AgeTextPrint") %>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
                                         <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
                                         <asp:BoundField DataField="HoleNumber" HeaderText="배정홀" />
                                         <asp:BoundField DataField="CourseOrder" HeaderText="코스순번" />

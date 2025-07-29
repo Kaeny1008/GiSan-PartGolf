@@ -399,12 +399,12 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_ServerHoleDelete_Click(object sender, EventArgs e)
         {
-            int holeId = int.TryParse(HF_TargetHoleId.Value, out int h) ? h : 0;
+            int delmCode = int.TryParse(HF_TargetHoleId.Value, out int h) ? h : 0;
             string courseCode = ViewState["CourseCode"]?.ToString();
 
-            if (holeId > 0 && !string.IsNullOrEmpty(courseCode))
+            if (delmCode > 0 && !string.IsNullOrEmpty(courseCode))
             {
-                bool success = Global.dbManager.DeleteHoleById(holeId);
+                bool success = Global.dbManager.DeleteStadiumCourseHole(holeId: delmCode);
 
                 if (success)
                 {
@@ -446,35 +446,11 @@ namespace GiSanParkGolf.Sites.Admin
             return holeList;
         }
 
-        protected void BTN_ServerDeleteAllHoles_Click(object sender, EventArgs e)
-        {
-            string courseCode = ViewState["CourseCode"]?.ToString();
-
-            if (!string.IsNullOrEmpty(courseCode))
-            {
-                bool success = Global.dbManager.DeleteAllHolesByCourse(courseCode);
-
-                if (success)
-                {
-                    // 리스트 재로드
-                    var holeList = Global.dbManager.GetHoleListByCourse(courseCode);
-                    GV_HoleDetail.DataSource = holeList;
-                    GV_HoleDetail.DataBind();
-
-                    ShowToast("삭제 완료", "해당 코스의 모든 홀이 삭제되었습니다.");
-                }
-                else
-                {
-                    ShowToast("오류", "홀 전체 삭제 중 오류가 발생했습니다.", showOk:true);
-                }
-            }
-        }
-
         protected void BTN_ServerCourseDelete_Click(object sender, EventArgs e)
         {
-            int courseCode = int.TryParse(HF_TargetCourseCode.Value, out int h) ? h : 0;
+            int delmCode = int.TryParse(HF_TargetCourseCode.Value, out int h) ? h : 0;
 
-            bool success = Global.dbManager.DeleteCourse(courseCode);
+            bool success = Global.dbManager.DeleteStadiumCourseHole(courseCode: delmCode);
 
             if (success)
             {
@@ -496,9 +472,9 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_ServerStadiumDelete_Click(object sender, EventArgs e)
         {
-            string stadiumCode = HF_TargetStadiumCode.Value;
+            string delmCode = HF_TargetStadiumCode.Value;
 
-            bool success = Global.dbManager.DeleteStadium(stadiumCode);
+            bool success = Global.dbManager.DeleteStadiumCourseHole(stadiumCode: delmCode);
 
             if (success)
                 ShowToast("경기장 삭제 완료", "해당 경기장이 삭제되었습니다.");
