@@ -10,6 +10,7 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Xml.Linq;
 
 namespace GiSanParkGolf.Sites.Admin
 {
@@ -621,15 +622,15 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void ShowModal(string title, string message, bool scrollToResult = false)
         {
-            string script = $@"launchModal('#MainModal', '{title}', '{message}', 0);";
+            string safeTitle = HttpUtility.JavaScriptStringEncode(title);
+            string safeMessage = HttpUtility.JavaScriptStringEncode(message);
 
+            string script = $"launchModal('#MainModal', '{safeTitle}', '{safeMessage}', 0);";
             if (scrollToResult)
             {
-                script += @"
-                    new bootstrap.Tab(document.querySelector('a[href=""#tab-result""]')).show();
-                    document.getElementById('rightPanel').scrollIntoView({ behavior: 'smooth' });";
+                script += "localStorage.setItem('lastActiveTabId', '#tab-result');";
+                script += "setTimeout(showTabWhenReady('#tab-result'), 400);";
             }
-
             ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModal", script, true);
         }
 
@@ -800,7 +801,7 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (string.IsNullOrEmpty(recommendedHole) || recommendedHole == "추천없음")
             {
-                ShowModal("배정 실패", "추천된 홀이 없습니다.", true);
+                ShowModal("배정 실패", "추천된 홀이 없습니다.", false);
                 return;
             }
 
@@ -810,7 +811,7 @@ namespace GiSanParkGolf.Sites.Admin
             var player = unassignedPlayers.FirstOrDefault(p => p.UserId == userId);
             if (player == null)
             {
-                ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", true);
+                ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", false);
                 return;
             }
 
@@ -818,14 +819,14 @@ namespace GiSanParkGolf.Sites.Admin
             var parts = recommendedHole.Split('-');
             if (parts.Length != 2)
             {
-                ShowModal("배정 실패", "추천홀 정보가 올바르지 않습니다.", true);
+                ShowModal("배정 실패", "추천홀 정보가 올바르지 않습니다.", false);
                 return;
             }
             string courseName = parts[0];
             int holeNo;
             if (!int.TryParse(parts[1], out holeNo) || holeNo < 1)
             {
-                ShowModal("배정 실패", "홀 번호가 올바르지 않습니다.", true);
+                ShowModal("배정 실패", "홀 번호가 올바르지 않습니다.", false);
                 return;
             }
             string holeNumber = $"{courseName}-{holeNo}";
@@ -880,7 +881,17 @@ namespace GiSanParkGolf.Sites.Admin
 
             hiddenBox.Visible = unassignedPlayers.Any();
 
-            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", true);
+            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", false);
+        }
+
+        protected void gvUnassignedPlayers_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "AssignManual")
+            {
+                string userId = e.CommandArgument.ToString();
+                // userId에 해당하는 플레이어를 수동으로 배치하는 코드 작성
+                // 예시: 원하는 로직 호출/수동 배치 UI 띄우기 등
+            }
         }
     }
 }

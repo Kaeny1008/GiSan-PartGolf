@@ -5,13 +5,27 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <script type="text/javascript">
+
+        function showTabWhenReady(TAB_RESULT_ID, retryCount = 0) {
+            console.log(TAB_RESULT_ID);
+            var tabTrigger = document.querySelector('a[href="' + TAB_RESULT_ID + '"]');
+            if (tabTrigger) {
+                new bootstrap.Tab(tabTrigger).show();
+            } else if (retryCount < 20) { // 최대 20회 시도
+                setTimeout(function() { showTabWhenReady(TAB_RESULT_ID, retryCount + 1); }, 100);
+            }
+        }
+
         let modalConfig = {
-            name: "",          // 모달 ID
-            title: "",         // 모달 제목
-            body: "",          // 모달 본문 메시지
-            yesButtonType: 0,  // 예 버튼 종류 (0: 확인형, 1: 실행형)
-            launch: false      // 실행 여부
+            name: "",
+            title: "",
+            body: "",
+            yesButtonType: 0,
+            launch: false
         };
+
+        // 마지막 활성 탭 id 저장
+        let lastActiveTabId = sessionStorage.getItem("lastActiveTabId") || "#tab-info";
 
         function launchModal(modalId, title, body, yesButtonType = 0) {
             modalConfig.name = modalId;
@@ -28,24 +42,19 @@
 
             const showmodal = $(modalConfig.name);
 
-            // 콘텐츠 삽입
             showmodal.find(".modal-title").text(modalConfig.title);
             showmodal.find(".modal-body").text(modalConfig.body);
 
-            // 모든 버튼 초기화
             showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final").hide().off("click");
 
-            // 예 버튼 설정 - switch 문으로 변경
             switch (modalConfig.yesButtonType) {
-                case 0: // 확인 모드
+                case 0:
                     showmodal.find("#BTN_Close").show();
                     break;
-
-                case 1: // 실행 모드 (예 / 아니오)
+                case 1:
                     showmodal.find("#BTN_No").show();
                     showmodal.find("#MainContent_BTN_SettingYes").show();
                     break;
-
                 case 2:
                     showmodal.find("#BTN_No").show();
                     showmodal.find("#MainContent_BTN_SaveAssignment_Final").show();
@@ -53,32 +62,51 @@
                     break;
             }
 
-            // 모달 실행
             const modalElement = document.querySelector(modalConfig.name);
             const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
             modalInstance.show();
         }
+
+        // 탭 변경 시 sessionStorage에 저장
+        $(document).ready(function () {
+            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                lastActiveTabId = $(e.target).attr('href');
+                sessionStorage.setItem("lastActiveTabId", lastActiveTabId);
+            });
+
+            // 페이지 로드 시 마지막 탭 활성화
+            if (lastActiveTabId) {
+                let $tab = $('a[data-bs-toggle="tab"][href="' + lastActiveTabId + '"]');
+                if ($tab.length) {
+                    $tab.tab('show');
+                }
+            }
+        });
 
         // 패널 표시
         Sys.Application.add_load(function () {
             var state = document.getElementById("<%= HiddenPanelState.ClientID %>")?.value || "none";
 
             switch (state) {
-              case "right":
-                document.getElementById('leftPanel')?.classList.add('hidden');
-                document.getElementById('rightPanel')?.classList.remove('d-none');
-                stste.value = "";
-                break;
+                case "right":
+                    document.getElementById('leftPanel')?.classList.add('hidden');
+                    document.getElementById('rightPanel')?.classList.remove('d-none');
+                    // 패널이 오른쪽일 때 마지막 탭 복원
+                    if (lastActiveTabId) {
+                        let $tab = $('a[data-bs-toggle="tab"][href="' + lastActiveTabId + '"]');
+                        if ($tab.length) {
+                            $tab.tab('show');
+                        }
+                    }
+                    break;
 
-              case "left":
-                document.getElementById('leftPanel')?.classList.remove('hidden');
-                document.getElementById('rightPanel')?.classList.add('d-none');
-                stste.value = "";
-                break;
+                case "left":
+                    document.getElementById('leftPanel')?.classList.remove('hidden');
+                    document.getElementById('rightPanel')?.classList.add('d-none');
+                    break;
 
-              default:
-                // 아무 상태도 지정되지 않았을 경우 (옵션)
-                break;
+                default:
+                    break;
             }
         });
     </script>
@@ -421,7 +449,8 @@
                                     <asp:GridView ID="gvUnassignedPlayers" runat="server"
                                         AutoGenerateColumns="False"
                                         CssClass="table table-bordered table-hover table-condensed table-striped table-responsive" 
-                                        OnRowDataBound="gvUnassignedPlayers_RowDataBound"
+                                        OnRowDataBound="gvUnassignedPlayers_RowDataBound" 
+                                        OnRowCommand ="gvUnassignedPlayers_RowCommand"
                                         EmptyDataText="미배정된 인원이 없습니다.">
                                         <Columns>
                                             <asp:BoundField DataField="UserId" HeaderText="ID" />
@@ -429,15 +458,28 @@
                                             <asp:BoundField DataField="GenderText" HeaderText="성별" />
                                             <asp:BoundField DataField="AgeText" HeaderText="연령" />
                                             <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
-                                            <asp:TemplateField HeaderText="추천 배정홀">
+                                            <asp:TemplateField HeaderText="추천 배정">
                                                 <ItemTemplate>
                                                     <asp:Label ID="lblRecommendCourse" runat="server" />
-                                                    <asp:Button ID="BTN_AssignCourse" runat="server" Text="배정" CssClass="btn btn-sm btn-success ms-2"
+                                                    <asp:Button ID="BTN_AssignCourse" 
+                                                        runat="server" 
+                                                        Text="배정" 
+                                                        CssClass="btn btn-sm btn-success ms-2"
                                                         CommandName="AssignCourse"
                                                         CommandArgument='<%# Eval("UserId") %>'
                                                         OnClick="BTN_AssignCourse_Click" />
                                                 </ItemTemplate>
                                                 <ItemStyle Width="15%" HorizontalAlign="Center" />
+                                            </asp:TemplateField>
+                                            <asp:TemplateField HeaderText="수동배정">
+                                                <ItemTemplate>
+                                                    <asp:Button ID="BTN_AssignManual" 
+                                                        runat="server" 
+                                                        Text="배정" 
+                                                        CommandName="AssignManual" 
+                                                        CommandArgument='<%# Eval("UserId") %>' 
+                                                        CssClass="btn btn-primary btn-sm" />
+                                                </ItemTemplate>
                                             </asp:TemplateField>
                                         </Columns>
                                     </asp:GridView>
