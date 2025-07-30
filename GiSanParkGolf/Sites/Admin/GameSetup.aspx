@@ -5,17 +5,6 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <script type="text/javascript">
-
-        function showTabWhenReady(TAB_RESULT_ID, retryCount = 0) {
-            console.log(TAB_RESULT_ID);
-            var tabTrigger = document.querySelector('a[href="' + TAB_RESULT_ID + '"]');
-            if (tabTrigger) {
-                new bootstrap.Tab(tabTrigger).show();
-            } else if (retryCount < 20) { // 최대 20회 시도
-                setTimeout(function() { showTabWhenReady(TAB_RESULT_ID, retryCount + 1); }, 100);
-            }
-        }
-
         let modalConfig = {
             name: "",
             title: "",
@@ -23,9 +12,6 @@
             yesButtonType: 0,
             launch: false
         };
-
-        // 마지막 활성 탭 id 저장
-        let lastActiveTabId = sessionStorage.getItem("lastActiveTabId") || "#tab-info";
 
         function launchModal(modalId, title, body, yesButtonType = 0) {
             modalConfig.name = modalId;
@@ -67,6 +53,9 @@
             modalInstance.show();
         }
 
+        // 마지막 활성 탭 id 저장
+        let lastActiveTabId = sessionStorage.getItem("lastActiveTabId") || "#tab-info";
+
         // 탭 변경 시 sessionStorage에 저장
         $(document).ready(function () {
             $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -107,6 +96,28 @@
 
                 default:
                     break;
+            }
+        });
+
+        var isPostBack = false;
+        var originalDoPostBack = window.__doPostBack;
+        window.__doPostBack = function() {
+            isPostBack = true;
+            return originalDoPostBack.apply(this, arguments);
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var forms = document.getElementsByTagName('form');
+            for (var i = 0; i < forms.length; i++) {
+                forms[i].addEventListener('submit', function() {
+                    isPostBack = true;
+                });
+            }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            if (!isPostBack) {
+                sessionStorage.setItem('lastActiveTabId', '#tab-info');
             }
         });
     </script>
@@ -450,7 +461,6 @@
                                         AutoGenerateColumns="False"
                                         CssClass="table table-bordered table-hover table-condensed table-striped table-responsive" 
                                         OnRowDataBound="gvUnassignedPlayers_RowDataBound" 
-                                        OnRowCommand ="gvUnassignedPlayers_RowCommand"
                                         EmptyDataText="미배정된 인원이 없습니다.">
                                         <Columns>
                                             <asp:BoundField DataField="UserId" HeaderText="ID" />
@@ -478,7 +488,8 @@
                                                         Text="배정" 
                                                         CommandName="AssignManual" 
                                                         CommandArgument='<%# Eval("UserId") %>' 
-                                                        CssClass="btn btn-primary btn-sm" />
+                                                        CssClass="btn btn-primary btn-sm"
+                                                        OnClientClick='<%# "openManualAssignModal(\"" + Eval("UserId") + "\"); return false;" %>' />
                                                 </ItemTemplate>
                                             </asp:TemplateField>
                                         </Columns>
@@ -528,4 +539,50 @@
             </div>
         </div>
     </div>
+
+    <!-- 수동배정 모달 추가 -->
+    <div class="modal fade" id="ManualAssignModal" tabindex="-1" aria-labelledby="ManualAssignModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ManualAssignModalLabel">수동 배정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 여기에 수동 배정 관련 입력 폼 또는 안내 메시지를 추가하세요 -->
+                    <p>선수에게 직접 코스를 배정할 수 있습니다.<br />배정할 코스와 홀을 선택하세요.</p>
+                    <div class="mb-2">
+                        <label class="form-label">코스 선택</label>
+                        <asp:DropDownList ID="manualCourseSelect" runat="server" CssClass="form-select">
+                            <asp:ListItem Text="코스 선택" Value="" />
+                            <asp:ListItem Text="A코스" Value="A" />
+                            <asp:ListItem Text="B코스" Value="B" />
+                            <asp:ListItem Text="C코스" Value="C" />
+                        </asp:DropDownList>
+                    </div>
+                    <div class="mb-2">
+                        <label for="manualHoleInput" class="form-label">홀 번호</label>
+                        <asp:TextBox ID="manualHoleInput" runat="server" Text="number" CssClass="form-control">1</asp:TextBox>
+                    </div>
+                    <asp:HiddenField ID="manualAssignUserId" runat="server" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <asp:UpdatePanel ID="upManualAssign" runat="server">
+                        <ContentTemplate>
+                            <asp:Button ID="BTN_AssignManual" runat="server" Text="배정" OnClick="BTN_AssignManual_Click" CssClass="btn btn-primary btn-sm" />
+                        </ContentTemplate>
+                    </asp:UpdatePanel>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        function openManualAssignModal(userId) {
+            var hiddenField = document.getElementById('<%= manualAssignUserId.ClientID %>');
+            hiddenField.value = userId;
+            $('#ManualAssignModal').modal('show');
+        }
+    </script>
 </asp:Content>

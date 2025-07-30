@@ -596,8 +596,11 @@ namespace GiSanParkGolf.Sites.Admin
             HiddenPanelState.Value = "left";
 
             ScriptManager.RegisterStartupScript(this, this.GetType(), "RestoreLeftPanel",
-                @"document.getElementById('leftPanel')?.classList.remove('hidden');
-                document.getElementById('rightPanel')?.classList.remove('active');", true);
+                @"setTimeout(function() {
+                    document.getElementById('leftPanel')?.classList.remove('hidden');
+                    document.getElementById('rightPanel')?.classList.remove('active');
+                    sessionStorage.setItem('lastActiveTabId', '#tab-info');
+                }, 100);", true);
         }
 
         private void ResetRightPanelData()
@@ -628,8 +631,13 @@ namespace GiSanParkGolf.Sites.Admin
             string script = $"launchModal('#MainModal', '{safeTitle}', '{safeMessage}', 0);";
             if (scrollToResult)
             {
-                script += "localStorage.setItem('lastActiveTabId', '#tab-result');";
-                script += "setTimeout(showTabWhenReady('#tab-result'), 400);";
+                script += "sessionStorage.setItem('lastActiveTabId', '#tab-result');";
+                script += @"setTimeout(function() {
+                                var tabTrigger = document.querySelector('a[href=""#tab-result""]');
+                                if (tabTrigger) {
+                                    new bootstrap.Tab(tabTrigger).show();
+                                }
+                            }, 100);";
             }
             ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModal", script, true);
         }
@@ -641,19 +649,30 @@ namespace GiSanParkGolf.Sites.Admin
                 var drv = e.Row.DataItem as GameJoinUserList;
                 if (drv != null)
                 {
+                    // 추천 배정 정보 및 사유
                     var (recommendCourse, reason) = RecommendCourseForPlayerWithReason(drv);
                     var lbl = e.Row.FindControl("lblRecommendCourse") as Label;
-                    var btn = e.Row.FindControl("BTN_AssignCourse") as Button;
+                    var btnAssignCourse = e.Row.FindControl("BTN_AssignCourse") as Button;
                     if (lbl != null)
                     {
                         lbl.Text = recommendCourse;
                         lbl.Attributes["title"] = reason; // 마우스 오버시 추천사유 툴팁
                     }
-                    if (btn != null)
+                    if (btnAssignCourse != null)
                     {
-                        btn.Attributes["title"] = reason; // 마우스 오버시 추천사유 툴팁
+                        btnAssignCourse.Attributes["title"] = reason; // 마우스 오버시 추천사유 툴팁
                     }
                 }
+            }
+        }
+
+        public void RaisePostBackEvent(string eventArgument)
+        {
+            if (eventArgument.StartsWith("AssignManual_"))
+            {
+                string userId = eventArgument.Substring("AssignManual_".Length);
+                // team/pos 값은 JS → 서버로 전송해야 하므로 추가 작업 필요!
+                // 여기서 실제 배정 처리
             }
         }
 
@@ -884,14 +903,47 @@ namespace GiSanParkGolf.Sites.Admin
             ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", false);
         }
 
-        protected void gvUnassignedPlayers_RowCommand(object sender, GridViewCommandEventArgs e)
+        protected void BTN_AssignManual_Click(object sender, EventArgs e)
         {
-            if (e.CommandName == "AssignManual")
+
+            ScriptManager.RegisterStartupScript(
+                upManualAssign, // UpdatePanel의 ID
+                upManualAssign.GetType(),
+                "closeManualAssignModal",
+                "$('#ManualAssignModal').modal('hide');",
+                true
+            );
+
+            string userId = manualAssignUserId.Value;
+            string course = manualCourseSelect.SelectedValue;
+            string holeStr = manualHoleInput.Text;
+
+            // 유효성 검사: 코스명과 홀번호 입력값 체크
+            if (string.IsNullOrWhiteSpace(course))
             {
-                string userId = e.CommandArgument.ToString();
-                // userId에 해당하는 플레이어를 수동으로 배치하는 코드 작성
-                // 예시: 원하는 로직 호출/수동 배치 UI 띄우기 등
+                ShowModal("입력 오류", "코스를 선택하세요.", false);
+                return;
             }
+            if (string.IsNullOrWhiteSpace(holeStr))
+            {
+                ShowModal("입력 오류", "홀 번호를 입력하세요.", false);
+                return;
+            }
+            if (!int.TryParse(holeStr, out int hole) || hole < 1)
+            {
+                ShowModal("입력 오류", "홀 번호가 올바르지 않습니다.", false);
+                return;
+            }
+
+            Debug.WriteLine(userId);
+            Debug.WriteLine(course);
+            Debug.WriteLine(holeStr);
+
+            // 실제 배정 로직 (DB 업데이트 등)
+            // 예시: AssignPlayerToCourse(userId, course, hole);
+
+            // 결과 반영 및 UI 갱신
+            // 예: ReloadCourseAssignmentResult();
         }
     }
 }
