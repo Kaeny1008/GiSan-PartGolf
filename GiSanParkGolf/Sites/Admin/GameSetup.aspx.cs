@@ -626,11 +626,261 @@ namespace GiSanParkGolf.Sites.Admin
             if (scrollToResult)
             {
                 script += @"
-            new bootstrap.Tab(document.querySelector('a[href=""#tab-result""]')).show();
-            document.getElementById('rightPanel').scrollIntoView({ behavior: 'smooth' });";
+                    new bootstrap.Tab(document.querySelector('a[href=""#tab-result""]')).show();
+                    document.getElementById('rightPanel').scrollIntoView({ behavior: 'smooth' });";
             }
 
             ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModal", script, true);
+        }
+
+        protected void gvUnassignedPlayers_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                var drv = e.Row.DataItem as GameJoinUserList;
+                if (drv != null)
+                {
+                    var (recommendCourse, reason) = RecommendCourseForPlayerWithReason(drv);
+                    var lbl = e.Row.FindControl("lblRecommendCourse") as Label;
+                    var btn = e.Row.FindControl("BTN_AssignCourse") as Button;
+                    if (lbl != null)
+                    {
+                        lbl.Text = recommendCourse;
+                        lbl.Attributes["title"] = reason; // 마우스 오버시 추천사유 툴팁
+                    }
+                    if (btn != null)
+                    {
+                        btn.Attributes["title"] = reason; // 마우스 오버시 추천사유 툴팁
+                    }
+                }
+            }
+        }
+
+        private List<CourseList> CachedCourseList
+        {
+            get => ViewState["CachedCourseList"] as List<CourseList>;
+            set => ViewState["CachedCourseList"] = value;
+        }
+
+        private List<HoleList> CachedHoleList
+        {
+            get => ViewState["CachedHoleList"] as List<HoleList>;
+            set => ViewState["CachedHoleList"] = value;
+        }
+
+        private List<AssignedPlayer> CachedAssignmentResult
+        {
+            get => ViewState["CachedAssignmentResult"] as List<AssignedPlayer>;
+            set => ViewState["CachedAssignmentResult"] = value;
+        }
+
+        private void CacheGameData(string gameCode)
+        {
+            var gameInfo = Global.dbManager.GetGameInformation(gameCode);
+            if (gameInfo == null) return;
+
+            if (CachedCourseList == null)
+                CachedCourseList = Global.dbManager.GetCourseListByStadium(gameInfo.StadiumCode);
+
+            if (CachedHoleList == null && CachedCourseList != null)
+            {
+                var holes = new List<HoleList>();
+                foreach (var course in CachedCourseList)
+                {
+                    holes.AddRange(Global.dbManager.GetHoleListByCourse(course.CourseCode));
+                }
+                CachedHoleList = holes;
+            }
+
+            if (CachedAssignmentResult == null)
+                CachedAssignmentResult = Global.dbManager.GetAssignmentResult(gameCode);
+        }
+
+        // 추천 코스+홀 계산 개선 메서드 (캐싱 활용)
+        // 추천사유를 함께 반환하도록 변경
+        private (string RecommendText, string Reason) RecommendCourseForPlayerWithReason(GameJoinUserList drv)
+        {
+            string gameCode = TB_GameCode.Text;
+            CacheGameData(gameCode);
+
+            var courseList = CachedCourseList ?? new List<CourseList>();
+            var holeList = CachedHoleList ?? new List<HoleList>();
+            var assignment = CachedAssignmentResult ?? new List<AssignedPlayer>();
+
+            string gender = drv.GenderText;
+            int.TryParse(drv.AgeText?.Replace("세", ""), out int age);
+            int handicap = drv.AgeHandicap;
+            string awards = drv.AwardsSummary ?? string.Empty;
+
+            var holeInfos = new List<(string CourseName, string HoleName, int HoleNo, int Distance, int AssignedCount)>();
+            foreach (var course in courseList)
+            {
+                var holes = holeList.Where(h => h.CourseCode == course.CourseCode);
+                foreach (var hole in holes)
+                {
+                    int assignedCount = assignment.Count(a => a.CourseName == course.CourseName && a.GroupNumber == hole.HoleNo);
+                    holeInfos.Add((course.CourseName, hole.HoleName, hole.HoleNo, hole.Distance, assignedCount));
+                }
+            }
+
+            string bestCourse = null;
+            int? bestHoleNo = null;
+            string reason = "";
+
+            if (age >= 65)
+            {
+                var minHole = holeInfos.OrderBy(h => h.Distance).ThenBy(h => h.AssignedCount).FirstOrDefault();
+                if (minHole.CourseName != null)
+                {
+                    bestCourse = minHole.CourseName; bestHoleNo = minHole.HoleNo;
+                    reason = "고령자(65세 이상) - 가장 짧은 거리 우선";
+                }
+            }
+            else if (gender == "여" || age < 20)
+            {
+                var minHole = holeInfos.OrderBy(h => h.AssignedCount).ThenBy(h => h.Distance).FirstOrDefault();
+                if (minHole.CourseName != null)
+                {
+                    bestCourse = minHole.CourseName; bestHoleNo = minHole.HoleNo;
+                    reason = "여성 또는 20세 미만 - 덜 배정된 홀 우선";
+                }
+            }
+            else if (awards.Contains("최우수상"))
+            {
+                var maxHole = holeInfos.OrderByDescending(h => h.AssignedCount).ThenBy(h => h.Distance).FirstOrDefault();
+                if (maxHole.CourseName != null)
+                {
+                    bestCourse = maxHole.CourseName; bestHoleNo = maxHole.HoleNo;
+                    reason = "최우수상 수상자 - 많이 배정된 홀 우선";
+                }
+            }
+            else if (handicap >= 5)
+            {
+                var minHole = holeInfos.OrderBy(h => h.AssignedCount).ThenBy(h => h.Distance).FirstOrDefault();
+                if (minHole.CourseName != null)
+                {
+                    bestCourse = minHole.CourseName; bestHoleNo = minHole.HoleNo;
+                    reason = "핸디캡 5 이상 - 덜 배정된 홀 우선";
+                }
+            }
+            else if (gender == "여" && age >= 50 && handicap <= 1)
+            {
+                var minHole = holeInfos.Where(h => h.Distance == holeInfos.Min(x => x.Distance)).OrderBy(h => h.AssignedCount).FirstOrDefault();
+                if (minHole.CourseName != null)
+                {
+                    bestCourse = minHole.CourseName; bestHoleNo = minHole.HoleNo;
+                    reason = "여성, 50세 이상, 핸디캡 1 이하 - 최단거리 홀 우선";
+                }
+            }
+
+            string recommendText = (string.IsNullOrEmpty(bestCourse) || !bestHoleNo.HasValue)
+                ? "추천없음"
+                : $"{bestCourse}-{bestHoleNo}";
+
+            if (string.IsNullOrEmpty(reason))
+                reason = "기본 추천 기준에 해당 없음";
+
+            return (recommendText, reason);
+        }
+
+        protected void BTN_AssignCourse_Click(object sender, EventArgs e)
+        {
+            HiddenPanelState.Value = "right"; // 패널 상태 유지
+
+            var btn = sender as Button;
+            if (btn == null) return;
+
+            string userId = btn.CommandArgument;
+
+            GridViewRow row = btn.NamingContainer as GridViewRow;
+            if (row == null) return;
+
+            var lbl = row.FindControl("lblRecommendCourse") as Label;
+            string recommendedHole = lbl?.Text;
+
+            if (string.IsNullOrEmpty(recommendedHole) || recommendedHole == "추천없음")
+            {
+                ShowModal("배정 실패", "추천된 홀이 없습니다.", true);
+                return;
+            }
+
+            var assignedPlayers = ViewState["AssignmentResult"] as List<AssignedPlayer> ?? new List<AssignedPlayer>();
+            var unassignedPlayers = ViewState["UnassignedPlayers"] as List<GameJoinUserList> ?? new List<GameJoinUserList>();
+
+            var player = unassignedPlayers.FirstOrDefault(p => p.UserId == userId);
+            if (player == null)
+            {
+                ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", true);
+                return;
+            }
+
+            // 추천홀 파싱 (예: "A-1" -> 코스명:A, 홀번호:1)
+            var parts = recommendedHole.Split('-');
+            if (parts.Length != 2)
+            {
+                ShowModal("배정 실패", "추천홀 정보가 올바르지 않습니다.", true);
+                return;
+            }
+            string courseName = parts[0];
+            int holeNo;
+            if (!int.TryParse(parts[1], out holeNo) || holeNo < 1)
+            {
+                ShowModal("배정 실패", "홀 번호가 올바르지 않습니다.", true);
+                return;
+            }
+            string holeNumber = $"{courseName}-{holeNo}";
+
+            int maxOrder = assignedPlayers
+                .Where(a => a.CourseName == courseName && a.HoleNumber == holeNumber)
+                .Select(a => a.CourseOrder)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            var currentTeamNumber = assignedPlayers
+                     .Where(a => a.CourseName == courseName && a.HoleNumber == holeNumber)
+                     .Select(a => a.TeamNumber)
+                     .FirstOrDefault() ?? ""; // 해당 홀에 이미 배정된 팀넘버가 있으면 사용, 없으면 빈 문자열
+
+            var newAssigned = new AssignedPlayer
+            {
+                UserId = player.UserId,
+                UserName = player.UserName,
+                AgeHandicap = player.AgeHandicap,
+                GameCode = TB_GameCode.Text,
+                CourseName = courseName,
+                CourseOrder = maxOrder + 1,
+                GroupNumber = holeNo, // 실제 홀 번호로 할당
+                HoleNumber = holeNumber,
+                TeamNumber = currentTeamNumber, // 필요시 할당
+                UserNumber = player.UserNumber,
+                UserGender = player.UserGender,
+                AgeText = player.AgeText,
+                GenderText = player.GenderText
+            };
+
+            assignedPlayers.Add(newAssigned);
+            unassignedPlayers.Remove(player);
+
+            // 배정 결과 정렬: 코스명, 홀번호, 팀번호, 코스순번 기준
+            var sortedAssignedPlayers = assignedPlayers
+                .OrderBy(a => a.TeamNumber)
+                .ThenBy(a => a.GroupNumber)
+                .ThenBy(a => a.CourseName)
+                .ThenBy(a => a.CourseOrder)
+                .ToList();
+
+            ViewState["AssignmentResult"] = sortedAssignedPlayers;
+            ViewState["UnassignedPlayers"] = unassignedPlayers;
+
+            gvCourseResult.DataSource = sortedAssignedPlayers;
+            gvCourseResult.DataBind();
+
+            gvUnassignedPlayers.DataSource = unassignedPlayers;
+            gvUnassignedPlayers.DataBind();
+
+            hiddenBox.Visible = unassignedPlayers.Any();
+
+            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", true);
         }
     }
 }

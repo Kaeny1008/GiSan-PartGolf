@@ -67,11 +67,13 @@
               case "right":
                 document.getElementById('leftPanel')?.classList.add('hidden');
                 document.getElementById('rightPanel')?.classList.remove('d-none');
+                stste.value = "";
                 break;
 
               case "left":
                 document.getElementById('leftPanel')?.classList.remove('hidden');
                 document.getElementById('rightPanel')?.classList.add('d-none');
+                stste.value = "";
                 break;
 
               default:
@@ -366,6 +368,11 @@
                                     Text="새로고침"
                                     OnClick="BTN_RefreshResult_Click" />
 
+                                <asp:Button ID="BTN_RetryCourseAssignment" runat="server"
+                                    CssClass="btn btn-danger btn-sm"
+                                    Text="코스 재배치"
+                                    OnClientClick="launchModal('#MainModal', '코스 재배치', '코스배치를 다시 하시겠습니까?', 1); return false;" />
+
                                 <asp:Button ID="BTN_SaveAssignment" runat="server"
                                     CssClass="btn btn-success btn-sm"
                                     Text="배정 결과 저장"
@@ -413,7 +420,8 @@
                                     </div>
                                     <asp:GridView ID="gvUnassignedPlayers" runat="server"
                                         AutoGenerateColumns="False"
-                                        CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                                        CssClass="table table-bordered table-hover table-condensed table-striped table-responsive" 
+                                        OnRowDataBound="gvUnassignedPlayers_RowDataBound"
                                         EmptyDataText="미배정된 인원이 없습니다.">
                                         <Columns>
                                             <asp:BoundField DataField="UserId" HeaderText="ID" />
@@ -421,6 +429,16 @@
                                             <asp:BoundField DataField="GenderText" HeaderText="성별" />
                                             <asp:BoundField DataField="AgeText" HeaderText="연령" />
                                             <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
+                                            <asp:TemplateField HeaderText="추천 배정홀">
+                                                <ItemTemplate>
+                                                    <asp:Label ID="lblRecommendCourse" runat="server" />
+                                                    <asp:Button ID="BTN_AssignCourse" runat="server" Text="배정" CssClass="btn btn-sm btn-success ms-2"
+                                                        CommandName="AssignCourse"
+                                                        CommandArgument='<%# Eval("UserId") %>'
+                                                        OnClick="BTN_AssignCourse_Click" />
+                                                </ItemTemplate>
+                                                <ItemStyle Width="15%" HorizontalAlign="Center" />
+                                            </asp:TemplateField>
                                         </Columns>
                                     </asp:GridView>
                                 </div>

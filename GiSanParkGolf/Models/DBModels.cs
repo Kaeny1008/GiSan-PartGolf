@@ -341,6 +341,7 @@ namespace GiSanParkGolf.Models
         public DateTime CreatedAt { get; set; }
     }
 
+    [Serializable]
     public class CourseList
     {
         public string CourseCode { get; set; }          // CO001
@@ -353,6 +354,7 @@ namespace GiSanParkGolf.Models
         public string ActiveStatus => IsActive ? "사용" : "미사용";
     }
 
+    [Serializable]
     public class HoleList
     {
         public int HoleId { get; set; }               // PK
@@ -360,6 +362,23 @@ namespace GiSanParkGolf.Models
         public string HoleName { get; set; }
         public int Distance { get; set; }
         public int Par { get; set; }
+
+        public int HoleNo
+        {
+            get
+            {
+                // HoleName이 "1홀", "10홀" 등일 때 숫자 부분만 추출
+                if (!string.IsNullOrEmpty(HoleName))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(HoleName, @"^\d+");
+                    if (match.Success && int.TryParse(match.Value, out int holeNumber))
+                    {
+                        return holeNumber;
+                    }
+                }
+                return 0; // 파싱 실패 시 0 반환
+            }
+        }
     }
 
     [Serializable]
