@@ -541,42 +541,48 @@
     </div>
 
     <!-- 수동배정 모달 추가 -->
-    <div class="modal fade" id="ManualAssignModal" tabindex="-1" aria-labelledby="ManualAssignModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ManualAssignModalLabel">수동 배정</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- 여기에 수동 배정 관련 입력 폼 또는 안내 메시지를 추가하세요 -->
-                    <p>선수에게 직접 코스를 배정할 수 있습니다.<br />배정할 코스와 홀을 선택하세요.</p>
-                    <div class="mb-2">
-                        <label class="form-label">코스 선택</label>
-                        <asp:DropDownList ID="manualCourseSelect" runat="server" CssClass="form-select">
-                            <asp:ListItem Text="코스 선택" Value="" />
-                            <asp:ListItem Text="A코스" Value="A" />
-                            <asp:ListItem Text="B코스" Value="B" />
-                            <asp:ListItem Text="C코스" Value="C" />
-                        </asp:DropDownList>
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">
+        <ContentTemplate>
+        <div class="modal fade" id="ManualAssignModal" tabindex="-1" aria-labelledby="ManualAssignModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ManualAssignModalLabel">수동 배정</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="mb-2">
-                        <label for="manualHoleInput" class="form-label">홀 번호</label>
-                        <asp:TextBox ID="manualHoleInput" runat="server" Text="number" CssClass="form-control">1</asp:TextBox>
+                    <div class="modal-body">
+                        <!-- 여기에 수동 배정 관련 입력 폼 또는 안내 메시지를 추가하세요 -->
+                        <p>선수에게 직접 코스를 배정할 수 있습니다.<br />배정할 코스와 홀을 선택하세요.</p>
+                        <div class="mb-2">
+                            <label class="form-label">코스 선택</label>
+                            <asp:DropDownList ID="manualCourseSelect" runat="server" CssClass="form-select" AutoPostBack="true">
+                                <asp:ListItem Text="코스 선택" Value="" />
+                            </asp:DropDownList>
+                        </div>
+                        <div class="mb-2">
+                            <label for="manualHoleInput" class="form-label">홀 번호</label>
+                            <asp:DropDownList ID="manualHoleInput" runat="server" CssClass="form-select">
+                                <asp:ListItem Text="홀 선택" Value="" />
+                            </asp:DropDownList>
+                        </div>
+                        <asp:HiddenField ID="manualAssignUserId" runat="server" />
                     </div>
-                    <asp:HiddenField ID="manualAssignUserId" runat="server" />
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <asp:UpdatePanel ID="upManualAssign" runat="server">
-                        <ContentTemplate>
-                            <asp:Button ID="BTN_AssignManual" runat="server" Text="배정" OnClick="BTN_AssignManual_Click" CssClass="btn btn-primary btn-sm" />
-                        </ContentTemplate>
-                    </asp:UpdatePanel>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <asp:UpdatePanel ID="upManualAssign" runat="server">
+                            <ContentTemplate>
+                                <asp:Button ID="BTN_AssignManual" runat="server" Text="배정" OnClick="BTN_AssignManual_Click" CssClass="btn btn-primary btn-sm" />
+                            </ContentTemplate>
+                        </asp:UpdatePanel>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+        </ContentTemplate>
+        <Triggers>
+            <asp:AsyncPostBackTrigger ControlID="manualCourseSelect" EventName="SelectedIndexChanged" />
+        </Triggers>
+    </asp:UpdatePanel>
 
     <script type="text/javascript">
         function openManualAssignModal(userId) {

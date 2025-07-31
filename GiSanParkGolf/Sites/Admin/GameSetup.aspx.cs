@@ -2,7 +2,9 @@
 using GiSanParkGolf.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -714,6 +716,16 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (CachedAssignmentResult == null)
                 CachedAssignmentResult = Global.dbManager.GetAssignmentResult(gameCode);
+
+            manualCourseSelect.Items.Clear();
+            manualCourseSelect.Items.Add(new ListItem("코스 선택", ""));
+            if (CachedCourseList != null)
+            {
+                foreach (var course in CachedCourseList)
+                {
+                    manualCourseSelect.Items.Add(new ListItem(course.CourseName, course.CourseCode));
+                }
+            }
         }
 
         // 추천 코스+홀 계산 개선 메서드 (캐싱 활용)
@@ -903,6 +915,30 @@ namespace GiSanParkGolf.Sites.Admin
             ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", false);
         }
 
+        protected void manualCourseSelect_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 코스명 선택값
+            string selectedCourse = manualCourseSelect.SelectedValue;
+            if (string.IsNullOrEmpty(selectedCourse) || CachedCourseList == null) return;
+
+            // 선택된 코스의 HoleCount 가져오기
+            var course = CachedCourseList.FirstOrDefault(c => c.CourseName == selectedCourse);
+            if (course == null) return;
+
+            int holeCount = course.HoleCount;
+
+            // 홀 번호 드롭다운 채우기 (manualHoleInput을 DropDownList로 변경 필요)
+            manualHoleInput.Items.Clear();
+            for (int i = 1; i <= holeCount; i++)
+            {
+                manualHoleInput.Items.Add(new ListItem(i.ToString(), i.ToString()));
+            }
+
+            // 모달을 다시 띄우는 스크립트
+            ScriptManager.RegisterStartupScript(upManualAssign, upManualAssign.GetType(), "ReopenManualAssignModal",
+                "$('#ManualAssignModal').modal('show');", true);
+        }
+
         protected void BTN_AssignManual_Click(object sender, EventArgs e)
         {
 
@@ -916,7 +952,7 @@ namespace GiSanParkGolf.Sites.Admin
 
             string userId = manualAssignUserId.Value;
             string course = manualCourseSelect.SelectedValue;
-            string holeStr = manualHoleInput.Text;
+            string holeStr = manualHoleInput.SelectedValue;
 
             // 유효성 검사: 코스명과 홀번호 입력값 체크
             if (string.IsNullOrWhiteSpace(course))
