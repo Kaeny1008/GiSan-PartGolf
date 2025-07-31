@@ -552,9 +552,7 @@ namespace GiSanParkGolf.Sites.Admin
                 return;
             }
 
-            // 모달 띄우기만 하고 저장은 아직 안 함!
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "ConfirmSave",
-                @"launchModal('#MainModal', '확인', '이전에 저장된 배정 결과가 있을 수 있습니다.\r\n덮어씌우시겠습니까?', 2);", true);
+            ShowModal("배정 결과 저장", "이전에 저장된 배정 결과가 있을 수 있습니다.\r\n덮어씌우시겠습니까?", 2, true);
         }
 
         protected void BTN_SaveAssignment_Final_Click(object sender, EventArgs e)
@@ -952,23 +950,24 @@ namespace GiSanParkGolf.Sites.Admin
             );
 
             string userId = manualAssignUserId.Value;
-            string course = manualCourseSelect.SelectedValue;
+            string course = manualCourseSelect.SelectedItem.ToString();
             string holeStr = manualHoleInput.SelectedValue;
 
             // 유효성 검사
+            // 이건 라벨로 처리해야 할 것 같음
             if (string.IsNullOrWhiteSpace(course))
             {
-                ShowModal("입력 오류", "코스를 선택하세요.", 0, false);
+                //ShowModal("입력 오류", "코스를 선택하세요.", 0, false);
                 return;
             }
             if (string.IsNullOrWhiteSpace(holeStr))
             {
-                ShowModal("입력 오류", "홀 번호를 입력하세요.", 0, false);
+                //ShowModal("입력 오류", "홀 번호를 입력하세요.", 0, false);
                 return;
             }
             if (!int.TryParse(holeStr, out int holeNo) || holeNo < 1)
             {
-                ShowModal("입력 오류", "홀 번호가 올바르지 않습니다.", 0, false);
+                //ShowModal("입력 오류", "홀 번호가 올바르지 않습니다.", 0, false);
                 return;
             }
 
@@ -979,7 +978,7 @@ namespace GiSanParkGolf.Sites.Admin
             var player = unassignedPlayers.FirstOrDefault(p => p.UserId == userId);
             if (player == null)
             {
-                ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", 0, false);
+                //ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", 0, false);
                 return;
             }
 

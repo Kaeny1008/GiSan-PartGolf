@@ -28,8 +28,10 @@
 
             const showmodal = $(modalConfig.name);
 
+            var htmlMessage = modalConfig.body.replace(/(\r\n|\n)/g, '<br/>');
+
             showmodal.find(".modal-title").text(modalConfig.title);
-            showmodal.find(".modal-body").text(modalConfig.body);
+            showmodal.find(".modal-body").html(htmlMessage);
 
             showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final, #MainContent_BTN_Cleanup").hide().off("click");
 
@@ -44,6 +46,7 @@
                 case 2:
                     showmodal.find("#BTN_No").show();
                     showmodal.find("#MainContent_BTN_SaveAssignment_Final").show();
+                    break;
                 case 3:
                     showmodal.find("#MainContent_BTN_Cleanup").show();
                 default:
@@ -539,7 +542,7 @@
                         OnClick="BTN_SaveAssignment_Final_Click" />
                     <asp:Button ID="BTN_Cleanup" runat="server" 
                         class="btn btn-secondary"
-                        Text="확인3" 
+                        Text="확인" 
                         OnClientClick="registerModalCleanup(); return false;" />
                 </div>
             </div>
@@ -600,23 +603,33 @@
             $('#ManualAssignModal').modal('show');
         }
 
+        // 페이지 스크롤 위치 저장
+        var scrollPos = 0;
+        Sys.WebForms.PageRequestManager.getInstance().add_beginRequest(function () {
+            scrollPos = $(window).scrollTop();
+        });
+        Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
+            $(window).scrollTop(scrollPos);
+        });
+
+        Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
+            $('#ManualAssignModal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+                $('body').css('overflow', 'auto');
+            });
+        });
+
         function registerModalCleanup() {
             // 모달을 즉시 닫기
-            console.log("모달닫기 실행")
             $('#MainModal').modal('hide');
             // hidden.bs.modal 이벤트 핸들러 등록
-            console.log("모달닫기 실행2")
             $('#MainModal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
                 $('.modal-backdrop').remove();
                 $('body').removeClass('modal-open');
-                // $('body').css('padding-right', '');  ← 이 줄 삭제!
+                // 여기서 포스트백 실행!
+                __doPostBack('btnRefreshGrid', '');
             });
         }
-
-        $('#ManualAssignModal').on('hidden.bs.modal', function () {
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-        });
-
     </script>
 </asp:Content>
