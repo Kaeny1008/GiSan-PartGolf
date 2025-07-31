@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
+using System.Web.Optimization;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Xml.Linq;
@@ -254,7 +255,7 @@ namespace GiSanParkGolf.Sites.Admin
             var (assignedPlayers, unassignedPlayers) = AssignTeamsToSlots(teamList, holeSlots, maxPerHole, gameCode);
             BindGridViews(assignedPlayers, unassignedPlayers);
 
-            ShowModal("배정 완료", "코스 배치가 성공적으로 완료되었습니다.", true);
+            ShowModal("배정 완료", "코스 배치가 성공적으로 완료되었습니다.", 0, true);
         }
 
         private bool DidUseSorting()
@@ -547,7 +548,7 @@ namespace GiSanParkGolf.Sites.Admin
         {
             if (gvUnassignedPlayers.Rows.Count != 0)
             {
-                ShowModal("경고", "아직 배정되지 않은 플레이어가 있습니다.", false);
+                ShowModal("경고", "아직 배정되지 않은 플레이어가 있습니다.", 0, false);
                 return;
             }
 
@@ -625,12 +626,12 @@ namespace GiSanParkGolf.Sites.Admin
             hiddenBox.Visible = false;
         }
 
-        private void ShowModal(string title, string message, bool scrollToResult = false)
+        private void ShowModal(string title, string message, int buttonNo, bool scrollToResult = false)
         {
             string safeTitle = HttpUtility.JavaScriptStringEncode(title);
             string safeMessage = HttpUtility.JavaScriptStringEncode(message);
 
-            string script = $"launchModal('#MainModal', '{safeTitle}', '{safeMessage}', 0);";
+            string script = $"launchModal('#MainModal', '{safeTitle}', '{safeMessage}', {buttonNo});";
             if (scrollToResult)
             {
                 script += "sessionStorage.setItem('lastActiveTabId', '#tab-result');";
@@ -832,7 +833,7 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (string.IsNullOrEmpty(recommendedHole) || recommendedHole == "추천없음")
             {
-                ShowModal("배정 실패", "추천된 홀이 없습니다.", false);
+                ShowModal("배정 실패", "추천된 홀이 없습니다.", 0, false);
                 return;
             }
 
@@ -842,7 +843,7 @@ namespace GiSanParkGolf.Sites.Admin
             var player = unassignedPlayers.FirstOrDefault(p => p.UserId == userId);
             if (player == null)
             {
-                ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", false);
+                ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", 0, false);
                 return;
             }
 
@@ -850,14 +851,14 @@ namespace GiSanParkGolf.Sites.Admin
             var parts = recommendedHole.Split('-');
             if (parts.Length != 2)
             {
-                ShowModal("배정 실패", "추천홀 정보가 올바르지 않습니다.", false);
+                ShowModal("배정 실패", "추천홀 정보가 올바르지 않습니다.", 0, false);
                 return;
             }
             string courseName = parts[0];
             int holeNo;
             if (!int.TryParse(parts[1], out holeNo) || holeNo < 1)
             {
-                ShowModal("배정 실패", "홀 번호가 올바르지 않습니다.", false);
+                ShowModal("배정 실패", "홀 번호가 올바르지 않습니다.", 0, false);
                 return;
             }
             string holeNumber = $"{courseName}-{holeNo}";
@@ -912,7 +913,7 @@ namespace GiSanParkGolf.Sites.Admin
 
             hiddenBox.Visible = unassignedPlayers.Any();
 
-            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", false);
+            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", 0, false);
         }
 
         protected void manualCourseSelect_SelectedIndexChanged(object sender, EventArgs e)
@@ -922,7 +923,7 @@ namespace GiSanParkGolf.Sites.Admin
             if (string.IsNullOrEmpty(selectedCourse) || CachedCourseList == null) return;
 
             // 선택된 코스의 HoleCount 가져오기
-            var course = CachedCourseList.FirstOrDefault(c => c.CourseName == selectedCourse);
+            var course = CachedCourseList.FirstOrDefault(c => c.CourseCode == selectedCourse);
             if (course == null) return;
 
             int holeCount = course.HoleCount;
@@ -941,10 +942,10 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_AssignManual_Click(object sender, EventArgs e)
         {
-
+            // 모달 닫기 (수동 배정 모달)
             ScriptManager.RegisterStartupScript(
-                upManualAssign, // UpdatePanel의 ID
-                upManualAssign.GetType(),
+                UpdatePanel1, // 최상위 UpdatePanel ID로 변경
+                UpdatePanel1.GetType(),
                 "closeManualAssignModal",
                 "$('#ManualAssignModal').modal('hide');",
                 true
@@ -954,32 +955,87 @@ namespace GiSanParkGolf.Sites.Admin
             string course = manualCourseSelect.SelectedValue;
             string holeStr = manualHoleInput.SelectedValue;
 
-            // 유효성 검사: 코스명과 홀번호 입력값 체크
+            // 유효성 검사
             if (string.IsNullOrWhiteSpace(course))
             {
-                ShowModal("입력 오류", "코스를 선택하세요.", false);
+                ShowModal("입력 오류", "코스를 선택하세요.", 0, false);
                 return;
             }
             if (string.IsNullOrWhiteSpace(holeStr))
             {
-                ShowModal("입력 오류", "홀 번호를 입력하세요.", false);
+                ShowModal("입력 오류", "홀 번호를 입력하세요.", 0, false);
                 return;
             }
-            if (!int.TryParse(holeStr, out int hole) || hole < 1)
+            if (!int.TryParse(holeStr, out int holeNo) || holeNo < 1)
             {
-                ShowModal("입력 오류", "홀 번호가 올바르지 않습니다.", false);
+                ShowModal("입력 오류", "홀 번호가 올바르지 않습니다.", 0, false);
                 return;
             }
 
-            Debug.WriteLine(userId);
-            Debug.WriteLine(course);
-            Debug.WriteLine(holeStr);
+            // 배정 정보 가져오기
+            var assignedPlayers = ViewState["AssignmentResult"] as List<AssignedPlayer> ?? new List<AssignedPlayer>();
+            var unassignedPlayers = ViewState["UnassignedPlayers"] as List<GameJoinUserList> ?? new List<GameJoinUserList>();
 
-            // 실제 배정 로직 (DB 업데이트 등)
-            // 예시: AssignPlayerToCourse(userId, course, hole);
+            var player = unassignedPlayers.FirstOrDefault(p => p.UserId == userId);
+            if (player == null)
+            {
+                ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", 0, false);
+                return;
+            }
 
-            // 결과 반영 및 UI 갱신
-            // 예: ReloadCourseAssignmentResult();
+            string holeNumber = $"{course}-{holeNo}";
+
+            int maxOrder = assignedPlayers
+                .Where(a => a.CourseName == course && a.HoleNumber == holeNumber)
+                .Select(a => a.CourseOrder)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            var currentTeamNumber = assignedPlayers
+                .Where(a => a.CourseName == course && a.HoleNumber == holeNumber)
+                .Select(a => a.TeamNumber)
+                .FirstOrDefault() ?? "";
+
+            var newAssigned = new AssignedPlayer
+            {
+                UserId = player.UserId,
+                UserName = player.UserName,
+                AgeHandicap = player.AgeHandicap,
+                GameCode = TB_GameCode.Text,
+                CourseName = course,
+                CourseOrder = maxOrder + 1,
+                GroupNumber = holeNo,
+                HoleNumber = holeNumber,
+                TeamNumber = currentTeamNumber,
+                UserNumber = player.UserNumber,
+                UserGender = player.UserGender,
+                AgeText = player.AgeText,
+                GenderText = player.GenderText
+            };
+
+            assignedPlayers.Add(newAssigned);
+            unassignedPlayers.Remove(player);
+
+            // 정렬
+            var sortedAssignedPlayers = assignedPlayers
+                .OrderBy(a => a.TeamNumber)
+                .ThenBy(a => a.GroupNumber)
+                .ThenBy(a => a.CourseName)
+                .ThenBy(a => a.CourseOrder)
+                .ToList();
+
+            ViewState["AssignmentResult"] = sortedAssignedPlayers;
+            ViewState["UnassignedPlayers"] = unassignedPlayers;
+
+            gvCourseResult.DataSource = sortedAssignedPlayers;
+            gvCourseResult.DataBind();
+
+            gvUnassignedPlayers.DataSource = unassignedPlayers;
+            gvUnassignedPlayers.DataBind();
+
+            hiddenBox.Visible = unassignedPlayers.Any();
+
+            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", 3, false);
         }
     }
 }

@@ -31,7 +31,7 @@
             showmodal.find(".modal-title").text(modalConfig.title);
             showmodal.find(".modal-body").text(modalConfig.body);
 
-            showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final").hide().off("click");
+            showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final, #MainContent_BTN_Cleanup").hide().off("click");
 
             switch (modalConfig.yesButtonType) {
                 case 0:
@@ -44,6 +44,8 @@
                 case 2:
                     showmodal.find("#BTN_No").show();
                     showmodal.find("#MainContent_BTN_SaveAssignment_Final").show();
+                case 3:
+                    showmodal.find("#MainContent_BTN_Cleanup").show();
                 default:
                     break;
             }
@@ -532,16 +534,20 @@
                     <asp:Button ID="BTN_SettingYes" runat="server" Text="예" CssClass="btn btn-primary"
                         OnClick="BTN_SettingYes_Click" />
                     <asp:Button ID="BTN_SaveAssignment_Final" runat="server"
-                                CssClass="btn btn-primary" 
-                                Text="예"
-                                OnClick="BTN_SaveAssignment_Final_Click" />
+                        CssClass="btn btn-primary" 
+                        Text="예"
+                        OnClick="BTN_SaveAssignment_Final_Click" />
+                    <asp:Button ID="BTN_Cleanup" runat="server" 
+                        class="btn btn-secondary"
+                        Text="확인3" 
+                        OnClientClick="registerModalCleanup(); return false;" />
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 수동배정 모달 추가 -->
-    <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
         <ContentTemplate>
         <div class="modal fade" id="ManualAssignModal" tabindex="-1" aria-labelledby="ManualAssignModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -555,7 +561,9 @@
                         <p>선수에게 직접 코스를 배정할 수 있습니다.<br />배정할 코스와 홀을 선택하세요.</p>
                         <div class="mb-2">
                             <label class="form-label">코스 선택</label>
-                            <asp:DropDownList ID="manualCourseSelect" runat="server" CssClass="form-select" AutoPostBack="true">
+                            <asp:DropDownList ID="manualCourseSelect" runat="server" CssClass="form-select" 
+                                OnSelectedIndexChanged="manualCourseSelect_SelectedIndexChanged"
+                                AutoPostBack="true">
                                 <asp:ListItem Text="코스 선택" Value="" />
                             </asp:DropDownList>
                         </div>
@@ -571,7 +579,11 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                         <asp:UpdatePanel ID="upManualAssign" runat="server">
                             <ContentTemplate>
-                                <asp:Button ID="BTN_AssignManual" runat="server" Text="배정" OnClick="BTN_AssignManual_Click" CssClass="btn btn-primary btn-sm" />
+                                <asp:Button ID="BTN_AssignManual" 
+                                    runat="server" 
+                                    Text="배정" 
+                                    OnClick="BTN_AssignManual_Click" 
+                                    CssClass="btn btn-primary" />
                             </ContentTemplate>
                         </asp:UpdatePanel>
                     </div>
@@ -579,9 +591,6 @@
             </div>
         </div>
         </ContentTemplate>
-        <Triggers>
-            <asp:AsyncPostBackTrigger ControlID="manualCourseSelect" EventName="SelectedIndexChanged" />
-        </Triggers>
     </asp:UpdatePanel>
 
     <script type="text/javascript">
@@ -590,5 +599,24 @@
             hiddenField.value = userId;
             $('#ManualAssignModal').modal('show');
         }
+
+        function registerModalCleanup() {
+            // 모달을 즉시 닫기
+            console.log("모달닫기 실행")
+            $('#MainModal').modal('hide');
+            // hidden.bs.modal 이벤트 핸들러 등록
+            console.log("모달닫기 실행2")
+            $('#MainModal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+                // $('body').css('padding-right', '');  ← 이 줄 삭제!
+            });
+        }
+
+        $('#ManualAssignModal').on('hidden.bs.modal', function () {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+        });
+
     </script>
 </asp:Content>
