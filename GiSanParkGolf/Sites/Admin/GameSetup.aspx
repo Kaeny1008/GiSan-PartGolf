@@ -135,6 +135,42 @@
         #rightPanel.active {
           display: block;
         }
+
+        #MainContent_gvCourseResult {
+          border-collapse: collapse;
+          width: 100%;
+          background: #fff;
+          font-family: "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+          border: 1px solid #e0e0e0;
+        }
+
+        #MainContent_gvCourseResult th,
+        #MainContent_gvCourseResult td {
+          border: 1px solid #e0e0e0;
+          padding: 10px 12px;
+          text-align: center;
+          font-size: 15px;
+        }
+
+        #MainContent_gvCourseResult tr:first-child th {
+          background: #f7f7f7;
+          color: #222;
+          font-weight: 600;
+        }
+
+        #MainContent_gvCourseResult tr.team-bg-even td {
+          background-color: #e3f0fd; /* 밝은 파스텔 블루 */
+        }
+
+        #MainContent_gvCourseResult tr.team-bg-odd td {
+          background-color: #e6fff7; /* 밝은 민트 */
+        }
+
+        /* (선택) hover 효과: 예시에는 없으니 빼도 됩니다 */
+        #MainContent_gvCourseResult tr.team-bg-even:hover td,
+        #MainContent_gvCourseResult tr.team-bg-odd:hover td {
+          background-color: #f1f1f1;
+        }
     </style>
 
     <style type="text/css" media="print">
@@ -439,7 +475,7 @@
                                 <asp:GridView ID="gvCourseResult" runat="server"
                                     AutoGenerateColumns="False"
                                     OnRowDataBound="gvCourseResult_RowDataBound"
-                                    CssClass="table table-bordered table-hover table-condensed table-striped table-responsive"
+                                    CssClass=""
                                     EmptyDataText="배치된 코스가 없습니다. 먼저 코스배치를 실행하세요.">
                                     <Columns>
                                         <asp:BoundField DataField="RowNumber" HeaderText="No" />

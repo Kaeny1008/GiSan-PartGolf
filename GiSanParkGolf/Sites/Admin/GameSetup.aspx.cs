@@ -125,19 +125,21 @@ namespace GiSanParkGolf.Sites.Admin
 
                 if (loadResult)
                 {
+                    gvPlayerList.DataSource = Global.dbManager.GetGameUserList(gameCode);
+                    gvPlayerList.DataBind();
+
                     // 변경 코드 (List<GameJoinUserList> → List<AssignedPlayer>로 변환)
-                    var joinUserList = Global.dbManager.GetGameUserList(gameCode);
+                    var joinUserList = Global.dbManager.GetAssignmentResult(gameCode);
                     var assignedPlayers = joinUserList.Select(p => new AssignedPlayer
                     {
                         UserId = p.UserId,
                         UserName = p.UserName,
                         AgeHandicap = p.AgeHandicap,
                         GameCode = p.GameCode,
-                        // 아래 필드는 상황에 맞게 할당 필요 (예시)
-                        CourseName = "", // 또는 적절한 값
-                        CourseOrder = 0,
-                        GroupNumber = 0,
-                        HoleNumber = "",
+                        CourseName = p.CourseName, // 또는 적절한 값
+                        CourseOrder = p.CourseOrder,
+                        GroupNumber = p.GroupNumber,
+                        HoleNumber = p.HoleNumber,
                         TeamNumber = p.TeamNumber,
                         UserNumber = p.UserNumber,
                         UserGender = p.UserGender,
@@ -146,10 +148,8 @@ namespace GiSanParkGolf.Sites.Admin
                     }).ToList();
 
                     ViewState["AssignmentResult"] = assignedPlayers;
-                    gvPlayerList.DataSource = assignedPlayers;
-                    gvPlayerList.DataBind();
 
-                    gvCourseResult.DataSource = Global.dbManager.GetAssignmentResult(gameCode);
+                    gvCourseResult.DataSource = assignedPlayers;
                     gvCourseResult.DataBind();
 
                     GameList.DataSource = ViewState["GameList"];
@@ -230,6 +230,8 @@ namespace GiSanParkGolf.Sites.Admin
         }
 
         private List<AssignedPlayer> cachedAssignment;
+        private int _lastTeamNumber = -1;
+        private bool _isEvenTeam = false;
 
         protected void gvCourseResult_RowDataBound(object sender, GridViewRowEventArgs e)
         {
@@ -258,6 +260,26 @@ namespace GiSanParkGolf.Sites.Admin
                     e.Row.Font.Bold = true;
                     e.Row.Cells[8].Text += " (단독)"; // 팀번호 옆 표시
                 }
+
+                // 현재 행의 팀번호 가져오기
+                int teamNumber = Convert.ToInt32(DataBinder.Eval(e.Row.DataItem, "TeamNumber"));
+
+                // ViewState에서 최종 팀번호와 색상상태 가져오기 (최초 1회는 -1, false)
+                int lastTeamNumber = ViewState["LastTeamNumber"] != null ? (int)ViewState["LastTeamNumber"] : -1;
+                bool isEvenTeam = ViewState["IsEvenTeam"] != null ? (bool)ViewState["IsEvenTeam"] : false;
+
+                // 팀번호가 바뀌면 색상 스위칭
+                if (teamNumber != lastTeamNumber)
+                {
+                    isEvenTeam = !isEvenTeam;
+                }
+
+                // CSS 클래스 적용
+                e.Row.CssClass += (isEvenTeam ? " team-bg-even" : " team-bg-odd");
+
+                // 현재 팀번호/상태 저장
+                ViewState["LastTeamNumber"] = teamNumber;
+                ViewState["IsEvenTeam"] = isEvenTeam;
             }
         }
 

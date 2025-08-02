@@ -97,14 +97,14 @@
                             <RowStyle CssClass="text-center hover-row align-middle" />
                             <Columns>
                                 <asp:TemplateField HeaderText="No.">
-                                    <ItemStyle Width="50px" />
+                                    <ItemStyle CssClass="ellipsis-no" />
                                     <ItemTemplate>
                                         <%#Eval("RowNumber")%>
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
                                 <asp:TemplateField HeaderText="대회명">
-                                    <ItemStyle CssClass="text-truncate" Width="220px" />
+                                    <ItemStyle CssClass="text-truncate" />
                                     <ItemTemplate>
                                         <%# Eval("GameStatus").ToString() == "모집중"
                                             ? "<a class='HyperLink link-hover d-inline-block text-truncate' style='max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;' href='/Sites/Player/JoinGame.aspx?GameCode=" + Eval("GameCode") + "'>" +
@@ -118,14 +118,14 @@
                                 </asp:TemplateField>
 
                                 <asp:TemplateField HeaderText="경기장">
-                                    <ItemStyle Width="150px" />
+                                    <ItemStyle CssClass="ellipsis-stadiumname" />
                                     <ItemTemplate>
                                         <%#Eval("StadiumName")%>
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
                                 <asp:TemplateField HeaderText="상태">
-                                    <ItemStyle Width="100px" />
+                                    <ItemStyle CssClass="ellipsis-gamestatus" />
                                     <ItemTemplate>
                                         <%# Eval("GameStatus").ToString() == "모집중"
                                             ? "<span style='color:blue;'><i class='bi bi-check-circle-fill me-1'></i>모집중</span>"
