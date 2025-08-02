@@ -125,7 +125,28 @@ namespace GiSanParkGolf.Sites.Admin
 
                 if (loadResult)
                 {
-                    gvPlayerList.DataSource = Global.dbManager.GetGameUserList(gameCode);
+                    // 변경 코드 (List<GameJoinUserList> → List<AssignedPlayer>로 변환)
+                    var joinUserList = Global.dbManager.GetGameUserList(gameCode);
+                    var assignedPlayers = joinUserList.Select(p => new AssignedPlayer
+                    {
+                        UserId = p.UserId,
+                        UserName = p.UserName,
+                        AgeHandicap = p.AgeHandicap,
+                        GameCode = p.GameCode,
+                        // 아래 필드는 상황에 맞게 할당 필요 (예시)
+                        CourseName = "", // 또는 적절한 값
+                        CourseOrder = 0,
+                        GroupNumber = 0,
+                        HoleNumber = "",
+                        TeamNumber = p.TeamNumber,
+                        UserNumber = p.UserNumber,
+                        UserGender = p.UserGender,
+                        AgeText = p.AgeText,
+                        GenderText = p.GenderText
+                    }).ToList();
+
+                    ViewState["AssignmentResult"] = assignedPlayers;
+                    gvPlayerList.DataSource = assignedPlayers;
                     gvPlayerList.DataBind();
 
                     gvCourseResult.DataSource = Global.dbManager.GetAssignmentResult(gameCode);
@@ -534,6 +555,16 @@ namespace GiSanParkGolf.Sites.Admin
 
             //필요하면 ViewState에도 다시 저장
             ViewState["AssignmentResult"] = assignmentData;
+
+            // gvUnassignedPlayers에 데이터 바인딩(빈값)
+            var unAssignmentData = new List<GameJoinUserList>();
+
+            gvUnassignedPlayers.DataSource = unAssignmentData;
+            gvUnassignedPlayers.DataBind();
+
+            ViewState["UnassignedPlayers"]= unAssignmentData;
+
+            hiddenBox.Visible = unAssignmentData.Any();
 
             ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalComplete",
                 @"launchModal('#MainModal', '새로고침 완료', '저장된 배정 결과를 다시 불러왔습니다.', 0);
@@ -1035,6 +1066,54 @@ namespace GiSanParkGolf.Sites.Admin
             hiddenBox.Visible = unassignedPlayers.Any();
 
             ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", 3, false);
+        }
+
+        protected void BTN_CancelAssignment_Click(object sender, EventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn == null) return;
+            string userId = btn.CommandArgument;
+
+            var assignedPlayers = ViewState["AssignmentResult"] as List<AssignedPlayer> ?? new List<AssignedPlayer>();
+            var unassignedPlayers = ViewState["UnassignedPlayers"] as List<GameJoinUserList> ?? new List<GameJoinUserList>();
+
+            // 배정된 플레이어 찾기
+            var player = assignedPlayers.FirstOrDefault(p => p.UserId == userId);
+            if (player == null) return;
+
+            // GameJoinUserList로 변환 (UserId, UserName 등만 복원, 필요한 필드만)
+            var user = new GameJoinUserList
+            {
+                UserId = player.UserId,
+                UserName = player.UserName,
+                AgeHandicap = player.AgeHandicap,
+                UserNumber = player.UserNumber,
+                UserGender = player.UserGender
+            };
+
+            assignedPlayers.Remove(player);
+            unassignedPlayers.Add(user);
+
+            // 정렬
+            var sortedAssignedPlayers = assignedPlayers
+                .OrderBy(a => a.TeamNumber)
+                .ThenBy(a => a.GroupNumber)
+                .ThenBy(a => a.CourseName)
+                .ThenBy(a => a.CourseOrder)
+                .ToList();
+
+            ViewState["AssignmentResult"] = sortedAssignedPlayers;
+            ViewState["UnassignedPlayers"] = unassignedPlayers;
+
+            gvCourseResult.DataSource = sortedAssignedPlayers;
+            gvCourseResult.DataBind();
+
+            gvUnassignedPlayers.DataSource = unassignedPlayers;
+            gvUnassignedPlayers.DataBind();
+
+            hiddenBox.Visible = unassignedPlayers.Any();
+
+            ShowModal("배정 취소", $"{player.UserName}님의 배정을 취소했습니다.", 0, false);
         }
     }
 }

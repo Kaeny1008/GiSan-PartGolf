@@ -399,6 +399,8 @@ namespace GiSanParkGolf.Models
         public string AgeText { get; set; }
         public string GenderText { get; set; }
 
+        public string FormattedBirthDate => UserNumber.ToString().PadLeft(6, '0');
+
         public string AgeTextPrint
         {
             get
@@ -425,6 +427,25 @@ namespace GiSanParkGolf.Models
                 }
             }
         }
+
+        public string AwardType { get; set; }       // 수상 종류 (예: 최우수상)
+        public string AwardLevel { get; set; }      // 수상 등급 (Gold, Silver 등)
+        public DateTime? AwardDate { get; set; }    // 수상 날짜
+        public string AwardNote { get; set; }       // 심사평 혹은 비고
+
+        public string AwardsSummary
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(AwardType) && !string.IsNullOrEmpty(AwardLevel))
+                    return $"{AwardType} ({AwardLevel})";
+                else if (!string.IsNullOrEmpty(AwardType))
+                    return AwardType;
+                else
+                    return "없음";
+            }
+        }
+
         public string Summary =>
             $"{UserName} (핸디캡 {AgeHandicap}) → {CourseName} {CourseOrder}번";
     }

@@ -455,6 +455,11 @@
                                         <asp:BoundField DataField="HoleNumber" HeaderText="배정홀" />
                                         <asp:BoundField DataField="CourseOrder" HeaderText="코스순번" />
                                         <asp:BoundField DataField="TeamNumber" HeaderText="팀번호" />
+                                        <asp:TemplateField HeaderText="취소">
+                                            <ItemTemplate>
+                                                <asp:Button ID="BTN_CancelAssignment" runat="server" Text="배정취소" CommandArgument='<%# Eval("UserId") %>' OnClick="BTN_CancelAssignment_Click" CssClass="btn btn-danger btn-sm" />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
                                     </Columns>
                                 </asp:GridView>
 
