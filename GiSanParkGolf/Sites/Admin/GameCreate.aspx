@@ -125,7 +125,7 @@
                     <div class="form-control d-flex flex-row justify-content-around">
                         <asp:RadioButtonList ID="rblPlayMode" runat="server" CssClass="d-flex gap-3" RepeatDirection="Horizontal" RepeatLayout="Flow">
                             <asp:ListItem Text="스트로크" Value="Stroke" Selected="True" />
-                            <asp:ListItem Text="매치" Value="Match" />
+                            <asp:ListItem Text="매치" Value="Match" Enabled="False" />
                         </asp:RadioButtonList>
                     </div>
                 </div>

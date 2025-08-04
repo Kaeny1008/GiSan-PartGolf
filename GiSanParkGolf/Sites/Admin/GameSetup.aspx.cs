@@ -53,30 +53,18 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void Search_SearchRequested(object sender, EventArgs e)
         {
-            SearchField = search.SelectedField;
-            SearchKeyword = search.Keyword;
-            ViewState["GameList"] = null;
-
-            GameList.SelectedIndex = -1;
-            GameList.PageIndex = 0;
-            LoadGameList();
+            ResetGameList(search.SelectedField, search.Keyword);
         }
 
         protected void Search_ResetRequested(object sender, EventArgs e)
         {
-            ViewState.Remove("SearchField");
-            ViewState.Remove("SearchKeyword");
-            ViewState["GameList"] = null;
-            
-            GameList.SelectedIndex = -1;
-            GameList.PageIndex = 0;
-            LoadGameList();
+            ResetGameList();
         }
 
         protected void Pager_PageChanged(object sender, int newPage)
         {
-            GameList.PageIndex = newPage;
-            LoadGameList();
+            // 현재 검색 조건을 유지한 채로 페이지 인덱스만 변경
+            ResetGameList(SearchField, SearchKeyword, newPage);
         }
 
         private void LoadGameList()
@@ -84,17 +72,10 @@ namespace GiSanParkGolf.Sites.Admin
             string field = SearchField;
             string keyword = SearchKeyword;
 
-            List<GameListModel> result;
-
-            if (ViewState["GameList"] == null)
-            {
-                result = Global.dbManager.GetGames(field, keyword);
-                ViewState["GameList"] = result;
-            }
-            else
-            {
-                result = (List<GameListModel>)ViewState["GameList"];
-            }
+            List<GameListModel> result = GetOrCacheViewStateList<GameListModel>(
+                "GameList",
+                () => Global.dbManager.GetGames(field, keyword)
+            );
 
             GameList.DataSource = result;
             GameList.DataBind();
@@ -106,11 +87,7 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void GameList_RowDataBound(object sender, GridViewRowEventArgs e)
         {
-            if (e.Row.RowType == DataControlRowType.DataRow)
-            {
-                int no = (GameList.PageIndex * GameList.PageSize) + e.Row.RowIndex + 1;
-                e.Row.Cells[0].Text = no.ToString();
-            }
+            Helper.SetRowNumber(GameList, e);
         }
 
         protected void GameList_RowCommand(object sender, GridViewCommandEventArgs e)
@@ -215,11 +192,9 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void gvPlayerList_RowDataBound(object sender, GridViewRowEventArgs e)
         {
+            Helper.SetRowNumber(gvPlayerList, e);
             if (e.Row.RowType == DataControlRowType.DataRow)
             {
-                int no = (gvPlayerList.PageIndex * gvPlayerList.PageSize) + e.Row.RowIndex + 1;
-                e.Row.Cells[0].Text = no.ToString();
-
                 int userNumber = Convert.ToInt32(DataBinder.Eval(e.Row.DataItem, "UserNumber"));
                 int userGender = Convert.ToInt32(DataBinder.Eval(e.Row.DataItem, "UserGender"));
 
@@ -288,14 +263,18 @@ namespace GiSanParkGolf.Sites.Admin
             string gameCode = TB_GameCode.Text.Trim();
             var gameInfo = Global.dbManager.GetGameInformation(gameCode);
             int maxPerHole = gameInfo.HoleMaximum;
-
             var players = Global.dbManager.GetGameUserList(gameCode);
             if (players == null || players.Count == 0) return;
 
+            // 참가자 리스트를 정렬(정렬 기준은 GetSortedPlayers 함수 내부에 있음)
             var sortedPlayers = GetSortedPlayers(players);
+            // 정렬된 참가자 리스트로 팀 리스트를 생성
             var teamList = BuildTeams(sortedPlayers, maxPerHole);
+            // 경기장 코드로 홀 슬롯(배치 가능한 각 홀) 리스트를 생성
             var holeSlots = GenerateHoleSlots(gameInfo.StadiumCode);
+            // 팀을 홀 슬롯에 배정, 배정된 플레이어/미배정 플레이어로 분리
             var (assignedPlayers, unassignedPlayers) = AssignTeamsToSlots(teamList, holeSlots, maxPerHole, gameCode);
+
             BindGridViews(assignedPlayers, unassignedPlayers);
 
             ShowModal("배정 완료", "코스 배치가 성공적으로 완료되었습니다.", 0, true);
@@ -305,11 +284,6 @@ namespace GiSanParkGolf.Sites.Admin
         {
             return DDL_HandicapUse.SelectedValue == "True"
                 || DDL_AgeGroupUse.SelectedValue == "True";
-
-            // 성별정렬은 셔플과 상관없어보여 스킵
-            //return DDL_HandicapUse.SelectedValue == "True"
-            //    || DDL_GenderUse.SelectedValue == "True"
-            //    || DDL_AgeGroupUse.SelectedValue == "True";
         }
 
         private IEnumerable<GameJoinUserList> GetSortedPlayers(IEnumerable<GameJoinUserList> players)
@@ -325,10 +299,6 @@ namespace GiSanParkGolf.Sites.Admin
 
             if (useHandicap)
                 query = query.OrderByDescending(p => p.AgeHandicap);
-
-            //성별정렬은 어차피 다음메서드에서 셔플 뒤, 남자 여자 구분하니까
-            //if (useGender)
-            //    query = query.OrderBy(p => p.UserGender);
 
             return query;
         }
@@ -595,7 +565,6 @@ namespace GiSanParkGolf.Sites.Admin
                       if (tabTrigger) new bootstrap.Tab(tabTrigger).show();
                   }, 600);", true);
         }
-
 
         protected void BTN_SaveAssignment_Click(object sender, EventArgs e)
         {
@@ -1136,6 +1105,37 @@ namespace GiSanParkGolf.Sites.Admin
             hiddenBox.Visible = unassignedPlayers.Any();
 
             ShowModal("배정 취소", $"{player.UserName}님의 배정을 취소했습니다.", 0, false);
+        }
+
+        private void ResetGameList(string searchField = null, string searchKeyword = null, int? pageIndex = null)
+        {
+            // 검색 조건 세팅/초기화
+            SearchField = searchField;
+            SearchKeyword = searchKeyword;
+
+            // ViewState 캐시 초기화
+            ViewState["GameList"] = null;
+
+            // GridView 인덱스 리셋 또는 지정
+            GameList.SelectedIndex = -1;
+            GameList.PageIndex = pageIndex ?? 0;
+
+            // 데이터 로드
+            LoadGameList();
+        }
+
+        private List<T> GetOrCacheViewStateList<T>(string key, Func<List<T>> loadFunc)
+        {
+            if (ViewState[key] == null)
+            {
+                var data = loadFunc();
+                ViewState[key] = data;
+                return data;
+            }
+            else
+            {
+                return (List<T>)ViewState[key];
+            }
         }
     }
 }

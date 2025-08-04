@@ -4,21 +4,6 @@
 <%@ Register Src="~/Controls/NewPagingControl.ascx" TagPrefix="uc" TagName="NewPagingControl" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <script language="javascript">
-        var gamecode;
-
-        function ShowModal(gamecode2) {
-            gamecode = gamecode2;
-            $("#SaveModal").modal("show");
-        }
-        function GoGameCancel() {
-            var gp = "MyGame.aspx?GameCancel=true&GameCode=" + gamecode;
-            console.log(gp);
-            location.href = gp;
-
-            return false;
-        }
-    </script>
     <style>
         .input-group{
             text-align: center;
@@ -35,8 +20,6 @@
             text-align: left;
         }
     </style>
-
-
 
     <div id="MainContent" runat="server">
         <!-- 상단 카드: 페이지 설명 영역 -->
@@ -175,7 +158,6 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
                     <asp:Button ID="Button2" 
                         runat="server" 
-                        OnClientClick="return GoGameCancel();"
                         class="btn btn-primary" 
                         Text="예" />
                 </div>

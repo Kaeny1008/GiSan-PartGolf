@@ -151,36 +151,7 @@ namespace GiSanParkGolf.Sites.Player
 
         protected void GameList_RowDataBound(object sender, GridViewRowEventArgs e)
         {
-            if (e.Row.RowType == DataControlRowType.DataRow)
-            {
-                int no = (GameList.PageIndex * GameList.PageSize) + e.Row.RowIndex + 1;
-                e.Row.Cells[0].Text = no.ToString();
-
-                var status = DataBinder.Eval(e.Row.DataItem, "GameStatus")?.ToString();
-                var cell = e.Row.Cells[e.Row.Cells.Count - 2]; // 상태 컬럼
-
-                if (status == "준비중")
-                {
-                    cell.Text = "<span style='color:blue;'>준비중</span>";
-                }
-                else
-                {
-                    cell.Text = $"<span>{status}</span>";
-                }
-
-                // 취소/완료 버튼 컬럼
-                var btnCell = e.Row.Cells[e.Row.Cells.Count - 1];
-                var gameCode = DataBinder.Eval(e.Row.DataItem, "GameCode")?.ToString();
-
-                if (status == "준비중")
-                {
-                    btnCell.Text = $"<button type='button' class='btn btn-danger' style='--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;' onclick='ShowModal(\"{gameCode}\")'>취소</button>";
-                }
-                else
-                {
-                    btnCell.Text = "<span>완료</span>";
-                }
-            }
+            Helper.SetRowNumber(GameList, e);
         }
     }
 }

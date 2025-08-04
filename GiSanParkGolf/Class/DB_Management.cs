@@ -739,7 +739,7 @@ namespace GiSanParkGolf.Class
                     DB_Connection.Open();
 
                 DB_Connection.Query(
-                    "sp_Player_GameCancel",
+                    "sp_Set_Player_GameCancel",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 ).SingleOrDefault();
