@@ -31,43 +31,8 @@ namespace GiSanParkGolf.Sites.Player
         {
             if (!Page.IsPostBack)
             {
-                if (!string.IsNullOrEmpty(Request.QueryString["GameCode"]))
-                {
-                    MainContent.Visible = false;
-                    GameContent.Visible = true;
-                    gamecode = Request.QueryString["GameCode"];
-                    LoadGame();
-                }
-                else
-                {
-                    MainContent.Visible = true;
-                    GameContent.Visible = false;
-                    LoadGameList();
-                }
+                LoadGameList();
             }
-        }
-
-        protected void LoadGame()
-        {
-            var gameinfo = (new DB_Management()).GetGameInformation(gamecode);
-
-            TB_GameName.Text = gameinfo.GameName;
-            TB_GameDate.Text = ConvertDate(gameinfo.GameDate);
-            TB_StadiumName.Text = gameinfo.StadiumName;
-            TB_GameHost.Text = gameinfo.GameHost;
-            TB_StartDate.Text = ConvertDate(gameinfo.StartRecruiting);
-            TB_EndDate.Text = ConvertDate(gameinfo.EndRecruiting);
-            TB_HoleMaximum.Text = gameinfo.HoleMaximum.ToString();
-            TB_Note.Text = gameinfo.GameNote;
-            TB_User.Text = gameinfo.ParticipantNumber.ToString();
-        }
-
-        protected string ConvertDate(DateTime datetime)
-        {
-            DateTime now = datetime;
-            string formattedDate = now.ToString("yyyy-MM-dd");
-
-            return formattedDate;
         }
 
         protected void Search_SearchRequested(object sender, EventArgs e)

@@ -276,7 +276,7 @@ namespace GiSanParkGolf.Class
         public Select_GameList GetGameInformation(string gameCode)
         {
             var query = "sp_Get_Game_Information";
-            var parameters = new DynamicParameters(new { GameCode = gameCode });
+            var parameters = new DynamicParameters(new { GameCode = gameCode});
 
             try
             {
@@ -298,41 +298,30 @@ namespace GiSanParkGolf.Class
             }
         }
 
-        //public UserViewModel GetUserByUserID(string userID)
-        //{
+        public Select_GameList GetMyGameInformation(string gameCode, string userId)
+        {
+            var query = "sp_Get_MyGame_Information";
+            var parameters = new DynamicParameters(new { GameCode = gameCode, UserId = userId });
 
-        //    string strSQL = "SELECT UserId, UserPassword, UserName, UserWClass, UserClass";
-        //    strSQL += " FROM SYS_Users";
-        //    strSQL += " WHERE UserId = @UserID";
-        //    strSQL += ";";
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
 
-        //    SqlCommand sqlCMD = new SqlCommand(strSQL, DB_Connection);
-        //    sqlCMD.CommandType = CommandType.Text;
-
-        //    sqlCMD.Parameters.AddWithValue("@UserID", userID);
-
-        //    DB_Connection.Open();
-
-        //    SqlDataReader sqlDR = sqlCMD.ExecuteReader();
-        //    while (sqlDR.Read())
-        //    {
-        //        Helper.CurrentUser?.UserId = sqlDR.GetString(0);
-        //        Helper.CurrentUser?.UserPassword = sqlDR.GetString(1);
-        //        Helper.CurrentUser?.UserName = sqlDR.GetString(2);
-        //        Global.uvm.UserWClass = sqlDR.GetString(3);
-        //        Global.uvm.UserClass = sqlDR.GetInt32(4);
-        //    }
-        //    DB_Connection.Close();
-
-        //    SetCookie(Helper.CurrentUser?.UserId,
-        //        Helper.CurrentUser?.UserPassword,
-        //        Helper.CurrentUser?.UserName,
-        //        Global.uvm.UserWClass,
-        //        Global.uvm.UserClass
-        //        , 2);
-
-        //    return Global.uvm;
-        //}
+                return DB_Connection.Query<Select_GameList>(
+                    query, parameters, commandType: CommandType.StoredProcedure
+                ).SingleOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetGameInformation] 오류: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
 
         public UserViewModel GetUserByUserID(string userID)
         {
@@ -639,7 +628,8 @@ namespace GiSanParkGolf.Class
             string query = @"
                 SELECT JoinStatus
                 FROM Game_JoinUser
-                WHERE UserId = @Id AND GameCode = @GameCode
+                WHERE UserId = @Id 
+                AND GameCode = @GameCode
             ";
 
             var parameters = new
@@ -723,7 +713,41 @@ namespace GiSanParkGolf.Class
             }
         }
 
-        public string MyGameCancel(string gameCode, string userID)
+        public string MyGameCancel(string gameCode, string userID, string cancelReason)
+        {
+            string result = "Success";
+
+            var parameters = new DynamicParameters(new
+            {
+                UserId = userID,
+                GameCode = gameCode,
+                CancelReason = cancelReason
+            });
+
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                DB_Connection.Query(
+                    "sp_Set_Player_GameCancel",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                ).SingleOrDefault();
+            }
+            catch (Exception ex)
+            {
+                result = ex.Message;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+
+            return result;
+        }
+
+        public string MyGameRejoin(string gameCode, string userID)
         {
             string result = "Success";
 
@@ -739,7 +763,7 @@ namespace GiSanParkGolf.Class
                     DB_Connection.Open();
 
                 DB_Connection.Query(
-                    "sp_Set_Player_GameCancel",
+                    "sp_Set_Player_GameRejoin",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 ).SingleOrDefault();
@@ -1474,7 +1498,8 @@ namespace GiSanParkGolf.Class
                        U.UserGender,
                        A.CourseName, A.HoleNumber, A.TeamNumber,
                        A.GroupNumber, A.CourseOrder, A.AgeHandicap,
-                       A.CourseOrder
+                       A.CourseOrder,
+                       A.AssignmentStatus
                 FROM Game_UserAssignment A
                 INNER JOIN SYS_Users U ON A.UserId = U.UserId
                 WHERE A.GameCode = @GameCode
@@ -1562,5 +1587,32 @@ namespace GiSanParkGolf.Class
             }
         }
 
+        public bool ApproveCancelAssignment(string gameCode, string userId)
+        {
+            try
+            {
+                if (DB_Connection.State != ConnectionState.Open)
+                    DB_Connection.Open();
+
+                var param = new DynamicParameters();
+                param.Add("@GameCode", gameCode);
+                param.Add("@UserId", userId);
+                param.Add("@Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+                DB_Connection.Execute("sp_Set_ApproveCancelAssignment", param, commandType: CommandType.StoredProcedure);
+
+                int result = param.Get<int>("@Result");
+                return result == 1;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ApproveCancelAssignment] 프로시저 호출 오류: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                DB_Connection.Close();
+            }
+        }
     }
 }

@@ -25,38 +25,43 @@
         function pageLoad() {
             if (!launch) return;
             const modal = $(showModalName);
+
+            const bodyWithBr = showBody.replace(/\r\n|\n/g, "<br>");
+
             modal.find('.modal-title').text(showTitle);
-            modal.find('.modal-body').text(showBody);
+            modal.find('.modal-body').html(bodyWithBr);
 
             const $buttons = $('#SaveModalButtons');
             $buttons.html(''); // 초기화
 
             if (onlyYes) {
-                // ✅ 성공 메시지일 경우 확인 누르면 이동
+                // 성공 메시지일 경우 확인 누르면 이동
                 if (showTitle === "참가신청 성공") {
                     $buttons.append(`
-                    <button type="button" class="btn btn-primary" onclick="location.href='/Sites/Player/JoinGame.aspx';">
-                        확인
-                    </button>
-                    `);
+                        <button type="button" class="btn btn-primary" onclick="location.href='/Sites/Player/JoinGame.aspx';">
+                            확인
+                        </button>`
+                    );
                 } else {
                     $buttons.append(`
-                    <button type="button" class="btn btn-primary" onclick="history.back();">
-                        확인
-                    </button>
-                    `);
+                        <button type="button" class="btn btn-primary" onclick="history.back();">
+                            확인
+                        </button>`
+                    );
                 }
             } else {
                 $buttons.append(`<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>`);
                 switch (showYesButton) {
                     case 0:
-                        $buttons.append(`<button type="button" class="btn btn-primary" onclick="SubmitJoin();">예</button>`); break;
+                        $buttons.append(`<button type="button" class="btn btn-primary" onclick="SubmitJoin();">예</button>`);
+                        break;
                 }
             }
 
             modal.modal("show");
             launch = false;
         }
+
         function SubmitJoin() {
             document.getElementById('<%= BTN_JoinGame.ClientID %>').click();
         }

@@ -107,27 +107,55 @@ namespace GiSanParkGolf.Sites.Admin
 
                     // 변경 코드 (List<GameJoinUserList> → List<AssignedPlayer>로 변환)
                     var joinUserList = Global.dbManager.GetAssignmentResult(gameCode);
-                    var assignedPlayers = joinUserList.Select(p => new AssignedPlayer
-                    {
-                        UserId = p.UserId,
-                        UserName = p.UserName,
-                        AgeHandicap = p.AgeHandicap,
-                        GameCode = p.GameCode,
-                        CourseName = p.CourseName, // 또는 적절한 값
-                        CourseOrder = p.CourseOrder,
-                        GroupNumber = p.GroupNumber,
-                        HoleNumber = p.HoleNumber,
-                        TeamNumber = p.TeamNumber,
-                        UserNumber = p.UserNumber,
-                        UserGender = p.UserGender,
-                        AgeText = p.AgeText,
-                        GenderText = p.GenderText
-                    }).ToList();
+
+                    // AssignmentStatus가 Cancelled가 아닌 참가자만
+                    var assignedPlayers = joinUserList
+                        .Where(p => !string.Equals(p.AssignmentStatus, "Cancelled", StringComparison.OrdinalIgnoreCase))
+                        .Select(p => new AssignedPlayer
+                        {
+                            UserId = p.UserId,
+                            UserName = p.UserName,
+                            AgeHandicap = p.AgeHandicap,
+                            GameCode = p.GameCode,
+                            CourseName = p.CourseName,
+                            CourseOrder = p.CourseOrder,
+                            GroupNumber = p.GroupNumber,
+                            HoleNumber = p.HoleNumber,
+                            TeamNumber = p.TeamNumber,
+                            UserNumber = p.UserNumber,
+                            UserGender = p.UserGender,
+                            AssignmentStatus = p.AssignmentStatus
+                        })
+                        .ToList();
+
+                    // AssignmentStatus가 Cancelled인 참가자만
+                    var cancelPlayers = joinUserList
+                        .Where(p => string.Equals(p.AssignmentStatus, "Cancelled", StringComparison.OrdinalIgnoreCase))
+                        .Select(p => new AssignedPlayer
+                        {
+                            UserId = p.UserId,
+                            UserName = p.UserName,
+                            AgeHandicap = p.AgeHandicap,
+                            GameCode = p.GameCode,
+                            CourseName = p.CourseName,
+                            CourseOrder = p.CourseOrder,
+                            GroupNumber = p.GroupNumber,
+                            HoleNumber = p.HoleNumber,
+                            TeamNumber = p.TeamNumber,
+                            UserNumber = p.UserNumber,
+                            UserGender = p.UserGender,
+                            AssignmentStatus = p.AssignmentStatus
+                        })
+                        .ToList();
 
                     ViewState["AssignmentResult"] = assignedPlayers;
+                    ViewState["CancelPlayers"] = cancelPlayers;
 
                     gvCourseResult.DataSource = assignedPlayers;
                     gvCourseResult.DataBind();
+
+                    gvCancelPlayers.DataSource = cancelPlayers;
+                    gvCancelPlayers.DataBind();
 
                     GameList.DataSource = ViewState["GameList"];
                     GameList.DataBind();
@@ -415,8 +443,6 @@ namespace GiSanParkGolf.Sites.Admin
                                 TeamNumber = $"{teamNumber:D2}",
                                 UserNumber = player.UserNumber,
                                 UserGender = player.UserGender,
-                                AgeText = player.AgeText,
-                                GenderText = player.GenderText
                             });
                         }
 
@@ -907,8 +933,6 @@ namespace GiSanParkGolf.Sites.Admin
                 TeamNumber = currentTeamNumber, // 필요시 할당
                 UserNumber = player.UserNumber,
                 UserGender = player.UserGender,
-                AgeText = player.AgeText,
-                GenderText = player.GenderText
             };
 
             assignedPlayers.Add(newAssigned);
@@ -1030,8 +1054,6 @@ namespace GiSanParkGolf.Sites.Admin
                 TeamNumber = currentTeamNumber,
                 UserNumber = player.UserNumber,
                 UserGender = player.UserGender,
-                AgeText = player.AgeText,
-                GenderText = player.GenderText
             };
 
             assignedPlayers.Add(newAssigned);
@@ -1135,6 +1157,87 @@ namespace GiSanParkGolf.Sites.Admin
             else
             {
                 return (List<T>)ViewState[key];
+            }
+        }
+
+        protected void btnApproveCancel_Click(object sender, EventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn == null) return;
+
+            string userId = btn.CommandArgument;
+            string gameCode = TB_GameCode.Text.Trim();
+
+            // 예시: 상태를 "Cancelled"로 변경
+            bool result = Global.dbManager.ApproveCancelAssignment(gameCode, userId);
+
+            if (result)
+            {
+                ShowModal("처리 완료", "취소요청이 승인되어 참가취소로 변경되었습니다.", 0, false);
+                // 새로고침
+                var assignmentData = Global.dbManager.GetAssignmentResult(gameCode);
+                gvCourseResult.DataSource = assignmentData;
+                gvCourseResult.DataBind();
+                ViewState["AssignmentResult"] = assignmentData;
+            }
+            else
+            {
+                ShowModal("실패", "처리 중 오류가 발생했습니다.", 0, false);
+            }
+        }
+
+        protected void gvCancelPlayers_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                string userId = DataBinder.Eval(e.Row.DataItem, "UserId").ToString();
+                Button btn = (Button)e.Row.FindControl("btnRestore");
+                if (btn != null)
+                {
+                    btn.OnClientClick = $"launchModalWithUserId('#MainModal', '재참가', '배정결과 저장 전까지는 목록 이동만 됩니다.', 4, '{userId}'); return false;";
+                }
+            }
+        }
+
+        protected void btnRestore_Click(object sender, EventArgs e)
+        {
+            string userId = manualAssignUserId.Value;
+            var cancelPlayers = ViewState["CancelPlayers"] as List<AssignedPlayer> ?? new List<AssignedPlayer>();
+            var unassignedPlayers = ViewState["UnassignedPlayers"] as List<GameJoinUserList> ?? new List<GameJoinUserList>();
+
+            // cancelPlayers에서 해당 UserId의 플레이어 찾기
+            var assigned = cancelPlayers.FirstOrDefault(p => p.UserId == userId);
+            if (assigned != null)
+            {
+                // 필요하다면 AssignedPlayer를 GameJoinUserList로 변환
+                var newUnassigned = new GameJoinUserList
+                {
+                    // 필요한 속성들 할당
+                    UserId = assigned.UserId,
+                    UserName = assigned.UserName,
+                    AgeHandicap = assigned.AgeHandicap,
+                    UserNumber = assigned.UserNumber,
+                    UserGender = assigned.UserGender
+                };
+                // UnassignedPlayers에 추가
+                unassignedPlayers.Add(newUnassigned);
+
+                // cancelPlayers에서 삭제(필요시)
+                cancelPlayers.Remove(assigned);
+
+                // ViewState에 다시 저장
+                ViewState["CancelPlayers"] = cancelPlayers;
+                ViewState["UnassignedPlayers"] = unassignedPlayers;
+
+                gvCancelPlayers.DataSource = cancelPlayers;
+                gvCancelPlayers.DataBind();
+
+                gvUnassignedPlayers.DataSource = unassignedPlayers;
+                gvUnassignedPlayers.DataBind();
+                hiddenBox.Visible = unassignedPlayers.Any();
+
+                // 탭이동 시키고 싶은데 안된다...
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "GoToResultTab", "sessionStorage.setItem('lastActiveTabId', '#tab-result');", true);
             }
         }
     }

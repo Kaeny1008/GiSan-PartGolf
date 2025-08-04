@@ -68,10 +68,9 @@ namespace GiSanParkGolf.Sites.Player
             {
                 if (earlyJoinCheck.Equals("Join"))
                 {
-                    //string strJs = "<script>alert('이미 대회참가 신청을 하셨습니다.'); location.href='javascript:history.go(-1)';</script>";
-                    //Page.ClientScript.RegisterStartupScript(this.GetType(), "goDefault", strJs);
+                    string msg = "참가 신청 기록이 있습니다.\\r\\n\\'선수 페이지 - 내 대회\\'로 이동하여 확인 하여 주십시오.";
                     ScriptManager.RegisterStartupScript(this, this.GetType(), "alreadyJoin",
-                        "launchModal('#SaveModal', '안내', '이미 대회 참가 신청을 하셨습니다.', true, -1);", true);
+                        $"launchModal('#SaveModal', '안내', '{msg}', true, -1);", true);
 
                     return;
                 }

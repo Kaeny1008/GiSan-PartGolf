@@ -13,7 +13,7 @@
     </asp:PlaceHolder>
 
     <webopt:bundlereference runat="server" path="~/Content/css" />
-    <link rel="stylesheet" href="/Class/StyleSheet.css?after45" />
+    <link rel="stylesheet" href="/Class/StyleSheet.css?after" />
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 </head>
 <body>
@@ -157,6 +157,35 @@
                 본 사이트는 오픈소스 소프트웨어 및<br /> GitHub Copilot을 활용하여 구축되었습니다.<br />
                 <a href="/license/license">오픈소스 및 AI 라이선스 안내</a>
             </footer>
+        </div>
+
+        <script language="javascript">
+            function showResultModal(message, title) {
+                // 타이틀 세팅 (title이 전달되면, 아니면 기본값)
+                document.getElementById('resultModalLabel').textContent = title || '알림';
+                // 메시지 세팅
+                document.getElementById('resultModalBody').textContent = message;
+                // 모달 오픈
+                var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+                modal.show();
+            }
+        </script>
+        <!-- 공통 결과 알림 모달 -->
+        <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="resultModalLabel">알림</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+              </div>
+              <div class="modal-body" id="resultModalBody">
+                <!-- 여기에 결과 메시지가 들어감 -->
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+              </div>
+            </div>
+          </div>
         </div>
     </form>
 </body>

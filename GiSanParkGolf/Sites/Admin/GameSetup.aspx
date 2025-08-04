@@ -13,6 +13,12 @@
             launch: false
         };
 
+        function launchModalWithUserId(modalId, title, body, yesButtonType, userId) {
+            launchModal(modalId, title, body, yesButtonType);
+            // HiddenField에 userId 저장 (ASP.NET ClientID)
+            document.getElementById('<%= manualAssignUserId.ClientID %>').value = userId;
+        }
+
         function launchModal(modalId, title, body, yesButtonType = 0) {
             modalConfig.name = modalId;
             modalConfig.title = title;
@@ -33,7 +39,7 @@
             showmodal.find(".modal-title").text(modalConfig.title);
             showmodal.find(".modal-body").html(htmlMessage);
 
-            showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final, #MainContent_BTN_Cleanup").hide().off("click");
+            showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final, #MainContent_BTN_Cleanup, #MainContent_BTN_MovePlayer").hide().off("click");
 
             switch (modalConfig.yesButtonType) {
                 case 0:
@@ -49,6 +55,10 @@
                     break;
                 case 3:
                     showmodal.find("#MainContent_BTN_Cleanup").show();
+                    break;
+                case 4:
+                    showmodal.find("#MainContent_BTN_MovePlayer").show();
+                    break;
                 default:
                     break;
             }
@@ -125,6 +135,41 @@
                 sessionStorage.setItem('lastActiveTabId', '#tab-info');
             }
         });
+
+        function openManualAssignModal(userId) {
+            var hiddenField = document.getElementById('<%= manualAssignUserId.ClientID %>');
+            hiddenField.value = userId;
+            $('#ManualAssignModal').modal('show');
+        }
+
+        // 페이지 스크롤 위치 저장
+        var scrollPos = 0;
+        Sys.WebForms.PageRequestManager.getInstance().add_beginRequest(function () {
+            scrollPos = $(window).scrollTop();
+        });
+        Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
+            $(window).scrollTop(scrollPos);
+        });
+
+        Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
+            $('#ManualAssignModal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+                $('body').css('overflow', 'auto');
+            });
+        });
+
+        function registerModalCleanup() {
+            // 모달을 즉시 닫기
+            $('#MainModal').modal('hide');
+            // hidden.bs.modal 이벤트 핸들러 등록
+            $('#MainModal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open');
+                // 여기서 포스트백 실행!
+                __doPostBack('btnRefreshGrid', '');
+            });
+        }
     </script>
 
     <style>
@@ -279,6 +324,7 @@
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-player">참가자확인</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-course">코스배치</a></li>
                         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-result">코스배치 결과 확인</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-cancelplayer">취소 참가자 목록</a></li>
                     </ul>
                     
                     <!-- 탭 콘텐츠 -->
@@ -344,40 +390,33 @@
                                             <ItemTemplate>
                                                 <%-- 서버 코드에서 삽입하므로 비워둠 --%>
                                             </ItemTemplate>
-                                            <ItemStyle Width="8%" />
-                                            <HeaderStyle Width="8%" />
                                         </asp:TemplateField>
                                         <asp:TemplateField HeaderText="ID">
                                             <ItemTemplate><%# Eval("UserId") %></ItemTemplate>
-                                            <ItemStyle Width="15%" />
-                                            <HeaderStyle Width="15%" />
                                         </asp:TemplateField>
                                         <asp:TemplateField HeaderText="성명">
                                             <ItemTemplate><%# Eval("UserName") %></ItemTemplate>
-                                            <ItemStyle Width="15%" />
-                                            <HeaderStyle Width="15%" />
                                         </asp:TemplateField>
                                         <asp:TemplateField HeaderText="생년월일">
                                             <ItemTemplate><%# Eval("FormattedBirthDate") %></ItemTemplate>
-                                            <ItemStyle Width="12%" />
-                                            <HeaderStyle Width="12%" />
                                         </asp:TemplateField>
                                         <asp:TemplateField HeaderText="성별">
                                             <ItemTemplate><%# Eval("GenderText") %></ItemTemplate>
-                                            <ItemStyle Width="10%" />
-                                            <HeaderStyle Width="10%" />
                                         </asp:TemplateField>
                                         <asp:TemplateField HeaderText="연령">
                                             <ItemTemplate>
                                                 <%-- 서버 코드에서 삽입하므로 비워둠 --%>
                                             </ItemTemplate>
-                                            <ItemStyle Width="10%" />
                                         </asp:TemplateField>
                                         <asp:TemplateField HeaderText="수상경력">
                                             <ItemTemplate>
                                                 <%# Eval("AwardsSummary") ?? "없음" %>
                                             </ItemTemplate>
-                                            <ItemStyle Width="20%" />
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="상태">
+                                            <ItemTemplate>
+                                                <%# (Eval("IsCancelled").ToString() == "1") ? "취소" : "참가" %>
+                                            </ItemTemplate>
                                         </asp:TemplateField>
                                     </Columns>
                                     <EmptyDataTemplate>데이터가 없습니다.</EmptyDataTemplate>
@@ -481,16 +520,35 @@
                                         <asp:BoundField DataField="RowNumber" HeaderText="No" />
                                         <asp:BoundField DataField="UserId" HeaderText="ID" />
                                         <asp:BoundField DataField="UserName" HeaderText="성명" />
-                                        <asp:BoundField DataField="GenderTextPrint" HeaderText="성별" />
+                                        <asp:BoundField DataField="GenderText" HeaderText="성별" />
                                         <asp:TemplateField HeaderText="연령">
                                             <ItemTemplate>
-                                                <%# Eval("AgeTextPrint") %>
+                                                <%# Eval("AgeText") %>
                                             </ItemTemplate>
                                         </asp:TemplateField>
                                         <asp:BoundField DataField="AgeHandicap" HeaderText="핸디캡" />
                                         <asp:BoundField DataField="HoleNumber" HeaderText="배정홀" />
                                         <asp:BoundField DataField="CourseOrder" HeaderText="코스순번" />
                                         <asp:BoundField DataField="TeamNumber" HeaderText="팀번호" />
+                                        <asp:TemplateField HeaderText="참가여부">
+                                            <ItemTemplate>
+                                                <%# 
+                                                    Eval("AssignmentStatus")?.ToString() == "Cancelled" ? "참가취소" :
+                                                    Eval("AssignmentStatus")?.ToString() == "Assigned" ? "배정" :
+                                                    ""
+                                                %>
+                                                <asp:Button
+                                                    ID="btnApproveCancel"
+                                                    runat="server"
+                                                    Text="취소 승인"
+                                                    CommandName="ApproveCancel"
+                                                    CommandArgument='<%# Eval("UserId") %>'
+                                                    CssClass="btn btn-warning btn-sm"
+                                                    Visible='<%# Eval("AssignmentStatus")?.ToString() == "CancelRequested" %>'
+                                                    OnClick="btnApproveCancel_Click"
+                                                />
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
                                         <asp:TemplateField HeaderText="취소">
                                             <ItemTemplate>
                                                 <asp:Button ID="BTN_CancelAssignment" runat="server" Text="배정취소" CommandArgument='<%# Eval("UserId") %>' OnClick="BTN_CancelAssignment_Click" CssClass="btn btn-danger btn-sm" />
@@ -545,6 +603,58 @@
                             </div>
                         </div>
 
+                        <!-- 취소처리된 참가자 탭 -->
+                        <div class="tab-pane fade" id="tab-cancelplayer">
+                            <asp:GridView
+                                ID="gvCancelPlayers"
+                                runat="server"
+                                CssClass="table table-bordered table-striped table-hover"
+                                AutoGenerateColumns="False"
+                                EmptyDataText="취소된 참가자가 없습니다." 
+                                OnRowDataBound="gvCancelPlayers_RowDataBound"
+                                DataKeyNames="UserId">
+                                <Columns>
+                                    <asp:TemplateField HeaderText="No.">
+                                        <ItemTemplate>
+                                            <%# Container.DataItemIndex + 1 %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="ID">
+                                        <ItemTemplate><%# Eval("UserId") %></ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="성명">
+                                        <ItemTemplate><%# Eval("UserName") %></ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="생년월일">
+                                        <ItemTemplate><%# Eval("FormattedBirthDate") %></ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="성별">
+                                        <ItemTemplate><%# Eval("GenderText") %></ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="연령">
+                                        <ItemTemplate>
+                                            <ItemTemplate><%# Eval("AgeText") %></ItemTemplate>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="수상경력">
+                                        <ItemTemplate>
+                                            <%# Eval("AwardsSummary") ?? "없음" %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="재참가">
+                                        <ItemTemplate>
+                                            <asp:Button
+                                                ID="btnRestore"
+                                                runat="server"
+                                                Text="미배정으로 이동"
+                                                CommandName="Restore"
+                                                CommandArgument='<%# Eval("UserId") %>'
+                                                CssClass="btn btn-success btn-sm" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -552,6 +662,7 @@
     </div>
 
     <asp:HiddenField ID="HiddenPanelState" runat="server" Value="none" />
+    <asp:HiddenField ID="manualAssignUserId" runat="server" />
 
     <!-- 공통 확인 모달 -->
     <div class="modal fade" id="MainModal" tabindex="-1" aria-labelledby="MainModalLabel" aria-hidden="true">
@@ -585,6 +696,10 @@
                         class="btn btn-secondary"
                         Text="확인" 
                         OnClientClick="registerModalCleanup(); return false;" />
+                    <asp:Button ID="BTN_MovePlayer" runat="server" 
+                        class="btn btn-secondary"
+                        Text="확인" 
+                        OnClick="btnRestore_Click" />
                 </div>
             </div>
         </div>
@@ -617,7 +732,6 @@
                                 <asp:ListItem Text="홀 선택" Value="" />
                             </asp:DropDownList>
                         </div>
-                        <asp:HiddenField ID="manualAssignUserId" runat="server" />
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
@@ -636,41 +750,4 @@
         </div>
         </ContentTemplate>
     </asp:UpdatePanel>
-
-    <script type="text/javascript">
-        function openManualAssignModal(userId) {
-            var hiddenField = document.getElementById('<%= manualAssignUserId.ClientID %>');
-            hiddenField.value = userId;
-            $('#ManualAssignModal').modal('show');
-        }
-
-        // 페이지 스크롤 위치 저장
-        var scrollPos = 0;
-        Sys.WebForms.PageRequestManager.getInstance().add_beginRequest(function () {
-            scrollPos = $(window).scrollTop();
-        });
-        Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
-            $(window).scrollTop(scrollPos);
-        });
-
-        Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
-            $('#ManualAssignModal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open');
-                $('body').css('overflow', 'auto');
-            });
-        });
-
-        function registerModalCleanup() {
-            // 모달을 즉시 닫기
-            $('#MainModal').modal('hide');
-            // hidden.bs.modal 이벤트 핸들러 등록
-            $('#MainModal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open');
-                // 여기서 포스트백 실행!
-                __doPostBack('btnRefreshGrid', '');
-            });
-        }
-    </script>
 </asp:Content>

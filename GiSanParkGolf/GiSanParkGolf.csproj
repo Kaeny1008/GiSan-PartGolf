@@ -259,6 +259,7 @@
     <Content Include="Sites\Admin\GameCreate.aspx" />
     <Content Include="Sites\Player\JoinGame.aspx" />
     <Content Include="Sites\Player\MyGame.aspx" />
+    <Content Include="Sites\Player\MyGameDetail.aspx" />
     <Content Include="Sites\UserManagement\User Modify.aspx" />
     <Content Include="Sites\UserManagement\UserRepositories.aspx" />
     <Content Include="TempHint.aspx" />
@@ -528,6 +529,13 @@
     </Compile>
     <Compile Include="Sites\Player\MyGame.aspx.designer.cs">
       <DependentUpon>MyGame.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Sites\Player\MyGameDetail.aspx.cs">
+      <DependentUpon>MyGameDetail.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Sites\Player\MyGameDetail.aspx.designer.cs">
+      <DependentUpon>MyGameDetail.aspx</DependentUpon>
     </Compile>
     <Compile Include="Sites\UserManagement\User Modify.aspx.cs">
       <DependentUpon>User Modify.aspx</DependentUpon>

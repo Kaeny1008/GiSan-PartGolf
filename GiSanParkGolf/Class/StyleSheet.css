@@ -186,12 +186,30 @@ footer {
     border-top: 1px solid #dcdcdc;
 }
 
-/* 기타 보조 클래스 */
+.input-group {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .input-group-text {
     width: 150px;
-    background-color: #efefef;
-    color: #333;
-    border: 1px solid #ccc;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.form-control {
+    flex: 1 1 0%;
+    min-width: 0;
+    width: 100%; /* ← 이 줄이 핵심 */
+    box-sizing: border-box;
+}
+
+textarea.form-control {
+    width: 100% !important; /* ← textarea는 반드시 명시! */
+    min-width: 0;
+    box-sizing: border-box;
+    resize: vertical;
 }
 
 .hidden {
