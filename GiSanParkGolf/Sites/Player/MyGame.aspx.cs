@@ -31,14 +31,6 @@ namespace GiSanParkGolf.Sites.Player
         {
             if (!Page.IsPostBack)
             {
-                // 참가취소로 온경우
-                if (!string.IsNullOrEmpty(Request.QueryString["GameCancel"]))
-                {
-                    gamecode = Request.QueryString["GameCode"];
-                    GameCancel();
-                    return;
-                }
-
                 if (!string.IsNullOrEmpty(Request.QueryString["GameCode"]))
                 {
                     MainContent.Visible = false;
@@ -52,22 +44,6 @@ namespace GiSanParkGolf.Sites.Player
                     GameContent.Visible = false;
                     LoadGameList();
                 }
-            }
-        }
-
-        protected void GameCancel()
-        {
-            string dbWrite = Global.dbManager.MyGameCancel(gamecode, Helper.CurrentUser?.UserId);
-            if (dbWrite.Equals("Success"))
-            {
-                Response.Redirect(string.Format("~/Sites/Player/MyGame.aspx"));
-            }
-            else
-            {
-                string strAlarm = @"<script language='JavaScript'>window.alert('";
-                strAlarm += dbWrite;
-                strAlarm += "');</script>";
-                Response.Write(strAlarm);
             }
         }
 
