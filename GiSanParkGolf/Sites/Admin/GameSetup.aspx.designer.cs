@@ -339,15 +339,6 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.GridView gvCancelPlayers;
 
         /// <summary>
-        /// HiddenPanelState 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField HiddenPanelState;
-
-        /// <summary>
         /// manualAssignUserId 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -355,6 +346,15 @@ namespace GiSanParkGolf.Sites.Admin
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField manualAssignUserId;
+
+        /// <summary>
+        /// manualHoleValue 컨트롤입니다.
+        /// </summary>
+        /// <remarks>
+        /// 자동 생성 필드입니다.
+        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField manualHoleValue;
 
         /// <summary>
         /// BTN_SettingYes 컨트롤입니다.
@@ -375,15 +375,6 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.Button BTN_SaveAssignment_Final;
 
         /// <summary>
-        /// BTN_Cleanup 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button BTN_Cleanup;
-
-        /// <summary>
         /// BTN_MovePlayer 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -393,15 +384,6 @@ namespace GiSanParkGolf.Sites.Admin
         protected global::System.Web.UI.WebControls.Button BTN_MovePlayer;
 
         /// <summary>
-        /// UpdatePanel1 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.UpdatePanel UpdatePanel1;
-
-        /// <summary>
         /// manualCourseSelect 컨트롤입니다.
         /// </summary>
         /// <remarks>
@@ -409,24 +391,6 @@ namespace GiSanParkGolf.Sites.Admin
         /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList manualCourseSelect;
-
-        /// <summary>
-        /// manualHoleInput 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList manualHoleInput;
-
-        /// <summary>
-        /// upManualAssign 컨트롤입니다.
-        /// </summary>
-        /// <remarks>
-        /// 자동 생성 필드입니다.
-        /// 수정하려면 디자이너 파일에서 코드 숨김 파일로 필드 선언을 이동하세요.
-        /// </remarks>
-        protected global::System.Web.UI.UpdatePanel upManualAssign;
 
         /// <summary>
         /// BTN_AssignManual 컨트롤입니다.

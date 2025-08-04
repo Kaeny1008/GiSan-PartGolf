@@ -24,6 +24,7 @@
             modalConfig.title = title;
             modalConfig.body = body;
             modalConfig.yesButtonType = yesButtonType;
+            console.log('yesButtonType:', yesButtonType);
             modalConfig.launch = true;
 
             renderModal();
@@ -39,7 +40,8 @@
             showmodal.find(".modal-title").text(modalConfig.title);
             showmodal.find(".modal-body").html(htmlMessage);
 
-            showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final, #MainContent_BTN_Cleanup, #MainContent_BTN_MovePlayer").hide().off("click");
+            //showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final, #MainContent_BTN_Cleanup, #MainContent_BTN_MovePlayer").hide().off("click");
+            showmodal.find("button, input[type='submit']").hide().off("click");
 
             switch (modalConfig.yesButtonType) {
                 case 0:
@@ -54,7 +56,7 @@
                     showmodal.find("#MainContent_BTN_SaveAssignment_Final").show();
                     break;
                 case 3:
-                    showmodal.find("#MainContent_BTN_Cleanup").show();
+                    /*showmodal.find("#MainContent_BTN_Cleanup").show();*/
                     break;
                 case 4:
                     showmodal.find("#MainContent_BTN_MovePlayer").show();
@@ -63,78 +65,13 @@
                     break;
             }
 
+            console.log('yesButtonType:', modalConfig.yesButtonType);
+            console.log('BTN_Close:', showmodal.find("#BTN_Close").length); // 몇 개 있는지
+
             const modalElement = document.querySelector(modalConfig.name);
             const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
             modalInstance.show();
         }
-
-        // 마지막 활성 탭 id 저장
-        let lastActiveTabId = sessionStorage.getItem("lastActiveTabId") || "#tab-info";
-
-        // 탭 변경 시 sessionStorage에 저장
-        $(document).ready(function () {
-            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-                lastActiveTabId = $(e.target).attr('href');
-                sessionStorage.setItem("lastActiveTabId", lastActiveTabId);
-            });
-
-            // 페이지 로드 시 마지막 탭 활성화
-            if (lastActiveTabId) {
-                let $tab = $('a[data-bs-toggle="tab"][href="' + lastActiveTabId + '"]');
-                if ($tab.length) {
-                    $tab.tab('show');
-                }
-            }
-        });
-
-        // 패널 표시
-        Sys.Application.add_load(function () {
-            var state = document.getElementById("<%= HiddenPanelState.ClientID %>")?.value || "none";
-
-            switch (state) {
-                case "right":
-                    document.getElementById('leftPanel')?.classList.add('hidden');
-                    document.getElementById('rightPanel')?.classList.remove('d-none');
-                    // 패널이 오른쪽일 때 마지막 탭 복원
-                    if (lastActiveTabId) {
-                        let $tab = $('a[data-bs-toggle="tab"][href="' + lastActiveTabId + '"]');
-                        if ($tab.length) {
-                            $tab.tab('show');
-                        }
-                    }
-                    break;
-
-                case "left":
-                    document.getElementById('leftPanel')?.classList.remove('hidden');
-                    document.getElementById('rightPanel')?.classList.add('d-none');
-                    break;
-
-                default:
-                    break;
-            }
-        });
-
-        var isPostBack = false;
-        var originalDoPostBack = window.__doPostBack;
-        window.__doPostBack = function() {
-            isPostBack = true;
-            return originalDoPostBack.apply(this, arguments);
-        };
-
-        document.addEventListener('DOMContentLoaded', function() {
-            var forms = document.getElementsByTagName('form');
-            for (var i = 0; i < forms.length; i++) {
-                forms[i].addEventListener('submit', function() {
-                    isPostBack = true;
-                });
-            }
-        });
-
-        window.addEventListener('beforeunload', function() {
-            if (!isPostBack) {
-                sessionStorage.setItem('lastActiveTabId', '#tab-info');
-            }
-        });
 
         function openManualAssignModal(userId) {
             var hiddenField = document.getElementById('<%= manualAssignUserId.ClientID %>');
@@ -142,45 +79,54 @@
             $('#ManualAssignModal').modal('show');
         }
 
-        // 페이지 스크롤 위치 저장
-        var scrollPos = 0;
-        Sys.WebForms.PageRequestManager.getInstance().add_beginRequest(function () {
-            scrollPos = $(window).scrollTop();
-        });
-        Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
-            $(window).scrollTop(scrollPos);
-        });
-
-        Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
-            $('#ManualAssignModal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open');
-                $('body').css('overflow', 'auto');
+        $(document).ready(function () {
+            // 탭 클릭 시 bottomPanel로 스크롤 이동
+            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var bottomPanel = document.getElementById('bottomPanel');
+                if (bottomPanel) {
+                    bottomPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             });
         });
 
-        function registerModalCleanup() {
-            // 모달을 즉시 닫기
-            $('#MainModal').modal('hide');
-            // hidden.bs.modal 이벤트 핸들러 등록
-            $('#MainModal').off('hidden.bs.modal').on('hidden.bs.modal', function () {
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open');
-                // 여기서 포스트백 실행!
-                __doPostBack('btnRefreshGrid', '');
-            });
+        function onCourseChanged() {
+            var courseSelect = document.getElementById('<%= manualCourseSelect.ClientID %>');
+            var holeSelect = document.getElementById("manualHoleInput");
+            var selectedCourse = courseSelect.value;
+
+            holeSelect.innerHTML = '<option value="">홀 선택</option>';
+
+            if (selectedCourse && courseHoleCountMap[selectedCourse]) {
+                var holeCount = courseHoleCountMap[selectedCourse];
+                for (var i = 1; i <= holeCount; i++) {
+                    var opt = document.createElement("option");
+                    opt.value = i;
+                    opt.text = i + "홀";
+                    holeSelect.appendChild(opt);
+                }
+            }
         }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // 홀 선택할 때마다 HiddenField에 값 저장 (중복 없이)
+            var holeInput = document.getElementById('manualHoleInput');
+            var holeHidden = document.getElementById('<%= manualHoleValue.ClientID %>');
+            if (holeInput && holeHidden) {
+                holeInput.addEventListener('change', function () {
+                    holeHidden.value = this.value;
+                });
+            }
+        });
+
+        $(function () {
+            $('#ManualAssignModal').on('show.bs.modal', function () {
+                document.getElementById('MainContent_manualCourseSelect').selectedIndex = 0;
+                document.getElementById('manualHoleInput').selectedIndex = 0;
+            });
+        });
     </script>
 
     <style>
-        #leftPanel.hidden {
-          display: none;
-        }
-
-        #rightPanel.active {
-          display: block;
-        }
-
         #MainContent_gvCourseResult {
           border-collapse: collapse;
           width: 100%;
@@ -211,7 +157,6 @@
           background-color: #e6fff7; /* 밝은 민트 */
         }
 
-        /* (선택) hover 효과: 예시에는 없으니 빼도 됩니다 */
         #MainContent_gvCourseResult tr.team-bg-even:hover td,
         #MainContent_gvCourseResult tr.team-bg-odd:hover td {
           background-color: #f1f1f1;
@@ -247,9 +192,9 @@
     <div class="container mt-4">
         <div class="row position-relative">
             <!-- 좌측: 대회 목록 -->
-            <div id="leftPanel">
+            <div id="topPanel">
                 <div class="custom-card">
-                    <h4 class="card-title">대회 설정</h4>
+                    <h4 class="card-title">대회 선택</h4>
                     <p class="mb-2 text-muted">대회명을 클릭하여 세부정보를 확인하세요.</p>
 
                     <!-- 검색 컨트롤 -->
@@ -309,7 +254,7 @@
             </div>
 
             <!-- 우측: 상세정보 탭 카드 -->
-            <div id="rightPanel" class="d-none">
+            <div id="bottomPanel">
                 <div class="custom-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="card-title mb-0">대회 상세정보</h4>
@@ -661,8 +606,8 @@
         </div>
     </div>
 
-    <asp:HiddenField ID="HiddenPanelState" runat="server" Value="none" />
     <asp:HiddenField ID="manualAssignUserId" runat="server" />
+    <asp:HiddenField ID="manualHoleValue" runat="server" />
 
     <!-- 공통 확인 모달 -->
     <div class="modal fade" id="MainModal" tabindex="-1" aria-labelledby="MainModalLabel" aria-hidden="true">
@@ -692,10 +637,10 @@
                         CssClass="btn btn-primary" 
                         Text="예"
                         OnClick="BTN_SaveAssignment_Final_Click" />
-                    <asp:Button ID="BTN_Cleanup" runat="server" 
+                    <%--<asp:Button ID="BTN_Cleanup" runat="server" 
                         class="btn btn-secondary"
                         Text="확인" 
-                        OnClientClick="registerModalCleanup(); return false;" />
+                        OnClientClick="registerModalCleanup(); return false;" />--%>
                     <asp:Button ID="BTN_MovePlayer" runat="server" 
                         class="btn btn-secondary"
                         Text="확인" 
@@ -706,48 +651,38 @@
     </div>
 
     <!-- 수동배정 모달 추가 -->
-    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
-        <ContentTemplate>
-        <div class="modal fade" id="ManualAssignModal" tabindex="-1" aria-labelledby="ManualAssignModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="ManualAssignModalLabel">수동 배정</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade" id="ManualAssignModal" tabindex="-1" aria-labelledby="ManualAssignModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ManualAssignModalLabel">수동 배정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>선수에게 직접 코스를 배정할 수 있습니다.<br />배정할 코스와 홀을 선택하세요.</p>
+                    <div class="mb-2">
+                        <label class="form-label">코스 선택</label>
+                        <asp:DropDownList 
+                            ID="manualCourseSelect" 
+                            runat="server" 
+                            CssClass="form-select" 
+                            OnChange="onCourseChanged()">
+                            <asp:ListItem Text="코스 선택" Value="" />
+                             <%--서버에서 바인딩--%> 
+                        </asp:DropDownList>
                     </div>
-                    <div class="modal-body">
-                        <!-- 여기에 수동 배정 관련 입력 폼 또는 안내 메시지를 추가하세요 -->
-                        <p>선수에게 직접 코스를 배정할 수 있습니다.<br />배정할 코스와 홀을 선택하세요.</p>
-                        <div class="mb-2">
-                            <label class="form-label">코스 선택</label>
-                            <asp:DropDownList ID="manualCourseSelect" runat="server" CssClass="form-select" 
-                                OnSelectedIndexChanged="manualCourseSelect_SelectedIndexChanged"
-                                AutoPostBack="true">
-                                <asp:ListItem Text="코스 선택" Value="" />
-                            </asp:DropDownList>
-                        </div>
-                        <div class="mb-2">
-                            <label for="manualHoleInput" class="form-label">홀 번호</label>
-                            <asp:DropDownList ID="manualHoleInput" runat="server" CssClass="form-select">
-                                <asp:ListItem Text="홀 선택" Value="" />
-                            </asp:DropDownList>
-                        </div>
+                    <div class="mb-2">
+                        <label for="manualHoleInput" class="form-label">홀 번호</label>
+                        <select id="manualHoleInput" class="form-select">
+                            <option value="">홀 선택</option>
+                        </select>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <asp:UpdatePanel ID="upManualAssign" runat="server">
-                            <ContentTemplate>
-                                <asp:Button ID="BTN_AssignManual" 
-                                    runat="server" 
-                                    Text="배정" 
-                                    OnClick="BTN_AssignManual_Click" 
-                                    CssClass="btn btn-primary" />
-                            </ContentTemplate>
-                        </asp:UpdatePanel>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <asp:Button ID="BTN_AssignManual" runat="server" Text="배정" OnClick="BTN_AssignManual_Click" CssClass="btn btn-primary" />
                 </div>
             </div>
         </div>
-        </ContentTemplate>
-    </asp:UpdatePanel>
+    </div>
 </asp:Content>

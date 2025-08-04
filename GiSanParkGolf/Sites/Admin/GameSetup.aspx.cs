@@ -41,14 +41,38 @@ namespace GiSanParkGolf.Sites.Admin
                 SearchKeyword = null;
                 GameList.PageIndex = 0;
                 LoadGameList();
-
                 gvPlayerList.DataSource = new List<GameJoinUserList>();
                 gvPlayerList.DataBind();
-            } else
+            }
+            else
             {
                 pager.CurrentPage = GameList.PageIndex;
                 pager.TotalPages = GameList.PageCount;
             }
+        }
+
+        // 게임코드로 코스 드롭다운 바인딩 및 캐시 세팅
+        private void BindCourseSelectAndCache(string gameCode)
+        {
+            var gameInfo = Global.dbManager.GetGameInformation(gameCode);
+            if (gameInfo == null)
+            {
+                manualCourseSelect.Items.Clear();
+                manualCourseSelect.Items.Add(new ListItem("코스 선택", ""));
+                manualCourseSelect.Enabled = false;
+                CachedCourseList = null;
+                return;
+            }
+
+            var courseList = Global.dbManager.GetCourseListByStadium(gameInfo.StadiumCode);
+            manualCourseSelect.Items.Clear();
+            manualCourseSelect.Items.Add(new ListItem("코스 선택", ""));
+            foreach (var course in courseList)
+            {
+                manualCourseSelect.Items.Add(new ListItem(course.CourseName, course.CourseCode));
+            }
+            manualCourseSelect.Enabled = true;
+            CachedCourseList = courseList;
         }
 
         protected void Search_SearchRequested(object sender, EventArgs e)
@@ -160,18 +184,32 @@ namespace GiSanParkGolf.Sites.Admin
                     GameList.DataSource = ViewState["GameList"];
                     GameList.DataBind();
 
-                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ActivateRightPanel",
-                        @"document.getElementById('leftPanel')?.classList.add('hidden');
-                         document.getElementById('rightPanel')?.classList.remove('d-none');", true);
+                    // 게임 선택 후에만 코스 드롭다운/코스맵 바인딩
+                    if (!string.IsNullOrEmpty(TB_GameCode.Text))
+                    {
+                        BindCourseSelectAndCache(TB_GameCode.Text);
+                    }
+                    else
+                    {
+                        manualCourseSelect.Items.Clear();
+                        manualCourseSelect.Items.Add(new ListItem("코스 선택", ""));
+                    }
+
+                    ScriptManager.RegisterStartupScript(
+                        this,
+                        this.GetType(),
+                        "ScrollTobottomPanel",
+                        @"document.getElementById('bottomPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });",
+                        true
+                    );
                 }
-                HiddenPanelState.Value = "right";
             }
         }
 
         private bool LoadGame(string gameCode)
         {
 
-            ResetRightPanelData();
+            ResetbottomPanelData();
 
             var gameinfo = Global.dbManager.GetGameInformation(gameCode);
 
@@ -463,30 +501,10 @@ namespace GiSanParkGolf.Sites.Admin
 
         private void BindGridViews(List<AssignedPlayer> assignedPlayers, List<GameJoinUserList> unassignedPlayers)
         {
-            //gvCourseResult.DataSource = assignedPlayers.Select((p, index) => new
-            //{
-            //    RowNumber = index + 1,
-            //    p.UserId,
-            //    p.UserName,
-            //    GenderTextPrint = p.GenderTextPrint,
-            //    AgeTextPrint = p.AgeTextPrint,
-            //    p.AgeHandicap,
-            //    p.HoleNumber,
-            //    p.CourseOrder,
-            //    p.TeamNumber
-            //}).ToList();
             gvCourseResult.DataSource = assignedPlayers;
             gvCourseResult.DataBind();
             ViewState["AssignmentResult"] = assignedPlayers;
 
-            //gvUnassignedPlayers.DataSource = unassignedPlayers.Select(p => new
-            //{
-            //    p.UserId,
-            //    p.UserName,
-            //    GenderText = p.GenderText,
-            //    AgeText = p.AgeText,
-            //    p.AgeHandicap
-            //}).ToList();
             gvUnassignedPlayers.DataSource = unassignedPlayers;
             gvUnassignedPlayers.DataBind();
             ViewState["UnassignedPlayers"] = unassignedPlayers;
@@ -586,10 +604,10 @@ namespace GiSanParkGolf.Sites.Admin
 
             ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModalComplete",
                 @"launchModal('#MainModal', '새로고침 완료', '저장된 배정 결과를 다시 불러왔습니다.', 0);
-                  setTimeout(function() {
-                      var tabTrigger = document.querySelector('a[href=""#tab-result""]');
-                      if (tabTrigger) new bootstrap.Tab(tabTrigger).show();
-                  }, 600);", true);
+                  var tabTrigger = document.querySelector('a[href=""#tab-result""]');
+                  if (tabTrigger) new bootstrap.Tab(tabTrigger).show();
+                  var bottomPanel = document.getElementById('bottomPanel');
+                  if (bottomPanel) bottomPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });", true);
         }
 
         protected void BTN_SaveAssignment_Click(object sender, EventArgs e)
@@ -640,19 +658,19 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_BackToList_Click(object sender, EventArgs e)
         {
-            ResetRightPanelData();
+            ResetbottomPanelData();
 
-            HiddenPanelState.Value = "left";
-
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "RestoreLeftPanel",
-                @"setTimeout(function() {
-                    document.getElementById('leftPanel')?.classList.remove('hidden');
-                    document.getElementById('rightPanel')?.classList.remove('active');
-                    sessionStorage.setItem('lastActiveTabId', '#tab-info');
-                }, 100);", true);
+            ScriptManager.RegisterStartupScript(
+                this,
+                this.GetType(),
+                "ScrollTotopPanel",
+                @"document.getElementById('topPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+                  sessionStorage.setItem('lastActiveTabId', '#tab-info');",
+                true
+            );
         }
 
-        private void ResetRightPanelData()
+        private void ResetbottomPanelData()
         {
             // 1. TextBox 초기화
             TB_GameName.Text = TB_GameDate.Text = TB_StadiumName.Text = TB_GameHost.Text =
@@ -678,15 +696,19 @@ namespace GiSanParkGolf.Sites.Admin
             string safeMessage = HttpUtility.JavaScriptStringEncode(message);
 
             string script = $"launchModal('#MainModal', '{safeTitle}', '{safeMessage}', {buttonNo});";
+            Debug.WriteLine("ShowModal Button No. : " + buttonNo);
             if (scrollToResult)
             {
-                script += "sessionStorage.setItem('lastActiveTabId', '#tab-result');";
-                script += @"setTimeout(function() {
-                                var tabTrigger = document.querySelector('a[href=""#tab-result""]');
-                                if (tabTrigger) {
-                                    new bootstrap.Tab(tabTrigger).show();
-                                }
-                            }, 100);";
+                script += @"
+                    var tabTrigger = document.querySelector('a[href=""#tab-result""]');
+                    if (tabTrigger) {
+                        new bootstrap.Tab(tabTrigger).show();
+                    }
+                    var bottomPanel = document.getElementById('bottomPanel');
+                    if (bottomPanel) {
+                        bottomPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                ";
             }
             ScriptManager.RegisterStartupScript(this, this.GetType(), "LaunchModal", script, true);
         }
@@ -764,15 +786,15 @@ namespace GiSanParkGolf.Sites.Admin
             if (CachedAssignmentResult == null)
                 CachedAssignmentResult = Global.dbManager.GetAssignmentResult(gameCode);
 
-            manualCourseSelect.Items.Clear();
-            manualCourseSelect.Items.Add(new ListItem("코스 선택", ""));
-            if (CachedCourseList != null)
-            {
-                foreach (var course in CachedCourseList)
-                {
-                    manualCourseSelect.Items.Add(new ListItem(course.CourseName, course.CourseCode));
-                }
-            }
+            //manualCourseSelect.Items.Clear();
+            //manualCourseSelect.Items.Add(new ListItem("코스 선택", ""));
+            //if (CachedCourseList != null)
+            //{
+            //    foreach (var course in CachedCourseList)
+            //    {
+            //        manualCourseSelect.Items.Add(new ListItem(course.CourseName, course.CourseCode));
+            //    }
+            //}
         }
 
         // 추천 코스+홀 계산 개선 메서드 (캐싱 활용)
@@ -864,8 +886,6 @@ namespace GiSanParkGolf.Sites.Admin
 
         protected void BTN_AssignCourse_Click(object sender, EventArgs e)
         {
-            HiddenPanelState.Value = "right"; // 패널 상태 유지
-
             var btn = sender as Button;
             if (btn == null) return;
 
@@ -957,74 +977,72 @@ namespace GiSanParkGolf.Sites.Admin
 
             hiddenBox.Visible = unassignedPlayers.Any();
 
-            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", 0, false);
+            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", 0, true);
         }
 
-        protected void manualCourseSelect_SelectedIndexChanged(object sender, EventArgs e)
+        protected override void OnPreRender(EventArgs e)
         {
-            // 코스명 선택값
-            string selectedCourse = manualCourseSelect.SelectedValue;
-            if (string.IsNullOrEmpty(selectedCourse) || CachedCourseList == null) return;
-
-            // 선택된 코스의 HoleCount 가져오기
-            var course = CachedCourseList.FirstOrDefault(c => c.CourseCode == selectedCourse);
-            if (course == null) return;
-
-            int holeCount = course.HoleCount;
-
-            // 홀 번호 드롭다운 채우기 (manualHoleInput을 DropDownList로 변경 필요)
-            manualHoleInput.Items.Clear();
-            for (int i = 1; i <= holeCount; i++)
+            base.OnPreRender(e);
+            if (CachedCourseList != null)
             {
-                manualHoleInput.Items.Add(new ListItem(i.ToString(), i.ToString()));
+                var courseMap = CachedCourseList.ToDictionary(c => c.CourseCode, c => c.HoleCount);
+                var json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(courseMap);
+                ClientScript.RegisterStartupScript(this.GetType(), "CourseHoleCountMap", $"var courseHoleCountMap = {json};", true);
             }
-
-            // 모달을 다시 띄우는 스크립트
-            ScriptManager.RegisterStartupScript(upManualAssign, upManualAssign.GetType(), "ReopenManualAssignModal",
-                "$('#ManualAssignModal').modal('show');", true);
         }
+
+        //protected void manualCourseSelect_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    // 코스명 선택값
+        //    string selectedCourse = manualCourseSelect.SelectedValue;
+        //    if (string.IsNullOrEmpty(selectedCourse) || CachedCourseList == null) return;
+
+        //    // 선택된 코스의 HoleCount 가져오기
+        //    var course = CachedCourseList.FirstOrDefault(c => c.CourseCode == selectedCourse);
+        //    if (course == null) return;
+
+        //    int holeCount = course.HoleCount;
+
+        //    // 홀 번호 드롭다운 채우기 (manualHoleInput을 DropDownList로 변경 필요)
+        //    manualHoleInput.Items.Clear();
+        //    for (int i = 1; i <= holeCount; i++)
+        //    {
+        //        manualHoleInput.Items.Add(new ListItem(i.ToString(), i.ToString()));
+        //    }
+
+        //    // 모달을 다시 띄우는 스크립트
+        //    ScriptManager.RegisterStartupScript(upManualAssign, upManualAssign.GetType(), "ReopenManualAssignModal",
+        //        "$('#ManualAssignModal').modal('show');", true);
+        //}
 
         protected void BTN_AssignManual_Click(object sender, EventArgs e)
         {
-            // 모달 닫기 (수동 배정 모달)
-            ScriptManager.RegisterStartupScript(
-                UpdatePanel1, // 최상위 UpdatePanel ID로 변경
-                UpdatePanel1.GetType(),
-                "closeManualAssignModal",
-                "$('#ManualAssignModal').modal('hide');",
-                true
-            );
-
             string userId = manualAssignUserId.Value;
-            string course = manualCourseSelect.SelectedItem.ToString();
-            string holeStr = manualHoleInput.SelectedValue;
+            string course = manualCourseSelect.SelectedItem.Text;
+            string holeStr = manualHoleValue.Value;
 
-            // 유효성 검사
-            // 이건 라벨로 처리해야 할 것 같음
             if (string.IsNullOrWhiteSpace(course))
             {
-                //ShowModal("입력 오류", "코스를 선택하세요.", 0, false);
+                ShowModal("입력 오류", "코스를 선택하세요.", 0, false);
                 return;
             }
             if (string.IsNullOrWhiteSpace(holeStr))
             {
-                //ShowModal("입력 오류", "홀 번호를 입력하세요.", 0, false);
+                ShowModal("입력 오류", "홀 번호를 입력하세요.", 0, false);
                 return;
             }
             if (!int.TryParse(holeStr, out int holeNo) || holeNo < 1)
             {
-                //ShowModal("입력 오류", "홀 번호가 올바르지 않습니다.", 0, false);
+                ShowModal("입력 오류", "홀 번호가 올바르지 않습니다.", 0, false);
                 return;
             }
 
-            // 배정 정보 가져오기
             var assignedPlayers = ViewState["AssignmentResult"] as List<AssignedPlayer> ?? new List<AssignedPlayer>();
             var unassignedPlayers = ViewState["UnassignedPlayers"] as List<GameJoinUserList> ?? new List<GameJoinUserList>();
-
             var player = unassignedPlayers.FirstOrDefault(p => p.UserId == userId);
             if (player == null)
             {
-                //ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", 0, false);
+                ShowModal("배정 실패", "플레이어 정보를 찾을 수 없습니다.", 0, false);
                 return;
             }
 
@@ -1059,7 +1077,6 @@ namespace GiSanParkGolf.Sites.Admin
             assignedPlayers.Add(newAssigned);
             unassignedPlayers.Remove(player);
 
-            // 정렬
             var sortedAssignedPlayers = assignedPlayers
                 .OrderBy(a => a.TeamNumber)
                 .ThenBy(a => a.GroupNumber)
@@ -1069,16 +1086,13 @@ namespace GiSanParkGolf.Sites.Admin
 
             ViewState["AssignmentResult"] = sortedAssignedPlayers;
             ViewState["UnassignedPlayers"] = unassignedPlayers;
-
             gvCourseResult.DataSource = sortedAssignedPlayers;
             gvCourseResult.DataBind();
-
             gvUnassignedPlayers.DataSource = unassignedPlayers;
             gvUnassignedPlayers.DataBind();
-
             hiddenBox.Visible = unassignedPlayers.Any();
 
-            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", 3, false);
+            ShowModal("배정 완료", $"{player.UserName}님을 {holeNumber}에 배정했습니다.", 0, true);
         }
 
         protected void BTN_CancelAssignment_Click(object sender, EventArgs e)
@@ -1126,7 +1140,7 @@ namespace GiSanParkGolf.Sites.Admin
 
             hiddenBox.Visible = unassignedPlayers.Any();
 
-            ShowModal("배정 취소", $"{player.UserName}님의 배정을 취소했습니다.", 0, false);
+            ShowModal("배정 취소", $"{player.UserName}님의 배정을 취소했습니다.", 0, true);
         }
 
         private void ResetGameList(string searchField = null, string searchKeyword = null, int? pageIndex = null)
@@ -1236,8 +1250,12 @@ namespace GiSanParkGolf.Sites.Admin
                 gvUnassignedPlayers.DataBind();
                 hiddenBox.Visible = unassignedPlayers.Any();
 
-                // 탭이동 시키고 싶은데 안된다...
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "GoToResultTab", "sessionStorage.setItem('lastActiveTabId', '#tab-result');", true);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "GoToResultTab",
+                    @"sessionStorage.setItem('lastActiveTabId', '#tab-result');
+                      var tabTrigger = document.querySelector('a[href=""#tab-result""]');
+                      if (tabTrigger) new bootstrap.Tab(tabTrigger).show();
+                      var bottomPanel = document.getElementById('bottomPanel');
+                      if (bottomPanel) bottomPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });", true);
             }
         }
     }
