@@ -1,0 +1,8 @@
+parkgolf_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.ap-osaka-1.oraclecloud.com))(connect_data=(service_name=ga954dfdfd886e5_parkgolf_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+parkgolf_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.ap-osaka-1.oraclecloud.com))(connect_data=(service_name=ga954dfdfd886e5_parkgolf_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+parkgolf_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.ap-osaka-1.oraclecloud.com))(connect_data=(service_name=ga954dfdfd886e5_parkgolf_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+
