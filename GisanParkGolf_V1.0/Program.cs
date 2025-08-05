@@ -1,8 +1,8 @@
-using GisanParkGolf_V1._0.Data;
+using GisanParkGolf_Core.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace GisanParkGolf_V1._0
+namespace GisanParkGolf_Core
 {
     public class Program
     {

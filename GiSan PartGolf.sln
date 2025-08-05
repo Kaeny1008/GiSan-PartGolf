@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T-Engine", "T-Engine\T-Engi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dul", "Dul\Dul.csproj", "{6F97AA47-27BA-488F-908B-FB7084756B80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GisanParkGolf_V1.0", "GisanParkGolf_V1.0\GisanParkGolf_V1.0.csproj", "{EB443AAB-A6F5-4339-844C-61BC6CE03102}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GisanParkGolf_Core", "GisanParkGolf_V1.0\GisanParkGolf_Core.csproj", "{EB443AAB-A6F5-4339-844C-61BC6CE03102}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

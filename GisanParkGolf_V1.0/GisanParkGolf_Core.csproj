@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>GisanParkGolf_V1._0</RootNamespace>
+    <RootNamespace>GisanParkGolf_Core</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

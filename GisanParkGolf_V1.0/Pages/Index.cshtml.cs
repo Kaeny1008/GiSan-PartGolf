@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 
-namespace GisanParkGolf_V1._0.Pages
+namespace GisanParkGolf_Core.Pages
 {
     [Authorize]
     public class IndexModel : PageModel

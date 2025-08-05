@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace GisanParkGolf_V1._0.Data
+namespace GisanParkGolf_Core.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {

@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using T_Engine;
 
-namespace GisanParkGolf_V1._0.Pages.Account
+namespace GisanParkGolf_Core.Pages.Account
 {
     public class LoginModel : PageModel
     {
