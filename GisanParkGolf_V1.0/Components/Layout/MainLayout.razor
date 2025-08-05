@@ -1,23 +1,39 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(title ?? "기산 파크골프")</title>
+    <link rel="stylesheet" href="/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="/Class/StyleSheet.css?after" />
+    <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+    <script src="/bootstrap/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+    <div class="header-fixed">
         <NavMenu />
+        <UserBanner />
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+    <div class="container body-content" style="margin-top:70px">
+        @Body
+    </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    <div class="container mt-5 mb-4">
+        <footer class="text-muted small mt-5 text-center">
+            &copy; 2025 기산파크골프 시스템.<br />
+            본 사이트는 오픈소스 소프트웨어 및<br /> GitHub Copilot을 활용하여 구축되었습니다.<br />
+            <a href="/license/license">오픈소스 및 AI 라이선스 안내</a>
+        </footer>
+    </div>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+    <ResultModal @ref="resultModalRef" />
+</body>
+
+@code {
+    [CascadingParameter] public string? title { get; set; }
+    private ResultModal? resultModalRef;
+    public void ShowResult(string message, string? title = null)
+        => resultModalRef?.Show(message, title);
+}
