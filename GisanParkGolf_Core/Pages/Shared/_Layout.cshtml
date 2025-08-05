@@ -87,7 +87,7 @@
             <div class="card-welcome d-flex flex-wrap align-items-center gap-3">
                 <div class="d-flex align-items-center gap-2">
                     @* <span>@(User?.Identity?.IsAuthenticated == true ? User.Identity.Name : "손")님, 반갑습니다.</span> *@
-                    <span>@(Model.UserName ?? "손님")님, 반갑습니다.</span>
+                    <span>@(User.Identity.IsAuthenticated? User.Identity.Name : "손님")님, 반갑습니다.</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     @if (User?.Identity?.IsAuthenticated == true)

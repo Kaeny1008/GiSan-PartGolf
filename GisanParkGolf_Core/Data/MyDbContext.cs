@@ -5,13 +5,13 @@ public class MyDbContext : DbContext
 {
     public MyDbContext(DbContextOptions<MyDbContext> options) : base(options) { }
 
-    public DbSet<SYS_User> SYS_Users { get; set; }
+    public DbSet<SYS_USERS> SYS_USERS { get; set; }
 }
 
-public class SYS_User
+public class SYS_USERS
 {
     [Key]
-    public string UserId { get; set; }
-    public string UserName { get; set; }
-    public string UserPassword { get; set; }
+    public string USER_ID { get; set; }
+    public string USER_NAME { get; set; }
+    public string USER_PASSWORD { get; set; }
 }

@@ -1,4 +1,3 @@
-using GisanParkGolf_Core.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,9 +10,6 @@ namespace GisanParkGolf_Core
             var builder = WebApplication.CreateBuilder(args);
 
             // Oracle·Î º¯°æ!
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseOracle(builder.Configuration.GetConnectionString("OracleDb")));
-
             builder.Services.AddDbContext<MyDbContext>(options =>
                 options.UseOracle(builder.Configuration.GetConnectionString("OracleDb")));
 
@@ -21,7 +17,7 @@ namespace GisanParkGolf_Core
             {
                 options.SignIn.RequireConfirmedAccount = false;
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<MyDbContext>();
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
