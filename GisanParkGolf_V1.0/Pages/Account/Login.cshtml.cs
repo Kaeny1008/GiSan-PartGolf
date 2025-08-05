@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using T_Engine;
 
 namespace GisanParkGolf_V1._0.Pages.Account
 {
@@ -45,10 +46,12 @@ namespace GisanParkGolf_V1._0.Pages.Account
                 return Page();
             }
 
+            var crypt = new Cryptography();
+            string encryptedPassword = crypt.GetEncoding("ParkGolf", Input.Password);
+
             var user = await _dbContext.SYS_Users.SingleOrDefaultAsync(u => u.UserId == Input.UserID);
 
-            // 비밀번호 평문 비교는 지양, 데모 목적일 때만 허용
-            if (user != null && user.UserPassword == Input.Password)
+            if (user != null && user.UserPassword == encryptedPassword)
             {
                 // 인증 쿠키 발급
                 var claims = new List<Claim>
@@ -60,7 +63,7 @@ namespace GisanParkGolf_V1._0.Pages.Account
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
 
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                await HttpContext.SignInAsync("Identity.Application", principal);
 
                 return RedirectToPage("/Index");
             }

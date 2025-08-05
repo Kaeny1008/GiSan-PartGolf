@@ -22,10 +22,6 @@
             window.location.href = "/Account/Login";
             return false;
         }
-        function go_logoutpage() {
-            window.location.href = "/Logout";
-            return false;
-        }
         function go_usermodify() {
             window.location.href = "/User/Modify";
             return false;
@@ -90,17 +86,22 @@
         <div class="container mt-1">
             <div class="card-welcome d-flex flex-wrap align-items-center gap-3">
                 <div class="d-flex align-items-center gap-2">
-                    <span>@(User?.Identity?.IsAuthenticated == true ? User.Identity.Name : "손님")님, 반갑습니다.</span>
+                    @* <span>@(User?.Identity?.IsAuthenticated == true ? User.Identity.Name : "손")님, 반갑습니다.</span> *@
+                    <span>@(Model.UserName ?? "손님")님, 반갑습니다.</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     @if (User?.Identity?.IsAuthenticated == true)
                     {
-                        <button class="btn btn-outline-danger btn-sm" onclick="go_logoutpage()">로그아웃</button>
+                        <form asp-page="/Account/Logout" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">로그아웃</button>
+                        </form>
                         <button class="btn btn-outline-secondary btn-sm" onclick="go_usermodify()">정보수정</button>
                     }
                     else
                     {
-                        <button class="btn btn-outline-primary btn-sm" onclick="go_loginpage()">로그인</button>
+                        <form asp-page="/Account/Login" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">로그인</button>
+                        </form>
                     }
                 </div>
             </div>
