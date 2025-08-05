@@ -22,6 +22,7 @@ namespace GiSanParkGolf.Class
     {
         // 공통으로 사용될 커넥션 개체
         public readonly SqlConnection DB_Connection;
+        readonly string clientIP = HttpContext.Current?.Request?.UserHostAddress;
 
         public DB_Management()
         {
@@ -662,7 +663,7 @@ namespace GiSanParkGolf.Class
         {
             var p = new DynamicParameters();
             p.Add("@UserId", n.UserId, DbType.String);
-            p.Add("@JoinIP", n.JoinIP, DbType.String);
+            p.Add("@JoinIP", clientIP, DbType.String, size: 45);
             p.Add("@GameCode", n.GameCode, DbType.String);
 
             try
@@ -670,7 +671,7 @@ namespace GiSanParkGolf.Class
                 if (DB_Connection.State != ConnectionState.Open)
                     DB_Connection.Open();
 
-                DB_Connection.Execute("sp_Player_GameJoin", p, commandType: CommandType.StoredProcedure);
+                DB_Connection.Execute("sp_Set_Player_GameJoin", p, commandType: CommandType.StoredProcedure);
                 return "Success";
             }
             catch (Exception ex)
@@ -721,7 +722,8 @@ namespace GiSanParkGolf.Class
             {
                 UserId = userID,
                 GameCode = gameCode,
-                CancelReason = cancelReason
+                CancelReason = cancelReason,
+                JoinIP = clientIP
             });
 
             try
@@ -754,7 +756,8 @@ namespace GiSanParkGolf.Class
             var parameters = new DynamicParameters(new
             {
                 UserId = userID,
-                GameCode = gameCode
+                GameCode = gameCode,
+                JoinIP = clientIP
             });
 
             try
@@ -1551,6 +1554,7 @@ namespace GiSanParkGolf.Class
                 tvp.Columns.Add("GroupNumber", typeof(int));        // int
                 tvp.Columns.Add("CourseOrder", typeof(int));        // int
                 tvp.Columns.Add("AgeHandicap", typeof(int));        // int
+                tvp.Columns.Add("CancelPlayer", typeof(int));        // int
 
                 foreach (var player in assignments)
                 {
@@ -1562,7 +1566,8 @@ namespace GiSanParkGolf.Class
                         player.TeamNumber,
                         player.GroupNumber,
                         player.CourseOrder,
-                        player.AgeHandicap
+                        player.AgeHandicap,
+                        player.CancelPlayer
                     );
                 }
 
@@ -1571,6 +1576,7 @@ namespace GiSanParkGolf.Class
                 parameters.Add("@GameCode", gameCode, DbType.String);
                 parameters.Add("@SettingCode", settingCode, DbType.String);
                 parameters.Add("@AssignedPlayers", tvp.AsTableValuedParameter("TVP_AssignedPlayer"));
+                parameters.Add("@JoinIP", clientIP, DbType.String, size: 45);
 
                 DB_Connection.Execute("sp_Set_GameConfiguration", parameters, commandType: CommandType.StoredProcedure);
 
@@ -1598,6 +1604,7 @@ namespace GiSanParkGolf.Class
                 param.Add("@GameCode", gameCode);
                 param.Add("@UserId", userId);
                 param.Add("@Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
+                param.Add("@JoinIP", clientIP, DbType.String, size: 45);
 
                 DB_Connection.Execute("sp_Set_ApproveCancelAssignment", param, commandType: CommandType.StoredProcedure);
 

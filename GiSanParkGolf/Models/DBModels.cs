@@ -462,6 +462,7 @@ namespace GiSanParkGolf.Models
         public string AssignmentStatus { get; set; } // 배정 상태 (예: "배정완료", "대기중" 등)
         public string Summary =>
             $"{UserName} (핸디캡 {AgeHandicap}) → {CourseName} {CourseOrder}번";
+        public int CancelPlayer { get; set; } = 0; // 취소 참가자 여부 (0: 기존 참가자, 1: 취소 참가자)
     }
 
     public class PlayerAssignmentOptions

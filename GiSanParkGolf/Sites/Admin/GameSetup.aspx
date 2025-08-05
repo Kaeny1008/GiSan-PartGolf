@@ -24,7 +24,6 @@
             modalConfig.title = title;
             modalConfig.body = body;
             modalConfig.yesButtonType = yesButtonType;
-            console.log('yesButtonType:', yesButtonType);
             modalConfig.launch = true;
 
             renderModal();
@@ -40,7 +39,6 @@
             showmodal.find(".modal-title").text(modalConfig.title);
             showmodal.find(".modal-body").html(htmlMessage);
 
-            //showmodal.find("#BTN_No, #BTN_Close, #MainContent_BTN_SettingYes, #MainContent_BTN_SaveAssignment_Final, #MainContent_BTN_Cleanup, #MainContent_BTN_MovePlayer").hide().off("click");
             showmodal.find("button, input[type='submit']").hide().off("click");
 
             switch (modalConfig.yesButtonType) {
@@ -64,9 +62,6 @@
                 default:
                     break;
             }
-
-            console.log('yesButtonType:', modalConfig.yesButtonType);
-            console.log('BTN_Close:', showmodal.find("#BTN_Close").length); // 몇 개 있는지
 
             const modalElement = document.querySelector(modalConfig.name);
             const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
@@ -101,7 +96,7 @@
                 for (var i = 1; i <= holeCount; i++) {
                     var opt = document.createElement("option");
                     opt.value = i;
-                    opt.text = i + "홀";
+                    opt.text = i;
                     holeSelect.appendChild(opt);
                 }
             }
