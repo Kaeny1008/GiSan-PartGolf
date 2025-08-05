@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T-Engine", "T-Engine\T-Engi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dul", "Dul\Dul.csproj", "{6F97AA47-27BA-488F-908B-FB7084756B80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GisanParkGolf_V1.0", "GisanParkGolf_V1.0\GisanParkGolf_V1.0.csproj", "{7688A9BF-B73A-4BF2-BF15-67EB70008FC4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{6F97AA47-27BA-488F-908B-FB7084756B80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F97AA47-27BA-488F-908B-FB7084756B80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F97AA47-27BA-488F-908B-FB7084756B80}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7688A9BF-B73A-4BF2-BF15-67EB70008FC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7688A9BF-B73A-4BF2-BF15-67EB70008FC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7688A9BF-B73A-4BF2-BF15-67EB70008FC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7688A9BF-B73A-4BF2-BF15-67EB70008FC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
