@@ -22,7 +22,7 @@ namespace GiSanParkGolf.Class
     {
         // 공통으로 사용될 커넥션 개체
         public readonly SqlConnection DB_Connection;
-        readonly string clientIP = HttpContext.Current?.Request?.UserHostAddress;
+        readonly string ClientIP = HttpContext.Current?.Request?.UserHostAddress;
 
         public DB_Management()
         {
@@ -663,7 +663,7 @@ namespace GiSanParkGolf.Class
         {
             var p = new DynamicParameters();
             p.Add("@UserId", n.UserId, DbType.String);
-            p.Add("@JoinIP", clientIP, DbType.String, size: 45);
+            p.Add("@JoinIP", ClientIP, DbType.String, size: 45);
             p.Add("@GameCode", n.GameCode, DbType.String);
 
             try
@@ -723,7 +723,7 @@ namespace GiSanParkGolf.Class
                 UserId = userID,
                 GameCode = gameCode,
                 CancelReason = cancelReason,
-                JoinIP = clientIP
+                JoinIP = ClientIP
             });
 
             try
@@ -757,7 +757,7 @@ namespace GiSanParkGolf.Class
             {
                 UserId = userID,
                 GameCode = gameCode,
-                JoinIP = clientIP
+                JoinIP = ClientIP
             });
 
             try
@@ -1576,7 +1576,7 @@ namespace GiSanParkGolf.Class
                 parameters.Add("@GameCode", gameCode, DbType.String);
                 parameters.Add("@SettingCode", settingCode, DbType.String);
                 parameters.Add("@AssignedPlayers", tvp.AsTableValuedParameter("TVP_AssignedPlayer"));
-                parameters.Add("@JoinIP", clientIP, DbType.String, size: 45);
+                parameters.Add("@JoinIP", ClientIP, DbType.String, size: 45);
 
                 DB_Connection.Execute("sp_Set_GameConfiguration", parameters, commandType: CommandType.StoredProcedure);
 
@@ -1604,7 +1604,7 @@ namespace GiSanParkGolf.Class
                 param.Add("@GameCode", gameCode);
                 param.Add("@UserId", userId);
                 param.Add("@Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
-                param.Add("@JoinIP", clientIP, DbType.String, size: 45);
+                param.Add("@JoinIP", ClientIP, DbType.String, size: 45);
 
                 DB_Connection.Execute("sp_Set_ApproveCancelAssignment", param, commandType: CommandType.StoredProcedure);
 
