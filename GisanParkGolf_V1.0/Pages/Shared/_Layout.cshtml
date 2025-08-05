@@ -1,0 +1,146 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Mvc.Razor
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - 기산 파크골프</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/StyleSheet.css" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+</head>
+<body>
+    <script>
+        function go_loginpage() {
+            window.location.href = "/Account/Login";
+            return false;
+        }
+        function go_logoutpage() {
+            window.location.href = "/Logout";
+            return false;
+        }
+        function go_usermodify() {
+            window.location.href = "/User/Modify";
+            return false;
+        }
+        window.addEventListener("DOMContentLoaded", function () {
+            const header = document.querySelector(".header-fixed");
+            const bodyContent = document.querySelector(".body-content");
+            if (header && bodyContent) {
+                bodyContent.style.marginTop = header.offsetHeight + "px";
+            }
+        });
+    </script>
+    <div class="header-fixed">
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container">
+                <a class="navbar-brand" href="@(User?.Identity?.IsAuthenticated == true ? "/" : "/Account/Login")">기산 파크골프</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">관리자 페이지</a>
+                            @if (User?.Identity?.IsAuthenticated == true)
+                            {
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/Admin/PlayerManagement">선수 정보관리</a></li>
+                                    <li><a class="dropdown-item" href="/Admin/GameHandicap">Handicap 설정</a></li>
+                                    <li><a class="dropdown-item" href="/Admin/StadiumManager">경기장 설정</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" href="/Admin/GameList">대회개최</a></li>
+                                    <li><a class="dropdown-item" href="/Admin/GameSetup">인원 코스 및 배치</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" href="/TempHint">대회결과 입력</a></li>
+                                </ul>
+                            }
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">선수 페이지</a>
+                            @if (User?.Identity?.IsAuthenticated == true)
+                            {
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/Player/JoinGame">대회참가 신청</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" href="/Player/MyGame">내 대회</a></li>
+                                </ul>
+                            }
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">게시판</a>
+                            @if (User?.Identity?.IsAuthenticated == true)
+                            {
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/BBS/Notice">공지사항</a></li>
+                                </ul>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="container mt-1">
+            <div class="card-welcome d-flex flex-wrap align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span>@(User?.Identity?.IsAuthenticated == true ? User.Identity.Name : "손님")님, 반갑습니다.</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    @if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        <button class="btn btn-outline-danger btn-sm" onclick="go_logoutpage()">로그아웃</button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="go_usermodify()">정보수정</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-primary btn-sm" onclick="go_loginpage()">로그인</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+    </div>
+    <div class="container mt-5 mb-4">
+        <footer class="text-muted small mt-5 text-center">
+            &copy; 2025 기산파크골프 시스템.<br />
+            본 사이트는 오픈소스 소프트웨어 및<br /> GitHub Copilot을 활용하여 구축되었습니다.<br />
+            <a href="/license/license">오픈소스 및 AI 라이선스 안내</a>
+        </footer>
+    </div>
+    <!-- 결과 알림 모달 -->
+    <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultModalLabel">알림</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                </div>
+                <div class="modal-body" id="resultModalBody">
+                    <!-- 여기에 결과 메시지가 들어감 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function showResultModal(message, title) {
+            document.getElementById('resultModalLabel').textContent = title || '알림';
+            document.getElementById('resultModalBody').textContent = message;
+            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            modal.show();
+        }
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
