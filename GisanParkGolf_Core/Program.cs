@@ -1,3 +1,4 @@
+using GisanParkGolf_Core.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,9 +10,12 @@ namespace GisanParkGolf_Core
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Oracle로 변경!
             builder.Services.AddDbContext<MyDbContext>(options =>
-                options.UseOracle(builder.Configuration.GetConnectionString("OracleDb")));
+                options.UseMySql(
+                    builder.Configuration.GetConnectionString("MariaDb"),
+                    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("MariaDb"))
+                )
+            );
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options =>
             {
@@ -25,7 +29,11 @@ namespace GisanParkGolf_Core
             });
 
             builder.Services.AddAuthorization();
+            builder.Services.AddControllers();
             builder.Services.AddRazorPages();
+
+            // 여기에서 IUserService 등록!
+            builder.Services.AddScoped<IUserService, UserService>();
 
             var app = builder.Build();
 
@@ -42,6 +50,7 @@ namespace GisanParkGolf_Core
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapRazorPages();
+            app.MapControllers();
             app.Run();
         }
     }

@@ -1,2 +1,0 @@
-WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY = C:/Users/kaeny/source/repos/Kaeny1008/GiSan-PartGolf/GisanParkGolf_Core/OracleWallet)))
-SSL_SERVER_DN_MATCH = yes

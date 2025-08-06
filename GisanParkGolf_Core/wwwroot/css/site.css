@@ -1,22 +1,269 @@
-html {
-  font-size: 14px;
-}
+/* ===============================================
+   기산 파크골프 중간 밝기 UI 스타일 시트
+   버전: 2025.07.22 / 작성자: Copilot
+=============================================== */
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
+/* 전체 배경 및 기본 폰트 */
 body {
-  margin-bottom: 60px;
+    background-color: #f4f4f4;
+    color: #222;
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
+    font-size: 16px;
 }
+
+/* 네비게이션 */
+.navbar-custom {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dcdcdc;
+}
+
+.navbar-brand,
+.navbar-brand:hover,
+.nav-link,
+.nav-link:hover,
+.dropdown-item,
+.dropdown-item:hover {
+    color: #333 !important;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* 콘텐츠 박스 카드 스타일 */
+.custom-card {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    border-left: 4px solid #bbb;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    margin-bottom: 0.7rem;
+}
+
+/* 사용자 인사 카드 */
+.card-welcome {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+/* 콘텐츠 본문 영역 */
+.body-content {
+    background-color: #f4f4f4;
+    padding-top: 10px;
+}
+
+/* 패널 컴포넌트 */
+.panel {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+
+/* 카드 제목 */
+.card-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #2c3e50;
+}
+
+/* 테이블 */
+table {
+    font-size: 15px;
+    border-collapse: collapse;
+    color: #222;
+}
+
+.table thead {
+    background-color: #ebebeb;
+    font-weight: 600;
+    color: #222;
+}
+
+.table tbody tr:hover,
+.hover-row:hover {
+    background-color: #f2f9ff;
+}
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+/* 버튼 */
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-danger {
+    font-size: 0.875rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.25rem;
+    background-color: transparent;
+    color: #333;
+    border: 1px solid #333;
+}
+
+    .btn-outline-primary:hover,
+    .btn-outline-secondary:hover,
+    .btn-outline-danger:hover {
+        background-color: #333;
+        color: #fff;
+    }
+
+/* 링크 및 하이퍼링크 효과 */
+.link-hover,
+.link-hover:hover,
+.HyperLink:link,
+.HyperLink:visited,
+.HyperLink:hover,
+.HyperLink:active,
+.NoneDeco {
+    text-decoration: none;
+    color: #333;
+    cursor: pointer;
+}
+
+    .link-hover:hover,
+    .HyperLink:hover {
+        color: #0d6efd;
+    }
+
+/* 페이지네이션 */
+.custom-pager a,
+.custom-pager span {
+    margin: 2px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background-color: #f1f1f1;
+    text-decoration: none;
+    color: #333;
+}
+
+.custom-pager span {
+    background-color: #0d6efd;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* 가운데 정렬 컨테이너 */
+.center_container {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* 패널 정렬 */
+.panel-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+.left-panel {
+    flex: 1;
+    max-width: 33.33%;
+}
+
+.right-panel {
+    flex: 2;
+}
+
+/* 푸터 */
+footer {
+    text-align: center;
+    color: #777;
+    font-size: 0.875rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dcdcdc;
+}
+
+.input-group {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-group-text {
+    width: 150px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.form-control {
+    flex: 1 1 0%;
+    min-width: 0;
+    width: 100%; /* ← 이 줄이 핵심 */
+    box-sizing: border-box;
+}
+
+textarea.form-control {
+    width: 100% !important; /* ← textarea는 반드시 명시! */
+    min-width: 0;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.hidden {
+    display: none;
+}
+
+/* 더 작은 미니멀 버튼 */
+.btn-xs {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.2rem;
+}
+
+.header-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1050;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #dcdcdc;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(1px,1px,1px,1px);
+    white-space: nowrap;
+}
+
+.ellipsis-no {
+    max-width: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ellipsis-stadiumname {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ellipsis-gamestatus {
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/*유효성 검사 숨기기*/
+/*.field-validation-error, .field-validation-valid {
+    display: none !important;
+}*/

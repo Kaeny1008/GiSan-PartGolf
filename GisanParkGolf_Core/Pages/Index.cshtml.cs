@@ -20,10 +20,10 @@ namespace GisanParkGolf_Core.Pages
             if (User?.Identity?.IsAuthenticated == true)
             {
                 var userId = User.Identity.Name; // 로그인시 저장된 값 (UserId와 동일해야 함)
-                var user = _db.SYS_USERS.FirstOrDefault(u => u.USER_ID == userId);
+                var user = _db.SYS_Users.FirstOrDefault(u => u.UserId == userId);
                 if (user != null)
                 {
-                    UserName = user.USER_NAME;
+                    UserName = user.UserName;
                 }
             }
         }
