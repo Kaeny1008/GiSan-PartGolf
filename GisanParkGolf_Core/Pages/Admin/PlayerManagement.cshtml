@@ -1,4 +1,78 @@
 ﻿@page
 @model GisanParkGolf_Core.Pages.Admin.PlayerManagementModel
 @{
+    ViewData["Title"] = "선수 정보관리";
 }
+
+<div class="container-fluid">
+    <h3 class="text-dark mb-4">선수 정보 관리</h3>
+
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <p class="text-primary m-0 fw-bold">선수 목록</p>
+                <div>
+                    <a asp-page="./CreatePlayer" class="btn btn-success btn-sm">선수 등록</a>
+                    <a asp-page-handler="Excel"
+                       asp-route-SearchField="@Model.SearchField"
+                       asp-route-SearchQuery="@Model.SearchQuery"
+                       asp-route-ReadyUserOnly="@Model.ReadyUserOnly"
+                       class="btn btn-info btn-sm">엑셀 저장</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                @await Component.InvokeAsync("Search", new {
+                searchField = Model.SearchField,
+                                searchQuery = Model.SearchQuery,
+                                readyUserOnly = Model.ReadyUserOnly
+                                })
+            </form>
+
+            <div class="table-responsive table mt-2">
+                <table class="table my-0">
+                    <thead>
+                        <tr>
+                            <th>아이디</th>
+                            <th>이름</th>
+                            <th>상태</th>
+                            <th>등록일</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr>
+                                <td>@user.UserId</td>
+                                <td>@user.UserName</td>
+                                <td>@user.UserWClass</td>
+                                <td>@user.UserRegistrationDate.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <a asp-page="./EditPlayer" asp-route-id="@user.UserId" class="btn btn-sm btn-info">수정</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6 align-self-center">
+                    <p>
+                        총 @Model.TotalUsers 개 중 @(Model.Users.Count > 0 ? ((Model.CurrentPage - 1) * Model.PageSize) + 1 : 0)-@(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalUsers)) 개 표시
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    @await Component.InvokeAsync("PagingControl", new
+                    {
+                        totalItems = Model.TotalUsers,
+                                        itemsPerPage = Model.PageSize,
+                                        currentPage = Model.CurrentPage
+                                        })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
