@@ -38,8 +38,10 @@ namespace GisanParkGolf_Core.Models
         [Required(ErrorMessage = "주소는 필수입니다.")]
         public string Address { get; set; } = string.Empty;
 
-        public string Address2 { get; set; } = string.Empty;
+        // string을 string?으로 변경하여 Null을 허용하도록 수정
+        public string? Address2 { get; set; }
 
-        public string Memo { get; set; } = string.Empty;
+        // string을 string?으로 변경하여 Null을 허용하도록 수정
+        public string? Memo { get; set; }
     }
 }

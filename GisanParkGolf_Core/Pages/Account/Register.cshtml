@@ -211,12 +211,4 @@
             });
         </script>
     }
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <script>
-            window.addEventListener('DOMContentLoaded', function () {
-                showResultModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["SuccessMessage"])), "알림");
-            });
-        </script>
-    }
 }

@@ -1,22 +1,35 @@
 ﻿@page
 @model GisanParkGolf_Core.Pages.Account.LoginModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "로그인";
+
+    // C# 로직: 보여줄 메시지가 있는지 여기서 미리 결정합니다.
+    string? messageToShow = null;
+    if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        messageToShow = Model.ErrorMessage;
+    }
+    else if (TempData["SuccessMessage"] != null)
+    {
+        messageToShow = TempData["SuccessMessage"]?.ToString();
+    }
 }
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
     <div class="custom-card">
         <div class="w-100" style="max-width: 480px;">
-            <form method="post">
+            @*
+                여기! 메시지를 눈에 보이지 않는 hidden input에 담아둡니다.
+                C# 데이터를 HTML로 전달하는 가장 안전한 방법입니다.
+            *@
+            <input type="hidden" id="PageMessage" value="@messageToShow" />
+
+            <form method="post" novalidate>
                 <div class="alert alert-primary shadow-sm rounded text-center mb-4">
                     <div class="d-flex align-items-center justify-content-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
                              class="bi bi-exclamation-triangle-fill text-primary me-2" viewBox="0 0 16 16">
-                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091
-                            1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8
-                            5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1
-                            0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2
-                            1 1 0 0 1 0-2z" />
+                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
                         </svg>
                         <h5 class="mb-0 fw-bold">로그인이 필요합니다</h5>
                     </div>
@@ -26,14 +39,14 @@
                     <div class="input-group" style="width: 360px;">
                         <span class="input-group-text" style="width:80px;">ID</span>
                         <input asp-for="Input.USER_ID" class="form-control" placeholder="아이디를 입력하세요" />
-                        <span asp-validation-for="Input.USER_ID" class="text-danger"></span>
+                        @* <span asp-validation-for="Input.USER_ID" class="text-danger"></span> *@
                     </div>
                 </div>
                 <div class="d-flex justify-content-center mb-0">
                     <div class="input-group" style="width: 360px;">
                         <span class="input-group-text" style="width:80px;">PW</span>
                         <input asp-for="Input.USER_PASSWORD" class="form-control" placeholder="비밀번호를 입력하세요" type="password" />
-                        <span asp-validation-for="Input.USER_PASSWORD" class="text-danger"></span>
+                        @* <span asp-validation-for="Input.USER_PASSWORD" class="text-danger"></span> *@
                     </div>
                 </div>
                 <div style="height: 32px;"></div>
@@ -41,16 +54,24 @@
                     <button type="submit" class="btn btn-primary" style="width:160px;">로그인</button>
                     <a asp-page="/Account/Register" class="btn btn-outline-secondary" style="width:160px;">회원가입</a>
                 </div>
-                <div asp-validation-summary="All" class="text-danger"></div>
-                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                {
-                    <script>
-                        window.addEventListener('DOMContentLoaded', function () {
-                            showResultModal(@Json.Serialize(Model.ErrorMessage), "알림");
-                        });
-                    </script>
-                }
+                @* <div asp-validation-summary="All" class="text-danger"></div> *@
             </form>
         </div>
     </div>
 </div>
+
+@*
+    JavaScript는 C# 코드를 전혀 신경 쓰지 않고,
+    오직 HTML에 있는 'PageMessage'의 값만 보고 동작합니다.
+*@
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        const messageInput = document.getElementById('PageMessage');
+        const message = messageInput.value;
+
+        // 메시지가 실제로 존재할 때만 모달을 띄웁니다.
+        if (message) {
+            showResultModal(message, "알림");
+        }
+    });
+</script>

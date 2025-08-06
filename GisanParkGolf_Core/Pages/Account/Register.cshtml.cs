@@ -15,7 +15,7 @@ namespace GisanParkGolf_Core.Pages.Account
             _dbContext = dbContext;
         }
 
-        public SYS_Users NewUser { get; set; }
+        public SYS_Users? NewUser { get; set; }
 
         [BindProperty]
         public Register_InputModel Input { get; set; } = new Register_InputModel();

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Configuration;
+using System.Linq; // Linq 네임스페이스를 추가해야 합니다.
 using System.Security.Claims;
 using System.Threading.Tasks;
 using T_Engine;
@@ -42,20 +42,29 @@ namespace GisanParkGolf_Core.Pages.Account
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // --- 여기부터 수정 ---
             if (!ModelState.IsValid)
             {
+                // ModelState에 있는 모든 에러 메시지를 가져옵니다.
+                var allErrors = ModelState.Values.SelectMany(v => v.Errors);
+
+                // 에러 메시지들을 하나의 문자열로 합칩니다. (줄바꿈으로 구분)
+                ErrorMessage = string.Join("\n", allErrors.Select(e => e.ErrorMessage));
+
+                // Page()를 반환하면, ErrorMessage가 포함된 페이지가 다시 렌더링됩니다.
                 return Page();
             }
+            // --- 여기까지 수정 ---
 
             var crypt = new Cryptography();
             string encryptedPassword = crypt.GetEncoding("ParkGolf", Input.USER_PASSWORD);
 
             // 관리자 마스터 계정 하드코딩
-            if (Input.USER_ID == "1" && encryptedPassword == "+xh7rdesqZo=")
+            if (Input.USER_ID == "supervisor" && encryptedPassword == "JfdGnVeo6PR5KwhI3yVlQjhyfM5lT77e")
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, "1"),
+                    new Claim(ClaimTypes.Name, "관리자"),
                     new Claim("DisplayName", "MasterAdmin"),
                     new Claim("IsAdmin", "true")
                     // 필요한 추가 Claim
@@ -63,6 +72,7 @@ namespace GisanParkGolf_Core.Pages.Account
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
 
+                //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
                 await HttpContext.SignInAsync("Identity.Application", principal);
 
                 return RedirectToPage("/Index");
@@ -82,13 +92,14 @@ namespace GisanParkGolf_Core.Pages.Account
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
 
+                //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
                 await HttpContext.SignInAsync("Identity.Application", principal);
-
+                
                 return RedirectToPage("/Index");
             }
             else
             {
-                ErrorMessage = "로그인에 실패했습니다.\n 아이디 또는 비밀번호를 확인하세요.";
+                ErrorMessage = "로그인에 실패했습니다.\n아이디 또는 비밀번호를 확인하세요.";
                 return Page();
             }
         }
