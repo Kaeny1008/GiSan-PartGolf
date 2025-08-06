@@ -2,8 +2,30 @@
 
 namespace GisanParkGolf_Core.Models
 {
-    public class InputModels
+    /// <summary>
+    /// 페이징 컨트롤의 각 버튼에 대한 정보를 담는 모델
+    /// </summary>
+    public class PagingButtonViewModel
     {
+        /// <summary>
+        /// 버튼에 표시될 텍스트 (예: "1", "2", "이전", "다음")
+        /// </summary>
+        public string Text { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 클릭 시 이동할 페이지 번호
+        /// </summary>
+        public int PageIndex { get; set; }
+
+        /// <summary>
+        /// 버튼 활성화 여부 (true이면 클릭 가능, false이면 비활성화)
+        /// </summary>
+        public bool IsEnabled { get; set; } = true;
+
+        /// <summary>
+        /// 현재 페이지인지를 나타내는 플래그 (CSS 스타일링용)
+        /// </summary>
+        public bool IsCurrent { get; set; } = false;
     }
 
     public class Register_InputModel

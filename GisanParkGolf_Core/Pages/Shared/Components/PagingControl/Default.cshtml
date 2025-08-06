@@ -1,0 +1,35 @@
+﻿@model List<GisanParkGolf_Core.Models.PagingButtonViewModel>
+
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center flex-wrap">
+        @foreach (var button in Model)
+        {
+            // 버튼이 비활성화 상태일 때 (IsEnabled = false)
+            if (!button.IsEnabled)
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">@button.Text</span>
+                </li>
+            }
+            // 버튼이 현재 페이지일 때 (IsCurrent = true)
+            else if (button.IsCurrent)
+            {
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">@button.Text</span>
+                </li>
+            }
+            // 그 외 일반 버튼일 때
+            else
+            {
+                <li class="page-item">
+                    @*
+                        asp-route-currentPage 속성은 현재 페이지의 URL에
+                        "currentPage"라는 이름의 쿼리스트링 매개변수를 추가해줍니다.
+                        예: /YourPage?currentPage=3
+                    *@
+                    <a class="page-link" asp-route-currentPage="@button.PageIndex">@button.Text</a>
+                </li>
+            }
+        }
+    </ul>
+</nav>

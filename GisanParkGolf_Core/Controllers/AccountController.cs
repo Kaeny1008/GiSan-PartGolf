@@ -4,7 +4,7 @@ using GisanParkGolf_Core.Services;
 namespace GisanParkGolf_Core.Controllers
 {
     [ApiController]
-    [Route("api/account")] // <-- 이 부분도 체크!
+    [Route("api/account")]
     public class AccountController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -13,7 +13,7 @@ namespace GisanParkGolf_Core.Controllers
             _userService = userService;
         }
 
-        [HttpGet("checkid")] // <-- 이렇게 하면 /api/account/checkid
+        [HttpGet("checkid")]
         public IActionResult CheckId(string userId)
         {
             bool isExist = _userService.IsUserIdExist(userId);
