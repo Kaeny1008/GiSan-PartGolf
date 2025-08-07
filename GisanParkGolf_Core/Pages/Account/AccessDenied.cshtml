@@ -1,0 +1,32 @@
+﻿@page
+@model GisanParkGolf_Core.Pages.Account.AccessDeniedModel
+@{
+    ViewData["Title"] = "접근 거부";
+}
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="custom-card text-center">
+        <div class="w-100" style="max-width: 520px;">
+
+            <div class="alert alert-danger shadow-sm rounded mb-4">
+                <div class="d-flex align-items-center justify-content-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x-octagon-fill text-danger me-3" viewBox="0 0 16 16">
+                        <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                    </svg>
+                    <h4 class="mb-0 fw-bold">접근 권한이 없습니다</h4>
+                </div>
+            </div>
+
+            <p class="fs-5 mb-4">
+                이 페이지에 접근하는데<br />
+                <strong class="text-danger">필요한 권한</strong>을 가지고 있지 않습니다.<br />
+                관리자에게 문의하거나 다른 페이지를 이용해 주세요.
+            </p>
+
+            <a asp-page="/Index" class="btn btn-primary fw-bold" style="width: 200px; height: 45px; line-height: 30px;">
+                메인으로 돌아가기
+            </a>
+
+        </div>
+    </div>
+</div>

@@ -267,3 +267,27 @@ textarea.form-control {
 /*.field-validation-error, .field-validation-valid {
     display: none !important;
 }*/
+
+/* ============================================= */
+/*  모던 테이블 스타일 (가로선 강조)             */
+/* ============================================= */
+
+.table-modern {
+    /* 모든 테두리를 일단 제거해서 깔끔하게 시작합니다. */
+    border: none;
+}
+
+    /* thead (헤더) 아래에만 두꺼운 선을 추가해서 영역을 구분합니다. */
+    .table-modern thead {
+        border-bottom: 2px solid #dee2e6; /* 두꺼운 회색 선 */
+    }
+
+    /* tbody (본문)의 각 행(tr) 아래에 얇은 선을 추가합니다. */
+    .table-modern tbody tr {
+        border-bottom: 1px solid #dee2e6; /* 얇은 회색 선 */
+    }
+
+        /* 마지막 행 아래에는 선이 필요 없으므로 제거합니다. */
+        .table-modern tbody tr:last-child {
+            border-bottom: none;
+        }

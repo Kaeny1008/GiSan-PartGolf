@@ -3,14 +3,27 @@
 @{
     ViewData["Title"] = "로그인";
 
-    string? messageToShow = null;
-    if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    // 메시지 정보를 담을 변수들을 초기화합니다.
+    string? messageType = null;
+    string? messageTitle = null;
+    string? messageContent = null;
+
+    // [수정된 부분]
+    // 1. 진짜 POST 요청 실패 시 (ErrorMessage)
+    // HttpContext.Request.Method.Equals("POST") 조건을 추가해서,
+    // 페이지가 그냥 뜰 때(GET)는 ErrorMessage가 있어도 무시하도록 합니다.
+    if (HttpContext.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        messageToShow = Model.ErrorMessage;
+        messageType = "Error";
+        messageTitle = "로그인 실패";
+        messageContent = Model.ErrorMessage;
     }
+    // 2. 다른 페이지에서 온 성공 메시지 (TempData)
     else if (TempData["SuccessMessage"] != null)
     {
-        messageToShow = TempData["SuccessMessage"]?.ToString();
+        messageType = "Success";
+        messageTitle = "알림";
+        messageContent = TempData["SuccessMessage"]?.ToString();
     }
 }
 
@@ -18,7 +31,10 @@
     <div class="custom-card">
         <div class="w-100" style="max-width: 480px;">
 
-            <input type="hidden" id="PageMessage" value="@messageToShow" />
+            @* --- JavaScript에 정보를 넘겨주기 위한 숨겨진 입력 필드들 --- *@
+            <input type="hidden" id="PageMessageType" value="@messageType" />
+            <input type="hidden" id="PageMessageTitle" value="@messageTitle" />
+            <input type="hidden" id="PageMessageContent" value="@messageContent" />
 
             <form method="post" novalidate>
                 <div class="alert alert-primary shadow-sm rounded text-center mb-4">
@@ -35,14 +51,12 @@
                     <div class="input-group" style="width: 360px;">
                         <span class="input-group-text" style="width:80px;">ID</span>
                         <input asp-for="Input.USER_ID" class="form-control" placeholder="아이디를 입력하세요" />
-                        @* <span asp-validation-for="Input.USER_ID" class="text-danger"></span> *@
                     </div>
                 </div>
                 <div class="d-flex justify-content-center mb-0">
                     <div class="input-group" style="width: 360px;">
                         <span class="input-group-text" style="width:80px;">PW</span>
                         <input asp-for="Input.USER_PASSWORD" class="form-control" placeholder="비밀번호를 입력하세요" type="password" />
-                        @* <span asp-validation-for="Input.USER_PASSWORD" class="text-danger"></span> *@
                     </div>
                 </div>
                 <div style="height: 32px;"></div>
@@ -50,7 +64,6 @@
                     <button type="submit" class="btn btn-primary" style="width:160px;">로그인</button>
                     <a asp-page="/Account/Register" class="btn btn-outline-secondary" style="width:160px;">회원가입</a>
                 </div>
-                @* <div asp-validation-summary="All" class="text-danger"></div> *@
             </form>
         </div>
     </div>
@@ -58,12 +71,15 @@
 
 <script>
     window.addEventListener('DOMContentLoaded', function () {
-        const messageInput = document.getElementById('PageMessage');
-        const message = messageInput.value;
+        // 숨겨진 필드에서 모든 정보를 가져옵니다.
+        const messageType = document.getElementById('PageMessageType').value;
+        const title = document.getElementById('PageMessageTitle').value;
+        const content = document.getElementById('PageMessageContent').value;
 
-        // 메시지가 실제로 존재할 때만 모달을 띄웁니다.
-        if (message) {
-            showResultModal(message, "알림");
+        // 메시지 타입이 존재할 때만 모달을 띄웁니다.
+        if (messageType) {
+            // showResultModal 함수를 호출할 때 제목과 내용을 동적으로 전달합니다.
+            showResultModal(content, title);
         }
     });
 </script>

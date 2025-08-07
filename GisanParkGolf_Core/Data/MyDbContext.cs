@@ -57,5 +57,5 @@ public class SYS_Users
     public string? UserWClass { get; set; }
 
     [Column("user_class")]
-    public int? UserClass { get; set; }
+    public int UserClass { get; set; } = 3; // 기본값을 3으로 설정 (Member)
 }

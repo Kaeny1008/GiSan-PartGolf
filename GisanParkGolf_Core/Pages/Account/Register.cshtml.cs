@@ -1,4 +1,4 @@
-using GisanParkGolf_Core.Models;
+using GisanParkGolf_Core.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
@@ -37,14 +37,15 @@ namespace GisanParkGolf_Core.Pages.Account
             {
                 UserId = Input.UserId,
                 UserPassword = Input.Password,
-                UserName = Input.Name,
-                UserNumber = int.Parse(Input.BirthDay),
-                UserGender = int.Parse(Input.Gender),
-                UserAddress = Input.Address,
-                UserAddress2 = Input.Address2,
-                UserNote = Input.Memo,
+                UserName = Input.UserName,
+                UserNumber = int.Parse(Input.UserNumber),
+                UserGender = int.Parse(Input.UserGender),
+                UserAddress = Input.UserAddress,
+                UserAddress2 = Input.UserAddress2,
+                UserNote = Input.UserNote,
                 UserWClass = "승인대기",
-                UserClass = 3
+                UserClass = 3,
+                UserRegistrationDate = DateTime.Now
             };
 
             // 비밀번호 암호화

@@ -1,11 +1,14 @@
 using ClosedXML.Excel; // 엑셀 라이브러리 네임스페이스
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 namespace GisanParkGolf_Core.Pages.Admin
 {
+    [Authorize(Policy = "AdminOnly")]
     public class PlayerManagementModel : PageModel
     {
         private readonly MyDbContext _context;
@@ -13,9 +16,16 @@ namespace GisanParkGolf_Core.Pages.Admin
         public PlayerManagementModel(MyDbContext context)
         {
             _context = context;
+            SearchFields = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "이름", Value = "UserName" },
+                new SelectListItem { Text = "아이디", Value = "UserId" }
+            };
         }
 
         // --- 검색/페이징/데이터 속성들 ---
+        public List<SelectListItem> SearchFields { get; }
+
         [BindProperty(SupportsGet = true)]
         public string? SearchField { get; set; }
 
@@ -28,20 +38,15 @@ namespace GisanParkGolf_Core.Pages.Admin
         [BindProperty(SupportsGet = true)]
         public int CurrentPage { get; set; } = 1;
 
-        public int PageSize { get; set; } = 20; // 기존 PageSize 20으로 변경
+        public int PageSize { get; set; } = 10; // 기존 PageSize 10으로 변경
         public int TotalUsers { get; set; }
         public IList<SYS_Users> Users { get; set; } = new List<SYS_Users>();
 
         // 페이지 로드 및 검색/페이징 처리
         public async Task OnGetAsync()
         {
-            // 1. 재사용 가능한 쿼리 빌더 메서드 호출
             var usersIQ = GetFilteredUsersQuery();
-
-            // 2. 총 개수 계산
             TotalUsers = await usersIQ.CountAsync();
-
-            // 3. 페이징 처리하여 데이터 가져오기
             Users = await usersIQ.OrderByDescending(u => u.UserRegistrationDate)
                                  .Skip((CurrentPage - 1) * PageSize)
                                  .Take(PageSize)
@@ -100,7 +105,7 @@ namespace GisanParkGolf_Core.Pages.Admin
 
             if (ReadyUserOnly)
             {
-                usersIQ = usersIQ.Where(u => u.UserWClass == "W");
+                usersIQ = usersIQ.Where(u => u.UserWClass == "승인대기");
             }
 
             if (!string.IsNullOrEmpty(SearchQuery) && !string.IsNullOrEmpty(SearchField))
@@ -112,9 +117,6 @@ namespace GisanParkGolf_Core.Pages.Admin
                         break;
                     case "UserId":
                         usersIQ = usersIQ.Where(u => u.UserId.Contains(SearchQuery));
-                        break;
-                    case "UserWClass":
-                        usersIQ = usersIQ.Where(u => u.UserWClass.Contains(SearchQuery));
                         break;
                 }
             }

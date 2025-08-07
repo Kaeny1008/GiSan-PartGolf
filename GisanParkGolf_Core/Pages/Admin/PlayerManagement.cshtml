@@ -1,53 +1,95 @@
 ﻿@page
 @model GisanParkGolf_Core.Pages.Admin.PlayerManagementModel
+@using GisanParkGolf_Core.Extensions
 @{
     ViewData["Title"] = "선수 정보관리";
 }
 
-<div class="container-fluid">
-    <h3 class="text-dark mb-4">선수 정보 관리</h3>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+             const successMessage = @Html.Raw(Json.Serialize(TempData["SuccessMessage"] as string ?? string.Empty));
 
-    <div class="card shadow">
+            if (successMessage) {
+                document.getElementById('successModalBody').innerText = successMessage;
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+
+                successModal.show();
+            }
+        });
+    </script>
+}
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="successModalLabel">알림</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="successModalBody">
+                <!-- 여기에 성공 메시지 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2">선수 정보관리</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">선수의 정보를 수정합니다.</p>
+    </div>
+
+    <div class="custom-card">
         <div class="card-header py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <p class="text-primary m-0 fw-bold">선수 목록</p>
+            <div class="d-flex justify-content-end align-items-stretch">
                 <div>
-                    <a asp-page="./CreatePlayer" class="btn btn-success btn-sm">선수 등록</a>
                     <a asp-page-handler="Excel"
                        asp-route-SearchField="@Model.SearchField"
                        asp-route-SearchQuery="@Model.SearchQuery"
                        asp-route-ReadyUserOnly="@Model.ReadyUserOnly"
-                       class="btn btn-info btn-sm">엑셀 저장</a>
+                       class="btn btn-success btn-sm">엑셀 저장</a>
                 </div>
             </div>
         </div>
         <div class="card-body">
             <form method="get">
                 @await Component.InvokeAsync("Search", new {
-                searchField = Model.SearchField,
+                searchFields = Model.SearchFields,
+                                searchField = Model.SearchField,
                                 searchQuery = Model.SearchQuery,
                                 readyUserOnly = Model.ReadyUserOnly
                                 })
             </form>
 
-            <div class="table-responsive table mt-2">
-                <table class="table my-0">
+            <div class="table-responsive mt-2">
+                <table class="table my-0 table-striped table-hover table-modern">
                     <thead>
                         <tr>
+                            <th>No</th>
                             <th>아이디</th>
                             <th>이름</th>
                             <th>상태</th>
+                            <th>권한</th>
                             <th>등록일</th>
                             <th>관리</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var user in Model.Users)
+                        @for (var i = 0; i < Model.Users.Count; i++)
                         {
+                            var user = Model.Users[i];
+                            var rowNum = ((Model.CurrentPage - 1) * Model.PageSize) + i + 1;
+
                             <tr>
+                                <td>@rowNum</td>
                                 <td>@user.UserId</td>
                                 <td>@user.UserName</td>
                                 <td>@user.UserWClass</td>
+                                <td>@user.UserClass.ToRoleName()</td>
                                 <td>@user.UserRegistrationDate.ToString("yyyy-MM-dd")</td>
                                 <td>
                                     <a asp-page="./EditPlayer" asp-route-id="@user.UserId" class="btn btn-sm btn-info">수정</a>
@@ -58,19 +100,24 @@
                 </table>
             </div>
 
-            <div class="row mt-3">
-                <div class="col-md-6 align-self-center">
-                    <p>
-                        총 @Model.TotalUsers 개 중 @(Model.Users.Count > 0 ? ((Model.CurrentPage - 1) * Model.PageSize) + 1 : 0)-@(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalUsers)) 개 표시
+            <div class="row align-items-center mt-3">
+                <div class="col-md-4">
+                    <p class="text-muted mb-0">
+                        총 @Model.TotalUsers 명
                     </p>
                 </div>
-                <div class="col-md-6">
+
+                <div class="col-md-4 text-center">
                     @await Component.InvokeAsync("PagingControl", new
                     {
                         totalItems = Model.TotalUsers,
                                         itemsPerPage = Model.PageSize,
                                         currentPage = Model.CurrentPage
                                         })
+                </div>
+
+                <div class="col-md-4">
+                    <!-- 페이징 가운데로.. -->
                 </div>
             </div>
         </div>

@@ -26,4 +26,8 @@
     <ProjectReference Include="..\T-Engine\T-Engine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\License\" />
+  </ItemGroup>
+
 </Project>

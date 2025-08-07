@@ -1,24 +1,21 @@
+using GisanParkGolf_Core.Services; // IUserService를 위해 추가
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq; // Linq 네임스페이스를 추가해야 합니다.
-using System.Security.Claims;
+using System.Linq;
 using System.Threading.Tasks;
-using T_Engine;
 
 namespace GisanParkGolf_Core.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        private readonly MyDbContext _dbContext;
+        // ★★★ DBContext 대신, 우리가 만든 로그인 전문가를 주입받는다! ★★★
+        private readonly IUserService _userService;
 
-        public LoginModel(MyDbContext dbContext)
+        public LoginModel(IUserService userService)
         {
-            _dbContext = dbContext;
+            _userService = userService;
         }
 
         [BindProperty]
@@ -36,69 +33,29 @@ namespace GisanParkGolf_Core.Pages.Account
             public string USER_PASSWORD { get; set; } = string.Empty;
         }
 
-        public void OnGet()
-        {
-        }
+        public void OnGet() { }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // --- 여기부터 수정 ---
             if (!ModelState.IsValid)
             {
-                // ModelState에 있는 모든 에러 메시지를 가져옵니다.
-                var allErrors = ModelState.Values.SelectMany(v => v.Errors);
-
-                // 에러 메시지들을 하나의 문자열로 합칩니다. (줄바꿈으로 구분)
-                ErrorMessage = string.Join("\n", allErrors.Select(e => e.ErrorMessage));
-
-                // Page()를 반환하면, ErrorMessage가 포함된 페이지가 다시 렌더링됩니다.
+                // 모델 유효성 검사 실패 시, 에러 메시지를 합쳐서 보여준다.
+                ErrorMessage = string.Join("\n", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
                 return Page();
             }
-            // --- 여기까지 수정 ---
 
-            var crypt = new Cryptography();
-            string encryptedPassword = crypt.GetEncoding("ParkGolf", Input.USER_PASSWORD);
+            // ★★★ '로그인 전문가'에게 인증을 요청한다 ★★★
+            var principal = await _userService.AuthenticateUserAsync(Input.USER_ID, Input.USER_PASSWORD);
 
-            // 관리자 마스터 계정 하드코딩
-            if (Input.USER_ID == "supervisor" && encryptedPassword == "JfdGnVeo6PR5KwhI3yVlQjhyfM5lT77e")
+            if (principal != null)
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, "관리자"),
-                    new Claim("DisplayName", "MasterAdmin"),
-                    new Claim("IsAdmin", "true")
-                    // 필요한 추가 Claim
-                };
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
-
-                //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                // 인증 성공! 전문가가 만들어준 신분증(principal)으로 로그인 처리
                 await HttpContext.SignInAsync("Identity.Application", principal);
-
-                return RedirectToPage("/Index");
-            }
-
-            var user = await _dbContext.SYS_Users.SingleOrDefaultAsync(u => u.UserId == Input.USER_ID);
-
-            // 기존 로그인 로직
-            if (user != null && user.UserPassword == encryptedPassword)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.UserId),
-                    new Claim("DisplayName", user.UserName ?? user.UserId)
-                    // 필요한 추가 Claim
-                };
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
-
-                //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-                await HttpContext.SignInAsync("Identity.Application", principal);
-                
                 return RedirectToPage("/Index");
             }
             else
             {
+                // 인증 실패! 친구가 만든 에러 메시지를 그대로 사용
                 ErrorMessage = "로그인에 실패했습니다.\n아이디 또는 비밀번호를 확인하세요.";
                 return Page();
             }

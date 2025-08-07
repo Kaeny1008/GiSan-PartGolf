@@ -1,0 +1,110 @@
+﻿@page "{id}"
+@model GiSanParkGolf.Pages.Admin.EditPlayerModel
+@{
+    ViewData["Title"] = "선수 정보 수정";
+}
+
+<!-- 상단 카드: 페이지 설명 영역 -->
+<div class="mb-3 text-center">
+    <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
+    <p class="text-muted" style="font-size: 0.95rem;">
+        선수의 정보를 수정합니다.
+    </p>
+</div>
+
+<div class="center_container mt-4">
+    <!-- 폼 전체를 form 태그로 감싸고, POST 방식으로 데이터를 보낸다 -->
+    <form method="post">
+        <!-- 서버 측 유효성 검사 메시지를 한 곳에 모아서 보여주는 영역 -->
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+        <!-- 수정할 대상의 UserId는 숨겨진 필드로 폼에 포함시켜야 서버가 누굴 수정할지 알 수 있어 -->
+        <input type="hidden" asp-for="Player.UserId" />
+
+        <div class="custom-card">
+            <!-- ID (읽기 전용) -->
+            <div class="input-group mb-3">
+                <span class="input-group-text" style="width: 150px;">ID</span>
+                <input asp-for="Player.UserId" class="form-control" readonly />
+            </div>
+
+            <!-- 암호 -->
+            <span asp-validation-for="Player.NewPassword" class="text-danger small d-block mb-2 ms-1"></span>
+            <div class="input-group mb-3">
+                <span class="input-group-text" style="width: 150px;">암호</span>
+                <input asp-for="Player.NewPassword" type="password" class="form-control" placeholder="수정시에만 입력하세요." />
+            </div>
+
+            <!-- 암호 확인 -->
+            <span asp-validation-for="Player.ConfirmPassword" class="text-danger small d-block mb-2 ms-1"></span>
+            <div class="input-group mb-3">
+                <span class="input-group-text" style="width: 150px;">암호 확인</span>
+                <input asp-for="Player.ConfirmPassword" type="password" class="form-control" placeholder="수정시에만 입력하세요." />
+            </div>
+
+            <!-- 이름 -->
+            <span asp-validation-for="Player.UserName" class="text-danger small d-block mb-2 ms-1"></span>
+            <div class="input-group mb-3">
+                <span class="input-group-text" style="width: 150px;">이름</span>
+                <input asp-for="Player.UserName" class="form-control" />
+            </div>
+
+            <!-- 주민번호 -->
+            <span asp-validation-for="Player.UserNumber" class="text-danger small d-block mb-2 ms-1"></span>
+            <span asp-validation-for="Player.UserGender" class="text-danger small d-block mb-2 ms-1"></span>
+            <div class="input-group mb-3">
+                <span class="input-group-text" style="width: 150px;">주민번호</span>
+                <input asp-for="Player.UserNumber" class="form-control" style="flex: 2 1 auto;" maxlength="6" placeholder="생년월일 6자리" />
+                <span class="input-group-text" style="width:15px; justify-content:center;">-</span>
+                <input asp-for="Player.UserGender" class="form-control" style="flex: 1 1 auto;" maxlength="1" placeholder="성별" />
+                <span class="input-group-text" style="width:auto;">******</span>
+            </div>
+
+            <span asp-validation-for="Player.UserAddress" class="text-danger small d-block mb-2 ms-1"></span>
+            <div class="input-group mb-3">
+                <span class="input-group-text" style="width: 150px;">주소</span>
+                <input asp-for="Player.UserAddress" class="form-control" />
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text" style="width: 150px;">상세주소</span>
+                <input asp-for="Player.UserAddress2" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <div class="row g-0">
+                    <div class="col-auto">
+                        <label asp-for="Player.UserNote" class="input-group-text" style="width: 150px; border-top-right-radius: 0; border-bottom-right-radius: 0; height: 100%;">비고</label>
+                    </div>
+                    <div class="col">
+                        <textarea asp-for="Player.UserNote" class="form-control" rows="3" style="border-top-left-radius: 0; border-bottom-left-radius: 0;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 가입 승인 -->
+            <div class="input-group mb-3">
+                <div class="form-check form-switch">
+                    <input asp-for="Player.IsApproved" class="form-check-input" type="checkbox" role="switch" />
+                    <label asp-for="Player.IsApproved" class="form-check-label">가입 승인</label>
+                </div>
+            </div>
+
+            <!-- 회원 등급 -->
+            <span asp-validation-for="Player.UserClass" class="text-danger small d-block mb-2 ms-1"></span>
+            <div class="input-group mb-3">
+                <label class="input-group-text" style="width: 150px;" asp-for="Player.UserClass">회원등급</label>
+                <select asp-for="Player.UserClass" class="form-select">
+                    <option value="">선택...</option>
+                    <option value="1">Administrator</option>
+                    <option value="2">Manager</option>
+                    <option value="3">Member</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary fw-bold" style="height:40px">수정하기</button>
+        </div>
+    </form>
+</div>
