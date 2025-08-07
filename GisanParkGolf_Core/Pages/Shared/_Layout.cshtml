@@ -137,6 +137,16 @@
             modal.show();
         }
     </script>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var message = @Html.Raw(Json.Serialize(TempData["SuccessMessage"]));
+                showResultModal(message, '작업 완료');
+            });
+        </script>
+    }
+
     @RenderSection("Scripts", required: false)
 </body>
 </html>
