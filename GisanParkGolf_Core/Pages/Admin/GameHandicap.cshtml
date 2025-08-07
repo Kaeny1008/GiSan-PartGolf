@@ -1,0 +1,306 @@
+﻿@page
+@model GisanParkGolf_Core.Pages.Admin.GameHandicapModel
+@{
+    ViewData["Title"] = "핸디캡 관리";
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+
+
+            // --- 기존 핸디캡 관리 스크립트 ---
+            document.querySelectorAll('.ddl-source').forEach(dropdown => {
+                toggleHandicapInput(dropdown);
+                dropdown.addEventListener('change', function () { toggleHandicapInput(this); });
+            });
+            document.querySelectorAll('.txt-handicap').forEach(input => {
+                input.addEventListener('input', function () { markHandicapAsManual(this); });
+            });
+
+            // --- 결과 알림 모달을 띄우는 로직 ---
+            const successMessage = @Html.Raw(Json.Serialize(Model.SuccessMessage));
+            const errorMessage = @Html.Raw(Json.Serialize(Model.ErrorMessage));
+
+            if (successMessage) {
+                showResultModal('작업 성공', successMessage, 'success');
+            } else if (errorMessage) {
+                showResultModal('오류 발생', errorMessage, 'error');
+            }
+
+            // 페이지 크기 변경 시 자동으로 폼 제출
+            document.getElementById('pageSizeSelect').addEventListener('change', function () {
+                this.form.submit();
+            });
+        });
+
+        function toggleHandicapInput(dropdown) {
+            const row = dropdown.closest('tr');
+            const handicapInput = row.querySelector('.txt-handicap');
+            if (!handicapInput) return;
+            if (dropdown.value === "자동") {
+                handicapInput.setAttribute("readonly", "true");
+                handicapInput.value = handicapInput.dataset.autoValue;
+                handicapInput.classList.add("bg-light");
+            } else {
+                handicapInput.removeAttribute("readonly");
+                handicapInput.value = handicapInput.dataset.currentValue;
+                handicapInput.classList.remove("bg-light");
+            }
+        }
+
+        function markHandicapAsManual(input) {
+            const row = input.closest('tr');
+            const sourceDropdown = row.querySelector('.ddl-source');
+            if (sourceDropdown && sourceDropdown.value !== '수동') {
+                sourceDropdown.value = '수동';
+                toggleHandicapInput(sourceDropdown);
+            }
+        }
+
+        function showConfirmRecalcModal() {
+            const modalElement = document.getElementById('confirmRecalcModal');
+            if (modalElement) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            }
+        }
+
+        function showResultModal(title, message, type) {
+            const modalElement = document.getElementById('resultModal');
+            if (modalElement) {
+                const modal = new bootstrap.Modal(modalElement);
+                const modalTitle = modalElement.querySelector('.modal-title');
+                const modalBody = modalElement.querySelector('.modal-body');
+                const modalHeader = modalElement.querySelector('.modal-header');
+
+                modalTitle.textContent = title;
+                modalBody.textContent = message;
+
+                modalHeader.classList.remove('bg-success', 'bg-danger', 'text-white');
+                if (type === 'success') {
+                    modalHeader.classList.add('bg-success', 'text-white');
+                } else {
+                    modalHeader.classList.add('bg-danger', 'text-white');
+                }
+                modal.show();
+            }
+        }
+    </script>
+}
+
+<!-- 상단 카드: 페이지 설명 영역 -->
+<div class="mb-3 text-center">
+    <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
+    <p class="text-muted" style="font-size: 0.95rem;">
+        각 선수의 핸디캡을 관리 합니다. '산정 방식'을 '수동'으로 변경하면 핸디캡 점수를 직접 수정할 수 있습니다.
+    </p>
+</div>
+
+<div class="container mt-4">
+    <div class="custom-card">
+        <!-- 필터 및 버튼 영역 -->
+        <div class="card-header py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+                    <!-- 페이지당 행 수 선택 드롭다운 -->
+                    <select name="PageSize" id="pageSizeSelect" class="form-select" style="width: auto;" asp-for="PageSize">
+                        <option value="10">10개씩 보기</option>
+                        <option value="25">25개씩 보기</option>
+                        <option value="50">50개씩 보기</option>
+                        <option value="100">100개씩 보기</option>
+                    </select>
+                    <select name="SearchField" class="form-select" style="width: auto;" asp-for="SearchField">
+                        <option value="UserName">이름</option>
+                        <option value="UserId">ID</option>
+                    </select>
+                    <input type="text" name="SearchKeyword" class="form-control" placeholder="검색어 입력..." asp-for="SearchKeyword" style="width: 200px;" />
+                    <button type="submit" class="btn btn-primary">검색</button>
+                    <a asp-page="/Admin/GameHandicap" class="btn btn-secondary">초기화</a>
+                </form>
+
+                <!-- 오른쪽 버튼 영역 -->
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-danger" onclick="showConfirmRecalcModal()">
+                        <i class="bi bi-calculator"></i> 전체 자동 계산
+                    </button>
+                    <a asp-page="/Admin/GameHandicapLog" class="btn btn-outline-dark">
+                        <i class="bi bi-bar-chart-line"></i> 핸디캡 기록 보기
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 핸디캡 출력 테이블 -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <form method="post">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%;">No.</th>
+                                <th>ID</th>
+                                <th>이름</th>
+                                <th>생년월일</th>
+                                <th>나이</th>
+                                <th>핸디캡</th>
+                                <th>산정 방식</th>
+                                <th>최종 수정일</th>
+                                <th>수정자</th>
+                                <th style="width: 8%;">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Handicaps != null && Model.Handicaps.Any())
+                            {
+                                var rowNum = (Model.Handicaps.PageIndex - 1) * Model.PageSize + 1;
+                                @foreach (var user in Model.Handicaps)
+                                {
+                                    <tr>
+                                        <td class="text-center">@(rowNum++)</td>
+                                        <td>@user.UserId</td>
+                                        <td>@user.UserName</td>
+                                        <td>@user.UserNumber.ToString("D6")</td>
+                                        <td>@user.Age</td>
+                                        <td>
+                                            <input type="number" name="newHandicap" class="form-control txt-handicap" value="@user.AgeHandicap"
+                                                   data-current-value="@user.AgeHandicap"
+                                                   data-auto-value="@Model.CalculateHandicapByAge(user.Age)" />
+                                        </td>
+                                        <td>
+                                            <select name="newSource" class="form-select ddl-source">
+                                                <option value="자동" selected="@(user.Source == "자동")">자동</option>
+                                                <option value="수동" selected="@(user.Source == "수동" || user.Source == "미설정")">수동</option>
+                                            </select>
+                                        </td>
+                                        <td>@user.LastUpdated?.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td>@user.LastUpdatedBy</td>
+                                        <td class="text-center">
+                                            <input type="hidden" name="userId" value="@user.UserId" />
+                                            <input type="hidden" name="age" value="@user.Age" />
+                                            <button type="submit" asp-page-handler="Update" class="btn btn-sm btn-success">저장</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="10" class="text-center text-muted p-4">
+                                        ⚠️ 현재 조건에 맞는 핸디캡 데이터가 없습니다.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+
+            <!-- 페이지네이션 컨트롤 -->
+            @if (Model.Handicaps != null && Model.Handicaps.TotalPages > 0)
+            {
+                <div class="row align-items-center mt-3">
+                    <div class="col-md-4">
+                        <p class="text-muted mb-0">
+                            총 @Model.Handicaps.TotalCount 명
+                        </p>
+                    </div>
+                    @if (Model.Handicaps.TotalPages > 1)
+                    {
+                        <div class="col-md-8 d-flex justify-content-end">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination mb-0">
+                                    @{
+                                        var prevDisabled = !Model.Handicaps.HasPreviousPage ? "disabled" : "";
+                                        <li class="page-item @prevDisabled">
+                                            <a asp-page="/Admin/GameHandicap"
+                                               asp-route-PageIndex="@(Model.Handicaps.PageIndex - 1)"
+                                               asp-route-PageSize="@Model.PageSize"
+                                               asp-route-SearchField="@Model.SearchField"
+                                               asp-route-SearchKeyword="@Model.SearchKeyword"
+                                               class="page-link">
+                                                이전
+                                            </a>
+                                        </li>
+                                    }
+                                    @for (var i = 1; i <= Model.Handicaps.TotalPages; i++)
+                                    {
+                                        <li class="page-item @(i == Model.Handicaps.PageIndex ? "active" : "")">
+                                            <a asp-page="/Admin/GameHandicap"
+                                               asp-route-PageIndex="@i"
+                                               asp-route-PageSize="@Model.PageSize"
+                                               asp-route-SearchField="@Model.SearchField"
+                                               asp-route-SearchKeyword="@Model.SearchKeyword"
+                                               class="page-link">
+                                                @i
+                                            </a>
+                                        </li>
+                                    }
+                                    @{
+                                        var nextDisabled = !Model.Handicaps.HasNextPage ? "disabled" : "";
+                                        <li class="page-item @nextDisabled">
+                                            <a asp-page="/Admin/GameHandicap"
+                                               asp-route-PageIndex="@(Model.Handicaps.PageIndex + 1)"
+                                               asp-route-PageSize="@Model.PageSize"
+                                               asp-route-SearchField="@Model.SearchField"
+                                               asp-route-SearchKeyword="@Model.SearchKeyword"
+                                               class="page-link">
+                                                다음
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- 모달 창들 -->
+<div class="modal fade" id="confirmRecalcModal" tabindex="-1" aria-labelledby="confirmRecalcModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="confirmRecalcModalLabel">전체 자동 계산 확인</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>모든 사용자의 핸디캡을 <strong>나이 기준으로 자동 재계산</strong>하시겠습니까?</p>
+                <p class="text-muted small">
+                    이 작업은 되돌릴 수 없습니다.<br />
+                    '수동'으로 설정된 사용자의 핸디캡도 변경될 수 있으니 주의하세요.
+                </p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <form method="post">
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">취소</button>
+                    <button type="submit" asp-page-handler="RecalculateAll" class="btn btn-danger">예, 계산을 진행합니다</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" id="resultModalHeader">
+                <h5 class="modal-title" id="resultModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="resultModalBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+            </div>
+        </div>
+    </div>
+</div>

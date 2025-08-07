@@ -1,0 +1,88 @@
+﻿@page
+@model GisanParkGolf_Core.Pages.Admin.GameHandicapLogModel
+@{
+    ViewData["Title"] = "핸디캡 변경 이력";
+    int rowNum = 1;
+}
+
+<!-- 상단 카드: 페이지 설명 영역 -->
+<div class="mb-3 text-center">
+    <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
+    <p class="text-muted" style="font-size: 0.95rem;">
+        변경된 핸디캡의 이력을 조회할 수 있습니다.
+    </p>
+</div>
+
+<div class="container mt-4">
+    <div class="custom-card">
+        <!-- 검색 영역 -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <form method="get" class="d-flex flex-wrap gap-2">
+                    <select name="SearchField" class="form-select" style="width: auto;">
+                        <option value="UserName" selected="@(Model.SearchField == "UserName")">이름</option>
+                        <option value="UserId" selected="@(Model.SearchField == "UserId")">ID</option>
+                    </select>
+                    <input type="text" name="SearchKeyword" class="form-control" placeholder="검색어 입력..." value="@Model.SearchKeyword" style="width: 250px;" />
+                    <button type="submit" class="btn btn-primary">검색</button>
+                    <a asp-page="/Admin/GameHandicapLog" class="btn btn-secondary">초기화</a>
+                </form>
+            </div>
+            <div class="col-md-4 text-end">
+                <a asp-page="/Admin/GameHandicap" class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil-square"></i> 핸디캡 관리 돌아가기
+                </a>
+            </div>
+        </div>
+
+        <!-- 로그 출력 테이블 -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>ID</th>
+                        <th>이름</th>
+                        <th>나이</th>
+                        <th>이전 핸디캡</th>
+                        <th>변경 핸디캡</th>
+                        <th>이전 방식</th>
+                        <th>변경 방식</th>
+                        <th>수정자</th>
+                        <th>변경일시</th>
+                        <th>변경 사유</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Logs.Any())
+                    {
+                        @foreach (var log in Model.Logs)
+                        {
+                            <tr>
+                                <td class="text-center">@(rowNum++)</td>
+                                <td>@log.UserId</td>
+                                <td>@log.UserName</td>
+                                <td class="text-center">@log.Age</td>
+                                <td class="text-center">@log.PrevHandicap</td>
+                                <td class="text-center">@log.NewHandicap</td>
+                                <td class="text-center">@log.PrevSource</td>
+                                <td class="text-center">@log.NewSource</td>
+                                <td class="text-center">@log.ChangedBy</td>
+                                <td>@log.ChangedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@log.Reason</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center text-muted p-4">
+                                ⚠️ 핸디캡 변경 로그가 없습니다.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

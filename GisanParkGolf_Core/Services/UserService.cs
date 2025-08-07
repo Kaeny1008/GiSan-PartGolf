@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using GisanParkGolf_Core.Data;
 using Microsoft.EntityFrameworkCore;
 using T_Engine;
 
@@ -43,6 +44,8 @@ namespace GisanParkGolf_Core.Services
             if (user != null && user.UserPassword == encryptedPassword)
             {
                 bool isAdmin = (user.UserClass == 1);
+                bool isManager = (user.UserClass == 2);
+                bool isMember = (user.UserClass == 3);
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.UserId), 
@@ -54,7 +57,9 @@ namespace GisanParkGolf_Core.Services
                     new Claim("UserAddress", user.UserAddress),
                     new Claim("UserAddress2", user.UserAddress2 ?? string.Empty),
                     new Claim("UserRegistrationDate", user.UserRegistrationDate.ToString("o")),
-                    new Claim("IsAdmin", (user.UserClass == 1).ToString().ToLower())
+                    new Claim("IsAdmin", (user.UserClass == 1).ToString().ToLower()),
+                    new Claim("IsManager", (user.UserClass == 2).ToString().ToLower()),
+                    new Claim("IsMember", (user.UserClass == 3).ToString().ToLower())
                 };
                 var identity = new ClaimsIdentity(claims, "Identity.Application");
                 return new ClaimsPrincipal(identity);

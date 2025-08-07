@@ -1,5 +1,5 @@
+using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Services;
-using Microsoft.AspNetCore.Identity; // Identity 사용을 위해 필수!
 using Microsoft.EntityFrameworkCore;
 using T_Engine;
 
@@ -9,46 +9,46 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // --- 1. 데이터베이스 및 서비스 등록 ---
         var connectionString = builder.Configuration.GetConnectionString("MariaDb");
         builder.Services.AddDbContext<MyDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
         );
 
-        // 서비스들을 여기에 등록 (Singleton, Scoped 등)
         builder.Services.AddSingleton<Cryptography>();
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IHandicapService, HandicapService>();
+        builder.Services.AddScoped<IPlayerService, PlayerService>();
 
+        // 로그인 시스템 설정
+        // 복잡한 Identity 시스템 대신, 간단하고 빠른 '쿠키 인증' 시스템을 사용
+        builder.Services.AddAuthentication("Identity.Application") // 이 이름의 쿠키를 사용
+            .AddCookie("Identity.Application", options =>
+            {
+                // 로그인하지 않은 사용자가 권한이 필요한 페이지에 오면, 여기로
+                options.LoginPath = "/Account/Login";
 
-        // --- 2. 인증 및 권한 설정 (ASP.NET Core Identity 사용) ---
-        // UserManager, SignInManager 등을 모두 제공하는 Identity 시스템 등록
-        builder.Services.AddDefaultIdentity<IdentityUser>(options => {
-            options.SignIn.RequireConfirmedAccount = false;
-        })
-        .AddEntityFrameworkStores<MyDbContext>();
+                // 권한은 있지만 등급이 낮아서 접근 못할 때, 여기로
+                options.AccessDeniedPath = "/Account/AccessDenied";
 
-        // Identity가 사용하는 쿠키의 설정을 우리 입맛에 맞게 변경
-        builder.Services.ConfigureApplicationCookie(options =>
-        {
-            options.Cookie.Name = "GisanParkGolf.AuthCookie";
-            options.LoginPath = "/Account/Login";
-            options.AccessDeniedPath = "/Account/AccessDenied";
-            options.ExpireTimeSpan = TimeSpan.FromHours(8);
-        });
+                // 쿠키 이름과 유효시간 설정
+                options.Cookie.Name = "GisanParkGolf.AuthCookie";
+                options.ExpireTimeSpan = TimeSpan.FromHours(8); // 8시간 동안 로그인 유지
+            });
 
-        // 권한 정책 설정: "IsAdmin" 클레임이 "true"인 사용자만 통과
+        // '관리자' 정책
         builder.Services.AddAuthorization(options =>
         {
             options.AddPolicy("AdminOnly", policy =>
                 policy.RequireClaim("IsAdmin", "true"));
+            options.AddPolicy("ManagerOnly", policy =>
+                policy.RequireClaim("IsManager", "true"));
+            options.AddPolicy("MemberOnly", policy =>
+                policy.RequireClaim("IsMember", "true"));
         });
 
-
-        // --- 3. 기타 웹 설정 ---
         builder.Services.AddRazorPages();
         builder.Services.AddControllers();
 
-        // --- 4. 애플리케이션 빌드 및 실행 ---
         var app = builder.Build();
 
         if (!app.Environment.IsDevelopment())
@@ -61,7 +61,7 @@ public class Program
         app.UseStaticFiles();
         app.UseRouting();
 
-        // 순서 중요: Authentication -> Authorization
+        // 중요: 인증(Authentication)이 허가(Authorization)보다 항상 먼저
         app.UseAuthentication();
         app.UseAuthorization();
 

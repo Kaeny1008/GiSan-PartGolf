@@ -1,4 +1,5 @@
 using GisanParkGolf_Core.Data; // SYS_User 모델이 있는 곳
+using GisanParkGolf_Core.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

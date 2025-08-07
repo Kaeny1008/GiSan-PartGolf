@@ -1,4 +1,5 @@
 ﻿using GisanParkGolf_Core.Data; // PagingButtonViewModel이 있는 네임스페이스
+using GisanParkGolf_Core.ViewModels.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GisanParkGolf_Core.Components

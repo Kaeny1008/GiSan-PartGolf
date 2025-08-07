@@ -1,4 +1,4 @@
-using GisanParkGolf_Core.Services;
+ï»¿using GisanParkGolf_Core.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -22,10 +22,10 @@ namespace GisanParkGolf_Core.Pages.Account
 
         public class InputModel
         {
-            [Required(ErrorMessage = "ID¸¦ ÀÔ·ÂÇÏ¿© ÁÖ½Ê½Ã¿À.")]
+            [Required(ErrorMessage = "IDë¥¼ ì…ë ¥í•˜ì—¬ ì£¼ì‹­ì‹œì˜¤.")]
             public string USER_ID { get; set; } = string.Empty;
 
-            [Required(ErrorMessage = "ºñ¹Ğ¹øÈ£¸¦ ÀÔ·ÂÇÏ¿© ÁÖ½Ê½Ã¿À.")]
+            [Required(ErrorMessage = "ë¹„ë°€ë²ˆí˜¸ë¥¼ ì…ë ¥í•˜ì—¬ ì£¼ì‹­ì‹œì˜¤.")]
             [DataType(DataType.Password)]
             public string USER_PASSWORD { get; set; } = string.Empty;
         }
@@ -45,7 +45,7 @@ namespace GisanParkGolf_Core.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "·Î±×ÀÎ¿¡ ½ÇÆĞÇß½À´Ï´Ù.\n¾ÆÀÌµğ ¶Ç´Â ºñ¹Ğ¹øÈ£¸¦ È®ÀÎÇÏ¼¼¿ä.");
+                    ModelState.AddModelError(string.Empty, "ë¡œê·¸ì¸ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.\nì•„ì´ë”” ë˜ëŠ” ë¹„ë°€ë²ˆí˜¸ë¥¼ í™•ì¸í•˜ì„¸ìš”.");
                 }
             }
 

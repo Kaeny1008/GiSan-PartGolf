@@ -1,61 +1,35 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using GisanParkGolf_Core.Data;
+using Microsoft.EntityFrameworkCore;
 
-public class MyDbContext : DbContext
+namespace GisanParkGolf_Core.Data
 {
-    public MyDbContext(DbContextOptions<MyDbContext> options) : base(options) { }
+    public class MyDbContext : DbContext
+    {
+        public MyDbContext(DbContextOptions<MyDbContext> options) : base(options) { }
 
-    public DbSet<SYS_Users> SYS_Users { get; set; }
-}
+        public DbSet<SYS_Users> SYS_Users { get; set; } = null!;
+        public DbSet<SYS_UserHandicaps> SYS_UserHandicaps { get; set; } = null!;
+        public DbSet<SYS_HandicapChangeLog> SYS_HandicapChangeLogs { get; set; } = null!;
 
-[Table("sys_users")]
-public class SYS_Users
-{
-    [Key]
-    [StringLength(15)]
-    [Column("user_id")]
-    public string UserId { get; set; } = string.Empty;
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
 
-    [StringLength(25)]
-    [Required]
-    [Column("user_name")]
-    public string UserName { get; set; } = string.Empty;
+            // SYS_Users와 SYS_UserHandicaps 간의 1:1 관계 설정
+            // 한 명의 유저는 하나의 핸디캡 정보를 가짐
+            modelBuilder.Entity<SYS_Users>()
+                .HasOne(u => u.Handicap)
+                .WithOne(h => h.User)
+                .HasForeignKey<SYS_UserHandicaps>(h => h.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // 유저가 삭제되면 핸디캡 정보도 함께 삭제
 
-    [StringLength(100)]
-    [Required]
-    [Column("user_password")]
-    public string UserPassword { get; set; } = string.Empty;
-
-    [Required]
-    [Column("user_number")]
-    public int UserNumber { get; set; }
-
-    [Required]
-    [Column("user_gender")]
-    public int UserGender { get; set; }
-
-    [StringLength(70)]
-    [Required]
-    [Column("user_address")]
-    public string UserAddress { get; set; } = string.Empty;
-
-    [StringLength(70)]
-    [Column("user_address2")]
-    public string? UserAddress2 { get; set; }
-
-    [Required]
-    [Column("user_registration_date")]
-    public DateTime UserRegistrationDate { get; set; }
-
-    [StringLength(255)]
-    [Column("user_note")]
-    public string? UserNote { get; set; }
-
-    [StringLength(8)]
-    [Column("user_wclass")]
-    public string UserWClass { get; set; } = "승인대기"; // 기본값을 "승인대기"로 설정
-
-    [Column("user_class")]
-    public int UserClass { get; set; } = 3; // 기본값을 3으로 설정 (Member)
+            // SYS_HandicapChangeLog와 SYS_Users 간의 1:N 관계 설정
+            // 한 명의 유저는 여러 개의 핸디캡 변경 로그를 가질 수 있음
+            modelBuilder.Entity<SYS_HandicapChangeLog>()
+                .HasOne(l => l.User)
+                .WithMany() // SYS_Users 쪽에서 로그 목록을 참조할 필요가 없으므로 비워둠
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.Restrict); // 유저가 삭제되어도 로그는 보존
+        }
+    }
 }

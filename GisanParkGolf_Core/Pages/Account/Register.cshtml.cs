@@ -1,11 +1,8 @@
 using GisanParkGolf_Core.Data;
+using GisanParkGolf_Core.ViewModels.Account;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic; // ★★★ List<string>을 사용하기 위해 추가! ★★★
-using System.ComponentModel.DataAnnotations;
-using System.Linq; // ★★★ ToLower()를 사용하기 위해 추가! ★★★
-using System.Threading.Tasks;
 using T_Engine;
 
 namespace GisanParkGolf_Core.Pages.Account

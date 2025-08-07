@@ -1,21 +1,25 @@
-using ClosedXML.Excel; // 엑셀 라이브러리 네임스페이스
+using ClosedXML.Excel;
+using GisanParkGolf_Core.Data;
+using GisanParkGolf_Core.Helpers;
+using GisanParkGolf_Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace GisanParkGolf_Core.Pages.Admin
 {
     [Authorize(Policy = "AdminOnly")]
     public class PlayerManagementModel : PageModel
     {
-        private readonly MyDbContext _context;
+        private readonly IPlayerService _playerService;
 
-        public PlayerManagementModel(MyDbContext context)
+        public PlayerManagementModel(IPlayerService playerService)
         {
-            _context = context;
+            _playerService = playerService;
             SearchFields = new List<SelectListItem>
             {
                 new SelectListItem { Text = "이름", Value = "UserName" },
@@ -23,11 +27,12 @@ namespace GisanParkGolf_Core.Pages.Admin
             };
         }
 
-        // --- 검색/페이징/데이터 속성들 ---
+        // --- 속성들 ---
         public List<SelectListItem> SearchFields { get; }
 
+        // ★★★★★ 변경점: 기본 검색 필드를 'UserName'으로 설정 ★★★★★
         [BindProperty(SupportsGet = true)]
-        public string? SearchField { get; set; }
+        public string SearchField { get; set; } = "UserName";
 
         [BindProperty(SupportsGet = true)]
         public string? SearchQuery { get; set; }
@@ -36,42 +41,31 @@ namespace GisanParkGolf_Core.Pages.Admin
         public bool ReadyUserOnly { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public int CurrentPage { get; set; } = 1;
+        public int PageIndex { get; set; } = 1;
 
-        public int PageSize { get; set; } = 10; // 기존 PageSize 10으로 변경
-        public int TotalUsers { get; set; }
-        public IList<SYS_Users> Users { get; set; } = new List<SYS_Users>();
+        [BindProperty(SupportsGet = true)]
+        public int PageSize { get; set; } = 10;
 
-        // 페이지 로드 및 검색/페이징 처리
+        public PaginatedList<SYS_Users> Users { get; set; } = null!;
+
+        // --- 메서드들 ---
         public async Task OnGetAsync()
         {
-            var usersIQ = GetFilteredUsersQuery();
-            TotalUsers = await usersIQ.CountAsync();
-            Users = await usersIQ.OrderByDescending(u => u.UserRegistrationDate)
-                                 .Skip((CurrentPage - 1) * PageSize)
-                                 .Take(PageSize)
-                                 .ToListAsync();
+            Users = await _playerService.GetPlayersAsync(SearchField, SearchQuery, ReadyUserOnly, PageIndex, PageSize);
         }
 
-        // 엑셀 저장 버튼 클릭 시 호출될 핸들러
         public async Task<IActionResult> OnGetExcelAsync()
         {
-            // 1. 페이징 없이 필터링된 모든 데이터를 가져옵니다.
-            var usersIQ = GetFilteredUsersQuery();
-            var users = await usersIQ.OrderByDescending(u => u.UserRegistrationDate).ToListAsync();
+            var users = await _playerService.GetPlayersForExcelAsync(SearchField, SearchQuery, ReadyUserOnly);
 
-            // 2. ClosedXML을 사용하여 엑셀 파일 생성
             using (var workbook = new XLWorkbook())
             {
                 var worksheet = workbook.Worksheets.Add("선수 목록");
-
-                // 헤더 추가
                 worksheet.Cell(1, 1).Value = "아이디";
                 worksheet.Cell(1, 2).Value = "이름";
-                worksheet.Cell(1, 3).Value = "상태";
+                worksheet.Cell(1, 3).Value = "가입 상태";
                 worksheet.Cell(1, 4).Value = "등록일";
 
-                // 데이터 추가
                 int currentRow = 2;
                 foreach (var user in users)
                 {
@@ -82,45 +76,16 @@ namespace GisanParkGolf_Core.Pages.Admin
                     currentRow++;
                 }
 
-                // 스타일 조정 (선택 사항)
                 worksheet.Columns().AdjustToContents();
 
-                // 3. 메모리 스트림에 엑셀 파일을 저장
                 using (var stream = new MemoryStream())
                 {
                     workbook.SaveAs(stream);
                     var content = stream.ToArray();
-                    string fileName = $"GisanParkGolf_Players_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-
-                    // 4. 파일 다운로드 Result 반환
+                    string fileName = $"GisanParkGolf_Players_{System.DateTime.Now:yyyyMMddHHmmss}.xlsx";
                     return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
                 }
             }
-        }
-
-        // 검색 조건에 따라 IQueryable을 반환하는 헬퍼 메서드 (코드 중복 방지)
-        private IQueryable<SYS_Users> GetFilteredUsersQuery()
-        {
-            IQueryable<SYS_Users> usersIQ = _context.SYS_Users.AsQueryable();
-
-            if (ReadyUserOnly)
-            {
-                usersIQ = usersIQ.Where(u => u.UserWClass == "승인대기");
-            }
-
-            if (!string.IsNullOrEmpty(SearchQuery) && !string.IsNullOrEmpty(SearchField))
-            {
-                switch (SearchField)
-                {
-                    case "UserName":
-                        usersIQ = usersIQ.Where(u => u.UserName.Contains(SearchQuery));
-                        break;
-                    case "UserId":
-                        usersIQ = usersIQ.Where(u => u.UserId.Contains(SearchQuery));
-                        break;
-                }
-            }
-            return usersIQ;
         }
     }
 }

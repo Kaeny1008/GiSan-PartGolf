@@ -1,10 +1,173 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "기산 파크골프 관리 시스템";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .hero-section {
+        position: relative;
+        height: 50vh;
+        background-image: url('/images/parkgolf-hero.jpg');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border-radius: 0.5rem;
+        margin-bottom: 3rem;
+    }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 0.5rem;
+            z-index: 1;
+        }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        padding: 2rem;
+    }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        .hero-content .lead {
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin: 1rem auto; /* 아래쪽 마진을 살짝 줄임 */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+        }
+
+    .sub-lead {
+        font-size: 1rem;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.85); /* 살짝 투명한 흰색 */
+        margin-top: 0.5rem;
+        margin-bottom: 2rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        color: #0d6efd;
+    }
+
+    .btn-outline-light {
+        border-color: rgba(255, 255, 255, 0.75);
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+            color: #fff;
+        }
+</style>
+
+<!-- 1. 메인 이미지 섹션 -->
+<div class="hero-section shadow-lg">
+    <div class="hero-content">
+        <h1 class="display-4">기산 파크골프</h1><h12>(이미지 변경예정)</h12>
+
+        @if (Model.IsAdmin)
+        {
+            // << 최고 관리자(Admin)에게 보이는 화면 >>
+            <p class="lead">관리자님, 시스템의 모든 기능을 제어할 수 있습니다.</p>
+            <p class="sub-lead">선수 정보, 경기, 시스템 설정을 관리하세요.</p>
+            <a href="/Admin/PlayerManagement" class="btn btn-danger btn-lg px-4"><i class="bi bi-gear-wide-connected"></i> 전체 시스템 관리</a>
+        }
+        else if (Model.IsManager)
+        {
+            // << 중간 관리자(Manager)에게 보이는 화면 >>
+            <p class="lead">매니저님, 환영합니다!</p>
+            <p class="sub-lead">대회결과를 입력, 관리 할 수 있습니다.</p>
+            <a href="/Admin/GameList" class="btn btn-success btn-lg px-4"><i class="bi bi-trophy-fill"></i> 대회결과 입력</a>
+        }
+        else if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            // << 일반 회원(Member)에게 보이는 화면 >>
+            <p class="lead">오늘도 즐거운 라운딩 되세요!</p>
+            <p class="sub-lead">대회에 참가 신청을 하거나 나의 경기 기록을 확인해보세요.</p>
+            <a href="/Player/JoinGame" class="btn btn-primary btn-lg px-4"><i class="bi bi-calendar-check"></i> 대회 참가신청</a>
+        }
+        else
+        {
+            // << 방문객(Guest)에게 보이는 화면 >>
+            <p class="lead">모두가 함께 즐기는 파크골프, 데이터로 더 스마트하게 관리하세요.</p>
+            <p class="sub-lead">
+                <i class="bi bi-box-arrow-in-right"></i>
+                로그인 후 모든 기능을 이용할 수 있습니다.
+            </p>
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="/Account/Register" class="btn btn-primary btn-lg px-4">지금 바로 회원가입</a>
+                <a href="/Account/Login" class="btn btn-outline-light btn-lg px-4">로그인</a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- 2. 주요 기능 소개 섹션 -->
+<div class="container">
+    <div class="row text-center">
+        <!-- 선수 관리 카드 -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="bi bi-people-fill feature-icon"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">선수 관리</h5>
+                    <p class="card-text text-muted">선수 정보를 손쉽게 등록, 검색, 수정하세요. 체계적인 선수 관리가 가능합니다.</p>
+                    <div class="mt-auto">
+                        <a href="/Admin/PlayerManagement" class="btn btn-outline-primary">바로가기 &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 핸디캡 시스템 카드 -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="bi bi-calculator-fill feature-icon"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">핸디캡 시스템</h5>
+                    <p class="card-text text-muted">나이 기반 자동 핸디캡 시스템과 수동 관리를 통해 공정한 경기 환경을 조성합니다.</p>
+                    <div class="mt-auto">
+                        <a href="/Admin/GameHandicap" class="btn btn-outline-primary">바로가기 &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 경기 관리 카드 -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="bi bi-trophy-fill feature-icon"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">경기 및 기록 관리</h5>
+                    <p class="card-text text-muted">경기를 생성하고 스코어를 기록하여 순위를 확인하세요. 모든 기록이 안전하게 보관됩니다.</p>
+                    <div class="mt-auto">
+                        <a href="#" class="btn btn-outline-secondary disabled">준비중</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\License\" />
+    <Folder Include="Pages\Player\" />
   </ItemGroup>
 
 </Project>
