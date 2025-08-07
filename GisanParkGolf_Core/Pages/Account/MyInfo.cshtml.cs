@@ -28,7 +28,7 @@ namespace GisanParkGolf_Core.Pages.Account
         public async Task<IActionResult> OnGetAsync()
         {
             // 현재 로그인한 사용자의 ID를 가져온다.
-            var userId = User.FindFirstValue(ClaimTypes.Name);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
             {
                 return Challenge(); // 로그인 안됐으면 로그인 페이지로

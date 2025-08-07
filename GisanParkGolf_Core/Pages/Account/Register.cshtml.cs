@@ -1,7 +1,11 @@
 using GisanParkGolf_Core.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic; // ★★★ List<string>을 사용하기 위해 추가! ★★★
 using System.ComponentModel.DataAnnotations;
+using System.Linq; // ★★★ ToLower()를 사용하기 위해 추가! ★★★
+using System.Threading.Tasks;
 using T_Engine;
 
 namespace GisanParkGolf_Core.Pages.Account
@@ -9,34 +13,56 @@ namespace GisanParkGolf_Core.Pages.Account
     public class RegisterModel : PageModel
     {
         private readonly MyDbContext _dbContext;
+        private readonly Cryptography _crypt;
+
+        private readonly List<string> _reservedUserIds = new List<string>
+        {
+            "admin", "administrator", "root", "manager", "supervisor",
+            "system", "master", "webmaster", "sysadmin", "관리자", "운영자"
+        };
 
         public RegisterModel(MyDbContext dbContext)
         {
             _dbContext = dbContext;
+            _crypt = new Cryptography();
         }
-
-        public SYS_Users? NewUser { get; set; }
 
         [BindProperty]
         public Register_InputModel Input { get; set; } = new Register_InputModel();
 
-        public string ErrorMessage { get; set; } = string.Empty;
-        public string SuccessMessage { get; set; } = string.Empty;
+        public void OnGet()
+        {
+            // 페이지가 처음 로드될 때 실행되는 곳
+        }
 
-        public void OnGet() { }
-
-        public IActionResult OnPost()
+        public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                ErrorMessage = "폼 입력을 확인하세요.";
                 return Page();
             }
 
-            NewUser = new SYS_Users
+            if (_reservedUserIds.Contains(Input.UserId.ToLower()))
+            {
+                // 금지된 아이디라면, 에러를 추가하고 페이지를 다시 보여줌
+                ModelState.AddModelError("Input.UserId", "이 아이디는 사용할 수 없습니다.");
+                return Page();
+            }
+
+            // DB에 똑같은 아이디가 이미 있는지 확인
+            bool isUserExists = await _dbContext.SYS_Users.AnyAsync(u => u.UserId == Input.UserId);
+            if (isUserExists)
+            {
+                // 이미 아이디가 존재하면, 에러를 추가하고 페이지를 다시 보여줌
+                ModelState.AddModelError("Input.UserId", "이미 사용 중인 아이디입니다.");
+                return Page();
+            }
+
+            // 모든 검사를 통과했으니, 새 사용자를 생성
+            var newUser = new SYS_Users
             {
                 UserId = Input.UserId,
-                UserPassword = Input.Password,
+                UserPassword = _crypt.GetEncoding("ParkGolf", Input.Password),
                 UserName = Input.UserName,
                 UserNumber = int.Parse(Input.UserNumber),
                 UserGender = int.Parse(Input.UserGender),
@@ -48,23 +74,20 @@ namespace GisanParkGolf_Core.Pages.Account
                 UserRegistrationDate = DateTime.Now
             };
 
-            // 비밀번호 암호화
-            var crypt = new Cryptography();
-            string encryptedPassword = crypt.GetEncoding("ParkGolf", NewUser.UserPassword);
-            NewUser.UserPassword = encryptedPassword;
-
-            _dbContext.SYS_Users.Add(NewUser);
+            _dbContext.SYS_Users.Add(newUser);
 
             try
             {
-                _dbContext.SaveChanges();
-                TempData["SuccessMessage"] = "가입 승인대기 되었습니다.\n관리자 승인 완료 후 사용 하실 수 있습니다.";
-                return RedirectToPage("/Account/Login"); // 성공 시 이동
+                // 변경사항을 데이터베이스에 비동기로 저장
+                await _dbContext.SaveChangesAsync();
+                TempData["SuccessMessage"] = "회원가입이 완료되었습니다.\n관리자 승인 후 로그인하여 주시기 바랍니다.";
+                return RedirectToPage("/Account/Login");
             }
-            catch (Exception ex)
+            catch (DbUpdateException)
             {
-                ErrorMessage = "가입 중 오류가 발생했습니다: " + ex.Message;
-                return Page(); // 실패 시 현재 페이지에서 에러 메시지 표시
+                // 데이터베이스 저장 중 오류가 발생했을 경우
+                ModelState.AddModelError(string.Empty, "가입 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                return Page();
             }
         }
     }

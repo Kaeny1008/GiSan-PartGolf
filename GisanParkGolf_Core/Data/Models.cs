@@ -20,8 +20,8 @@ namespace GisanParkGolf_Core.Data
         public string UserName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "생년월일은 필수입니다.")]
-        [RegularExpression(@"^\d{6}$", ErrorMessage = "생년월일은 6자리 숫자로 입력해주세요.")]
         [Display(Name = "생년월일")]
+        [ValidBirthdate] // 우리가 만든 똑똑한 검사 규칙을 여기에 딱!
         public string UserNumber { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "성별은 필수입니다.")]

@@ -4,22 +4,6 @@
 @{
     ViewData["Title"] = "선수 정보관리";
 }
-
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-             const successMessage = @Html.Raw(Json.Serialize(TempData["SuccessMessage"] as string ?? string.Empty));
-
-            if (successMessage) {
-                document.getElementById('successModalBody').innerText = successMessage;
-                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-
-                successModal.show();
-            }
-        });
-    </script>
-}
-
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

@@ -7,7 +7,7 @@ namespace GisanParkGolf_Core.Services
     public class UserService : IUserService
     {
         private readonly MyDbContext _db;
-        private readonly Cryptography _crypt; // 암호화 모듈도 주입받자!
+        private readonly Cryptography _crypt;
 
         public UserService(MyDbContext db, Cryptography crypt)
         {
@@ -20,7 +20,6 @@ namespace GisanParkGolf_Core.Services
             return _db.SYS_Users.Any(u => u.UserId == userId);
         }
 
-        // ★★★ 실제 로그인 로직을 여기에 구현! ★★★
         public async Task<ClaimsPrincipal?> AuthenticateUserAsync(string userId, string password)
         {
             string encryptedPassword = _crypt.GetEncoding("ParkGolf", password);
@@ -46,9 +45,16 @@ namespace GisanParkGolf_Core.Services
                 bool isAdmin = (user.UserClass == 1);
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, user.UserId),
-                    new Claim("DisplayName", user.UserName ?? user.UserId),
-                    new Claim("IsAdmin", isAdmin.ToString().ToLower())
+                    new Claim(ClaimTypes.NameIdentifier, user.UserId), 
+                    new Claim(ClaimTypes.Name, user.UserName ?? user.UserId), 
+                    new Claim("UserNumber", user.UserNumber.ToString()),
+                    new Claim("UserGender", user.UserGender.ToString()),
+                    new Claim("UserWClass", user.UserWClass ?? string.Empty),
+                    new Claim("UserClass", user.UserClass.ToString()),
+                    new Claim("UserAddress", user.UserAddress),
+                    new Claim("UserAddress2", user.UserAddress2 ?? string.Empty),
+                    new Claim("UserRegistrationDate", user.UserRegistrationDate.ToString("o")),
+                    new Claim("IsAdmin", (user.UserClass == 1).ToString().ToLower())
                 };
                 var identity = new ClaimsIdentity(claims, "Identity.Application");
                 return new ClaimsPrincipal(identity);
