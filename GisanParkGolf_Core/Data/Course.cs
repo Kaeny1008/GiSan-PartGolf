@@ -14,9 +14,12 @@ namespace GisanParkGolf_Core.Data
         [Column("stadium_code")]
         public string StadiumCode { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "코스 이름은 필수 항목입니다.")]
         [Column("course_name")]
         public string CourseName { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "홀 수는 필수 항목입니다.")]
+        [Range(1, int.MaxValue, ErrorMessage = "홀 수는 1 이상의 숫자로 입력해주세요.")]
         [Column("hole_count")]
         public int HoleCount { get; set; }
 

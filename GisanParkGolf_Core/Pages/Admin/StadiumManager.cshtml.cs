@@ -1,14 +1,16 @@
 using GisanParkGolf_Core.Data;
+using GisanParkGolf_Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace GiSanParkGolf.Pages.Admin
 {
     [Authorize(Policy = "AdminOnly")]
     public class StadiumManagerModel : PageModel
-    {
+    {        
         private readonly MyDbContext _context;
 
         public StadiumManagerModel(MyDbContext context)
@@ -16,7 +18,7 @@ namespace GiSanParkGolf.Pages.Admin
             _context = context;
         }
 
-        public IList<Stadium> StadiumList { get; set; } = new List<Stadium>();
+        public IList<Stadium> StadiumList { get; set; } = [];
         public Stadium? SelectedStadium { get; set; }
         public Course? SelectedCourse { get; set; }
 
@@ -25,11 +27,15 @@ namespace GiSanParkGolf.Pages.Admin
         [BindProperty]
         public Course NewCourse { get; set; } = new();
         [BindProperty]
-        public List<Hole> HoleDetails { get; set; } = new();
+        public List<Hole> HoleDetails { get; set; } = [];
 
-        public async Task OnGetAsync(string? stadiumCode, int? courseCode)
+        public async Task OnGetAsync(string? stadiumCode, int? courseCode, bool showNewForm = false)
         {
-            StadiumList = await _context.Stadiums.AsNoTracking().OrderBy(s => s.StadiumName).ToListAsync();
+            StadiumList = await _context.Stadiums
+                .Include(s => s.Courses) // 코스 개수 표시를 위해 Include
+                .AsNoTracking()
+                .OrderBy(s => s.StadiumName)
+                .ToListAsync();
 
             if (!string.IsNullOrEmpty(stadiumCode))
             {
@@ -51,18 +57,30 @@ namespace GiSanParkGolf.Pages.Admin
                     HoleDetails = SelectedCourse.Holes.ToList();
                 }
             }
+
+            if (showNewForm)
+            {
+                ViewData["ShowNewStadiumForm"] = "True";
+                SelectedStadium = null;
+                SelectedCourse = null;
+            }
+        }
+
+        public IActionResult OnGetNewStadium()
+        {
+            // showNewForm 쿼리 파라미터를 가지고 페이지를 새로고침
+            return RedirectToPage(new { showNewForm = true });
         }
 
         public async Task<IActionResult> OnPostCreateStadiumAsync()
         {
             if (!ModelState.IsValid)
             {
-                ViewData["ShowNewStadiumForm"] = "True";
-                ViewData["ValidationFailed Title"] = "경기장 생성 실패";
-                ViewData["ValidationFailed"] = "경기장 이름은 필 수 입력입니다.";  
-
-                // 유효성 검사 실패 시, 현재 입력된 값을 유지하며 페이지를 다시 표시
-                await OnGetAsync(null, null); // 경기장 목록은 다시 불러와야 함
+                // 유효성 검사 실패 시, 입력값 유지를 위해 showNewForm을 true로 설정
+                TempData["ModalType"] = "error";
+                TempData["ModalTitle"] = "저장 실패";
+                TempData["ModalBody"] = "입력 정보를 확인해주세요.";
+                await OnGetAsync(null, null, showNewForm: true);
                 return Page();
             }
 
@@ -72,6 +90,7 @@ namespace GiSanParkGolf.Pages.Admin
             _context.Stadiums.Add(NewStadium);
             await _context.SaveChangesAsync();
 
+            // 등록 성공 후, 새로 등록된 경기장을 선택한 상태로 리다이렉트
             return RedirectToPage(new { stadiumCode = NewStadium.StadiumCode });
         }
 
@@ -79,13 +98,13 @@ namespace GiSanParkGolf.Pages.Admin
         {
             if (string.IsNullOrWhiteSpace(NewCourse.CourseName) || NewCourse.HoleCount <= 0)
             {
-                ViewData["ValidationFailed Title"] = "코스 생성 실패";
-                ViewData["ValidationFailed"] = "코스명과 홀 수를 정확히 입력하세요.";
-                //return RedirectToPage(new { stadiumCode });
+                TempData["ModalType"] = "error";
+                TempData["ModalTitle"] = "저장 실패";
+                TempData["ModalBody"] = "입력 정보를 확인해주세요.";
                 await OnGetAsync(stadiumCode, null);
                 return Page();
             }
-
+            NewCourse.CourseName = NewCourse.CourseName + " 코스";
             NewCourse.StadiumCode = stadiumCode;
             NewCourse.CreatedAt = DateTime.Now;
 
@@ -100,6 +119,7 @@ namespace GiSanParkGolf.Pages.Admin
             return RedirectToPage(new { stadiumCode, courseCode = NewCourse.CourseCode });
         }
 
+        // (이하 다른 핸들러들은 모두 동일)
         public async Task<IActionResult> OnPostSaveHolesAsync(int courseCode, string stadiumCode)
         {
             var course = await _context.Courses
@@ -110,10 +130,19 @@ namespace GiSanParkGolf.Pages.Admin
 
             var existingHoles = course.Holes.ToDictionary(h => h.HoleId);
 
+            int newCount = HoleDetails.Count(h => h.HoleId == 0);
+            int updatedCount = 0;
             foreach (var submittedHole in HoleDetails)
             {
                 if (existingHoles.TryGetValue(submittedHole.HoleId, out var existingHole))
                 {
+                    if (existingHole.HoleName != submittedHole.HoleName ||
+                        existingHole.Distance != submittedHole.Distance ||
+                        existingHole.Par != submittedHole.Par)
+                    {
+                        updatedCount++;
+                    }
+
                     existingHole.HoleName = submittedHole.HoleName;
                     existingHole.Distance = submittedHole.Distance;
                     existingHole.Par = submittedHole.Par;
@@ -135,12 +164,15 @@ namespace GiSanParkGolf.Pages.Admin
             course.HoleCount = HoleDetails.Count;
             await _context.SaveChangesAsync();
 
+            TempData["ModalType"] = "success";
+            TempData["ModalTitle"] = "홀 정보 저장 완료";
+            TempData["ModalBody"] = $"총 {HoleDetails.Count}개의 홀이 저장 되었습니다.<br />{newCount}개 신규 / {updatedCount}개 수정 / {holesToDelete.Count}개 삭제";
+
             return RedirectToPage(new { stadiumCode, courseCode });
         }
 
         public async Task<IActionResult> OnPostDeleteStadiumAsync(string stadiumCode)
         {
-            // FindAsync 대신, Include를 사용해서 관련된 모든 Course와 Hole을 함께 불러온다.
             var stadium = await _context.Stadiums
                 .Include(s => s.Courses)
                 .ThenInclude(c => c.Holes)
@@ -149,8 +181,6 @@ namespace GiSanParkGolf.Pages.Admin
             if (stadium != null)
             {
                 _context.Stadiums.Remove(stadium);
-                // 이제 EF Core는 stadium과 함께 로드된 courses, holes를 모두 알고 있으므로
-                // Cascade 설정에 따라 연관된 모든 데이터를 함께 삭제한다.
                 await _context.SaveChangesAsync();
             }
             return RedirectToPage();
@@ -158,7 +188,6 @@ namespace GiSanParkGolf.Pages.Admin
 
         public async Task<IActionResult> OnPostDeleteCourseAsync(int courseCode, string stadiumCode)
         {
-            // FindAsync 대신, Include를 사용해서 관련된 모든 Hole을 함께 불러온다.
             var course = await _context.Courses
                 .Include(c => c.Holes)
                 .FirstOrDefaultAsync(c => c.CourseCode == courseCode);
