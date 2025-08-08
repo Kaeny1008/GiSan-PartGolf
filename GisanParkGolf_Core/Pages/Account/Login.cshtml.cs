@@ -10,11 +10,11 @@ namespace GisanParkGolf_Core.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        private readonly IUserService _userService;
+        private readonly IPlayerservice _Playerservice;
 
-        public LoginModel(IUserService userService)
+        public LoginModel(IPlayerservice Playerservice)
         {
-            _userService = userService;
+            _Playerservice = Playerservice;
         }
 
         [BindProperty]
@@ -36,7 +36,7 @@ namespace GisanParkGolf_Core.Pages.Account
         {
             if (ModelState.IsValid)
             {
-                var principal = await _userService.AuthenticateUserAsync(Input.USER_ID, Input.USER_PASSWORD);
+                var principal = await _Playerservice.AuthenticateUserAsync(Input.USER_ID, Input.USER_PASSWORD);
 
                 if (principal != null)
                 {

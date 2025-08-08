@@ -7,16 +7,16 @@ namespace GisanParkGolf_Core.Controllers
     [Route("api/account")]
     public class AccountController : ControllerBase
     {
-        private readonly IUserService _userService;
-        public AccountController(IUserService userService)
+        private readonly IPlayerservice _Playerservice;
+        public AccountController(IPlayerservice Playerservice)
         {
-            _userService = userService;
+            _Playerservice = Playerservice;
         }
 
         [HttpGet("checkid")]
         public IActionResult CheckId(string userId)
         {
-            bool isExist = _userService.IsUserIdExist(userId);
+            bool isExist = _Playerservice.IsUserIdExist(userId);
             return new JsonResult(new { isExist });
         }
     }

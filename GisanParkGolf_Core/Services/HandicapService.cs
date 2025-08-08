@@ -21,9 +21,9 @@ namespace GisanParkGolf_Core.Services
             _logger = logger;
         }
 
-        public async Task<PaginatedList<HandicapViewModel>> GetUserHandicapsAsync(string? searchField, string? searchKeyword, int pageIndex, int pageSize)
+        public async Task<PaginatedList<HandicapViewModel>> GetPlayerHandicapsAsync(string? searchField, string? searchKeyword, int pageIndex, int pageSize)
         {
-            var query = _dbContext.SYS_Users.AsQueryable();
+            var query = _dbContext.Players.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchKeyword))
             {
@@ -57,7 +57,7 @@ namespace GisanParkGolf_Core.Services
 
         public async Task<bool> UpdateHandicapAsync(string userId, int age, int newHandicap, string newSource, string updatedBy)
         {
-            var handicap = await _dbContext.SYS_UserHandicaps.FindAsync(userId);
+            var handicap = await _dbContext.PlayerHandicaps.FindAsync(userId);
             int prevHandicap = 0;
             string prevSource = "미설정";
 
@@ -72,11 +72,11 @@ namespace GisanParkGolf_Core.Services
             }
             else
             {
-                handicap = new SYS_UserHandicaps { UserId = userId };
-                _dbContext.SYS_UserHandicaps.Add(handicap);
+                handicap = new Player_Handicap { UserId = userId };
+                _dbContext.PlayerHandicaps.Add(handicap);
             }
 
-            var log = new SYS_HandicapChangeLog
+            var log = new Player_Handicap_ChangeLog
             {
                 UserId = userId,
                 Age = age,
@@ -86,13 +86,13 @@ namespace GisanParkGolf_Core.Services
                 NewSource = newSource,
                 Reason = "수동 편집",
                 ChangedBy = updatedBy,
-                ChangedAt = DateTime.UtcNow
+                ChangedAt = DateTime.Now
             };
-            _dbContext.SYS_HandicapChangeLogs.Add(log);
+            _dbContext.HandicapChangeLogs.Add(log);
 
             handicap.AgeHandicap = newHandicap;
             handicap.Source = newSource;
-            handicap.LastUpdated = DateTime.UtcNow;
+            handicap.LastUpdated = DateTime.Now;
             handicap.LastUpdatedBy = updatedBy;
 
             await _dbContext.SaveChangesAsync();
@@ -101,13 +101,13 @@ namespace GisanParkGolf_Core.Services
 
         public async Task<int> RecalculateAllHandicapsAsync(string updatedBy)
         {
-            var usersWithHandicaps = await _dbContext.SYS_Users
+            var PlayersWithHandicaps = await _dbContext.Players
                                                     .Include(u => u.Handicap)
                                                     .ToListAsync();
             int updatedCount = 0;
-            var logsToAdd = new List<SYS_HandicapChangeLog>();
+            var logsToAdd = new List<Player_Handicap_ChangeLog>();
 
-            foreach (var user in usersWithHandicaps)
+            foreach (var user in PlayersWithHandicaps)
             {
                 int age = PersonInfoCalculator.CalculateAge(user.UserNumber, user.UserGender);
                 int newHandicap = HandicapCalculator.CalculateByAge(age);
@@ -122,11 +122,11 @@ namespace GisanParkGolf_Core.Services
 
                 if (handicap == null)
                 {
-                    handicap = new SYS_UserHandicaps { UserId = user.UserId };
-                    _dbContext.SYS_UserHandicaps.Add(handicap);
+                    handicap = new Player_Handicap { UserId = user.UserId };
+                    _dbContext.PlayerHandicaps.Add(handicap);
                 }
 
-                logsToAdd.Add(new SYS_HandicapChangeLog
+                logsToAdd.Add(new Player_Handicap_ChangeLog
                 {
                     UserId = user.UserId,
                     Age = age,
@@ -136,12 +136,12 @@ namespace GisanParkGolf_Core.Services
                     NewSource = "자동",
                     Reason = "전체 자동 재계산",
                     ChangedBy = updatedBy,
-                    ChangedAt = DateTime.UtcNow
+                    ChangedAt = DateTime.Now
                 });
 
                 handicap.AgeHandicap = newHandicap;
                 handicap.Source = "자동";
-                handicap.LastUpdated = DateTime.UtcNow;
+                handicap.LastUpdated = DateTime.Now;
                 handicap.LastUpdatedBy = updatedBy;
 
                 updatedCount++;
@@ -149,7 +149,7 @@ namespace GisanParkGolf_Core.Services
 
             if (updatedCount > 0)
             {
-                await _dbContext.SYS_HandicapChangeLogs.AddRangeAsync(logsToAdd);
+                await _dbContext.HandicapChangeLogs.AddRangeAsync(logsToAdd);
                 await _dbContext.SaveChangesAsync();
             }
 
@@ -159,7 +159,7 @@ namespace GisanParkGolf_Core.Services
         public async Task<PaginatedList<HandicapChangeLogViewModel>> GetHandicapLogsAsync(string? searchField, string? searchKeyword, int pageIndex, int pageSize)
         {
             // 1. 로그 테이블을 먼저 가져온다.
-            var logsQuery = _dbContext.SYS_HandicapChangeLogs.AsQueryable();
+            var logsQuery = _dbContext.HandicapChangeLogs.AsQueryable();
 
             // 2. 검색 조건이 있으면 적용한다.
             if (!string.IsNullOrEmpty(searchKeyword))

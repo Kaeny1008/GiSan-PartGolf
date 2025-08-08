@@ -46,17 +46,17 @@ namespace GisanParkGolf_Core.Pages.Admin
         [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 10;
 
-        public PaginatedList<SYS_Users> Users { get; set; } = null!;
+        public PaginatedList<Player> Players { get; set; } = null!;
 
         // --- 메서드들 ---
         public async Task OnGetAsync()
         {
-            Users = await _playerService.GetPlayersAsync(SearchField, SearchQuery, ReadyUserOnly, PageIndex, PageSize);
+            Players = await _playerService.GetPlayersAsync(SearchField, SearchQuery, ReadyUserOnly, PageIndex, PageSize);
         }
 
         public async Task<IActionResult> OnGetExcelAsync()
         {
-            var users = await _playerService.GetPlayersForExcelAsync(SearchField, SearchQuery, ReadyUserOnly);
+            var Players = await _playerService.GetPlayersForExcelAsync(SearchField, SearchQuery, ReadyUserOnly);
 
             using (var workbook = new XLWorkbook())
             {
@@ -67,7 +67,7 @@ namespace GisanParkGolf_Core.Pages.Admin
                 worksheet.Cell(1, 4).Value = "등록일";
 
                 int currentRow = 2;
-                foreach (var user in users)
+                foreach (var user in Players)
                 {
                     worksheet.Cell(currentRow, 1).Value = user.UserId;
                     worksheet.Cell(currentRow, 2).Value = user.UserName;

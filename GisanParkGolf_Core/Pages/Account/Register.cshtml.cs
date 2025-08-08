@@ -47,7 +47,7 @@ namespace GisanParkGolf_Core.Pages.Account
             }
 
             // DB에 똑같은 아이디가 이미 있는지 확인
-            bool isUserExists = await _dbContext.SYS_Users.AnyAsync(u => u.UserId == Input.UserId);
+            bool isUserExists = await _dbContext.Players.AnyAsync(u => u.UserId == Input.UserId);
             if (isUserExists)
             {
                 // 이미 아이디가 존재하면, 에러를 추가하고 페이지를 다시 보여줌
@@ -56,7 +56,7 @@ namespace GisanParkGolf_Core.Pages.Account
             }
 
             // 모든 검사를 통과했으니, 새 사용자를 생성
-            var newUser = new SYS_Users
+            var newUser = new Player
             {
                 UserId = Input.UserId,
                 UserPassword = _crypt.GetEncoding("ParkGolf", Input.Password),
@@ -71,7 +71,7 @@ namespace GisanParkGolf_Core.Pages.Account
                 UserRegistrationDate = DateTime.Now
             };
 
-            _dbContext.SYS_Users.Add(newUser);
+            _dbContext.Players.Add(newUser);
 
             try
             {

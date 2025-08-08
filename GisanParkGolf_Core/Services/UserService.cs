@@ -5,12 +5,12 @@ using T_Engine;
 
 namespace GisanParkGolf_Core.Services
 {
-    public class UserService : IUserService
+    public class Playerservice : IPlayerservice
     {
         private readonly MyDbContext _db;
         private readonly Cryptography _crypt;
 
-        public UserService(MyDbContext db, Cryptography crypt)
+        public Playerservice(MyDbContext db, Cryptography crypt)
         {
             _db = db;
             _crypt = crypt;
@@ -18,7 +18,7 @@ namespace GisanParkGolf_Core.Services
 
         public bool IsUserIdExist(string userId)
         {
-            return _db.SYS_Users.Any(u => u.UserId == userId);
+            return _db.Players.Any(u => u.UserId == userId);
         }
 
         public async Task<ClaimsPrincipal?> AuthenticateUserAsync(string userId, string password)
@@ -39,7 +39,7 @@ namespace GisanParkGolf_Core.Services
             }
 
             // 2. 일반 사용자 처리
-            var user = await _db.SYS_Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            var user = await _db.Players.FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user != null && user.UserPassword == encryptedPassword)
             {

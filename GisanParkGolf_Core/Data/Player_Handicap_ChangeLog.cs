@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace GisanParkGolf_Core.Data
 {
     [Table("sys_handicap_change_logs")]
-    public class SYS_HandicapChangeLog
+    public class Player_Handicap_ChangeLog
     {
         [Key]
         [Column("log_id")]
@@ -50,6 +50,6 @@ namespace GisanParkGolf_Core.Data
 
         // --- Navigation Property ---
         [ForeignKey("UserId")]
-        public virtual SYS_Users User { get; set; } = null!;
+        public virtual Player User { get; set; } = null!;
     }
 }

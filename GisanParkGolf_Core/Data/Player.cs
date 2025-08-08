@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace GisanParkGolf_Core.Data
 {
     [Table("sys_users")]
-    public class SYS_Users
+    public class Player
     {
         [Key]
         [StringLength(15)]
@@ -53,6 +53,6 @@ namespace GisanParkGolf_Core.Data
         [Column("user_class")]
         public int UserClass { get; set; } = 3; // 기본값을 3으로 설정 (Member)
 
-        public virtual SYS_UserHandicaps? Handicap { get; set; }
+        public virtual Player_Handicap? Handicap { get; set; }
     }
 }

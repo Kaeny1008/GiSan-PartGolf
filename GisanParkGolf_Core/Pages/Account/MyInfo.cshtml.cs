@@ -35,7 +35,7 @@ namespace GisanParkGolf_Core.Pages.Account
                 return Challenge(); // 로그인 안됐으면 로그인 페이지로
             }
 
-            var user = await _context.SYS_Users.FindAsync(userId);
+            var user = await _context.Players.FindAsync(userId);
             if (user == null)
             {
                 return NotFound("사용자 정보를 찾을 수 없습니다.");
@@ -64,7 +64,7 @@ namespace GisanParkGolf_Core.Pages.Account
             }
 
             var userId = User.FindFirstValue(ClaimTypes.Name);
-            var userToUpdate = await _context.SYS_Users.FindAsync(userId);
+            var userToUpdate = await _context.Players.FindAsync(userId);
 
             if (userToUpdate == null)
             {

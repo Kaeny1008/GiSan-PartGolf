@@ -2,7 +2,7 @@
 
 namespace GisanParkGolf_Core.Services
 {
-    public interface IUserService
+    public interface IPlayerservice
     {
         // 기존 메서드
         bool IsUserIdExist(string userId);

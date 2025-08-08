@@ -10,12 +10,13 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         var connectionString = builder.Configuration.GetConnectionString("MariaDb");
+
         builder.Services.AddDbContext<MyDbContext>(options =>
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
         );
 
         builder.Services.AddSingleton<Cryptography>();
-        builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IPlayerservice, Playerservice>();
         builder.Services.AddScoped<IHandicapService, HandicapService>();
         builder.Services.AddScoped<IPlayerService, PlayerService>();
 

@@ -58,7 +58,7 @@ namespace GisanParkGolf_Core.Pages.Admin
                 return NotFound();
             }
 
-            var user = await _context.SYS_Users.FindAsync(id);
+            var user = await _context.Players.FindAsync(id);
 
             if (user == null)
             {
@@ -96,7 +96,7 @@ namespace GisanParkGolf_Core.Pages.Admin
                 return Page();
             }
 
-            var userToUpdate = await _context.SYS_Users.FindAsync(Input.UserId);
+            var userToUpdate = await _context.Players.FindAsync(Input.UserId);
 
             if (userToUpdate == null)
             {

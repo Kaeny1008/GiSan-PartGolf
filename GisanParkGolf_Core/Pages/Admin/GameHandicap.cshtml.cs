@@ -49,7 +49,7 @@ namespace GisanParkGolf_Core.Pages.Admin
         public async Task OnGetAsync()
         {
             // 서비스 계층을 통해 페이징 및 검색 조건에 맞는 데이터를 가져옴
-            Handicaps = await _handicapService.GetUserHandicapsAsync(SearchField, SearchKeyword, PageIndex, PageSize);
+            Handicaps = await _handicapService.GetPlayerHandicapsAsync(SearchField, SearchKeyword, PageIndex, PageSize);
         }
 
         // 개별 핸디캡을 업데이트할 때 실행되는 메서드

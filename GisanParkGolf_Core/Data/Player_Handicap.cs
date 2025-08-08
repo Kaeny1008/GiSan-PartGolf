@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GisanParkGolf_Core.Data
 {
-    // MariaDB의 'sys_userhandicaps' 테이블과 정확히 일치하도록 설정
+    // MariaDB의 'sys_PlayerHandicaps' 테이블과 정확히 일치하도록 설정
     [Table("sys_userhandicaps")]
-    public class SYS_UserHandicaps
+    public class Player_Handicap
     {
         // Primary Key & Foreign Key
         [Key]
@@ -33,6 +33,6 @@ namespace GisanParkGolf_Core.Data
         // 이 핸디캡 정보가 어떤 사용자의 것인지 알려주는 '연결고리' 역할
         // 실제 데이터베이스 컬럼으로 생성되지는 않음
         [ForeignKey("UserId")]
-        public virtual SYS_Users User { get; set; } = null!;
+        public virtual Player User { get; set; } = null!;
     }
 }

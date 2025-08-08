@@ -1,5 +1,4 @@
-﻿using GisanParkGolf_Core.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace GisanParkGolf_Core.Data
 {
@@ -7,29 +6,41 @@ namespace GisanParkGolf_Core.Data
     {
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options) { }
 
-        public DbSet<SYS_Users> SYS_Users { get; set; } = null!;
-        public DbSet<SYS_UserHandicaps> SYS_UserHandicaps { get; set; } = null!;
-        public DbSet<SYS_HandicapChangeLog> SYS_HandicapChangeLogs { get; set; } = null!;
+        // 모델 이름을 반영하여 DbSet 속성명도 규칙에 맞게 변경 (복수형)
+        public DbSet<Player> Players { get; set; } = null!;
+        public DbSet<Player_Handicap> PlayerHandicaps { get; set; } = null!;
+        public DbSet<Player_Handicap_ChangeLog> HandicapChangeLogs { get; set; } = null!;
+        public DbSet<Stadium> Stadiums { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<Hole> Holes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // SYS_Users와 SYS_UserHandicaps 간의 1:1 관계 설정
-            // 한 명의 유저는 하나의 핸디캡 정보를 가짐
-            modelBuilder.Entity<SYS_Users>()
+            modelBuilder.Entity<Player>()
                 .HasOne(u => u.Handicap)
                 .WithOne(h => h.User)
-                .HasForeignKey<SYS_UserHandicaps>(h => h.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // 유저가 삭제되면 핸디캡 정보도 함께 삭제
+                .HasForeignKey<Player_Handicap>(h => h.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // SYS_HandicapChangeLog와 SYS_Users 간의 1:N 관계 설정
-            // 한 명의 유저는 여러 개의 핸디캡 변경 로그를 가질 수 있음
-            modelBuilder.Entity<SYS_HandicapChangeLog>()
+            modelBuilder.Entity<Player_Handicap_ChangeLog>()
                 .HasOne(l => l.User)
-                .WithMany() // SYS_Users 쪽에서 로그 목록을 참조할 필요가 없으므로 비워둠
+                .WithMany()
                 .HasForeignKey(l => l.UserId)
-                .OnDelete(DeleteBehavior.Restrict); // 유저가 삭제되어도 로그는 보존
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Stadium>()
+                .HasMany(s => s.Courses)
+                .WithOne(c => c.Stadium)
+                .HasForeignKey(c => c.StadiumCode)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Course>()
+                .HasMany(c => c.Holes)
+                .WithOne(h => h.Course)
+                .HasForeignKey(h => h.CourseCode)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

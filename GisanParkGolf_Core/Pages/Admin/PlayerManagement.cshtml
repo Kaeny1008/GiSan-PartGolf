@@ -84,10 +84,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model.Users != null && Model.Users.Any())
+                        @if (Model.Players != null && Model.Players.Any())
                         {
-                            var rowNum = (Model.Users.PageIndex - 1) * Model.PageSize + 1;
-                            @foreach (var user in Model.Users)
+                            var rowNum = (Model.Players.PageIndex - 1) * Model.PageSize + 1;
+                            @foreach (var user in Model.Players)
                             {
                                 <tr>
                                     <td>@(rowNum++)</td>
@@ -114,24 +114,24 @@
                 </table>
             </div>
 
-            @if (Model.Users != null && Model.Users.TotalPages > 0)
+            @if (Model.Players != null && Model.Players.TotalPages > 0)
             {
                 <div class="row align-items-center mt-3">
                     <div class="col-md-4">
                         <p class="text-muted mb-0">
-                            총 @Model.Users.TotalCount 명
+                            총 @Model.Players.TotalCount 명
                         </p>
                     </div>
-                    @if (Model.Users.TotalPages > 1)
+                    @if (Model.Players.TotalPages > 1)
                     {
                         <div class="col-md-8 d-flex justify-content-end">
                             <nav aria-label="Page navigation">
                                 <ul class="pagination mb-0">
                                     @{
-                                        var prevDisabled = !Model.Users.HasPreviousPage ? "disabled" : "";
+                                        var prevDisabled = !Model.Players.HasPreviousPage ? "disabled" : "";
                                         <li class="page-item @prevDisabled">
                                             <a asp-page="./PlayerManagement"
-                                               asp-route-PageIndex="@(Model.Users.PageIndex - 1)"
+                                               asp-route-PageIndex="@(Model.Players.PageIndex - 1)"
                                                asp-route-PageSize="@Model.PageSize"
                                                asp-route-SearchField="@Model.SearchField"
                                                asp-route-SearchQuery="@Model.SearchQuery"
@@ -141,9 +141,9 @@
                                             </a>
                                         </li>
                                     }
-                                    @for (var i = 1; i <= Model.Users.TotalPages; i++)
+                                    @for (var i = 1; i <= Model.Players.TotalPages; i++)
                                     {
-                                        <li class="page-item @(i == Model.Users.PageIndex ? "active" : "")">
+                                        <li class="page-item @(i == Model.Players.PageIndex ? "active" : "")">
                                             <a asp-page="./PlayerManagement"
                                                asp-route-PageIndex="@i"
                                                asp-route-PageSize="@Model.PageSize"
@@ -156,10 +156,10 @@
                                         </li>
                                     }
                                     @{
-                                        var nextDisabled = !Model.Users.HasNextPage ? "disabled" : "";
+                                        var nextDisabled = !Model.Players.HasNextPage ? "disabled" : "";
                                         <li class="page-item @nextDisabled">
                                             <a asp-page="./PlayerManagement"
-                                               asp-route-PageIndex="@(Model.Users.PageIndex + 1)"
+                                               asp-route-PageIndex="@(Model.Players.PageIndex + 1)"
                                                asp-route-PageSize="@Model.PageSize"
                                                asp-route-SearchField="@Model.SearchField"
                                                asp-route-SearchQuery="@Model.SearchQuery"
