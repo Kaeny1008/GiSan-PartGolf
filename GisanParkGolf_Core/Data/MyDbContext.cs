@@ -13,6 +13,10 @@ namespace GisanParkGolf_Core.Data
         public DbSet<Stadium> Stadiums { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Hole> Holes { get; set; }
+        public DbSet<Game> Games { get; set; }
+        public DbSet<GameParticipant> GameParticipants { get; set; }
+        public DbSet<GameAwardHistory> GameAwardHistories { get; set; }
+        public DbSet<GameUserAssignment> GameUserAssignments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +44,24 @@ namespace GisanParkGolf_Core.Data
                 .HasMany(c => c.Holes)
                 .WithOne(h => h.Course)
                 .HasForeignKey(h => h.CourseCode)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Game>()
+                .HasMany(g => g.Participants)
+                .WithOne(p => p.Game)
+                .HasForeignKey(p => p.GameCode)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Game>()
+                .HasMany(g => g.AwardHistories)
+                .WithOne(a => a.Game)
+                .HasForeignKey(a => a.GameCode)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Game>()
+                .HasMany(g => g.UserAssignments)
+                .WithOne(a => a.Game)
+                .HasForeignKey(a => a.GameCode)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -1,0 +1,71 @@
+﻿@page "{gameCode?}"
+@model GiSanParkGolf.Pages.Admin.GameUpsertModel
+@{
+}
+
+<div class="container mt-4">
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">대회의 정보를 입력하고 모집 일정을 설정하세요.</p>
+    </div>
+
+    <form method="post">
+        <div class="row justify-content-center g-3">
+            <!-- 좌측 패널 -->
+            <div class="col-md-5">
+                <div class="custom-card">
+                    <h5 class="card-title">대회 정보</h5>
+                    <hr />
+                    <input type="hidden" asp-for="Game.GameCode" />
+                    <div class="mb-3">
+                        <label asp-for="Game.GameName" class="form-label">대회명</label>
+                        <input asp-for="Game.GameName" class="form-control" />
+                        <span asp-validation-for="Game.GameName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.GameDate" class="form-label">대회일시</label>
+                        <input asp-for="Game.GameDate" type="datetime-local" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.StadiumCode" class="form-label">경기장</label>
+                        <select asp-for="Game.StadiumCode" asp-items="Model.StadiumSelectList" class="form-select">
+                            <option value="">-- 경기장 선택 --</option>
+                        </select>
+                    </div>
+                    <!-- 다른 필드들... -->
+                </div>
+            </div>
+            <!-- 우측 패널 -->
+            <div class="col-md-5">
+                <div class="custom-card">
+                    <h5 class="card-title">모집 일정 및 비고</h5>
+                    <hr />
+                    <div class="mb-3">
+                        <label asp-for="Game.StartRecruiting" class="form-label">모집 시작</label>
+                        <input asp-for="Game.StartRecruiting" type="datetime-local" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.EndRecruiting" class="form-label">모집 종료</label>
+                        <input asp-for="Game.EndRecruiting" type="datetime-local" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.GameNote" class="form-label">비고</label>
+                        <textarea asp-for="Game.GameNote" class="form-control" rows="5"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a asp-page="./GameList" class="btn btn-secondary btn-lg">목록으로</a>
+            <button type="submit" class="btn btn-primary btn-lg">저장</button>
+            @if (!Model.IsCreateMode)
+            {
+                <button type="submit" asp-page-handler="CancelGame" asp-route-gameCode="@Model.Game.GameCode"
+                        class="btn btn-danger btn-lg" onclick="return confirm('정말 이 대회를 취소하시겠습니까?');">
+                    대회 취소
+                </button>
+            }
+        </div>
+    </form>
+</div>

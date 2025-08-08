@@ -20,6 +20,7 @@ public class Program
         builder.Services.AddScoped<IHandicapService, HandicapService>();
         builder.Services.AddScoped<IPlayerService, PlayerService>();
         builder.Services.AddScoped<IStadiumService, StadiumService>();
+        builder.Services.AddScoped<IGameService, GameService>();
 
         // 로그인 시스템 설정
         // 복잡한 Identity 시스템 대신, 간단하고 빠른 '쿠키 인증' 시스템을 사용
