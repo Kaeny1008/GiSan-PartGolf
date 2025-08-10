@@ -10,7 +10,7 @@ namespace GisanParkGolf_Core.Data
         [Column("game_code", TypeName = "varchar(6)")]
         public string? GameCode { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "대회명을 입력하세요.")]
         [Column("game_name", TypeName = "varchar(50)")]
         public string? GameName { get; set; }
 
@@ -21,11 +21,10 @@ namespace GisanParkGolf_Core.Data
         [Column("stadium_code", TypeName = "varchar(10)")]
         public string? StadiumCode { get; set; }
 
-        [Required]
         [Column("stadium_name", TypeName = "varchar(50)")]
         public string? StadiumName { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "주최자를 입력하세요.")]
         [Column("game_host", TypeName = "varchar(100)")]
         public string? GameHost { get; set; }
 
@@ -36,6 +35,8 @@ namespace GisanParkGolf_Core.Data
         public DateTime EndRecruiting { get; set; }
 
         [Column("hole_maximum")]
+        [Required(ErrorMessage = "홀당 최대인원을 입력하세요.")]
+        [Range(1, int.MaxValue, ErrorMessage = "홀당 최대인원은 1 이상이어야 합니다.")]
         public int HoleMaximum { get; set; }
 
         [Column("play_mode", TypeName = "varchar(20)")]

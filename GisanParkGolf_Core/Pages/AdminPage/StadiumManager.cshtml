@@ -1,5 +1,5 @@
 ﻿@page "{stadiumCode?}/{courseCode:int?}"
-@model GiSanParkGolf.Pages.Admin.StadiumManagerModel
+@model GiSanParkGolf.Pages.AdminPage.StadiumManagerModel
 @{
     ViewData["Title"] = "경기장 및 코스 관리";
 }
@@ -138,7 +138,7 @@
                 <!-- 검색 추가 -->
                 <form method="get" class="mb-3">
                     <div class="input-group">
-                        <select asp-for="PageSize" class="form-select" style="max-width: 120px;" onchange="this.form.submit()">
+                        <select asp-for="PageSize" class="form-select" style="max-width: auto;" onchange="this.form.submit()">
                             <option value="5">5개씩 보기</option>
                             <option value="10">10개씩 보기</option>
                             <option value="20">20개씩 보기</option>
@@ -151,7 +151,7 @@
                             <option value="CityName">시/군</option>
                         </select>
                         <input type="text" asp-for="SearchQuery" class="form-control" placeholder="검색어를 입력하세요..." />
-                        <button type="submit" class="btn btn-outline-primary">검색</button>
+                        <button type="submit" class="btn btn-primary">검색</button>
                         <a asp-page="./StadiumManager" class="btn btn-secondary">초기화</a>
                     </div>
                 </form>

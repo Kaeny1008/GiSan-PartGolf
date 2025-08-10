@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.Admin
+namespace GisanParkGolf_Core.Pages.AdminPage
 {
     [Authorize(Policy = "AdminOnly")]
     public class GameHandicapModel : PageModel

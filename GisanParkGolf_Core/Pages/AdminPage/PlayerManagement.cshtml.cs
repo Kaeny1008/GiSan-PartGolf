@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.Admin
+namespace GisanParkGolf_Core.Pages.AdminPage
 {
     [Authorize(Policy = "AdminOnly")]
     public class PlayerManagementModel : PageModel

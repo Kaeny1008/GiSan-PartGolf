@@ -1,5 +1,5 @@
 ﻿@page
-@model GiSanParkGolf.Pages.Admin.GameListModel
+@model GiSanParkGolf.Pages.AdminPage.GameListModel
 @{
     ViewData["Title"] = "대회 목록";
 }
@@ -20,7 +20,7 @@
         <div class="card-header py-3">
             <form method="get" class="d-flex flex-wrap align-items-center gap-2">
                 <!-- 페이지당 행 수 선택 드롭다운 -->
-                <select asp-for="PageSize" class="form-select" style="max-width: 120px;" onchange="this.form.submit()">
+                <select asp-for="PageSize" class="form-select" style="max-width: auto;" onchange="this.form.submit()">
                     <option value="10">10개씩 보기</option>
                     <option value="20">20개씩 보기</option>
                     <option value="50">50개씩 보기</option>
@@ -31,8 +31,8 @@
                     <option value="StadiumName">경기장</option>
                 </select>
                 <input type="text" asp-for="SearchQuery" class="form-control" placeholder="대회명 또는 주최로 검색..." />
-                <button type="submit" class="btn btn-outline-primary">검색</button>
-                <a asp-page="./GameList" class="btn btn-outline-secondary">초기화</a>
+                <button type="submit" class="btn btn-primary">검색</button>
+                <a asp-page="./GameList" class="btn btn-secondary">초기화</a>
             </form>
         </div>
 
@@ -49,18 +49,27 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var game in Model.GameList)
+                @if (Model.GameList != null && Model.GameList.Any())
+                {
+                    foreach (var game in Model.GameList)
+                    {
+                        <tr>
+                            <td><span class="badge bg-secondary">@game.GameStatus</span></td>
+                            <td>@game.GameName</td>
+                            <td>@game.GameDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@game.StadiumName</td>
+                            <td>@game.GameHost</td>
+                            <td>@game.ParticipantNumber</td>
+                            <td>
+                                <a asp-page="./GameUpsert" asp-route-gameCode="@game.GameCode" class="btn btn-sm btn-outline-secondary">수정</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td><span class="badge bg-secondary">@game.GameStatus</span></td>
-                        <td>@game.GameName</td>
-                        <td>@game.GameDate.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>@game.StadiumName</td>
-                        <td>@game.GameHost</td>
-                        <td>@game.ParticipantNumber / @game.HoleMaximum</td>
-                        <td>
-                            <a asp-page="./GameUpsert" asp-route-gameCode="@game.GameCode" class="btn btn-sm btn-outline-secondary">수정</a>
-                        </td>
+                        <td colspan="7" class="text-center text-muted">데이터가 없습니다.</td>
                     </tr>
                 }
             </tbody>

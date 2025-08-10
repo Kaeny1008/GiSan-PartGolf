@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using T_Engine;
 
-namespace GisanParkGolf_Core.Pages.Admin
+namespace GisanParkGolf_Core.Pages.AdminPage
 {
     [Authorize(Policy = "AdminOnly")]
     public class EditPlayerModel : PageModel

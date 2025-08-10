@@ -1,0 +1,163 @@
+﻿@page "{gameCode?}"
+@model GiSanParkGolf.Pages.AdminPage.GameUpsertModel
+@{
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          // 저장 버튼
+          document.getElementById('saveBtn')?.addEventListener('click', function () {
+            showConfirmModal("저장 확인", "정말 저장 하시겠습니까?", function() {
+              document.getElementById('gameUpsertForm').submit();
+            });
+          });
+
+          // 대회 취소 버튼
+          document.getElementById('cancelBtn')?.addEventListener('click', function () {
+            showConfirmModal("대회 취소", "정말 이 대회를 취소하시겠습니까?", function() {
+              // 취소용 submit: asp-page-handler="CancelGame"와 gameCode 파라미터 전달 필요
+              // form에 hidden으로 handler & gameCode 넣어서 submit
+              const form = document.getElementById('gameUpsertForm');
+              // handler
+              let handler = form.querySelector('input[name="handler"]');
+              if(!handler) {
+                handler = document.createElement('input');
+                handler.type = "hidden";
+                handler.name = "handler";
+                form.appendChild(handler);
+              }
+              handler.value = "CancelGame";
+              // gameCode
+              let code = form.querySelector('input[name="gameCode"]');
+              if(!code) {
+                code = document.createElement('input');
+                code.type = "hidden";
+                code.name = "gameCode";
+                code.value = '@(Model.Game != null ? Model.Game.GameCode : "")';
+                form.appendChild(code);
+              }
+              form.submit();
+            });
+          });
+
+          function showConfirmModal(title, body, onOk) {
+            document.getElementById('confirmModalLabel').textContent = title;
+            document.querySelector('#confirmModal .modal-body').textContent = body;
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+
+            // 확인 버튼 이벤트 초기화
+            const okBtn = document.getElementById('confirmModalOk');
+            okBtn.onclick = function () {
+              modal.hide();
+              if (onOk) onOk();
+            };
+          }
+        });
+    </script>
+}
+
+<!-- 공통 확인 모달 -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">제목자리</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+                바디메시지자리
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" id="confirmModalOk" class="btn btn-primary">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">대회의 정보를 입력하고 모집 일정을 설정하세요.</p>
+    </div>
+
+    <form id="gameUpsertForm" method="post">
+        @Html.AntiForgeryToken()
+        <div class="row justify-content-center g-3">
+            <!-- 좌측 패널 -->
+            <div class="col-md-5">
+                <div class="custom-card">
+                    <h5 class="card-title">대회 정보</h5>
+                    <hr />
+                    <input type="hidden" asp-for="Game.GameCode" />
+                    <div class="mb-3">
+                        <label asp-for="Game.GameName" class="form-label">대회명</label>
+                        <input asp-for="Game.GameName" class="form-control" />
+                        <span asp-validation-for="Game.GameName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.GameDate" class="form-label">대회일시</label>
+                        <input asp-for="Game.GameDate" type="datetime-local" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.GameHost" class="form-label">주최</label>
+                        <input asp-for="Game.GameHost" class="form-control" />
+                        <span asp-validation-for="Game.GameHost" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.StadiumCode" class="form-label">경기장</label>
+                        <select asp-for="Game.StadiumCode" asp-items="Model.StadiumSelectList" class="form-select">
+                            <option value="">-- 경기장 선택 --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.HoleMaximum" class="form-label">홀당 최대인원</label>
+                        <input asp-for="Game.HoleMaximum" class="form-control" type="number" min="1" />
+                        <span asp-validation-for="Game.HoleMaximum" class="text-danger"></span>
+                    </div>
+                    <div class="input-group mb-2 align-items-center">
+                        <span class="input-group-text">방식</span>
+                        <div class="form-control d-flex flex-row justify-content-around">
+                            <div class="d-flex gap-3">
+                                <input type="radio" asp-for="Game.PlayMode" id="PlayMode_Stroke" name="PlayMode" value="Stroke" checked />
+                                <label for="PlayMode_Stroke" class="me-2">스트로크</label>
+                                <input type="radio" asp-for="Game.PlayMode" id="PlayMode_Match" name="PlayMode" value="Match" disabled />
+                                <label for="PlayMode_Match">매치</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 우측 패널 -->
+            <div class="col-md-5">
+                <div class="custom-card">
+                    <h5 class="card-title">모집 일정 및 비고</h5>
+                    <hr />
+                    <div class="mb-3">
+                        <label asp-for="Game.StartRecruiting" class="form-label">모집 시작</label>
+                        <input asp-for="Game.StartRecruiting" type="datetime-local" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.EndRecruiting" class="form-label">모집 종료</label>
+                        <input asp-for="Game.EndRecruiting" type="datetime-local" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Game.GameNote" class="form-label">비고</label>
+                        <textarea asp-for="Game.GameNote" class="form-control" rows="5"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a asp-page="./GameList" class="btn btn-secondary btn-lg">목록으로</a>
+            <button type="button" id="saveBtn" class="btn btn-primary btn-lg">저장</button>
+            @if (!Model.IsCreateMode)
+            {
+                <button type="button" id="cancelBtn" class="btn btn-danger btn-lg">대회 취소</button>
+            }
+        </div>
+    </form>
+</div>

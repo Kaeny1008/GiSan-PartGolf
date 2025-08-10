@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace GiSanParkGolf.Pages.Admin
+namespace GiSanParkGolf.Pages.AdminPage
 {
     [Authorize(Policy = "AdminOnly")]
     public class GameListModel : PageModel

@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Wordprocessing;
 using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -5,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace GiSanParkGolf.Pages.Admin
+namespace GiSanParkGolf.Pages.AdminPage
 {
     [Authorize(Policy = "AdminOnly")]
     public class GameUpsertModel : PageModel
@@ -24,7 +25,7 @@ namespace GiSanParkGolf.Pages.Admin
 
         public SelectList? StadiumSelectList { get; set; }
 
-        public bool IsCreateMode => string.IsNullOrEmpty(Game.GameCode);
+        public bool IsCreateMode => string.IsNullOrEmpty(Game?.GameCode);
 
         public async Task<IActionResult> OnGetAsync(string? gameCode)
         {
@@ -61,17 +62,30 @@ namespace GiSanParkGolf.Pages.Admin
                 return Page();
             }
 
-            // 경기장 이름 동기화
-            var selectedStadium = (await _stadiumService.GetStadiumsAsync(null, null, 1, 1000)).FirstOrDefault(s => s.StadiumCode == Game.StadiumCode);
+            // Game이 null이면 바로 예외 처리 또는 반환(원하는 방식으로!)
+            if (Game == null)
+            {
+                // 사용자에게 오류 메시지를 보여주거나, 로그를 남기고 return 등
+                throw new InvalidOperationException("게임 정보가 없습니다.");
+                // 또는: return; // 메서드 종료
+            }
+
+            // StadiumCode가 null일 수 있으니, 필요한 경우 추가 체크
+            var selectedStadium = (await _stadiumService.GetStadiumsAsync(null, null, 1, 1000))
+                .FirstOrDefault(s => s.StadiumCode == Game.StadiumCode);
+
             Game.StadiumName = selectedStadium?.StadiumName ?? "알 수 없음";
+            Game.PostIp = HttpContext.Connection.RemoteIpAddress?.ToString();
 
             if (IsCreateMode)
             {
                 await _gameService.CreateGameAsync(Game);
+                TempData["SuccessMessage"] = "대회가 성공적으로 등록되었습니다.";
             }
             else
             {
                 await _gameService.UpdateGameAsync(Game);
+                TempData["SuccessMessage"] = "대회 정보가 성공적으로 수정되었습니다.";
             }
             return RedirectToPage("./GameList");
         }
