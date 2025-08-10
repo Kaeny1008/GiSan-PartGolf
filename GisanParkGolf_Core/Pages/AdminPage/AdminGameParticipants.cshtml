@@ -1,0 +1,75 @@
+﻿@page
+@model GiSanParkGolf.Pages.AdminPage.AdminGameParticipantsModel
+@{
+    ViewData["Title"] = "참가/취소 내역 관리";
+}
+
+<h3>@ViewData["Title"]</h3>
+
+<!-- 통계 요약 -->
+<div class="mb-3">
+    <span class="me-3">전체 참가내역: <strong>@Model.TotalCount</strong></span>
+    <span class="me-3 text-success">참가중: <strong>@Model.JoinedCount</strong></span>
+    <span class="me-3 text-danger">취소: <strong>@Model.CancelledCount</strong></span>
+</div>
+
+<!-- 검색/필터 폼 -->
+<form method="get" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <input type="text" name="SearchGameName" value="@Model.SearchGameName" class="form-control" style="width:180px" placeholder="대회명" />
+    <input type="text" name="SearchUserId" value="@Model.SearchUserId" class="form-control" style="width:180px" placeholder="참가자ID" />
+    <label>
+        <input type="checkbox" name="ShowCancelledOnly" value="true" @(Model.ShowCancelledOnly ? "checked" : "") />
+        취소자만 보기
+    </label>
+    <button type="submit" class="btn btn-primary">검색</button>
+</form>
+
+<!-- 목록 테이블 -->
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>No</th>
+            <th>대회명</th>
+            <th>참가자ID</th>
+            <th>참가일</th>
+            <th>상태</th>
+            <th>취소일</th>
+            <th>취소사유</th>
+            <th>취소처리자</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Participants != null && Model.Participants.Any())
+        {
+            int no = 0;
+            foreach (var p in Model.Participants)
+            {
+                <tr class="@(p.IsCancelled ? "table-danger" : "")">
+                    <td>@(++no)</td>
+                    <td>@p.Game?.GameName</td>
+                    <td>@p.UserId</td>
+                    <td>@p.JoinDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        @if (p.IsCancelled)
+                        {
+                            <span class="text-danger">취소</span>
+                        }
+                        else
+                        {
+                            <span class="text-success">참가</span>
+                        }
+                    </td>
+                    <td>@(p.CancelDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                    <td>@(p.CancelReason ?? "-")</td>
+                    <td>@(p.CancelledBy ?? "-")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="8" class="text-center text-muted">내역이 없습니다.</td>
+            </tr>
+        }
+    </tbody>
+</table>

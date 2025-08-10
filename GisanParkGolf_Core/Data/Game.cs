@@ -68,4 +68,9 @@ namespace GisanParkGolf_Core.Data
         public virtual ICollection<GameAwardHistory> AwardHistories { get; set; } = new List<GameAwardHistory>();
         public virtual ICollection<GameUserAssignment> UserAssignments { get; set; } = new List<GameUserAssignment>();
     }
+
+    public class GameViewModel : Game
+    {
+        public bool IsParticipating { get; set; }
+    }
 }

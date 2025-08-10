@@ -8,7 +8,7 @@ namespace GisanParkGolf_Core.Data
     public class GameParticipant
     {
         [Key]
-        [Column("join_id", TypeName = "varchar(12)")]
+        [Column("join_id", TypeName = "varchar(27)")]
         public string? JoinId { get; set; }
 
         [Required]

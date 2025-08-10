@@ -1,137 +1,153 @@
-﻿@page "{GameCode?}"
+﻿@page
 @model GiSanParkGolf.Pages.PlayerPage.JoinGameModel
 @{
-    ViewData["Title"] = Model.IsDetailView ? "대회 참가 신청" : "참여 가능 대회 목록";
+    ViewData["Title"] = "참여가능 대회 목록";
 }
 
-<!-- 페이지 제목 -->
+@using GisanParkGolf_Core.Helpers
+
 <div class="mb-3 text-center">
     <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
     <p class="text-muted" style="font-size: 0.95rem;">
-        @if (Model.IsDetailView)
-        {
-            <span>대회 정보를 확인하고 참가 신청 버튼을 눌러주세요.</span>
-        }
-        else
-        {
-            <span>참가하려는 대회를 선택하여 참가 신청을 하십시오.</span>
-        }
+        참가하려는 대회명을 선택하여 참가신청을 하십시오.
     </p>
 </div>
 
 <div class="container mt-4">
     <div class="custom-card">
-        @if (Model.IsDetailView)
-        {
-            <!-- 상세 정보 뷰 -->
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <dl class="row">
-                        <dt class="col-sm-4">대회명</dt>
-                        <dd class="col-sm-8">@Model.GameDetail?.GameName</dd>
+        <!-- 검색/필터 폼 -->
+        <form method="get" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <select asp-for="PageSize" class="form-select" style="width:auto" onchange="this.form.submit()">
+                <option value="10">10개씩 보기</option>
+                <option value="20">20개씩 보기</option>
+                <option value="50">50개씩 보기</option>
+            </select>
+            <select asp-for="SearchField" class="form-select" style="width:150px;">
+                <option value="GameName">대회명</option>
+                <option value="StadiumName">경기장</option>
+                <option value="GameHost">주최자</option>
+            </select>
+            <input type="text" asp-for="SearchQuery" class="form-control" placeholder="검색어" />
+            <button type="submit" class="btn btn-primary">검색</button>
+            <a asp-page="JoinGame" class="btn btn-secondary">초기화</a>
+        </form>
 
-                        <dt class="col-sm-4">대회일시</dt>
-                        <dd class="col-sm-8">@Model.GameDetail?.GameDate.ToString("yyyy-MM-dd HH:mm")</dd>
-
-                        <dt class="col-sm-4">경기장</dt>
-                        <dd class="col-sm-8">@Model.GameDetail?.StadiumName</dd>
-
-                        <dt class="col-sm-4">주최</dt>
-                        <dd class="col-sm-8">@Model.GameDetail?.GameHost</dd>
-
-                        <dt class="col-sm-4">비고</dt>
-                        <dd class="col-sm-8"><pre>@Model.GameDetail?.GameNote</pre></dd>
-                    </dl>
-                    <div class="text-center mt-4">
-                        <a asp-page="./JoinGame" class="btn btn-secondary btn-lg">목록으로</a>
-                        <form method="post" asp-page-handler="Join" class="d-inline" onsubmit="return confirm('정말 참가 신청하시겠습니까?');">
-                            <input type="hidden" name="gameCode" value="@Model.GameCode" />
-                            <button type="submit" class="btn btn-success btn-lg">참가 신청</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        }
-        else
-        {
-            <!-- 검색 뷰 컴포넌트 호출 -->
-            @await Component.InvokeAsync("Search", new {
-            searchFields = Model.SearchFields,
-                searchField = Model.SearchField,
-                searchQuery = Model.SearchQuery,
-                readyUserOnly = false // 이 페이지에서는 사용하지 않음
-                })
-
-            <!-- 대회 목록 테이블 -->
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
+        <!-- 목록 테이블 -->
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>No</th>
+                    <th>대회명</th>
+                    <th>경기장</th>
+                    <th>주최자</th>
+                    <th>대회일자</th>
+                    <th>모집시작</th>
+                    <th>모집종료</th>
+                    <th>참가자</th>
+                    <th>상태</th>
+                    <th>신청</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.GameList != null && Model.GameList.Any())
+                {
+                    int no = (Model.PageIndex - 1) * Model.PageSize;
+                    foreach (var game in Model.GameList)
+                    {
+                        <tr>
+                            <td>@(++no)</td>
+                            <td>@game.GameName</td>
+                            <td>@game.StadiumName</td>
+                            <td>@game.GameHost</td>
+                            <td>@game.GameDate.ToString("yyyy-MM-dd")</td>
+                            <td>@game.StartRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@game.EndRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@game.ParticipantNumber</td>
+                            <td>
+                                <span class="@(GameStatusHelper.ToDisplay(game.GameStatus) == "모집중" ? "text-primary" : "")">
+                                    @GameStatusHelper.ToDisplay(game.GameStatus)
+                                </span>
+                            </td>
+                            <td>
+                                @if (GameStatusHelper.ToDisplay(game.GameStatus) == "모집중")
+                                {
+                                    @if (!string.IsNullOrEmpty(game.GameCode) && Model.JoinedGameCodes.Contains(game.GameCode))
+                                    {
+                                        <form method="post" asp-page-handler="Leave" asp-route-gameCode="@game.GameCode" style="display:inline">
+                                            <button type="submit" class="btn btn-danger btn-sm">참가취소</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-page-handler="Join" asp-route-gameCode="@game.GameCode" style="display:inline">
+                                            <button type="submit" class="btn btn-success btn-sm">참가신청</button>
+                                        </form>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
                     <tr>
-                        <th>대회명</th>
-                        <th>대회일시</th>
-                        <th>경기장</th>
-                        <th>주최</th>
-                        <th>참가인원</th>
+                        <td colspan="10" class="text-center text-muted">참가 신청 가능한 대회가 없습니다.</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @if (Model.GameList != null && Model.GameList.Any())
-                    {
-                        foreach (var game in Model.GameList)
-                        {
-                            <tr>
-                                <td>
-                                    <a asp-page="./JoinGame" asp-route-GameCode="@game.GameCode">@game.GameName</a>
-                                </td>
-                                <td>@game.GameDate.ToString("yyyy-MM-dd HH:mm")</td>
-                                <td>@game.StadiumName</td>
-                                <td>@game.GameHost</td>
-                                <td>@game.ParticipantNumber</td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr><td colspan="5" class="text-center">참여 가능한 대회가 없습니다.</td></tr>
-                    }
-                </tbody>
-            </table>
-
-            <!-- 페이징 컨트롤 -->
-            @await Component.InvokeAsync("PagingControl", new {
-            totalItems = Model.TotalCount,
-                itemsPerPage = Model.PageSize,
-                currentPage = Model.PageIndex
-                })
-        }
+                }
+            </tbody>
+        </table>
+        <!-- 총 건수 -->
+        <div style="text-align:right">
+            총 건수: <span>@Model.GameList?.TotalCount ?? 0</span>
+        </div>
+        <!-- 페이징 컨트롤 -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                @{
+                    var prevDisabled = !(Model.GameList?.HasPreviousPage ?? false) ? "disabled" : "";
+                    var nextDisabled = !(Model.GameList?.HasNextPage ?? false) ? "disabled" : "";
+                }
+                <li class="page-item @prevDisabled">
+                    <a class="page-link"
+                       asp-page="JoinGame"
+                       asp-route-PageIndex="@(Model.PageIndex - 1)"
+                       asp-route-PageSize="@Model.PageSize"
+                       asp-route-SearchField="@Model.SearchField"
+                       asp-route-SearchQuery="@Model.SearchQuery">이전</a>
+                </li>
+                @for (int i = 1; i <= (Model.GameList?.TotalPages ?? 1); i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link"
+                           asp-page="JoinGame"
+                           asp-route-PageIndex="@i"
+                           asp-route-PageSize="@Model.PageSize"
+                           asp-route-SearchField="@Model.SearchField"
+                           asp-route-SearchQuery="@Model.SearchQuery">@i</a>
+                    </li>
+                }
+                <li class="page-item @nextDisabled">
+                    <a class="page-link"
+                       asp-page="JoinGame"
+                       asp-route-PageIndex="@(Model.PageIndex + 1)"
+                       asp-route-PageSize="@Model.PageSize"
+                       asp-route-SearchField="@Model.SearchField"
+                       asp-route-SearchQuery="@Model.SearchQuery">다음</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
-<!-- 참가 신청 결과 표시용 모달 -->
-@if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null)
+@* @if (TempData["SuccessMessage"] != null)
 {
-    <div class="modal fade" id="resultModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">알림</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="@(TempData["SuccessMessage"] != null ? "text-success" : "text-danger")">
-                        @TempData["SuccessMessage"]
-                        @TempData["ErrorMessage"]
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
-                </div>
-            </div>
-        </div>
+    <div class="alert alert-success mt-3" role="alert">
+        @TempData["SuccessMessage"]
     </div>
-    @section Scripts {
-        <script>
-            var resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
-            resultModal.show();
-        </script>
-    }
 }
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+} *@

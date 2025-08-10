@@ -1,27 +1,28 @@
 using GisanParkGolf_Core.Data;
+using GisanParkGolf_Core.Helpers;
 using GisanParkGolf_Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering; // SelectListItem을 위해 추가
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace GiSanParkGolf.Pages.PlayerPage
 {
+    [Authorize]
     public class JoinGameModel : PageModel
     {
         private readonly IGameService _gameService;
-        //private readonly IGameJoinService _gameJoinService;
+        private readonly IJoinGameService _joinGameService;
 
-        public JoinGameModel(IGameService gameService/*, IGameJoinService gameJoinService*/)
+        public JoinGameModel(IGameService gameService, IJoinGameService joinGameService)
         {
             _gameService = gameService;
-            //_gameJoinService = gameJoinService;
+            _joinGameService = joinGameService;
         }
 
-        // --- 뷰에 바인딩될 속성들 ---
-        public List<Game> GameList { get; set; } = new();
-        public int TotalCount { get; set; }
-        public List<SelectListItem> SearchFields { get; private set; } = new(); // 검색 필드 목록
+        public PaginatedList<Game>? GameList { get; set; }
+        public HashSet<string> JoinedGameCodes { get; set; } = new HashSet<string>();
 
         [BindProperty(SupportsGet = true)]
         public string? SearchField { get; set; } = "GameName";
@@ -32,45 +33,60 @@ namespace GiSanParkGolf.Pages.PlayerPage
         [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 10;
 
-        // --- 상세 보기용 속성 ---
-        [BindProperty(SupportsGet = true)]
-        public string? GameCode { get; set; }
-        public Game? GameDetail { get; set; }
-        public bool IsDetailView => !string.IsNullOrEmpty(GameCode);
-
-
-        public async Task<IActionResult> OnGetAsync()
+        public async Task OnGetAsync()
         {
-            // 검색 필드 목록 초기화 (SearchViewComponent에 전달할 데이터)
-            //SearchFields = new List<SelectListItem>
-            //{
-            //    new SelectListItem { Text = "대회명", Value = "GameName" },
-            //    new SelectListItem { Text = "경기장", Value = "StadiumName" },
-            //    new SelectListItem { Text = "주최", Value = "GameHost" },
-            //};
+            // 1. 모집중 대회 목록 조회
+            GameList = await _joinGameService.GetGamesAsync(SearchField, SearchQuery, PageIndex, PageSize, status: "모집중");
 
-            //if (IsDetailView)
-            //{
-            //    GameDetail = await _gameService.GetGameByCodeAsync(GameCode);
-            //    if (GameDetail == null) return NotFound();
-            //}
-            //else
-            //{
-            //    var (games, total) = await _gameService.GetRecruitingGamesPaginatedAsync(SearchField, SearchQuery, PageIndex, PageSize);
-            //    GameList = games;
-            //    TotalCount = total;
-            //}
-            return Page();
+            // 2. 내 참가중 게임코드 조회 (null-safe)
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId) || _joinGameService.GameParticipants == null)
+            {
+                JoinedGameCodes = new HashSet<string>();
+            }
+            else
+            {
+                var joinedCodes = await _joinGameService.GameParticipants
+                    .Where(gp => gp.UserId == userId && !gp.IsCancelled)
+                    .Select(gp => gp.GameCode)
+                    .ToListAsync();
+
+                // null이 아닌 값만 HashSet<string>으로 변환
+                JoinedGameCodes = joinedCodes
+                    .Where(x => x != null)
+                    .Select(x => x!)
+                    .ToHashSet();
+            }
         }
 
-        //public async Task<IActionResult> OnPostJoinAsync(string gameCode)
-        //{
-        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-        //    var (success, message) = await _gameJoinService.TryJoinAsync(gameCode, userId, ipAddress);
-        //    if (success) TempData["SuccessMessage"] = message;
-        //    else TempData["ErrorMessage"] = message;
-        //    return RedirectToPage(new { SearchField, SearchQuery, PageIndex, PageSize });
-        //}
+        public async Task<IActionResult> OnPostJoinAsync(string gameCode)
+        {
+            //로그인한 사용자 정보 필요(ClaimsPrincipal 등)
+            var result = await _joinGameService.JoinGameAsync(gameCode, User);
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = "참가신청이 완료되었습니다.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "참가신청 실패";
+            }
+            return RedirectToPage(new { SearchField, SearchQuery, PageIndex, PageSize });
+        }
+
+        public async Task<IActionResult> OnPostLeaveAsync(string gameCode)
+        {
+            //로그인한 사용자 정보 필요(ClaimsPrincipal 등)
+            var result = await _joinGameService.LeaveGameAsync(gameCode, User);
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = "참가취소가 완료되었습니다.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "참가취소 실패";
+            }
+            return RedirectToPage(new { SearchField, SearchQuery, PageIndex, PageSize });
+        }
     }
 }
