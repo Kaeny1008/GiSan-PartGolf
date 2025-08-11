@@ -6,6 +6,59 @@
 
 @using GisanParkGolf_Core.Helpers
 
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let targetForm = null;
+
+            $('.btn-action').on('click', function(e) {
+                e.preventDefault();
+                targetForm = $(this).closest('form');
+                const action = $(this).data('action');
+                const gamename = $(this).data('gamename');
+                let msg = '';
+
+                if (action === 'join') {
+                    msg = `<strong>[${gamename}]</strong> 대회에 참가 신청하시겠습니까?`;
+                } else if (action === 'leave') {
+                    msg = `<strong>[${gamename}]</strong> 대회 참가를 취소하시겠습니까?`;
+                } else {
+                    msg = "이 작업을 진행하시겠습니까?";
+                }
+                $('#actionConfirmModalBody').html(msg);
+                $('#actionConfirmModal').modal('show');
+            });
+
+            $('#actionConfirmBtn').on('click', function() {
+                if (targetForm) {
+                    targetForm.submit();
+                    $('#actionConfirmModal').modal('hide');
+                    targetForm = null;
+                }
+            });
+        });
+    </script>
+}
+
+<!-- 공통 Modal -->
+<div class="modal fade" id="actionConfirmModal" tabindex="-1" aria-labelledby="actionConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actionConfirmModalLabel">확인</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body" id="actionConfirmModalBody">
+                <!-- 동적으로 메시지 변경됨 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="actionConfirmBtn">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="mb-3 text-center">
     <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
     <p class="text-muted" style="font-size: 0.95rem;">
@@ -73,14 +126,24 @@
                                 {
                                     @if (!string.IsNullOrEmpty(game.GameCode) && Model.JoinedGameCodes.Contains(game.GameCode))
                                     {
-                                        <form method="post" asp-page-handler="Leave" asp-route-gameCode="@game.GameCode" style="display:inline">
-                                            <button type="submit" class="btn btn-danger btn-sm">참가취소</button>
+                                        <form method="post" asp-page-handler="Leave" asp-route-gameCode="@game.GameCode" style="display:inline" class="action-form">
+                                            <button type="button"
+                                                    class="btn btn-danger btn-sm btn-action"
+                                                    data-action="leave"
+                                                    data-gamename="@game.GameName">
+                                                참가취소
+                                            </button>
                                         </form>
                                     }
                                     else
                                     {
-                                        <form method="post" asp-page-handler="Join" asp-route-gameCode="@game.GameCode" style="display:inline">
-                                            <button type="submit" class="btn btn-success btn-sm">참가신청</button>
+                                        <form method="post" asp-page-handler="Join" asp-route-gameCode="@game.GameCode" style="display:inline" class="action-form">
+                                            <button type="button"
+                                                    class="btn btn-success btn-sm btn-action"
+                                                    data-action="join"
+                                                    data-gamename="@game.GameName">
+                                                참가신청
+                                            </button>
                                         </form>
                                     }
                                 }
@@ -98,7 +161,7 @@
         </table>
         <!-- 총 건수 -->
         <div style="text-align:right">
-            총 건수: <span>@Model.GameList?.TotalCount ?? 0</span>
+            참가가능 대회수: <span>@(Model.GameList?.TotalCount ?? 0)</span>
         </div>
         <!-- 페이징 컨트롤 -->
         <nav aria-label="Page navigation">
@@ -138,16 +201,3 @@
         </nav>
     </div>
 </div>
-
-@* @if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success mt-3" role="alert">
-        @TempData["SuccessMessage"]
-    </div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger mt-3" role="alert">
-        @TempData["ErrorMessage"]
-    </div>
-} *@

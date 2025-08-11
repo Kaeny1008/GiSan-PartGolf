@@ -38,8 +38,8 @@ namespace GisanParkGolf_Core.Data
         [Column("cancel_reason", TypeName = "varchar(200)")]
         public string? CancelReason { get; set; }
 
-        [Column("cancelled_by", TypeName = "varchar(15)")]
-        public string? CancelledBy { get; set; }
+        [Column("approval", TypeName = "varchar(15)")]
+        public string? Approval { get; set; }
 
         // Navigation Properties
         [ForeignKey("GameCode")]

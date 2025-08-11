@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/custom-modal.css">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -191,21 +192,45 @@
             </div>
         </div>
     </div>
+
     <script>
+        function htmlEscape(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
         function showResultModal(message, title) {
             document.getElementById('resultModalLabel').textContent = title || '알림';
-            document.getElementById('resultModalBody').innerHTML = message.replace(/\n/g, "<br>");
+            // 1. HTML escape 후 2. 줄바꿈 변환
+            const safeMsg = htmlEscape(message).replace(/\r\n|\r|\n/g, "<br>");
+            document.getElementById('resultModalBody').innerHTML = safeMsg;
             var modal = new bootstrap.Modal(document.getElementById('resultModal'));
             modal.show();
         }
     </script>
-    @if (TempData["SuccessMessage"] != null)
+
+    @{
+        var successMsg = TempData["SuccessMessage"] as string;
+        var successTitle = TempData["SuccessTitle"] as string ?? "완료";
+        var errorMsg = TempData["ErrorMessage"] as string;
+        var errorTitle = TempData["ErrorTitle"] as string ?? "실패";
+    }
+    @if (successMsg != null)
     {
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                var message = @Html.Raw(Json.Serialize(TempData["SuccessMessage"]));
-                showResultModal(message, '작업 완료');
-            });
+            showResultModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMsg)), 
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successTitle)));
+        </script>
+    }
+    @if (errorMsg != null)
+    {
+        <script>
+            showResultModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(errorMsg)),
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(errorTitle)));
         </script>
     }
 

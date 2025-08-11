@@ -67,13 +67,19 @@ namespace GisanParkGolf_Core.Services
 
             if (participant != null)
             {
+                if (participant.Approval != null)
+                {
+                    // 관리자에 의해 참가취소 승인된 참가자
+                    return new JoinGameResult { Success = false, ErrorMessage = "관리자가 취소요청을 승인하여 재 참가 요청 할 수 없습니다." };
+                }
+
                 if (participant.IsCancelled)
                 {
                     // 참가 취소 이력이 있으면 복구
                     participant.IsCancelled = false;
                     participant.CancelDate = null;
                     participant.CancelReason = null;
-                    participant.CancelledBy = null;
+                    participant.Approval = null;
                     participant.JoinDate = DateTime.Now;
                     participant.JoinIp = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "0.0.0.0";
                     participant.JoinStatus = "Join";
@@ -83,6 +89,15 @@ namespace GisanParkGolf_Core.Services
                     try
                     {
                         await _dbContext.SaveChangesAsync();
+                        await LogGameJoinHistoryAsync(
+                            gameCode,
+                            userId,
+                            "Join",
+                            userId,
+                            "참가자 요청",
+                            participant.JoinId,
+                            "참가 취소 이력 복구"
+                        );
                         return new JoinGameResult { Success = true };
                     }
                     catch (Exception ex)
@@ -113,7 +128,7 @@ namespace GisanParkGolf_Core.Services
                     IsCancelled = false,
                     CancelDate = null,
                     CancelReason = null,
-                    CancelledBy = null
+                    Approval = null
                 };
                 _dbContext.GameParticipants.Add(join);
 
@@ -122,6 +137,15 @@ namespace GisanParkGolf_Core.Services
                 try
                 {
                     await _dbContext.SaveChangesAsync();
+                    await LogGameJoinHistoryAsync(
+                        gameCode,
+                        userId,
+                        "Join",
+                        userId,
+                        null,
+                        joinId,
+                        "신규 참가"
+                    );
                     return new JoinGameResult { Success = true };
                 }
                 catch (Exception ex)
@@ -141,6 +165,11 @@ namespace GisanParkGolf_Core.Services
             if (game == null)
                 return new JoinGameResult { Success = false, ErrorMessage = "해당 대회를 찾을 수 없습니다." };
 
+            if (game.GameStatus != GameStatusHelper.ToStatusCode("모집중"))
+            {
+                return new JoinGameResult { Success = false, ErrorMessage = "모집중인 대회가 아닙니다.\n관리자에게 참가취소 요청을 하십시오." };
+            }
+
             // 참가 엔터티 찾기 (GameCode + UserId로)
             var joinEntity = await _dbContext.GameParticipants
                 .FirstOrDefaultAsync(gp => gp.GameCode == gameCode && gp.UserId == userId && !gp.IsCancelled);
@@ -151,7 +180,8 @@ namespace GisanParkGolf_Core.Services
             joinEntity.JoinStatus = "Cancel";
             joinEntity.IsCancelled = true;
             joinEntity.CancelDate = DateTime.Now;
-            joinEntity.CancelReason = "사용자 요청";
+            joinEntity.CancelReason = "참가자 요청";
+            joinEntity.Approval = userId;
 
             // 참가자 수 감소 (0보다 작아지지 않도록 방어 코드)
             if (game.ParticipantNumber > 0)
@@ -160,6 +190,15 @@ namespace GisanParkGolf_Core.Services
             try
             {
                 await _dbContext.SaveChangesAsync();
+                await LogGameJoinHistoryAsync(
+                    gameCode,
+                    userId,
+                    "Cancel",
+                    userId,
+                    "참가자 요청",
+                    joinEntity.JoinId,
+                    "사용자 직접 참가취소"
+                );
                 return new JoinGameResult { Success = true };
             }
             catch (Exception ex)
@@ -170,5 +209,31 @@ namespace GisanParkGolf_Core.Services
 
         public IQueryable<GameParticipant> GameParticipants
             => _dbContext.GameParticipants.AsQueryable();
+
+        public async Task LogGameJoinHistoryAsync(
+            string gameCode,
+            string userId,
+            string actionType,
+            string actionBy,
+            string? cancelReason = null,
+            string? participantId = null,
+            string? memo = null)
+        {
+            var ip = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "0.0.0.0";
+            var history = new GameJoinHistory
+            {
+                GameCode = gameCode,
+                UserId = userId,
+                ActionType = actionType,
+                ActionDate = DateTime.Now,
+                ActionBy = actionBy,
+                CancelReason = cancelReason,
+                ParticipantId = participantId,
+                Memo = memo,
+                ActionIp = ip
+            };
+            _dbContext.GameJoinHistories.Add(history);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

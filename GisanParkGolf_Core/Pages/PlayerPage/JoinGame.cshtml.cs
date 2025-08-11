@@ -12,12 +12,10 @@ namespace GiSanParkGolf.Pages.PlayerPage
     [Authorize]
     public class JoinGameModel : PageModel
     {
-        private readonly IGameService _gameService;
         private readonly IJoinGameService _joinGameService;
 
-        public JoinGameModel(IGameService gameService, IJoinGameService joinGameService)
+        public JoinGameModel(IJoinGameService joinGameService)
         {
-            _gameService = gameService;
             _joinGameService = joinGameService;
         }
 
@@ -35,10 +33,10 @@ namespace GiSanParkGolf.Pages.PlayerPage
 
         public async Task OnGetAsync()
         {
-            // 1. 모집중 대회 목록 조회
+            // 모집중 대회 목록 조회
             GameList = await _joinGameService.GetGamesAsync(SearchField, SearchQuery, PageIndex, PageSize, status: "모집중");
 
-            // 2. 내 참가중 게임코드 조회 (null-safe)
+            // 내 참가중 게임코드 조회
             string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId) || _joinGameService.GameParticipants == null)
             {
@@ -65,11 +63,13 @@ namespace GiSanParkGolf.Pages.PlayerPage
             var result = await _joinGameService.JoinGameAsync(gameCode, User);
             if (result.Success)
             {
+                TempData["SuccessTitle"] = "완료";
                 TempData["SuccessMessage"] = "참가신청이 완료되었습니다.";
             }
             else
             {
-                TempData["ErrorMessage"] = result.ErrorMessage ?? "참가신청 실패";
+                TempData["ErrorTitle"] = "참가 불가";
+                TempData["ErrorMessage"] = result.ErrorMessage;
             }
             return RedirectToPage(new { SearchField, SearchQuery, PageIndex, PageSize });
         }
@@ -80,10 +80,12 @@ namespace GiSanParkGolf.Pages.PlayerPage
             var result = await _joinGameService.LeaveGameAsync(gameCode, User);
             if (result.Success)
             {
+                TempData["SuccessTitle"] = "완료";
                 TempData["SuccessMessage"] = "참가취소가 완료되었습니다.";
             }
             else
             {
+                TempData["ErrorTitle"] = "취소 불가";
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "참가취소 실패";
             }
             return RedirectToPage(new { SearchField, SearchQuery, PageIndex, PageSize });
