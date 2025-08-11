@@ -183,7 +183,7 @@ namespace GisanParkGolf_Core.Services
             joinEntity.IsCancelled = true;
             joinEntity.CancelDate = DateTime.Now;
             joinEntity.CancelReason = "참가자 요청";
-            joinEntity.Approval = userId;
+            joinEntity.Approval = null;
 
             // 참가자 수 감소 (0보다 작아지지 않도록 방어 코드)
             if (game.ParticipantNumber > 0)
@@ -324,7 +324,7 @@ namespace GisanParkGolf_Core.Services
             participant.CancelDate = DateTime.Now;
             participant.CancelReason = cancelReason;
             participant.JoinStatus = "Cancel";
-            // 필요시 participant.Approval = ...;
+            participant.Approval = null;
 
             await _dbContext.SaveChangesAsync();
             return true;
