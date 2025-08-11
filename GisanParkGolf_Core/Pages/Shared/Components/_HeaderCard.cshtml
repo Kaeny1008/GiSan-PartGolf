@@ -1,0 +1,12 @@
+﻿@* 상단 카드 공통 Partial View *@
+@model (string Title, string? Description)
+
+<div class="header-card mb-4 text-center">
+    <h4 class="fw-bold mb-2">@Model.Title</h4>
+    @if (!string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <p class="text-muted card-desc">
+            @Model.Description
+        </p>
+    }
+</div>

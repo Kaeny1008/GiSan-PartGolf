@@ -1,0 +1,84 @@
+﻿@page "{gameCode}"
+@model GisanParkGolf_Core.Pages.PlayerPage.MyGameDetailModel
+@{
+    ViewData["Title"] = "대회 정보";
+}
+
+@* 상단 카드 Partial *@
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "대회 정보", "선택한 대회의 상세 정보를 확인 할 수 있습니다."))
+
+@if (!string.IsNullOrEmpty(Model.ResultMessage))
+{
+    <div class="alert alert-info text-center">@Model.ResultMessage</div>
+}
+
+<div class="custom-card" style="max-width:520px; margin:32px auto;">
+    <div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">대회명</span>
+            <input class="form-control" value="@Model.Detail?.GameName" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">대회일자</span>
+            <input class="form-control" value="@Model.Detail?.GameDate.ToString("yyyy-MM-dd")" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">대회장소</span>
+            <input class="form-control" value="@Model.Detail?.StadiumName" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">대회방식</span>
+            <input class="form-control" value="@Model.Detail?.PlayMode" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">주최</span>
+            <input class="form-control" value="@Model.Detail?.GameHost" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">홀당 최대인원</span>
+            <input class="form-control" value="@Model.Detail?.HoleMaximum" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">모집시작</span>
+            <input class="form-control" value="@Model.Detail?.StartRecruiting.ToString("yyyy-MM-dd")" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">모집종료</span>
+            <input class="form-control" value="@Model.Detail?.EndRecruiting.ToString("yyyy-MM-dd")" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">비고</span>
+            <textarea class="form-control" rows="2" readonly>@Model.Detail?.GameNote</textarea>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">참가인원</span>
+            <input class="form-control" value="@Model.Detail?.ParticipantNumber" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">취소일자</span>
+            <input class="form-control" value="@Model.Detail?.CancelDate?.ToString("yyyy-MM-dd HH:mm:ss")" readonly />
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">취소사유</span>
+            <input class="form-control" value="@Model.Detail?.CancelReason" readonly />
+        </div>
+    </div>
+    <div class="text-end mt-3">
+        @if (Model.Detail?.IsCancelled == 0)
+        {
+            <form method="post" class="d-inline">
+                <input type="hidden" name="actionType" value="cancel" />
+                <input type="text" name="cancelReason" class="form-control mb-2" placeholder="취소 사유를 입력하세요." maxlength="200" required />
+                <button type="submit" class="btn btn-danger">참가취소</button>
+            </form>
+        }
+        else if (Model.Detail?.IsCancelled == 1 && Model.Detail?.CancelledBy != "Admin" && Model.Detail?.AssignmentStatus != "Cancelled")
+        {
+            <form method="post" class="d-inline">
+                <input type="hidden" name="actionType" value="rejoin" />
+                <button type="submit" class="btn btn-success">재참가</button>
+            </form>
+        }
+        <a asp-page="./MyGame" class="btn btn-outline-secondary">목록으로</a>
+    </div>
+</div>

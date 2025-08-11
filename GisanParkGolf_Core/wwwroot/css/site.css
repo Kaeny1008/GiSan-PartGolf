@@ -291,3 +291,18 @@ textarea.form-control {
         .table-modern tbody tr:last-child {
             border-bottom: none;
         }
+
+.header-card {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+    .header-card .fw-bold {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .header-card .card-desc {
+        font-size: 0.95rem;
+        color: #6c757d;
+    }

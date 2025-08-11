@@ -1,0 +1,89 @@
+﻿@page
+@model GisanParkGolf_Core.Pages.PlayerPage.MyGameModel
+@{
+    ViewData["Title"] = "참여 대회 목록";
+}
+@* 상단 카드 Partial *@
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "참여 대회 목록", "내 대회의 결과 및 참가여부 수정을 할 수 있습니다."))
+
+<div class="container mt-4">
+    <form method="get" class="row mb-3 align-items-end">
+        <div class="col-md-2">
+            <select asp-for="PageSize" class="form-select" onchange="this.form.submit()">
+                <option value="5">5개씩 보기</option>
+                <option value="10">10개씩 보기</option>
+                <option value="20">20개씩 보기</option>
+                <option value="50">50개씩 보기</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select asp-for="SearchField" class="form-select">
+                <option value="GameName">대회명</option>
+                <option value="StadiumName">경기장</option>
+                <option value="GameHost">주최자</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <input asp-for="SearchKeyword" class="form-control" placeholder="검색어 입력" />
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary" type="submit">검색</button>
+            <a asp-page="./MyGame" class="btn btn-secondary">초기화</a>
+        </div>
+    </form>
+
+    <div class="custom-card">
+        <table class="table table-bordered table-hover table-condensed table-striped table-responsive">
+            <thead>
+                <tr class="text-center">
+                    <th>No</th>
+                    <th>대회명</th>
+                    <th>경기장</th>
+                    <th>주최자</th>
+                    <th>대회일자</th>
+                    <th>모집시작</th>
+                    <th>모집종료</th>
+                    <th>상태</th>
+                    <th>참가여부</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Games.Count == 0)
+                {
+                    <tr>
+                        <td colspan="9" class="text-center">참가 신청 또는 참가한 데이터가 없습니다.</td>
+                    </tr>
+                }
+                else
+                {
+                    int number = Model.Games.TotalCount - ((Model.Games.PageIndex - 1) * Model.Games.PageSize);
+                    foreach (var item in Model.Games)
+                    {
+                        <tr class="text-center">
+                            <td>@number</td>
+                            <td>
+                                <a asp-page="./MyGameDetail" asp-route-gameCode="@item.GameCode">
+                                    @item.GameName
+                                </a>
+                            </td>
+                            <td>@item.StadiumName</td>
+                            <td>@item.GameHost</td>
+                            <td>@item.GameDate.ToString("yyyy-MM-dd")</td>
+                            <td>@item.StartRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@item.EndRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@item.GameStatus</td>
+                            <td>@item.IsCancelledText</td>
+                        </tr>
+                        number--;
+                    }
+                }
+            </tbody>
+        </table>
+        <div class="text-end" style="font-style: italic; font-size: 8pt;">
+            총 건수: @Model.Games.TotalCount
+        </div>
+        <div class="mt-3">
+            @await Component.InvokeAsync("PagingControl", new { totalItems = Model.Games.TotalCount, itemsPerPage = Model.Games.PageSize, currentPage = Model.Games.PageIndex })
+        </div>
+    </div>
+</div>
