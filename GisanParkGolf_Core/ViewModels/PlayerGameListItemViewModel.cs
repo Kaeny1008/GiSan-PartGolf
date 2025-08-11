@@ -2,7 +2,7 @@
 
 namespace GisanParkGolf_Core.ViewModels
 {
-    public class PlayerGameListItem
+    public class PlayerGameListItemViewModel
     {
         public string GameCode { get; set; }
         public string GameName { get; set; }

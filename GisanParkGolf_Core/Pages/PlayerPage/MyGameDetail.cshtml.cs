@@ -3,7 +3,6 @@ using GisanParkGolf_Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -32,7 +31,6 @@ namespace GisanParkGolf_Core.Pages.PlayerPage
             string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                // 로그인 정보가 없으므로, 로그인 페이지로 리다이렉트
                 return RedirectToPage("/Account/Login");
             }
 
@@ -50,7 +48,6 @@ namespace GisanParkGolf_Core.Pages.PlayerPage
             string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                // 로그인 정보가 없으므로, 로그인 페이지로 리다이렉트
                 return RedirectToPage("/Account/Login");
             }
 

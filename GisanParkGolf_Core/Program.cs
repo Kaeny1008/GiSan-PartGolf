@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Services;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ public class Program
         builder.Services.AddScoped<IGameService, GameService>();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<IJoinGameService, JoinGameService>();
+        builder.Services.AddScoped<IPlayerGameService, PlayerGameService>();
 
         // 로그인 시스템 설정
         // 복잡한 Identity 시스템 대신, 간단하고 빠른 '쿠키 인증' 시스템을 사용

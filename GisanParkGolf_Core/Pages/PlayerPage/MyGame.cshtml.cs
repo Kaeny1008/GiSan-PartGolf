@@ -1,13 +1,14 @@
 using GisanParkGolf_Core.Services;
 using GisanParkGolf_Core.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace GisanParkGolf_Core.Pages.PlayerPage
 {
+    [Authorize]
     public class MyGameModel : PageModel
     {
         private readonly IPlayerGameService _playerGameService;
@@ -29,19 +30,21 @@ namespace GisanParkGolf_Core.Pages.PlayerPage
         [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 10;
 
-        public PaginatedList<PlayerGameListItem> GameList { get; set; }
+        public PaginatedList<PlayerGameListItemViewModel> GameList { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            // 실제 사용자 아이디 가져오기 (환경에 맞게 수정)
             string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
             if (string.IsNullOrEmpty(userId))
             {
-                throw new UnauthorizedAccessException("로그인 정보가 없습니다.");
+                return RedirectToPage("/Account/Login");
             }
 
-            GameList = await _playerGameService.GetMyGamesAsync(userId, SearchField, SearchKeyword, PageIndex, PageSize);
+            GameList = await _playerGameService.GetMyGamesAsync(
+                userId, SearchField, SearchKeyword, PageIndex, PageSize
+            );
+
+            return Page();
         }
     }
 }

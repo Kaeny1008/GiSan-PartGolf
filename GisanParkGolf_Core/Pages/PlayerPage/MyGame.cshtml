@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "참여 대회 목록";
 }
+
 @* 상단 카드 Partial *@
 @await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "참여 대회 목록", "내 대회의 결과 및 참가여부 수정을 할 수 있습니다."))
 
@@ -48,7 +49,7 @@
                 </tr>
             </thead>
             <tbody>
-                @if (Model.Games.Count == 0)
+                @if (Model.GameList == null || Model.GameList.Count == 0)
                 {
                     <tr>
                         <td colspan="9" class="text-center">참가 신청 또는 참가한 데이터가 없습니다.</td>
@@ -56,8 +57,8 @@
                 }
                 else
                 {
-                    int number = Model.Games.TotalCount - ((Model.Games.PageIndex - 1) * Model.Games.PageSize);
-                    foreach (var item in Model.Games)
+                    int number = Model.GameList.TotalCount - ((Model.GameList.PageIndex - 1) * Model.GameList.PageSize);
+                    foreach (var item in Model.GameList)
                     {
                         <tr class="text-center">
                             <td>@number</td>
@@ -80,10 +81,39 @@
             </tbody>
         </table>
         <div class="text-end" style="font-style: italic; font-size: 8pt;">
-            총 건수: @Model.Games.TotalCount
+            총 건수: @(Model.GameList?.TotalCount ?? 0)
         </div>
-        <div class="mt-3">
-            @await Component.InvokeAsync("PagingControl", new { totalItems = Model.Games.TotalCount, itemsPerPage = Model.Games.PageSize, currentPage = Model.Games.PageIndex })
-        </div>
+        @{
+            var prevDisabled = !(Model.GameList?.HasPreviousPage ?? false) ? "disabled" : "";
+            var nextDisabled = !(Model.GameList?.HasNextPage ?? false) ? "disabled" : "";
+        }
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @prevDisabled">
+                    <a class="page-link" asp-page="./MyGame"
+                       asp-route-PageIndex="@(Model.GameList?.PageIndex - 1 ?? 1)"
+                       asp-route-PageSize="@Model.GameList?.PageSize"
+                       asp-route-SearchField="@Model.SearchField"
+                       asp-route-SearchKeyword="@Model.SearchKeyword">이전</a>
+                </li>
+                @for (int i = 1; i <= (Model.GameList?.TotalPages ?? 1); i++)
+                {
+                    <li class="page-item @(i == Model.GameList?.PageIndex ? "active" : "")">
+                        <a class="page-link" asp-page="./MyGame"
+                           asp-route-PageIndex="@i"
+                           asp-route-PageSize="@Model.GameList?.PageSize"
+                           asp-route-SearchField="@Model.SearchField"
+                           asp-route-SearchKeyword="@Model.SearchKeyword">@i</a>
+                    </li>
+                }
+                <li class="page-item @nextDisabled">
+                    <a class="page-link" asp-page="./MyGame"
+                       asp-route-PageIndex="@(Model.GameList?.PageIndex + 1 ?? 1)"
+                       asp-route-PageSize="@Model.GameList?.PageSize"
+                       asp-route-SearchField="@Model.SearchField"
+                       asp-route-SearchKeyword="@Model.SearchKeyword">다음</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
