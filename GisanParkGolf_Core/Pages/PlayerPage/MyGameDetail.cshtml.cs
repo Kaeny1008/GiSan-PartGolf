@@ -1,93 +1,82 @@
+using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Services;
 using GisanParkGolf_Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.PlayerPage
+namespace GiSanParkGolf.Pages.PlayerPage
 {
     [Authorize]
     public class MyGameDetailModel : PageModel
     {
-        private readonly IPlayerGameService _playerGameService;
+        private readonly IJoinGameService _gameService;
 
-        public MyGameDetailModel(IPlayerGameService playerGameService)
+        public MyGameDetailModel(IJoinGameService gameService)
         {
-            _playerGameService = playerGameService;
+            _gameService = gameService;
         }
 
         [BindProperty(SupportsGet = true)]
-        public string GameCode { get; set; }
+        public string? GameCode { get; set; }
 
-        public PlayerGameDetailViewModel Detail { get; set; }
+        public MyGameDetailViewModel? Game { get; set; }
 
-        [TempData]
-        public string ResultMessage { get; set; }
-
-        public async Task<IActionResult> OnGetAsync(string gameCode)
+        public async Task<IActionResult> OnGetAsync(string? gameCode)
         {
-            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToPage("/Account/Login");
-            }
+            if (string.IsNullOrEmpty(gameCode))
+                return RedirectToPage("MyGame");
 
-            Detail = await _playerGameService.GetMyGameDetailAsync(userId, gameCode);
-            if (Detail == null)
-            {
-                ResultMessage = "데이터가 없습니다.";
-                return RedirectToPage("./MyGame");
-            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Game = await _gameService.GetMyGameInformationAsync(gameCode, userId);
+
+            if (Game == null)
+                return RedirectToPage("MyGame");
+
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(string gameCode, string actionType, string cancelReason)
+        public async Task<IActionResult> OnPostCancelAsync(string gameCode, string CancelReason)
         {
-            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(CancelReason))
             {
-                return RedirectToPage("/Account/Login");
+                TempData["ErrorMessage"] = "취소 사유를 반드시 입력하세요.";
+                return RedirectToPage(new { GameCode = gameCode });
             }
 
-            Detail = await _playerGameService.GetMyGameDetailAsync(userId, gameCode);
+            var result = await _gameService.MyGameCancelAsync(gameCode, userId, CancelReason);
 
-            if (Detail == null)
+            if (result)
+                TempData["SuccessMessage"] = "참가가 성공적으로 취소되었습니다.";
+            else
+                TempData["ErrorMessage"] = "참가취소 중 오류가 발생했습니다.";
+
+            return RedirectToPage(new { GameCode = gameCode });
+        }
+
+        public async Task<IActionResult> OnPostRejoinAsync(string gameCode)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var detail = await _gameService.GetMyGameInformationAsync(gameCode, userId);
+
+            if (detail?.Approval != null)
             {
-                ResultMessage = "데이터가 없습니다.";
-                return RedirectToPage("./MyGame");
+                TempData["ErrorMessage"] = "관리자에 의해 취소되어 재참가가 불가합니다.";
+                return RedirectToPage(new { GameCode = gameCode });
             }
 
-            if (actionType == "cancel")
-            {
-                if (string.IsNullOrWhiteSpace(cancelReason))
-                {
-                    ModelState.AddModelError("", "취소 사유를 입력하세요.");
-                }
-                else
-                {
-                    var result = await _playerGameService.CancelGameAsync(userId, gameCode, cancelReason);
-                    ResultMessage = result ? "참가가 성공적으로 취소되었습니다." : "참가취소 중 오류가 발생했습니다.";
-                }
-            }
-            else if (actionType == "rejoin")
-            {
-                if (Detail.CancelledBy == "Admin" || Detail.AssignmentStatus == "Cancelled")
-                {
-                    ModelState.AddModelError("", "관리자에 의해 취소된 게임은 재참가가 불가합니다.");
-                }
-                else
-                {
-                    var result = await _playerGameService.RejoinGameAsync(userId, gameCode);
-                    ResultMessage = result ? "재참가가 성공적으로 저장되었습니다." : "재참가 중 오류가 발생했습니다.";
-                }
-            }
+            var result = await _gameService.MyGameRejoinAsync(gameCode, userId);
 
-            // 변경된 상태를 다시 조회
-            Detail = await _playerGameService.GetMyGameDetailAsync(userId, gameCode);
+            if (result)
+                TempData["SuccessMessage"] = "재참가가 성공적으로 저장되었습니다.";
+            else
+                TempData["ErrorMessage"] = "재참가 중 오류가 발생했습니다.";
 
-            return Page();
+            return RedirectToPage(new { GameCode = gameCode });
         }
     }
 }

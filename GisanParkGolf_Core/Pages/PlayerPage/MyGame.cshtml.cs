@@ -1,50 +1,45 @@
+using GiSanParkGolf.Pages.AdminPage;
+using GisanParkGolf_Core.Data;
+using GisanParkGolf_Core.Helpers;
 using GisanParkGolf_Core.Services;
-using GisanParkGolf_Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.PlayerPage
+namespace GiSanParkGolf.Pages.PlayerPage
 {
     [Authorize]
     public class MyGameModel : PageModel
     {
-        private readonly IPlayerGameService _playerGameService;
+        private readonly IJoinGameService _gameService;
 
-        public MyGameModel(IPlayerGameService playerGameService)
+        public MyGameModel(IJoinGameService gameService)
         {
-            _playerGameService = playerGameService;
+            _gameService = gameService;
         }
 
-        [BindProperty(SupportsGet = true)]
-        public string SearchField { get; set; }
+        public PaginatedList<MyGameListModel>? GameList { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public string SearchKeyword { get; set; }
-
+        public string? SearchField { get; set; } = "GameName";
+        [BindProperty(SupportsGet = true)]
+        public string? SearchQuery { get; set; }
         [BindProperty(SupportsGet = true)]
         public int PageIndex { get; set; } = 1;
-
         [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 10;
 
-        public PaginatedList<PlayerGameListItemViewModel> GameList { get; set; }
-
-        public async Task<IActionResult> OnGetAsync()
+        public async Task OnGetAsync()
         {
             string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                return RedirectToPage("/Account/Login");
+                GameList = new PaginatedList<MyGameListModel>(new List<MyGameListModel>(), 0, PageIndex, PageSize);
+                return;
             }
 
-            GameList = await _playerGameService.GetMyGamesAsync(
-                userId, SearchField, SearchKeyword, PageIndex, PageSize
-            );
-
-            return Page();
+            GameList = await _gameService.GetMyGameListAsync(userId, SearchField, SearchQuery, PageIndex, PageSize);
         }
     }
 }

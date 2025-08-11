@@ -1,42 +1,52 @@
 ﻿@page
-@model GisanParkGolf_Core.Pages.PlayerPage.MyGameModel
+@model GiSanParkGolf.Pages.PlayerPage.MyGameModel
 @{
     ViewData["Title"] = "참여 대회 목록";
 }
 
-@* 상단 카드 Partial *@
-@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "참여 대회 목록", "내 대회의 결과 및 참가여부 수정을 할 수 있습니다."))
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Enter키로 검색
+            $('#SearchQuery').keypress(function (e) {
+                if (e.which === 13) {
+                    $(this).closest('form').submit();
+                }
+            });
+        });
+    </script>
+}
+
+<div class="mb-3 text-center">
+    <h4 class="fw-bold mb-2">참여 대회 목록</h4>
+    <p class="text-muted" style="font-size: 0.95rem;">
+        내 대회의 결과 및 참가여부 수정을 할 수 있습니다.
+    </p>
+</div>
 
 <div class="container mt-4">
-    <form method="get" class="row mb-3 align-items-end">
-        <div class="col-md-2">
-            <select asp-for="PageSize" class="form-select" onchange="this.form.submit()">
-                <option value="5">5개씩 보기</option>
+    <div class="custom-card">
+        <!-- 검색/필터 폼 -->
+        <form method="get" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+            <select asp-for="PageSize" class="form-select" style="width:auto" onchange="this.form.submit()">
                 <option value="10">10개씩 보기</option>
                 <option value="20">20개씩 보기</option>
                 <option value="50">50개씩 보기</option>
             </select>
-        </div>
-        <div class="col-md-2">
-            <select asp-for="SearchField" class="form-select">
+            <select asp-for="SearchField" class="form-select" style="width:150px;">
                 <option value="GameName">대회명</option>
                 <option value="StadiumName">경기장</option>
                 <option value="GameHost">주최자</option>
             </select>
-        </div>
-        <div class="col-md-4">
-            <input asp-for="SearchKeyword" class="form-control" placeholder="검색어 입력" />
-        </div>
-        <div class="col-md-2">
-            <button class="btn btn-primary" type="submit">검색</button>
-            <a asp-page="./MyGame" class="btn btn-secondary">초기화</a>
-        </div>
-    </form>
+            <input type="text" asp-for="SearchQuery" class="form-control" placeholder="검색어" id="SearchQuery" />
+            <button type="submit" class="btn btn-primary">검색</button>
+            <a asp-page="MyGame" class="btn btn-secondary">초기화</a>
+        </form>
 
-    <div class="custom-card">
-        <table class="table table-bordered table-hover table-condensed table-striped table-responsive">
-            <thead>
-                <tr class="text-center">
+        <!-- 목록 테이블 -->
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
                     <th>No</th>
                     <th>대회명</th>
                     <th>경기장</th>
@@ -49,69 +59,73 @@
                 </tr>
             </thead>
             <tbody>
-                @if (Model.GameList == null || Model.GameList.Count == 0)
+                @if (Model.GameList != null && Model.GameList.Any())
                 {
-                    <tr>
-                        <td colspan="9" class="text-center">참가 신청 또는 참가한 데이터가 없습니다.</td>
-                    </tr>
+                    int no = (Model.PageIndex - 1) * Model.PageSize;
+                    foreach (var game in Model.GameList)
+                    {
+                        <tr>
+                            <td>@(++no)</td>
+                            <td>
+                                <a asp-page="MyGameDetail" asp-route-GameCode="@game.GameCode">
+                                    @GisanParkGolf_Core.Helpers.StringHelper.CutStringUnicode(game.GameName ?? "", 25)
+                                </a>
+                            </td>
+                            <td>@game.StadiumName</td>
+                            <td>@game.GameHost</td>
+                            <td>@game.GameDate.ToString("yyyy-MM-dd")</td>
+                            <td>@game.StartRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@game.EndRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@GisanParkGolf_Core.Helpers.GameStatusHelper.ToDisplay(game.GameStatus)</td>
+                            <td>@game.IsCancelledText</td>
+                        </tr>
+                    }
                 }
                 else
                 {
-                    int number = Model.GameList.TotalCount - ((Model.GameList.PageIndex - 1) * Model.GameList.PageSize);
-                    foreach (var item in Model.GameList)
-                    {
-                        <tr class="text-center">
-                            <td>@number</td>
-                            <td>
-                                <a asp-page="./MyGameDetail" asp-route-gameCode="@item.GameCode">
-                                    @item.GameName
-                                </a>
-                            </td>
-                            <td>@item.StadiumName</td>
-                            <td>@item.GameHost</td>
-                            <td>@item.GameDate.ToString("yyyy-MM-dd")</td>
-                            <td>@item.StartRecruiting.ToString("yyyy-MM-dd")</td>
-                            <td>@item.EndRecruiting.ToString("yyyy-MM-dd")</td>
-                            <td>@item.GameStatus</td>
-                            <td>@item.IsCancelledText</td>
-                        </tr>
-                        number--;
-                    }
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">참가 신청 또는 참가한 데이터가 없습니다.</td>
+                    </tr>
                 }
             </tbody>
         </table>
-        <div class="text-end" style="font-style: italic; font-size: 8pt;">
-            총 건수: @(Model.GameList?.TotalCount ?? 0)
+        <!-- 총 건수 -->
+        <div style="text-align:right; font-style:italic; font-size:8pt;">
+            총 건수: <span>@(Model.GameList?.TotalCount ?? 0)</span>
         </div>
-        @{
-            var prevDisabled = !(Model.GameList?.HasPreviousPage ?? false) ? "disabled" : "";
-            var nextDisabled = !(Model.GameList?.HasNextPage ?? false) ? "disabled" : "";
-        }
+        <!-- 페이징 컨트롤 -->
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
+                @{
+                    var prevDisabled = !(Model.GameList?.HasPreviousPage ?? false) ? "disabled" : "";
+                    var nextDisabled = !(Model.GameList?.HasNextPage ?? false) ? "disabled" : "";
+                }
                 <li class="page-item @prevDisabled">
-                    <a class="page-link" asp-page="./MyGame"
-                       asp-route-PageIndex="@(Model.GameList?.PageIndex - 1 ?? 1)"
-                       asp-route-PageSize="@Model.GameList?.PageSize"
+                    <a class="page-link"
+                       asp-page="MyGame"
+                       asp-route-PageIndex="@(Model.PageIndex - 1)"
+                       asp-route-PageSize="@Model.PageSize"
                        asp-route-SearchField="@Model.SearchField"
-                       asp-route-SearchKeyword="@Model.SearchKeyword">이전</a>
+                       asp-route-SearchQuery="@Model.SearchQuery">이전</a>
                 </li>
                 @for (int i = 1; i <= (Model.GameList?.TotalPages ?? 1); i++)
                 {
-                    <li class="page-item @(i == Model.GameList?.PageIndex ? "active" : "")">
-                        <a class="page-link" asp-page="./MyGame"
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link"
+                           asp-page="MyGame"
                            asp-route-PageIndex="@i"
-                           asp-route-PageSize="@Model.GameList?.PageSize"
+                           asp-route-PageSize="@Model.PageSize"
                            asp-route-SearchField="@Model.SearchField"
-                           asp-route-SearchKeyword="@Model.SearchKeyword">@i</a>
+                           asp-route-SearchQuery="@Model.SearchQuery">@i</a>
                     </li>
                 }
                 <li class="page-item @nextDisabled">
-                    <a class="page-link" asp-page="./MyGame"
-                       asp-route-PageIndex="@(Model.GameList?.PageIndex + 1 ?? 1)"
-                       asp-route-PageSize="@Model.GameList?.PageSize"
+                    <a class="page-link"
+                       asp-page="MyGame"
+                       asp-route-PageIndex="@(Model.PageIndex + 1)"
+                       asp-route-PageSize="@Model.PageSize"
                        asp-route-SearchField="@Model.SearchField"
-                       asp-route-SearchKeyword="@Model.SearchKeyword">다음</a>
+                       asp-route-SearchQuery="@Model.SearchQuery">다음</a>
                 </li>
             </ul>
         </nav>

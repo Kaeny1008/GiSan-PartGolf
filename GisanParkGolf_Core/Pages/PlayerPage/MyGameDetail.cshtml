@@ -1,84 +1,154 @@
-﻿@page "{gameCode}"
-@model GisanParkGolf_Core.Pages.PlayerPage.MyGameDetailModel
+﻿@page "{GameCode}"
+@model GiSanParkGolf.Pages.PlayerPage.MyGameDetailModel
 @{
     ViewData["Title"] = "대회 정보";
 }
 
-@* 상단 카드 Partial *@
-@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "대회 정보", "선택한 대회의 상세 정보를 확인 할 수 있습니다."))
+@section Scripts {
+    <script>
+        function showCustomModal(actionType) {
+            var modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+            var okBtn = document.getElementById('modalOkBtn');
+            var modalTitle = document.querySelector('#cancelModal .modal-title');
+            var modalBody = document.querySelector('#cancelModal .modal-body');
 
-@if (!string.IsNullOrEmpty(Model.ResultMessage))
-{
-    <div class="alert alert-info text-center">@Model.ResultMessage</div>
+            if (actionType === 'cancel') {
+                modalTitle.textContent = "참가취소 확인";
+                modalBody.innerHTML = `
+                    정말 참가를 취소하시겠습니까?
+                    <div class="mt-2">
+                      <label for="cancelReasonInput" class="form-label">취소 사유 <span style="color:red">*</span></label>
+                      <textarea id="cancelReasonInput" class="form-control" rows="2" maxlength="200" placeholder="사유를 입력하세요."></textarea>
+                      <div id="cancelReasonError" class="text-danger mt-1" style="display:none;">취소 사유를 입력하세요.</div>
+                    </div>
+                `;
+                okBtn.onclick = function() {
+                    var reason = document.getElementById('cancelReasonInput').value || '';
+                    if (!reason.trim()) {
+                        document.getElementById('cancelReasonError').style.display = '';
+                        return;
+                    }
+                    document.getElementById('CancelReason').value = reason;
+                    modal.hide();
+                    document.getElementById('cancelForm').submit();
+                };
+                okBtn.textContent = "예(취소)";
+                okBtn.className = "btn btn-danger";
+            } else if (actionType === 'rejoin') {
+                modalTitle.textContent = "재참가 안내";
+                modalBody.innerHTML = `
+                    <div>
+                        재참가를 진행하시겠습니까?<br>
+                        <span class="text-danger">※ 관리자에 의해 강제 취소된 경우에는 재참가가 불가합니다.</span>
+                    </div>
+                `;
+                okBtn.onclick = function() {
+                    modal.hide();
+                    document.getElementById('rejoinForm').submit();
+                };
+                okBtn.textContent = "예(재참가)";
+                okBtn.className = "btn btn-success";
+            }
+            modal.show();
+        }
+    </script>
 }
 
-<div class="custom-card" style="max-width:520px; margin:32px auto;">
-    <div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">대회명</span>
-            <input class="form-control" value="@Model.Detail?.GameName" readonly />
+<div class="container mt-4">
+    <div class="mb-3 text-center">
+        <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
+        <p class="text-muted" style="font-size: 0.95rem;">선택한 대회의 상세 정보를 확인할 수 있습니다.</p>
+    </div>
+    <div class="row justify-content-center g-3">
+        <!-- 좌측 패널 -->
+        <div class="col-md-5">
+            <div class="custom-card">
+                <h5 class="card-title">대회 정보</h5>
+                <hr />
+                <div class="mb-3">
+                    <label class="form-label">대회명</label>
+                    <input class="form-control" value="@Model.Game?.GameName" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">대회일자</label>
+                    <input class="form-control" value="@Model.Game?.GameDate.ToString("yyyy-MM-dd HH:mm:ss")" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">경기장</label>
+                    <input class="form-control" value="@Model.Game?.StadiumName" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">방식</label>
+                    <input class="form-control" value="@Model.Game?.PlayModeToText" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">주최</label>
+                    <input class="form-control" value="@Model.Game?.GameHost" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">홀당 최대인원</label>
+                    <input class="form-control" value="@Model.Game?.HoleMaximum" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">참가인원</label>
+                    <input class="form-control" value="@Model.Game?.ParticipantNumber" disabled />
+                </div>
+            </div>
         </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">대회일자</span>
-            <input class="form-control" value="@Model.Detail?.GameDate.ToString("yyyy-MM-dd")" readonly />
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">대회장소</span>
-            <input class="form-control" value="@Model.Detail?.StadiumName" readonly />
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">대회방식</span>
-            <input class="form-control" value="@Model.Detail?.PlayMode" readonly />
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">주최</span>
-            <input class="form-control" value="@Model.Detail?.GameHost" readonly />
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">홀당 최대인원</span>
-            <input class="form-control" value="@Model.Detail?.HoleMaximum" readonly />
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">모집시작</span>
-            <input class="form-control" value="@Model.Detail?.StartRecruiting.ToString("yyyy-MM-dd")" readonly />
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">모집종료</span>
-            <input class="form-control" value="@Model.Detail?.EndRecruiting.ToString("yyyy-MM-dd")" readonly />
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">비고</span>
-            <textarea class="form-control" rows="2" readonly>@Model.Detail?.GameNote</textarea>
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">참가인원</span>
-            <input class="form-control" value="@Model.Detail?.ParticipantNumber" readonly />
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">취소일자</span>
-            <input class="form-control" value="@Model.Detail?.CancelDate?.ToString("yyyy-MM-dd HH:mm:ss")" readonly />
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">취소사유</span>
-            <input class="form-control" value="@Model.Detail?.CancelReason" readonly />
+        <!-- 우측 패널 -->
+        <div class="col-md-5">
+            <div class="custom-card">
+                <h5 class="card-title">참가 상태</h5>
+                <hr />
+                <div class="mb-3">
+                    <label class="form-label">취소일자</label>
+                    <input class="form-control" value="@Model.Game?.CancelDate?.ToString("yyyy-MM-dd HH:mm:ss")" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">취소사유</label>
+                    <input class="form-control" value="@Model.Game?.CancelReason" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">관리자 취소 승인</label>
+                    <input class="form-control"
+                           value="@(string.IsNullOrEmpty(Model.Game?.Approval) ? "아니오" : "예")"
+                           disabled />
+                </div>
+            </div>
         </div>
     </div>
-    <div class="text-end mt-3">
-        @if (Model.Detail?.IsCancelled == 0)
+    <div class="text-center mt-4">
+        <a asp-page="MyGame" class="btn btn-secondary btn-lg">목록으로</a>
+        @if (Model.Game != null && Model.Game.IsCancelled == 0)
         {
-            <form method="post" class="d-inline">
-                <input type="hidden" name="actionType" value="cancel" />
-                <input type="text" name="cancelReason" class="form-control mb-2" placeholder="취소 사유를 입력하세요." maxlength="200" required />
-                <button type="submit" class="btn btn-danger">참가취소</button>
+            <form id="cancelForm" method="post" asp-page-handler="Cancel" asp-route-GameCode="@Model.Game.GameCode" class="d-inline">
+                <input type="hidden" id="CancelReason" name="CancelReason" />
+                <button type="button" class="btn btn-danger btn-lg" onclick="showCustomModal('cancel')">참가취소</button>
             </form>
         }
-        else if (Model.Detail?.IsCancelled == 1 && Model.Detail?.CancelledBy != "Admin" && Model.Detail?.AssignmentStatus != "Cancelled")
+        @if (Model.Game != null && Model.Game.IsCancelled == 1)
         {
-            <form method="post" class="d-inline">
-                <input type="hidden" name="actionType" value="rejoin" />
-                <button type="submit" class="btn btn-success">재참가</button>
+            <form id="rejoinForm" method="post" asp-page-handler="Rejoin" asp-route-GameCode="@Model.Game.GameCode" class="d-inline">
+                <button type="button" class="btn btn-success btn-lg" onclick="showCustomModal('rejoin')">재참가</button>
             </form>
         }
-        <a asp-page="./MyGame" class="btn btn-outline-secondary">목록으로</a>
+    </div>
+</div>
+
+<!-- 공통 모달: 참가취소/재참가 -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">확인</h5>
+            </div>
+            <div class="modal-body">
+                정말 참가를 취소하시겠습니까?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">아니오</button>
+                <button type="button" class="btn btn-primary" id="modalOkBtn">예</button>
+            </div>
+        </div>
     </div>
 </div>

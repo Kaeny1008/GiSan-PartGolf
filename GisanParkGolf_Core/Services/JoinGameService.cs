@@ -1,5 +1,7 @@
-﻿using GisanParkGolf_Core.Data;
+﻿using GiSanParkGolf.Pages.PlayerPage;
+using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
+using GisanParkGolf_Core.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -234,6 +236,123 @@ namespace GisanParkGolf_Core.Services
             };
             _dbContext.GameJoinHistories.Add(history);
             await _dbContext.SaveChangesAsync();
+        }
+
+        // [NEW] 내 대회 목록 조회 (검색/페이징)
+        public async Task<PaginatedList<MyGameListModel>> GetMyGameListAsync(
+            string userId, string? searchField, string? searchQuery, int pageIndex, int pageSize)
+        {
+            var query = _dbContext.GameParticipants
+                .Include(gp => gp.Game)
+                .Where(gp => gp.UserId == userId)
+                .Select(gp => new MyGameListModel
+                {
+                    GameCode = gp.GameCode,
+                    GameName = gp.Game != null ? gp.Game.GameName : "",
+                    StadiumName = gp.Game != null ? gp.Game.StadiumName : "",
+                    GameHost = gp.Game != null ? gp.Game.GameHost : "",
+                    GameDate = gp.Game != null ? gp.Game.GameDate : DateTime.MinValue,
+                    StartRecruiting = gp.Game != null ? gp.Game.StartRecruiting : DateTime.MinValue,
+                    EndRecruiting = gp.Game != null ? gp.Game.EndRecruiting : DateTime.MinValue,
+                    GameStatus = gp.Game != null ? gp.Game.GameStatus : "",
+                    IsCancelledText = gp.IsCancelled ? "취소됨" : "참가"
+                });
+
+            if (!string.IsNullOrWhiteSpace(searchQuery) && !string.IsNullOrWhiteSpace(searchField))
+            {
+                var kw = searchQuery.Trim().ToLower();
+                switch (searchField)
+                {
+                    case "GameName":
+                        query = query.Where(g => (g.GameName ?? "").ToLower().Contains(kw));
+                        break;
+                    case "GameHost":
+                        query = query.Where(g => (g.GameHost ?? "").ToLower().Contains(kw));
+                        break;
+                    case "StadiumName":
+                        query = query.Where(g => (g.StadiumName ?? "").ToLower().Contains(kw));
+                        break;
+                }
+            }
+
+            query = query.OrderByDescending(g => g.GameDate);
+            return await PaginatedList<MyGameListModel>.CreateAsync(query.AsNoTracking(), pageIndex, pageSize);
+        }
+
+        public async Task<MyGameDetailViewModel?> GetMyGameInformationAsync(string gameCode, string? userId)
+        {
+            var participant = await _dbContext.GameParticipants
+                .Include(gp => gp.Game)
+                .FirstOrDefaultAsync(gp => gp.GameCode == gameCode && gp.UserId == userId);
+
+            if (participant == null || participant.Game == null)
+                return null;
+
+            var game = participant.Game;
+
+            // PlayModeToText 등은 필요에 따라 변환 로직 추가
+            return new MyGameDetailViewModel
+            {
+                GameCode = game.GameCode,
+                GameName = game.GameName,
+                GameDate = game.GameDate,
+                StadiumName = game.StadiumName,
+                PlayModeToText = game.PlayMode, // 변환 함수 필요시 적용
+                GameHost = game.GameHost,
+                HoleMaximum = game.HoleMaximum,
+                StartRecruiting = game.StartRecruiting,
+                EndRecruiting = game.EndRecruiting,
+                GameNote = game.GameNote,
+                ParticipantNumber = game.ParticipantNumber,
+                IsCancelled = participant.IsCancelled ? 1 : 0,
+                CancelDate = participant.CancelDate,
+                CancelReason = participant.CancelReason,
+                Approval = participant.Approval,
+                AssignmentStatus = null // 필요시 추가
+            };
+        }
+
+        public async Task<bool> MyGameCancelAsync(string gameCode, string? userId, string cancelReason)
+        {
+            var participant = await _dbContext.GameParticipants
+                .FirstOrDefaultAsync(gp => gp.GameCode == gameCode && gp.UserId == userId && !gp.IsCancelled);
+
+            if (participant == null)
+                return false;
+
+            participant.IsCancelled = true;
+            participant.CancelDate = DateTime.Now;
+            participant.CancelReason = cancelReason;
+            participant.JoinStatus = "Cancel";
+            // 필요시 participant.Approval = ...;
+
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> MyGameRejoinAsync(string gameCode, string? userId)
+        {
+            var participant = await _dbContext.GameParticipants
+                .FirstOrDefaultAsync(gp => gp.GameCode == gameCode && gp.UserId == userId && gp.IsCancelled);
+
+            if (participant == null)
+                return false;
+
+            // 관리자가 취소 승인한 경우
+            if (participant.Approval != null)
+            {
+                // 재참가 불가
+                return false;
+            }
+
+            participant.IsCancelled = false;
+            participant.CancelDate = null;
+            participant.CancelReason = null;
+            // 필요시 participant.Approval = null;
+            participant.JoinStatus = "Join";
+
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
     }
 }

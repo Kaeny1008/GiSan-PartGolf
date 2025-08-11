@@ -1,4 +1,6 @@
-﻿using GisanParkGolf_Core.Data;
+﻿using GiSanParkGolf.Pages.AdminPage;
+using GiSanParkGolf.Pages.PlayerPage;
+using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
 using Microsoft.EntityFrameworkCore;
 
