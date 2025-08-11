@@ -1,5 +1,6 @@
 ﻿using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.ViewModels;
+using GisanParkGolf_Core.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -9,121 +10,98 @@ namespace GisanParkGolf_Core.Services
 {
     public class PlayerGameService : IPlayerGameService
     {
-        private readonly MyDbContext _context;
+        private readonly MyDbContext _db;
 
-        public PlayerGameService(MyDbContext context)
+        public PlayerGameService(MyDbContext db)
         {
-            _context = context;
+            _db = db;
         }
 
         public async Task<PaginatedList<PlayerGameListItemViewModel>> GetMyGamesAsync(
             string userId, string searchField, string searchKeyword, int pageIndex, int pageSize)
         {
-            var query = _context.Games
-                .Where(g => g.Participants.Any(p => p.UserId == userId));
+            var query = _db.GameParticipants
+                .Include(x => x.Game)
+                .Where(x => x.UserId == userId);
 
             if (!string.IsNullOrEmpty(searchField) && !string.IsNullOrEmpty(searchKeyword))
             {
-                switch (searchField)
+                string kw = searchKeyword.ToLower();
+                query = searchField switch
                 {
-                    case "GameName":
-                        query = query.Where(g => g.GameName.Contains(searchKeyword));
-                        break;
-                    case "StadiumName":
-                        query = query.Where(g => g.StadiumName.Contains(searchKeyword));
-                        break;
-                    case "GameHost":
-                        query = query.Where(g => g.GameHost.Contains(searchKeyword));
-                        break;
-                }
+                    "GameName" => query.Where(x => x.Game != null && x.Game.GameName.ToLower().Contains(kw)),
+                    "GameHost" => query.Where(x => x.Game != null && x.Game.GameHost.ToLower().Contains(kw)),
+                    _ => query
+                };
             }
 
-            var totalCount = await query.CountAsync();
-            var games = await query
-                .OrderByDescending(g => g.GameDate)
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .Select(g => new PlayerGameListItemViewModel
-                {
-                    GameCode = g.GameCode,
-                    GameName = g.GameName,
-                    StadiumName = g.StadiumName,
-                    GameHost = g.GameHost,
-                    GameDate = g.GameDate,
-                    StartRecruiting = g.StartRecruiting,
-                    EndRecruiting = g.EndRecruiting,
-                    GameStatus = g.GameStatus,
-                    IsCancelledText = g.Participants
-                        .Where(p => p.UserId == userId)
-                        .Select(p => p.IsCancelled == true ? "취소" : "참가")
-                        .FirstOrDefault()
-                })
-                .ToListAsync();
+            query = query.OrderByDescending(x => x.Game.GameDate);
 
-            return new PaginatedList<PlayerGameListItemViewModel>(
-                games, totalCount, pageIndex, pageSize
+            return await PaginatedList<PlayerGameListItemViewModel>.CreateAsync(
+                query.Select(x => new PlayerGameListItemViewModel
+                {
+                    GameCode = x.GameCode,
+                    GameName = x.Game != null ? x.Game.GameName : "",
+                    GameHost = x.Game != null ? x.Game.GameHost : "",
+                    GameDate = x.Game != null ? x.Game.GameDate : default(DateTime),
+                    IsCancelledText = x.IsCancelled ? "취소" : "참가",
+                    // 실제 ViewModel에 있는 필드만 넣기
+                }),
+                pageIndex, pageSize
             );
         }
 
         public async Task<PlayerGameDetailViewModel> GetMyGameDetailAsync(string userId, string gameCode)
         {
-            var game = await _context.Games
-                .Where(g => g.GameCode == gameCode)
-                .Select(g => new PlayerGameDetailViewModel
-                {
-                    GameCode = g.GameCode,
-                    GameName = g.GameName,
-                    StadiumName = g.StadiumName,
-                    GameHost = g.GameHost,
-                    GameDate = g.GameDate,
-                    PlayMode = g.PlayMode,
-                    HoleMaximum = g.HoleMaximum,
-                    StartRecruiting = g.StartRecruiting,
-                    EndRecruiting = g.EndRecruiting,
-                    GameNote = g.GameNote,
-                    ParticipantNumber = g.Participants.Count(),
-                    IsCancelled = g.Participants.Where(p => p.UserId == userId).Select(p => p.IsCancelled).FirstOrDefault(),
-                    CancelDate = g.Participants.Where(p => p.UserId == userId).Select(p => p.CancelDate).FirstOrDefault(),
-                    CancelReason = g.Participants.Where(p => p.UserId == userId).Select(p => p.CancelReason).FirstOrDefault(),
-                    CancelledBy = g.Participants.Where(p => p.UserId == userId).Select(p => p.CancelledBy).FirstOrDefault(),
-                    AssignmentStatus = g.Participants.Where(p => p.UserId == userId).Select(p => p.AssignmentStatus).FirstOrDefault()
-                })
-                .FirstOrDefaultAsync();
+            var participant = await _db.GameParticipants
+                .Include(x => x.Game)
+                .FirstOrDefaultAsync(x => x.GameCode == gameCode && x.UserId == userId);
 
-            return game;
+            if (participant == null) return null;
+
+            var game = participant.Game;
+
+            return new PlayerGameDetailViewModel
+            {
+                GameCode = participant.GameCode,
+                GameName = game?.GameName ?? "",
+                GameDate = game?.GameDate,
+                GameHost = game?.GameHost ?? "",
+                PlayMode = game?.PlayMode,
+                HoleMaximum = game?.HoleMaximum,
+                StartRecruiting = game?.StartRecruiting,
+                EndRecruiting = game?.EndRecruiting,
+                GameNote = game?.Note,
+                ParticipantNumber = game?.ParticipantNumber,
+                CancelDate = participant.CancelDate,
+                CancelReason = participant.CancelReason,
+                AssignmentStatus = null,   // 실제 구조에 맞게
+                IsCancelled = participant.IsCancelled,
+                CancelledBy = null,        // 실제 구조에 맞게
+            };
         }
 
-        public async Task<bool> CancelGameAsync(string userId, string gameCode, string cancelReason)
+        public async Task<bool> CancelGameAsync(string userId, string gameCode, string reason)
         {
-            var participant = await _context.GameParticipants
-                .FirstOrDefaultAsync(p => p.GameCode == gameCode && p.UserId == userId);
-
-            if (participant == null || participant.IsCancelled == 1)
-                return false;
-
-            participant.IsCancelled = 1;
+            var participant = await _db.GameParticipants
+                .FirstOrDefaultAsync(x => x.GameCode == gameCode && x.UserId == userId);
+            if (participant == null) return false;
+            participant.IsCancelled = true;
+            participant.CancelReason = reason;
             participant.CancelDate = DateTime.Now;
-            participant.CancelReason = cancelReason;
-            participant.CancelledBy = "User";
-            await _context.SaveChangesAsync();
-
+            await _db.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> RejoinGameAsync(string userId, string gameCode)
         {
-            var participant = await _context.GameParticipants
-                .FirstOrDefaultAsync(p => p.GameCode == gameCode && p.UserId == userId);
-
-            if (participant == null || participant.IsCancelled == 0 || participant.CancelledBy == "Admin" || participant.AssignmentStatus == "Cancelled")
-                return false;
-
-            participant.IsCancelled = 0;
+            var participant = await _db.GameParticipants
+                .FirstOrDefaultAsync(x => x.GameCode == gameCode && x.UserId == userId);
+            if (participant == null) return false;
+            participant.IsCancelled = false;
             participant.CancelReason = null;
             participant.CancelDate = null;
-            participant.CancelledBy = null;
-            await _context.SaveChangesAsync();
-
+            await _db.SaveChangesAsync();
             return true;
         }
     }
