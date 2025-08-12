@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using GisanParkGolf_Core.Services;
+using GisanParkGolf_Core.Services.Account;
 
 namespace GisanParkGolf_Core.Controllers
 {

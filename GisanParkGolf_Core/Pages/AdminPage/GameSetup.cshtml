@@ -1,0 +1,197 @@
+﻿@page
+@model GiSanParkGolf.Pages.AdminPage.GameSetupModel
+@{
+    ViewData["Title"] = "인원 코스 및 배치";
+}
+
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음", "해당 대회의 선수 배치를 할 수 있습니다."))
+
+<div class="container mt-4">
+    <div class="row position-relative">
+        <div id="topPanel">
+            <div class="custom-card">
+                <h4 class="card-title">대회 선택</h4>
+                <p class="mb-2 text-muted">대회명을 클릭하여 세부정보를 확인하세요.</p>
+                <!-- 검색/필터/보기갯수 컨트롤 -->
+                @{
+                    var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                    {
+                        PageSize = Model.PageSize,
+                        SearchField = Model.SearchField,
+                        SearchQuery = Model.SearchQuery,
+                        ResetPageName = "./GameSetup",
+                        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                                {
+                                new() { Value = "GameName", Text = "대회명" }, //나중에 변경해야함. 우선 디자인만
+                                new() { Value = "UserId", Text = "참가자ID" } // 나중에 변경해야함. 우선 디자인만
+                                }
+                    };
+                }
+                @await Html.PartialAsync("_SearchControl", searchModel)
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:4rem">No</th>
+                                <th>대회명</th>
+                                <th>대회일자</th>
+                                <th>선택</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int no = (Model.PageIndex - 1) * Model.PageSize;
+                            }
+                            @foreach (var game in Model.GameList)
+                            {
+                                <tr class="@(Model.SelectedGame?.GameCode == game.GameCode ? "table-primary" : "")">
+                                    <td>@(++no)</td>
+                                    <td>@game.GameName</td>
+                                    <td>@game.GameDate.ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        <form method="post">
+                                            <input type="hidden" name="selectedGameCode" value="@game.GameCode" />
+                                            <button type="submit" name="action" value="selectGame" class="btn btn-outline-primary btn-sm">
+                                                선택
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 페이징 컨트롤 -->
+                @{
+                    var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+                    {
+                        PageIndex = Model.PageIndex,
+                        TotalPages = Model.TotalPages,
+                        GetPageUrl = i => Url.Page(
+                        "./GameSetup",
+                        null,
+                        new
+                        {
+                            SearchField = Model.SearchField,
+                            SearchQuery = Model.SearchQuery,
+                            PageIndex = i,
+                            PageSize = Model.PageSize
+                        }, null) ?? ""
+                    };
+                }
+                @await Html.PartialAsync("_Pagination", pagemodel)
+            </div>
+        </div>
+        <div id="bottomPanel">
+            <div class="custom-card">
+                @if (Model.SelectedGame != null)
+                {
+                    <!-- 대회 상세정보 -->
+                    <div class="mb-3">
+                        <h4 class="card-title mb-0">대회 상세정보</h4>
+                        <button type="submit" asp-page-handler="BackToList" class="btn btn-outline-success btn-sm float-end">목록으로 이동</button>
+                    </div>
+
+                    <!-- 탭 메뉴 -->
+                    <ul class="nav nav-tabs mb-3" id="gameSetupTabs" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" id="tab-info-tab" data-bs-toggle="tab" href="#tab-info" role="tab">기본정보</a></li>
+                        <li class="nav-item"><a class="nav-link" id="tab-player-tab" data-bs-toggle="tab" href="#tab-player" role="tab">참가자확인</a></li>
+                        <li class="nav-item"><a class="nav-link" id="tab-course-tab" data-bs-toggle="tab" href="#tab-course" role="tab">코스배치</a></li>
+                        <li class="nav-item"><a class="nav-link" id="tab-result-tab" data-bs-toggle="tab" href="#tab-result" role="tab">코스배치 결과 확인</a></li>
+                        <li class="nav-item"><a class="nav-link" id="tab-cancelplayer-tab" data-bs-toggle="tab" href="#tab-cancelplayer" role="tab">취소 참가자 목록</a></li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- 기본정보 -->
+                        <div class="tab-pane fade show active" id="tab-info" role="tabpanel">
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">대회코드</span>
+                                <input class="form-control" value="@Model.SelectedGame.GameCode" readonly />
+                                <span class="input-group-text">현재상태</span>
+                                <input class="form-control" value="@Model.SelectedGame.GameStatus" readonly />
+                            </div>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">대회명</span>
+                                <input class="form-control" value="@Model.SelectedGame.GameName" readonly />
+                                <span class="input-group-text">대회일자</span>
+                                <input class="form-control" value="@Model.SelectedGame.GameDateText" readonly />
+                            </div>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">장소</span>
+                                <input class="form-control" value="@Model.SelectedGame.StadiumName" readonly />
+                                <span class="input-group-text">주최</span>
+                                <input class="form-control" value="@Model.SelectedGame.GameHost" readonly />
+                            </div>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">홀당 최대</span>
+                                <input class="form-control" value="@Model.SelectedGame.HoleMaximum" readonly />
+                                <span class="input-group-text">참가인원</span>
+                                <input class="form-control" value="@Model.SelectedGame.ParticipantNumber" readonly />
+                            </div>
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">비고</span>
+                                <input class="form-control note" value="@Model.SelectedGame.Note" readonly />
+                                <span class="input-group-text">방식</span>
+                                <input class="form-control" value="@Model.SelectedGame.PlayMode" readonly />
+                            </div>
+                        </div>
+
+                        <!-- 참가자확인 탭 -->
+                        <div class="tab-pane fade" id="tab-player" role="tabpanel">
+                            <div class="mb-2 d-flex gap-2 justify-content-end">
+                                <button type="submit" asp-page-handler="ToExcel" class="btn btn-primary btn-sm">Excel 저장</button>
+                                <button type="button" onclick="window.print();" class="btn btn-outline-dark btn-sm">프린트 하기</button>
+                            </div>
+                            <div id="printArea">
+                                <table class="table table-bordered table-hover table-condensed table-striped table-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>ID</th>
+                                            <th>성명</th>
+                                            <th>생년월일</th>
+                                            <th>성별</th>
+                                            <th>연령</th>
+                                            <th>수상경력</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.PlayerList != null && Model.PlayerList.Count > 0)
+                                        {
+                                            var idx = 1;
+                                            foreach (var player in Model.PlayerList)
+                                            {
+                                                <tr>
+                                                    <td>@idx</td>
+                                                    <td>@player.UserId</td>
+                                                    <td>@player.UserName</td>
+                                                    <td>@player.FormattedBirthDate</td>
+                                                    <td>@player.UserGenderText</td>
+                                                    <td>@player.AgeText</td>
+                                                    <td>@(string.IsNullOrEmpty(player.AwardsSummary) ? "없음" : player.AwardsSummary)</td>
+                                                </tr>
+                                                idx++;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="8" class="text-center">데이터가 없습니다.</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 아래 코스배치, 결과, 취소자는 위 패턴대로 확장 -->
+                        <!-- 필요시 각 탭에 맞는 Model.List, 버튼, 테이블 추가 -->
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

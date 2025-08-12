@@ -3,7 +3,7 @@ using GisanParkGolf_Core.Helpers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Services
+namespace GisanParkGolf_Core.Services.PlayerPage
 {
     public interface IPlayerService
     {

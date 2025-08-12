@@ -1,7 +1,7 @@
 ﻿using GisanParkGolf_Core.Data;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GisanParkGolf_Core.ViewModels
+namespace GisanParkGolf_Core.ViewModels.PlayerPage
 {
     public class MyGameDetailViewModel
     {

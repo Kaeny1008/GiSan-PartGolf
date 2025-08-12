@@ -3,7 +3,7 @@ using GisanParkGolf_Core.Data;
 using Microsoft.EntityFrameworkCore;
 using T_Engine;
 
-namespace GisanParkGolf_Core.Services
+namespace GisanParkGolf_Core.Services.Account
 {
     public class Playerservice : IPlayerservice
     {
@@ -43,9 +43,9 @@ namespace GisanParkGolf_Core.Services
 
             if (user != null && user.UserPassword == encryptedPassword)
             {
-                bool isAdmin = (user.UserClass == 1);
-                bool isManager = (user.UserClass == 2);
-                bool isMember = (user.UserClass == 3);
+                bool isAdmin = user.UserClass == 1;
+                bool isManager = user.UserClass == 2;
+                bool isMember = user.UserClass == 3;
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.UserId), 

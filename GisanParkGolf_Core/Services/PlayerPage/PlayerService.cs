@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Services
+namespace GisanParkGolf_Core.Services.PlayerPage
 {
     public class PlayerService : IPlayerService
     {

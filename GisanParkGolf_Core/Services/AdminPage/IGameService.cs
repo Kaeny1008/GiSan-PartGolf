@@ -3,7 +3,7 @@ using GiSanParkGolf.Pages.PlayerPage;
 using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
 
-namespace GisanParkGolf_Core.Services
+namespace GisanParkGolf_Core.Services.AdminPage
 {
     public interface IGameService
     {

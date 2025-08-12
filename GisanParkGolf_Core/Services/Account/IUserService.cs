@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims; // Claims를 사용하기 위해 추가
 
-namespace GisanParkGolf_Core.Services
+namespace GisanParkGolf_Core.Services.Account
 {
     public interface IPlayerservice
     {

@@ -2,11 +2,11 @@
 using GiSanParkGolf.Pages.PlayerPage;
 using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
-using GisanParkGolf_Core.ViewModels;
+using GisanParkGolf_Core.ViewModels.PlayerPage;
 using System.Security.Claims;
-using static GisanParkGolf_Core.Services.JoinGameService;
+using static GisanParkGolf_Core.Services.PlayerPage.JoinGameService;
 
-namespace GisanParkGolf_Core.Services
+namespace GisanParkGolf_Core.Services.PlayerPage
 {
     public interface IJoinGameService
     {

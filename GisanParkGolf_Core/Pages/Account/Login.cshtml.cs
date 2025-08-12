@@ -1,4 +1,4 @@
-﻿using GisanParkGolf_Core.Services;
+﻿using GisanParkGolf_Core.Services.Account;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

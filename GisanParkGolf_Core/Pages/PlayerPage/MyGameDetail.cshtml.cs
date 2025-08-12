@@ -1,6 +1,6 @@
 using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Services;
-using GisanParkGolf_Core.ViewModels;
+using GisanParkGolf_Core.Services.PlayerPage;
+using GisanParkGolf_Core.ViewModels.PlayerPage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

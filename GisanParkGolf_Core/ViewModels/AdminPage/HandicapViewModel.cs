@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GisanParkGolf_Core.ViewModels
+namespace GisanParkGolf_Core.ViewModels.AdminPage
 {
     // 화면에 핸디캡 정보를 표시하기 위한 전용 모델
     public class HandicapViewModel
@@ -15,7 +15,7 @@ namespace GisanParkGolf_Core.ViewModels
 
         [Required]
         public string Source { get; set; } = string.Empty;
-        public System.DateTime? LastUpdated { get; set; }
+        public DateTime? LastUpdated { get; set; }
         public string? LastUpdatedBy { get; set; }
     }
 }

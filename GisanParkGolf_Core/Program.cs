@@ -1,6 +1,9 @@
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using GiSanParkGolf.Services.AdminPage;
 using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Services;
+using GisanParkGolf_Core.Services.Account;
+using GisanParkGolf_Core.Services.AdminPage;
+using GisanParkGolf_Core.Services.PlayerPage;
 using Microsoft.EntityFrameworkCore;
 using T_Engine;
 
@@ -16,14 +19,15 @@ public class Program
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
         );
 
+        builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<Cryptography>();
         builder.Services.AddScoped<IPlayerservice, Playerservice>();
         builder.Services.AddScoped<IHandicapService, HandicapService>();
         builder.Services.AddScoped<IPlayerService, PlayerService>();
         builder.Services.AddScoped<IStadiumService, StadiumService>();
         builder.Services.AddScoped<IGameService, GameService>();
-        builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<IJoinGameService, JoinGameService>();
+        builder.Services.AddScoped<IGameSetupService, GameSetupService>();
 
         // 로그인 시스템 설정
         // 복잡한 Identity 시스템 대신, 간단하고 빠른 '쿠키 인증' 시스템을 사용
