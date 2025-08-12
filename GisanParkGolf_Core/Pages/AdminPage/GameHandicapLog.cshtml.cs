@@ -24,7 +24,7 @@ namespace GisanParkGolf_Core.Pages.AdminPage
         public string SearchField { get; set; } = "UserName";
 
         [BindProperty(SupportsGet = true)]
-        public string? SearchKeyword { get; set; }
+        public string? SearchQuery { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public int PageIndex { get; set; } = 1;
@@ -35,7 +35,7 @@ namespace GisanParkGolf_Core.Pages.AdminPage
 
         public async Task OnGetAsync()
         {
-            Logs = await _handicapService.GetHandicapLogsAsync(SearchField, SearchKeyword, PageIndex, PageSize);
+            Logs = await _handicapService.GetHandicapLogsAsync(SearchField, SearchQuery, PageIndex, PageSize);
         }
     }
 }

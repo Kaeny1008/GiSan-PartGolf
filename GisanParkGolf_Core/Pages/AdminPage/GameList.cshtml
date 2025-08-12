@@ -4,12 +4,8 @@
     ViewData["Title"] = "대회 목록";
 }
 
-<div class="mb-3 text-center">
-    <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
-    <p class="text-muted" style="font-size: 0.95rem;">
-        대회를 개최, 수정 및 관리할 수 있는 페이지입니다.
-    </p>
-</div>
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음"
+    , "대회를 개최, 수정 및 관리할 수 있는 페이지입니다."))
 
 <div class="container mt-4">
     <div class="custom-card">
@@ -18,22 +14,22 @@
         </div>
         <!-- 필터 및 버튼 영역 -->
         <div class="card-header py-3">
-            <form method="get" class="d-flex flex-wrap align-items-center gap-2">
-                <!-- 페이지당 행 수 선택 드롭다운 -->
-                <select asp-for="PageSize" class="form-select" style="max-width: auto;" onchange="this.form.submit()">
-                    <option value="10">10개씩 보기</option>
-                    <option value="20">20개씩 보기</option>
-                    <option value="50">50개씩 보기</option>
-                </select>
-                <select asp-for="SearchField" class="form-select" style="max-width: 150px;">
-                    <option value="GameName">대회명</option>
-                    <option value="GameHost">주최</option>
-                    <option value="StadiumName">경기장</option>
-                </select>
-                <input type="text" asp-for="SearchQuery" class="form-control" placeholder="대회명 또는 주최로 검색..." />
-                <button type="submit" class="btn btn-primary">검색</button>
-                <a asp-page="./GameList" class="btn btn-secondary">초기화</a>
-            </form>
+            @{
+                var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                {
+                    PageSize = Model.PageSize,
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    ResetPageName = "./GameList",
+                    FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                        {
+                        new() { Value = "GameName", Text = "대회명" },
+                        new() { Value = "GameHost", Text = "주최" },
+                        new() { Value = "StadiumName", Text = "경기장" }
+                        }
+                };
+            }
+            @await Html.PartialAsync("_SearchControl", searchModel)
         </div>
 
         <table class="table table-hover align-middle">
@@ -75,38 +71,24 @@
             </tbody>
         </table>
 
-        <!-- 페이징 컨트롤 -->
+        <!-- 페이지네이션 컨트롤 -->
         @{
-            var prevDisabled = !(Model.GameList?.HasPreviousPage ?? false) ? "disabled" : "";
-            var nextDisabled = !(Model.GameList?.HasNextPage ?? false) ? "disabled" : "";
-        }
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                <li class="page-item @prevDisabled">
-                    <a class="page-link" asp-page="./GameList"
-                       asp-route-PageIndex="@(Model.PageIndex - 1)"
-                       asp-route-PageSize="@Model.PageSize"
-                       asp-route-SearchField="@Model.SearchField"
-                       asp-route-SearchQuery="@Model.SearchQuery">이전</a>
-                </li>
-                @for (int i = 1; i <= (Model.GameList?.TotalPages ?? 1); i++)
+            var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+            {
+                PageIndex = Model.PageIndex,
+                TotalPages = Model.GameList?.TotalPages ?? 1,
+                GetPageUrl = i => Url.Page(
+                "./GameList",
+                null,
+                new
                 {
-                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                        <a class="page-link" asp-page="./GameList"
-                           asp-route-PageIndex="@i"
-                           asp-route-PageSize="@Model.PageSize"
-                           asp-route-SearchField="@Model.SearchField"
-                           asp-route-SearchQuery="@Model.SearchQuery">@i</a>
-                    </li>
-                }
-                <li class="page-item @nextDisabled">
-                    <a class="page-link" asp-page="./GameList"
-                       asp-route-PageIndex="@(Model.PageIndex + 1)"
-                       asp-route-PageSize="@Model.PageSize"
-                       asp-route-SearchField="@Model.SearchField"
-                       asp-route-SearchQuery="@Model.SearchQuery">다음</a>
-                </li>
-            </ul>
-        </nav>
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    PageIndex = i,
+                    PageSize = Model.PageSize
+                }, null) ?? ""
+            };
+        }
+        @await Html.PartialAsync("_Pagination", pagemodel)
     </div>
 </div>

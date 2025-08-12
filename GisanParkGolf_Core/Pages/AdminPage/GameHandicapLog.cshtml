@@ -6,30 +6,32 @@
 }
 
 <!-- 상단 카드: 페이지 설명 영역 -->
-<div class="mb-3 text-center">
-    <h4 class="fw-bold mb-2">@ViewData["Title"]</h4>
-    <p class="text-muted" style="font-size: 0.95rem;">
-        변경된 핸디캡의 이력을 조회할 수 있습니다.
-    </p>
-</div>
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음"
+    , "변경된 핸디캡의 이력을 조회할 수 있습니다."))
 
 <div class="container mt-4">
     <div class="custom-card">
         <!-- 검색 영역 -->
         <div class="row mb-4">
             <div class="col-md-8">
-                <form method="get" class="d-flex flex-wrap gap-2">
-                    <select name="SearchField" class="form-select" style="width: auto;">
-                        <option value="UserName" selected="@(Model.SearchField == "UserName")">이름</option>
-                        <option value="UserId" selected="@(Model.SearchField == "UserId")">ID</option>
-                    </select>
-                    <input type="text" name="SearchKeyword" class="form-control" placeholder="검색어 입력..." value="@Model.SearchKeyword" style="width: 250px;" />
-                    <button type="submit" class="btn btn-primary">검색</button>
-                    <a asp-page="/Admin/GameHandicapLog" class="btn btn-secondary">초기화</a>
-                </form>
+                @{
+                    var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                    {
+                        PageSize = Model.PageSize,
+                        SearchField = Model.SearchField,
+                        SearchQuery = Model.SearchQuery,
+                        ResetPageName = "./GameHandicapLog",
+                        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                                {
+                                new() { Value = "UserName", Text = "이름" },
+                                new() { Value = "UserId", Text = "ID" }
+                                }
+                    };
+                }
+                @await Html.PartialAsync("_SearchControl", searchModel)
             </div>
             <div class="col-md-4 text-end">
-                <a asp-page="/Admin/GameHandicap" class="btn btn-outline-secondary">
+                <a asp-page="/AdminPage/GameHandicap" class="btn btn-outline-secondary">
                     <i class="bi bi-pencil-square"></i> 핸디캡 관리 돌아가기
                 </a>
             </div>
@@ -84,5 +86,25 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- 페이지네이션 컨트롤 -->
+        @{
+            var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+            {
+                PageIndex = Model.PageIndex,
+                TotalPages = Model.Logs.TotalPages,
+                GetPageUrl = i => Url.Page(
+                "./GameHandicapLog",
+                null,
+                new
+                {
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    PageIndex = i,
+                    PageSize = Model.PageSize
+                }, null) ?? ""
+            };
+        }
+        @await Html.PartialAsync("_Pagination", pagemodel)
     </div>
 </div>

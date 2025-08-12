@@ -28,7 +28,7 @@ namespace GisanParkGolf_Core.Pages.AdminPage
 
         // 검색어
         [BindProperty(SupportsGet = true)]
-        public string? SearchKeyword { get; set; }
+        public string? SearchQuery { get; set; }
 
         // 페이지당 보여줄 행 수
         [BindProperty(SupportsGet = true)]
@@ -49,7 +49,7 @@ namespace GisanParkGolf_Core.Pages.AdminPage
         public async Task OnGetAsync()
         {
             // 서비스 계층을 통해 페이징 및 검색 조건에 맞는 데이터를 가져옴
-            Handicaps = await _handicapService.GetPlayerHandicapsAsync(SearchField, SearchKeyword, PageIndex, PageSize);
+            Handicaps = await _handicapService.GetPlayerHandicapsAsync(SearchField, SearchQuery, PageIndex, PageSize);
         }
 
         // 개별 핸디캡을 업데이트할 때 실행되는 메서드
@@ -75,7 +75,7 @@ namespace GisanParkGolf_Core.Pages.AdminPage
             }
 
             // 현재 페이지 및 검색 상태를 유지하며 페이지를 새로고침
-            return RedirectToPage(new { SearchField, SearchKeyword, PageIndex, PageSize });
+            return RedirectToPage(new { SearchField, SearchQuery, PageIndex, PageSize });
         }
 
         // 모든 핸디캡을 일괄 재계산할 때 실행되는 메서드
@@ -93,7 +93,7 @@ namespace GisanParkGolf_Core.Pages.AdminPage
             }
 
             // 현재 페이지 및 검색 상태를 유지하며 페이지를 새로고침
-            return RedirectToPage(new { SearchField, SearchKeyword, PageIndex, PageSize });
+            return RedirectToPage(new { SearchField, SearchQuery, PageIndex, PageSize });
         }
 
         // .cshtml 파일에서 '자동' 핸디캡 값을 미리 보여주기 위한 헬퍼 메서드

@@ -20,15 +20,10 @@ namespace GisanParkGolf_Core.Pages.AdminPage
         public PlayerManagementModel(IPlayerService playerService)
         {
             _playerService = playerService;
-            SearchFields = new List<SelectListItem>
-            {
-                new SelectListItem { Text = "이름", Value = "UserName" },
-                new SelectListItem { Text = "아이디", Value = "UserId" }
-            };
         }
 
         // --- 속성들 ---
-        public List<SelectListItem> SearchFields { get; }
+        public List<SelectListItem> SearchFields { get; } = [];
 
         // ★★★★★ 변경점: 기본 검색 필드를 'UserName'으로 설정 ★★★★★
         [BindProperty(SupportsGet = true)]

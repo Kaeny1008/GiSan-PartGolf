@@ -1,5 +1,4 @@
 using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -21,13 +20,16 @@ namespace GiSanParkGolf.Pages.AdminPage
         public int TotalCount { get; set; }
         public int CancelledCount { get; set; }
         public int JoinedCount { get; set; }
+        public int TotalPages { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public string? SearchGameName { get; set; }
+        public string? SearchField { get; set; } = "GameName";
         [BindProperty(SupportsGet = true)]
-        public string? SearchUserId { get; set; }
+        public string? SearchQuery { get; set; }
         [BindProperty(SupportsGet = true)]
-        public bool ShowCancelledOnly { get; set; }
+        public int PageIndex { get; set; } = 1;
+        [BindProperty(SupportsGet = true)]
+        public int PageSize { get; set; } = 10;
 
         public async Task OnGetAsync()
         {
@@ -35,21 +37,38 @@ namespace GiSanParkGolf.Pages.AdminPage
                 .Include(gp => gp.Game)
                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(SearchGameName))
-                query = query.Where(gp => gp.Game.GameName.Contains(SearchGameName));
-            if (!string.IsNullOrEmpty(SearchUserId))
-                query = query.Where(gp => gp.UserId.Contains(SearchUserId));
-            if (ShowCancelledOnly)
+            if (!string.IsNullOrEmpty(SearchQuery))
+            {
+                switch (SearchField)
+                {
+                    case "GameName":
+                        query = query.Where(gp => gp.Game.GameName.Contains(SearchQuery));
+                        break;
+                    case "UserId":
+                        query = query.Where(gp => gp.UserId.Contains(SearchQuery));
+                        break;
+                }
+            }
+
+            if (SearchField == "CancelledOnly")
+            {
                 query = query.Where(gp => gp.IsCancelled);
+            }
+
+            TotalCount = await query.CountAsync();
+            CancelledCount = await _dbContext.GameParticipants.CountAsync(gp => gp.IsCancelled);
+            JoinedCount = await _dbContext.GameParticipants.CountAsync(gp => !gp.IsCancelled);
+
+            TotalPages = (int)Math.Ceiling((double)TotalCount / PageSize);
+            if (TotalPages == 0) TotalPages = 1;
+            if (PageIndex < 1) PageIndex = 1;
+            if (PageIndex > TotalPages) PageIndex = TotalPages;
 
             Participants = await query
                 .OrderByDescending(gp => gp.JoinDate)
-                .Take(200) // 최대 200건만
+                .Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
                 .ToListAsync();
-
-            TotalCount = await _dbContext.GameParticipants.CountAsync();
-            CancelledCount = await _dbContext.GameParticipants.CountAsync(gp => gp.IsCancelled);
-            JoinedCount = await _dbContext.GameParticipants.CountAsync(gp => !gp.IsCancelled);
         }
     }
 }

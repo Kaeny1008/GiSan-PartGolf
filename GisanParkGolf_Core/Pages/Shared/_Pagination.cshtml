@@ -1,0 +1,30 @@
+﻿@*
+    공통 페이징 컨트롤 Partial View
+    Model: PaginationModel (아래 정의 참고)
+*@
+
+@model GisanParkGolf_Core.Pages.Shared.PaginationModel
+@{
+    var prevDisabled = Model.PageIndex <= 1 ? "disabled" : "";
+    var nextDisabled = Model.PageIndex >= Model.TotalPages ? "disabled" : "";
+}
+
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @prevDisabled">
+            <a class="page-link"
+               href="@Model.GetPageUrl(Model.PageIndex - 1)">이전</a>
+        </li>
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                <a class="page-link"
+                   href="@Model.GetPageUrl(i)">@i</a>
+            </li>
+        }
+        <li class="page-item @nextDisabled">
+            <a class="page-link"
+               href="@Model.GetPageUrl(Model.PageIndex + 1)">다음</a>
+        </li>
+    </ul>
+</nav>

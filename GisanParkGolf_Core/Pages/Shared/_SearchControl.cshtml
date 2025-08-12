@@ -1,0 +1,26 @@
+﻿@model GisanParkGolf_Core.Pages.Shared.SearchControlModel
+
+<div class="card-header py-3">
+    <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+        <select name="PageSize" class="form-select" style="width:120px;" onchange="this.form.submit()">
+            @{
+                var pageSizes = new int[] { 10, 20, 50, 100 };
+                foreach(var size in pageSizes)
+                {
+                    var selected = Model.PageSize == size ? "selected" : "";
+                @:<option value="@size" @selected>@size 개씩 보기</option>
+                }
+            }
+        </select>
+        <select name="SearchField" class="form-select" style="width:150px;">
+            @foreach (var opt in Model.FieldOptions)
+            {
+                var selected = Model.SearchField == opt.Value ? "selected" : "";
+            @:<option value="@opt.Value" @selected>@opt.Text</option>
+            }
+        </select>
+        <input type="text" name="SearchQuery" value="@Model.SearchQuery" class="form-control" placeholder="검색어를 입력하세요..." />
+        <button type="submit" class="btn btn-primary">검색</button>
+        <a asp-page="@Model.ResetPageName" class="btn btn-secondary">초기화</a>
+    </form>
+</div>

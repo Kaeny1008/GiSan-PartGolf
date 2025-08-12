@@ -34,10 +34,8 @@
 </div>
 
 <div class="container mt-4">
-    <div class="mb-3 text-center">
-        <h4 class="fw-bold mb-2">선수 정보관리</h4>
-        <p class="text-muted" style="font-size: 0.95rem;">선수의 정보를 수정합니다.</p>
-    </div>
+    @await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음"
+        , "선수의 정보를 수정합니다."))
 
     <div class="custom-card">
         <div class="card-header py-3">
@@ -52,23 +50,22 @@
             </div>
         </div>
         <div class="card-body">
-            <!-- ★★★★★ 변경점: 검색 컴포넌트 대신 필터들을 직접 배치 ★★★★★ -->
-            <form method="get" class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                <select name="PageSize" id="pageSizeSelect" class="form-select" style="width: auto;" asp-for="PageSize">
-                    <option value="10">10개씩 보기</option>
-                    <option value="25">25개씩 보기</option>
-                    <option value="50">50개씩 보기</option>
-                    <option value="100">100개씩 보기</option>
-                </select>
-                <select name="SearchField" class="form-select" style="width: auto;" asp-for="SearchField" asp-items="Model.SearchFields"></select>
-                <input type="text" name="SearchQuery" class="form-control" placeholder="검색어 입력..." asp-for="SearchQuery" style="width: 200px;" />
-                <div class="form-check ms-2">
-                    <input type="checkbox" class="form-check-input" asp-for="ReadyUserOnly" id="readyUserOnlyCheck" />
-                    <label class="form-check-label" for="readyUserOnlyCheck">승인 선수만</label>
-                </div>
-                <button type="submit" class="btn btn-primary">검색</button>
-                <a asp-page="./PlayerManagement" class="btn btn-secondary">초기화</a>
-            </form>
+            <!-- 필터 및 버튼 영역 -->
+            @{
+                var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                {
+                    PageSize = Model.PageSize,
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    ResetPageName = "./PlayerManagement",
+                    FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                            {
+                            new() { Value = "UserName", Text = "이름" },
+                            new() { Value = "UserId", Text = "아이디" }
+                            }
+                };
+            }
+            @await Html.PartialAsync("_SearchControl", searchModel)
 
             <div class="table-responsive mt-2">
                 <table class="table my-0 table-striped table-hover table-modern">
@@ -114,67 +111,25 @@
                 </table>
             </div>
 
-            @if (Model.Players != null && Model.Players.TotalPages > 0)
-            {
-                <div class="row align-items-center mt-3">
-                    <div class="col-md-4">
-                        <p class="text-muted mb-0">
-                            총 @Model.Players.TotalCount 명
-                        </p>
-                    </div>
-                    @if (Model.Players.TotalPages > 1)
+            <!-- 페이지네이션 컨트롤 -->
+            @{
+                var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+                {
+                    PageIndex = Model.PageIndex,
+                    TotalPages = Model.Players?.TotalPages ?? 1,
+                    GetPageUrl = i => Url.Page(
+                    "./PlayerManagement",
+                    null,
+                    new
                     {
-                        <div class="col-md-8 d-flex justify-content-end">
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination mb-0">
-                                    @{
-                                        var prevDisabled = !Model.Players.HasPreviousPage ? "disabled" : "";
-                                        <li class="page-item @prevDisabled">
-                                            <a asp-page="./PlayerManagement"
-                                               asp-route-PageIndex="@(Model.Players.PageIndex - 1)"
-                                               asp-route-PageSize="@Model.PageSize"
-                                               asp-route-SearchField="@Model.SearchField"
-                                               asp-route-SearchQuery="@Model.SearchQuery"
-                                               asp-route-ReadyUserOnly="@Model.ReadyUserOnly"
-                                               class="page-link">
-                                                이전
-                                            </a>
-                                        </li>
-                                    }
-                                    @for (var i = 1; i <= Model.Players.TotalPages; i++)
-                                    {
-                                        <li class="page-item @(i == Model.Players.PageIndex ? "active" : "")">
-                                            <a asp-page="./PlayerManagement"
-                                               asp-route-PageIndex="@i"
-                                               asp-route-PageSize="@Model.PageSize"
-                                               asp-route-SearchField="@Model.SearchField"
-                                               asp-route-SearchQuery="@Model.SearchQuery"
-                                               asp-route-ReadyUserOnly="@Model.ReadyUserOnly"
-                                               class="page-link">
-                                                @i
-                                            </a>
-                                        </li>
-                                    }
-                                    @{
-                                        var nextDisabled = !Model.Players.HasNextPage ? "disabled" : "";
-                                        <li class="page-item @nextDisabled">
-                                            <a asp-page="./PlayerManagement"
-                                               asp-route-PageIndex="@(Model.Players.PageIndex + 1)"
-                                               asp-route-PageSize="@Model.PageSize"
-                                               asp-route-SearchField="@Model.SearchField"
-                                               asp-route-SearchQuery="@Model.SearchQuery"
-                                               asp-route-ReadyUserOnly="@Model.ReadyUserOnly"
-                                               class="page-link">
-                                                다음
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
-                            </nav>
-                        </div>
-                    }
-                </div>
+                        SearchField = Model.SearchField,
+                        SearchQuery = Model.SearchQuery,
+                        PageIndex = i,
+                        PageSize = Model.PageSize
+                    }, null) ?? ""
+                };
             }
+            @await Html.PartialAsync("_Pagination", pagemodel)
         </div>
     </div>
 </div>
