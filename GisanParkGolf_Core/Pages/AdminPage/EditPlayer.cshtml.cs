@@ -122,7 +122,7 @@ namespace GisanParkGolf_Core.Pages.AdminPage
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = $"'{Input.UserName}'님의 정보가 성공적으로 수정되었습니다.";
-            return RedirectToPage("/Admin/PlayerManagement"); // 수정 후 회원 목록 페이지로 이동
+            return RedirectToPage("/AdminPage/PlayerManagement"); // 수정 후 회원 목록 페이지로 이동
         }
     }
 }

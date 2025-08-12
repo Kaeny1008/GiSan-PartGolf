@@ -53,6 +53,7 @@
                     <th>모집종료</th>
                     <th>상태</th>
                     <th>참가여부</th>
+                    <th>대회확인</th>
                 </tr>
             </thead>
             <tbody>
@@ -63,11 +64,7 @@
                     {
                         <tr>
                             <td>@(++no)</td>
-                            <td>
-                                <a asp-page="MyGameDetail" asp-route-GameCode="@game.GameCode">
-                                    @GisanParkGolf_Core.Helpers.StringHelper.CutStringUnicode(game.GameName ?? "", 25)
-                                </a>
-                            </td>
+                            <td>@game.GameName</td>
                             <td>@game.StadiumName</td>
                             <td>@game.GameHost</td>
                             <td>@game.GameDate.ToString("yyyy-MM-dd")</td>
@@ -75,6 +72,12 @@
                             <td>@game.EndRecruiting.ToString("yyyy-MM-dd")</td>
                             <td>@GisanParkGolf_Core.Helpers.GameStatusHelper.ToDisplay(game.GameStatus)</td>
                             <td>@game.IsCancelledText</td>
+                            <td>
+                                <a asp-page="MyGameDetail" asp-route-GameCode="@game.GameCode"
+                                   class="btn btn-outline-primary btn-sm">
+                                    대회확인
+                                </a>
+                            </td>
                         </tr>
                     }
                 }

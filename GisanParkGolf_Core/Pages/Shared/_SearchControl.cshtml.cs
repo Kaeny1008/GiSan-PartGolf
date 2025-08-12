@@ -11,6 +11,10 @@ namespace GisanParkGolf_Core.Pages.Shared
 
     public class SearchControlModel
     {
+        public bool ShowCancelCheckbox { get; set; } = false;
+        public bool IsCancelRequestedChecked { get; set; } = false;
+        public bool ShowReadyUserCheckbox { get; set; } = false;
+        public bool ReadyUserChecked { get; set; } = false;
         public int PageSize { get; set; }
         public string? SearchField { get; set; }
         public string? SearchQuery { get; set; }

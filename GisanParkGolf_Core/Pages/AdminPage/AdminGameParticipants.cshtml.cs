@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace GiSanParkGolf.Pages.AdminPage
 {
@@ -42,15 +43,19 @@ namespace GiSanParkGolf.Pages.AdminPage
                 switch (SearchField)
                 {
                     case "GameName":
-                        query = query.Where(gp => gp.Game.GameName.Contains(SearchQuery));
+                        query = query.Where(gp => gp.Game != null
+                                               && gp.Game.GameName != null
+                                               && gp.Game.GameName.Contains(SearchQuery));
                         break;
                     case "UserId":
-                        query = query.Where(gp => gp.UserId.Contains(SearchQuery));
+                        query = query.Where(gp => gp.UserId != null
+                                               && gp.UserId.Contains(SearchQuery));
                         break;
                 }
             }
 
-            if (SearchField == "CancelledOnly")
+            var isCancelRequested = Request.Query["IsCancelRequested"] == "true";
+            if (isCancelRequested)
             {
                 query = query.Where(gp => gp.IsCancelled);
             }
@@ -69,6 +74,46 @@ namespace GiSanParkGolf.Pages.AdminPage
                 .Skip((PageIndex - 1) * PageSize)
                 .Take(PageSize)
                 .ToListAsync();
+        }
+
+        public async Task<IActionResult> OnPostApproveCancelAsync(string id)
+        {
+            var participant = await _dbContext.GameParticipants.FirstOrDefaultAsync(p => p.UserId == id);
+            if (participant != null && participant.IsCancelled && string.IsNullOrEmpty(participant.Approval))
+            {
+                participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
+                await _dbContext.SaveChangesAsync();
+                TempData["SuccessTitle"] = "취소 승인 완료";
+                TempData["SuccessMessage"] = "취소 승인이 완료되었습니다.";
+            }
+            else
+            {
+                TempData["ErrorTitle"] = "오류";
+                TempData["ErrorMessage"] = "취소 승인 처리에 실패했습니다.";
+            }
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostRejoinAsync(string id)
+        {
+            var participant = await _dbContext.GameParticipants.FirstOrDefaultAsync(p => p.UserId == id && p.IsCancelled);
+            if (participant != null)
+            {
+                participant.IsCancelled = false;
+                participant.CancelDate = null;
+                participant.CancelReason = null;
+                participant.Approval = null;
+                await _dbContext.SaveChangesAsync();
+
+                TempData["SuccessTitle"] = "재참가 완료";
+                TempData["SuccessMessage"] = "해당 참가자를 재참가 처리하였습니다.";
+            }
+            else
+            {
+                TempData["ErrorTitle"] = "오류";
+                TempData["ErrorMessage"] = "재참가 처리에 실패했습니다.";
+            }
+            return RedirectToPage();
         }
     }
 }

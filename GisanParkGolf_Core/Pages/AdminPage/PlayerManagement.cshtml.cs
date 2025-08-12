@@ -46,6 +46,12 @@ namespace GisanParkGolf_Core.Pages.AdminPage
         // --- 메서드들 ---
         public async Task OnGetAsync()
         {
+            var ReadyUserRequested = Request.Query["ReadyUserRequest"] == "true";
+            if (ReadyUserRequested)
+            {
+                ReadyUserOnly = true;
+            }
+
             Players = await _playerService.GetPlayersAsync(SearchField, SearchQuery, ReadyUserOnly, PageIndex, PageSize);
         }
 
@@ -81,6 +87,14 @@ namespace GisanParkGolf_Core.Pages.AdminPage
                     return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
                 }
             }
+        }
+
+        public async Task<IActionResult> OnPostApproveAllAsync()
+        {
+            // 승인대기(ReadyUserOnly=true)인 사용자 전체 승인 처리
+            await _playerService.ApproveReadyUsersAsync();
+            // 승인 후 다시 목록으로 리다이렉트
+            return RedirectToPage();
         }
     }
 }

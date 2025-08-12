@@ -123,14 +123,16 @@
                                 {
                                     @if (!string.IsNullOrEmpty(game.GameCode) && Model.JoinedGameCodes.Contains(game.GameCode))
                                     {
-                                        <form method="post" asp-page-handler="Leave" asp-route-gameCode="@game.GameCode" style="display:inline" class="action-form">
-                                            <button type="button"
-                                                    class="btn btn-danger btn-sm btn-action"
-                                                    data-action="leave"
-                                                    data-gamename="@game.GameName">
-                                                참가취소
-                                            </button>
-                                        </form>
+                                        // <form method="post" asp-page-handler="Leave" asp-route-gameCode="@game.GameCode" style="display:inline" class="action-form">
+                                        //     <button type="button"
+                                        //             class="btn btn-danger btn-sm btn-action"
+                                        //             data-action="leave"
+                                        //             data-gamename="@game.GameName">
+                                        //         참가취소
+                                        //     </button>
+                                        // </form>
+                                        // 참가 취소는 내대회에서 처리하도록 변경
+                                        <span class="badge bg-secondary align-middle" style="font-size:1em;">참가완료</span>
                                     }
                                     else
                                     {

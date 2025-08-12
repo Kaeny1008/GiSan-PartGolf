@@ -48,11 +48,17 @@ namespace GisanParkGolf_Core.Data
 
         [StringLength(8)]
         [Column("user_wclass")]
-        public string UserWClass { get; set; } = "승인대기"; // 기본값을 "승인대기"로 설정
+        public string UserWClass { get; set; } = UserStatus.Pending; // 기본값을 "승인대기"로 설정
 
         [Column("user_class")]
         public int UserClass { get; set; } = 3; // 기본값을 3으로 설정 (Member)
 
         public virtual Player_Handicap? Handicap { get; set; }
+    }
+
+    public static class UserStatus
+    {
+        public const string Pending = "승인대기";
+        public const string Approved = "승인";
     }
 }

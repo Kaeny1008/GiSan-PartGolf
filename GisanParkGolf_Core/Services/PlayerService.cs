@@ -9,11 +9,11 @@ namespace GisanParkGolf_Core.Services
 {
     public class PlayerService : IPlayerService
     {
-        private readonly MyDbContext _context;
+        private readonly MyDbContext _dbContext;
 
         public PlayerService(MyDbContext context)
         {
-            _context = context;
+            _dbContext = context;
         }
 
         public async Task<PaginatedList<Player>> GetPlayersAsync(string? searchField, string? searchQuery, bool readyUserOnly, int pageIndex, int pageSize)
@@ -33,11 +33,11 @@ namespace GisanParkGolf_Core.Services
         // 여러 곳에서 사용되는 필터링 로직을 private 메서드로 추출하여 코드 중복 방지
         private IQueryable<Player> GetFilteredPlayersQuery(string? searchField, string? searchQuery, bool readyUserOnly)
         {
-            IQueryable<Player> PlayersIQ = _context.Players.AsQueryable();
+            IQueryable<Player> PlayersIQ = _dbContext.Players.AsQueryable();
 
             if (readyUserOnly)
             {
-                PlayersIQ = PlayersIQ.Where(u => u.UserWClass == "승인");
+                PlayersIQ = PlayersIQ.Where(u => u.UserWClass == "승인대기");
             }
 
             if (!string.IsNullOrEmpty(searchQuery) && !string.IsNullOrEmpty(searchField))
@@ -53,6 +53,17 @@ namespace GisanParkGolf_Core.Services
                 }
             }
             return PlayersIQ;
+        }
+
+        public async Task ApproveReadyUsersAsync()
+        {
+            // 대기 상태(ReadyUserOnly=true)인 사용자 모두 승인(Status 변경)
+            var users = _dbContext.Players.Where(u => u.UserWClass == UserStatus.Pending).ToList();
+            foreach (var user in users)
+            {
+                user.UserWClass = UserStatus.Approved;
+            }
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

@@ -297,7 +297,7 @@ namespace GisanParkGolf_Core.Services
                 GameName = game.GameName,
                 GameDate = game.GameDate,
                 StadiumName = game.StadiumName,
-                PlayModeToText = game.PlayMode, // 변환 함수 필요시 적용
+                PlayMode = game.PlayMode, // 변환 함수 필요시 적용
                 GameHost = game.GameHost,
                 HoleMaximum = game.HoleMaximum,
                 StartRecruiting = game.StartRecruiting,

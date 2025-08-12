@@ -1,26 +1,52 @@
 ﻿@model GisanParkGolf_Core.Pages.Shared.SearchControlModel
 
 <div class="card-header py-3">
-    <form method="get" class="d-flex flex-wrap align-items-center gap-2">
-        <select name="PageSize" class="form-select" style="width:120px;" onchange="this.form.submit()">
-            @{
-                var pageSizes = new int[] { 10, 20, 50, 100 };
-                foreach(var size in pageSizes)
-                {
-                    var selected = Model.PageSize == size ? "selected" : "";
-                @:<option value="@size" @selected>@size 개씩 보기</option>
-                }
-            }
-        </select>
-        <select name="SearchField" class="form-select" style="width:150px;">
-            @foreach (var opt in Model.FieldOptions)
+    <form method="get">
+        <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
+            @if (Model.ShowCancelCheckbox)
             {
-                var selected = Model.SearchField == opt.Value ? "selected" : "";
-            @:<option value="@opt.Value" @selected>@opt.Text</option>
+                <label class="form-check-label d-flex align-items-center gap-2 mb-0 me-2" style="font-weight:500;">
+                    <input type="checkbox" name="IsCancelRequested" value="true" class="form-check-input"
+                        style="border-radius:0.3rem;width:1.2em;height:1.2em;"
+                        @(Model.IsCancelRequestedChecked ? "checked" : "") onchange="this.form.submit()" />
+                    <span class="text-danger" style="font-size:1.03rem;">
+                        <i class="bi bi-x-circle" style="vertical-align:-2px;"></i> 취소 신청한 사람만
+                    </span>
+                </label>
             }
-        </select>
-        <input type="text" name="SearchQuery" value="@Model.SearchQuery" class="form-control" placeholder="검색어를 입력하세요..." />
-        <button type="submit" class="btn btn-primary">검색</button>
-        <a asp-page="@Model.ResetPageName" class="btn btn-secondary">초기화</a>
+            @if (Model.ShowReadyUserCheckbox)
+            {
+                <label class="form-check-label d-flex align-items-center gap-2 mb-0 me-2" style="font-weight:500;">
+                    <input type="checkbox" name="ReadyUserOnly" value="true" class="form-check-input"
+                        style="border-radius:0.3rem;width:1.2em;height:1.2em;"
+                        @(Model.ReadyUserChecked ? "checked" : "") onchange="this.form.submit()" />
+                    <span class="text-primary" style="font-size:1.03rem;">
+                        <i class="bi bi-person-check" style="vertical-align:-2px;"></i> 승인대기 사람만
+                    </span>
+                </label>
+            }
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <select name="PageSize" class="form-select" style="width:150px;" onchange="this.form.submit()">
+                @{
+                    var pageSizes = new int[] { 10, 20, 50, 100 };
+                    foreach(var size in pageSizes)
+                    {
+                        var selected = Model.PageSize == size ? "selected" : "";
+                    @:<option value="@size" @selected>@size 개씩 보기</option>
+                    }
+                }
+            </select>
+            <select id="searchFieldSelect" name="SearchField" class="form-select" style="width:150px;">
+                @foreach (var opt in Model.FieldOptions)
+                {
+                    var selected = Model.SearchField == opt.Value ? "selected" : "";
+                @:<option value="@opt.Value" @selected>@opt.Text</option>
+                }
+            </select>
+            <input id="searchQueryInput" type="text" name="SearchQuery" value="@Model.SearchQuery" class="form-control" placeholder="검색어를 입력하세요..." />
+            <button type="submit" class="btn btn-primary">검색</button>
+            <a asp-page="@Model.ResetPageName" class="btn btn-secondary">초기화</a>
+        </div>
     </form>
 </div>

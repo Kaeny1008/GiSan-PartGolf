@@ -47,6 +47,29 @@
                        asp-route-ReadyUserOnly="@Model.ReadyUserOnly"
                        class="btn btn-success btn-sm">엑셀 저장</a>
                 </div>
+                <!-- 전체 승인 버튼 (모달 트리거) -->
+                <button type="button" class="btn btn-warning btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#approveAllModal">
+                    전체 승인
+                </button>
+
+                <!-- 전체 승인 확인 모달 -->
+                <div class="modal fade" id="approveAllModal" tabindex="-1" aria-labelledby="approveAllModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <form method="post" asp-page-handler="ApproveAll" class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title fw-bold" id="approveAllModalLabel">전체 승인 확인</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-0">정말 <span class="fw-bold text-danger">승인대기</span>인 모든 사용자를<br> <span class="fw-bold text-warning">한 번에 승인</span>하시겠습니까?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                <button type="submit" class="btn btn-warning">승인</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card-body">
@@ -59,10 +82,13 @@
                     SearchQuery = Model.SearchQuery,
                     ResetPageName = "./PlayerManagement",
                     FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
-                            {
-                            new() { Value = "UserName", Text = "이름" },
-                            new() { Value = "UserId", Text = "아이디" }
-                            }
+                    {
+                        new() { Value = "UserName", Text = "이름" },
+                        new() { Value = "UserId", Text = "아이디" },
+                        new() { Value = "ReadyUserOnly", Text = "승인자만" }
+                    },
+                    ShowReadyUserCheckbox = true,
+                    ReadyUserChecked = Model.ReadyUserOnly
                 };
             }
             @await Html.PartialAsync("_SearchControl", searchModel)

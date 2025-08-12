@@ -9,5 +9,6 @@ namespace GisanParkGolf_Core.Services
     {
         Task<PaginatedList<Player>> GetPlayersAsync(string? searchField, string? searchQuery, bool readyUserOnly, int pageIndex, int pageSize);
         Task<List<Player>> GetPlayersForExcelAsync(string? searchField, string? searchQuery, bool readyUserOnly);
+        Task ApproveReadyUsersAsync();
     }
 }
