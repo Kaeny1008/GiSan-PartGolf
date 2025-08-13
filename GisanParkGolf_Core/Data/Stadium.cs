@@ -9,11 +9,11 @@ namespace GisanParkGolf_Core.Data
     {
         [Key]
         [Column("stadium_code")]
-        public string StadiumCode { get; set; } = string.Empty;
+        public string? StadiumCode { get; set; }
 
         [Required(ErrorMessage = "경기장 이름은 필수 항목입니다.")]
         [Column("stadium_name")]
-        public string StadiumName { get; set; } = string.Empty;
+        public string? StadiumName { get; set; }
 
         [Column("is_active")]
         public bool IsActive { get; set; }

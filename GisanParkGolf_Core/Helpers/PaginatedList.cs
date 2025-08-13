@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,14 @@ namespace GisanParkGolf_Core.Helpers
         // ★★★★★ 에러 수정: 총 아이템 개수를 저장할 속성 추가! ★★★★★
         public int TotalCount { get; private set; }
 
+        public int PageSize { get; private set; }
+
         public PaginatedList(List<T> items, int count, int pageIndex, int pageSize)
         {
             PageIndex = pageIndex;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             TotalCount = count; // 생성자에서 총 개수 값을 할당
-
+            PageSize = pageSize;
             this.AddRange(items);
         }
 

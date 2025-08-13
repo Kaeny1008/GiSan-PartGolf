@@ -24,8 +24,10 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         [BindProperty(SupportsGet = true)]
         public string? SearchQuery { get; set; }
+
         [BindProperty(SupportsGet = true)]
         public int PageIndex { get; set; } = 1;
+
         [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 10;
 

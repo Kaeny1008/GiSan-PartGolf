@@ -1,7 +1,9 @@
-﻿using GiSanParkGolf.Pages.AdminPage;
+﻿using DocumentFormat.OpenXml.InkML;
+using GiSanParkGolf.Pages.AdminPage;
 using GiSanParkGolf.Pages.PlayerPage;
 using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
+using GisanParkGolf_Core.ViewModels.AdminPage;
 using Microsoft.EntityFrameworkCore;
 
 namespace GisanParkGolf_Core.Services.AdminPage
@@ -43,7 +45,9 @@ namespace GisanParkGolf_Core.Services.AdminPage
 
         public async Task<Game?> GetGameByIdAsync(string gameCode)
         {
-            return await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            return await _dbContext.Games
+                .Include(g => g.Stadium)
+                .FirstOrDefaultAsync(g => g.GameCode == gameCode);
         }
 
         public async Task CreateGameAsync(Game game)
@@ -68,6 +72,77 @@ namespace GisanParkGolf_Core.Services.AdminPage
                 game.GameStatus = status;
                 await _dbContext.SaveChangesAsync();
             }
+        }
+
+        // ############## 아래부터 코스배치관련 메서드 ##############
+        public async Task<PaginatedList<CompetitionViewModel>> GetCompetitionsAsync(
+            string? searchField, string? searchQuery, int pageIndex, int pageSize)
+        {
+            var query = _dbContext.Games.Include(g => g.Stadium).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchQuery) && !string.IsNullOrWhiteSpace(searchField))
+            {
+                searchQuery = searchQuery.Trim();
+                switch (searchField)
+                {
+                    case "GameName":
+                        query = query.Where(g => (g.GameName ?? "").Contains(searchQuery));
+                        break;
+                    case "GameHost":
+                        query = query.Where(g => (g.GameHost ?? "").Contains(searchQuery));
+                        break;
+                    case "StadiumName":
+                        query = query.Where(g => g.Stadium != null && (g.Stadium.StadiumName ?? "").Contains(searchQuery));
+                        break;
+                }
+            }
+
+            var orderedQuery = query.OrderByDescending(g => g.GameDate);
+            var projectedQuery = orderedQuery.Select(g => new CompetitionViewModel
+            {
+                GameCode = g.GameCode,
+                GameName = g.GameName,
+                GameDate = g.GameDate,
+                Status = g.GameStatus,
+                StadiumName = g.Stadium == null ? "(미지정)" : g.Stadium.StadiumName,
+                TotalParticipants = _dbContext.GameParticipants.Count(p => p.GameCode == g.GameCode),
+                GameHost = g.GameHost,
+                PlayMode = PlayModeHelper.ToKorDisplay(g.PlayMode),
+                GameNote = g.GameNote
+            });
+
+            return await PaginatedList<CompetitionViewModel>.CreateAsync(projectedQuery.AsNoTracking(), pageIndex, pageSize);
+        }
+
+        public async Task<PaginatedList<ParticipantViewModel>> GetParticipantsAsync(
+            string gameCode, string? searchQuery, int pageIndex, int pageSize)
+        {
+            var query = _dbContext.GameParticipants
+                .Include(p => p.User)
+                .Where(p => p.GameCode == gameCode);
+
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+                query = query.Where(p =>
+                    (p.User != null && p.User.UserName.Contains(searchQuery)) ||
+                    (p.UserId != null && p.UserId.Contains(searchQuery)) ||
+                    (p.JoinId != null && p.JoinId.Contains(searchQuery))
+                );
+
+            var projected = query.OrderBy(p => p.JoinDate)
+                .Select(p => new ParticipantViewModel
+                {
+                    JoinId = p.JoinId ?? "",
+                    UserId = p.UserId ?? "",
+                    Name = p.User != null ? p.User.UserName : "(알수없음)",
+                    JoinDate = p.JoinDate,
+                    JoinStatus = p.JoinStatus,
+                    IsCancelled = p.IsCancelled,
+                    CancelDate = p.CancelDate,
+                    CancelReason = p.CancelReason,
+                    Approval = p.Approval
+                });
+
+            return await PaginatedList<ParticipantViewModel>.CreateAsync(projected, pageIndex, pageSize);
         }
     }
 }

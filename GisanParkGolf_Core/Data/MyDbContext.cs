@@ -64,6 +64,11 @@ namespace GisanParkGolf_Core.Data
                 .WithOne(a => a.Game)
                 .HasForeignKey(a => a.GameCode)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Game>()
+                .HasOne(g => g.Stadium)
+                .WithMany()
+                .HasForeignKey(g => g.StadiumCode);
         }
     }
 }

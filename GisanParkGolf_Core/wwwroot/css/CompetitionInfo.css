@@ -1,0 +1,165 @@
+﻿.competition-detail-flex {
+    display: flex;
+    gap: 36px;
+    justify-content: flex-start; /* 왼쪽 정렬 */
+    align-items: flex-start;
+    margin-top: 32px;
+}
+
+/* 왼쪽 대회 정보 카드는 고정 너비 */
+.competition-card-modern {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px 0 #1b29591a;
+    padding: 28px 32px 24px 32px;
+    min-width: 320px;
+    max-width: 380px;
+    font-family: 'Pretendard', 'Segoe UI', Arial, sans-serif;
+    flex: 0 0 340px; /* 고정 */
+    box-sizing: border-box;
+}
+
+/* 참가자 카드: 오른쪽 전체(남은 공간 100%) 사용 */
+.participant-card-modern {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px 0 #1b29591a;
+    padding: 28px 32px 24px 32px;
+    font-family: 'Pretendard', 'Segoe UI', Arial, sans-serif;
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+.competition-title-modern {
+    font-size: 1.27rem;
+    font-weight: 700;
+    color: #26324f;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+}
+
+.competition-divider {
+    border-bottom: 1.5px solid #f1f3f8;
+    margin-bottom: 12px;
+}
+
+.competition-list {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    row-gap: 12px;
+    column-gap: 14px;
+    font-size: 1.04rem;
+    margin: 0;
+}
+
+    .competition-list dt {
+        font-weight: 600;
+        color: #3b4256;
+        margin: 0;
+        text-align: left;
+    }
+
+    .competition-list dd {
+        margin: 0;
+        color: #222;
+        text-align: left;
+        min-width: 0;
+        word-break: break-all;
+    }
+
+.status-badge {
+    padding: 1px 9px;
+    background: #e7f5ff;
+    color: #2461b1;
+    font-size: 0.98em;
+    border-radius: 8px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.mode-badge {
+    padding: 1px 7px;
+    background: #f3f0ff;
+    color: #6c40c3;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.98em;
+    display: inline-block;
+}
+
+.competition-note-modern {
+    background: #f6f7fa;
+    border-radius: 7px;
+    padding: 7px 12px;
+    min-height: 32px;
+    color: #4262b9;
+    white-space: pre-line;
+    font-size: 0.99em;
+    margin-top: -2px;
+    margin-bottom: -2px;
+    box-sizing: border-box;
+}
+
+.participant-title {
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: #26324f;
+    margin-bottom: 14px;
+    letter-spacing: -0.5px;
+    border-bottom: 1.5px solid #f1f3f8;
+    padding-bottom: 6px;
+}
+
+.participant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.participant-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.99rem;
+    padding: 6px 0;
+    border-bottom: 1px solid #f7f7f7;
+}
+
+.p-num {
+    width: 22px;
+    text-align: right;
+    color: #9ba5b5;
+    font-weight: 500;
+}
+
+.p-name {
+    flex: 1;
+    font-weight: 500;
+    color: #334;
+}
+
+.p-status {
+    font-size: 0.93em;
+    border-radius: 7px;
+    padding: 2px 9px;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.p-status-확정 {
+    background: #e8f6e6;
+    color: #2c9950;
+}
+
+.p-status-대기 {
+    background: #f8f3e5;
+    color: #b2861a;
+}
+
+.p-status-취소 {
+    background: #faeaea;
+    color: #d12a2a;
+}

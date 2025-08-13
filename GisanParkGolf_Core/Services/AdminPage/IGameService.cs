@@ -2,6 +2,7 @@
 using GiSanParkGolf.Pages.PlayerPage;
 using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
+using GisanParkGolf_Core.ViewModels.AdminPage;
 
 namespace GisanParkGolf_Core.Services.AdminPage
 {
@@ -21,5 +22,11 @@ namespace GisanParkGolf_Core.Services.AdminPage
 
         // 대회 상태 변경 (예: 취소)
         Task UpdateGameStatusAsync(string gameCode, string status);
+
+        Task<PaginatedList<CompetitionViewModel>> GetCompetitionsAsync(
+            string? searchField, string? searchQuery, int pageIndex, int pageSize);
+
+        Task<PaginatedList<ParticipantViewModel>> GetParticipantsAsync(
+            string gameCode, string? searchQuery, int pageIndex, int pageSize);
     }
 }

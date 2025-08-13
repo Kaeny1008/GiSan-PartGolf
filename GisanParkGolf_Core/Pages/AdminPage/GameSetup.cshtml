@@ -1,88 +1,202 @@
 ﻿@page
+@using GisanParkGolf_Core.Helpers
 @model GiSanParkGolf.Pages.AdminPage.GameSetupModel
 @{
     ViewData["Title"] = "인원 코스 및 배치";
+    var isSelected = !string.IsNullOrEmpty(Request.Query["gameCode"]);
+    var selectedGame = Model.Competitions.FirstOrDefault(c => c.GameCode == Request.Query["gameCode"]);
+    var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+    {
+        PageSize = Model.PageSize,
+        SearchField = Model.SearchField,
+        SearchQuery = Model.SearchQuery,
+        ResetPageName = "./GameSetup",
+        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+        {
+            new() { Value = "GameName", Text = "대회명" },
+            new() { Value = "GameHost", Text = "주최" },
+            new() { Value = "StadiumName", Text = "경기장" }
+        }
+    };
+    var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+    {
+        PageIndex = Model.PageIndex,
+        TotalPages = Model.Competitions?.TotalPages ?? 1,
+        GetPageUrl = i => Url.Page(
+            "./GameSetup",
+            null,
+            new
+            {
+                SearchField = Model.SearchField,
+                SearchQuery = Model.SearchQuery,
+                PageIndex = i,
+                PageSize = Model.PageSize
+            }, null) ?? ""
+    };
+    var participantSearchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+    {
+        PageSize = Model.ParticipantPageSize,
+        SearchField = Model.ParticipantSearchQuery ?? "UserName",
+        SearchQuery = Model.ParticipantSearchQuery,
+        ResetPageName = "./GameSetup",
+        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+        {
+            new() { Value = "UserName", Text = "이름" },
+            new() { Value = "UserId", Text = "아이디" },
+            new() { Value = "JoinId", Text = "참가코드" }
+        }
+    };
+    var participantPageModel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+    {
+        PageIndex = Model.ParticipantPageIndex,
+        TotalPages = Model.Participants?.TotalPages ?? 1,
+        GetPageUrl = i => Url.Page(
+            "./GameSetup",
+            null,
+            new
+            {
+                gameCode = Request.Query["gameCode"],
+                ParticipantSearchQuery = Model.ParticipantSearchQuery,
+                ParticipantPageIndex = i,
+                ParticipantPageSize = Model.ParticipantPageSize
+            }, null) ?? ""
+    };
 }
 
-@await Html.PartialAsync("Shared/Components/_HeaderCard",(ViewData["Title"] as string ?? "제목 없음"
-    , "대회를 선택한 후, 배치 옵션을 설정하고 인원을 코스에 배치할 수 있습니다."))
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (
+ViewData["Title"] as string ?? "제목 없음",
+    "대회를 선택한 후, 배치 옵션을 설정하고 인원을 코스에 배치할 수 있습니다."
+))
 
 <div class="container mt-2">
-    <!-- 대회 선택 패널(항상 보임) -->
-    <div id="topPanel" class="mb-4">
-        <div class="custom-card p-3 shadow-sm">
-            <h4 class="card-title">대회 선택</h4>
-            <p class="mb-2 text-muted">대회명을 클릭하여 세부정보를 확인하세요.</p>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="gameTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width:4rem">No</th>
-                            <th>대회명</th>
-                            <th>대회일자</th>
-                            <th>선택</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (int i = 1; i <= 5; i++)
-                        {
+    @if (!isSelected)
+    {
+        <!-- 대회 선택 패널(항상 보임) -->
+        <div id="topPanel" class="mb-4">
+            <div class="custom-card p-3 shadow-sm">
+                <h4 class="card-title">대회 선택</h4>
+                <p class="mb-2 text-muted">대회명을 클릭하여 세부정보를 확인하세요.</p>
+                <div class="card-header py-3">
+                    @await Html.PartialAsync("_SearchControl", searchModel)
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="gameTable">
+                        <thead class="table-light">
                             <tr>
-                                <td>@i</td>
-                                <td>파크골프대회 @i</td>
-                                <td>2025-09-0@i</td>
-                                <td>
-                                    <button class="btn btn-outline-primary btn-sm select-game-btn"
-                                            data-gamename="파크골프대회 @i"
-                                            data-gamedate="2025-09-0@i"
-                                            data-status="진행중"
-                                            data-unassigned="2"
-                                            data-total="32"
-                                            data-cancel="3"
-                                            data-wait="4"
-                                            data-todaycancel="2"
-                                            data-notice="오늘 15시 경기장 집합">
-                                        선택
-                                    </button>
-                                </td>
+                                <th style="width:4rem">No</th>
+                                <th>대회명</th>
+                                <th>대회일자</th>
+                                <th>상태</th>
+                                <th>경기장</th>
+                                <th>총 참가자</th>
+                                <th>선택</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Competitions.Count; i++)
+                            {
+                                var comp = Model.Competitions[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td>@comp.GameName</td>
+                                    <td>@comp.GameDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@GameStatusHelper.ToDisplay(comp.Status)</td>
+                                    <td>@comp.StadiumName</td>
+                                    <td>@comp.TotalParticipants</td>
+                                    <td>
+                                        <a asp-page="./GameSetup"
+                                           asp-route-gameCode="@comp.GameCode"
+                                           class="btn btn-outline-primary btn-sm">선택</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    @await Html.PartialAsync("_Pagination", pagemodel)
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- 아래는 대회 선택시만 표시 -->
-    <div id="selectedPanels" style="display:none;">
-        <!-- 상태바/대시보드 -->
-        <div id="statusBarArea"></div>
-        <div id="dashboardArea"></div>
-
-        <!-- 상세/탭/배치 패널 -->
+    }
+    else
+    {
+        <!-- 대회 선택시만 표시 -->
         <div id="bottomPanel">
             <div class="custom-card p-3 shadow-sm">
                 <div class="mb-3 d-flex align-items-center">
                     <h4 class="card-title mb-0 flex-grow-1">대회 상세정보</h4>
-                    <button class="btn btn-outline-success btn-sm" id="backToListBtn">목록으로 이동</button>
+                    <a asp-page="./GameSetup" class="btn btn-outline-success btn-sm">목록으로 이동</a>
                 </div>
-                <!-- 탭 메뉴 (기본 틀만) -->
                 <ul class="nav nav-tabs mb-3" id="gameSetupTabs" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-info" role="tab">기본정보</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-player" role="tab">참가자확인</a></li>
+                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-info" role="tab">정보 및 참가자</a></li>
                     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-course" role="tab">코스배치</a></li>
                     <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-result" role="tab">코스배치 결과 확인</a></li>
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane fade show active" id="tab-info" role="tabpanel">
-                        <div class="p-3 bg-light rounded">
-                            <b id="infoName">파크골프대회</b><br>
-                            <span id="infoDate">2025-09-01</span> /
-                            <span id="infoStatus">진행중</span> /
-                            <span id="infoTotal">32명 참가</span>
+                        <div class="competition-detail-flex">
+                            <!-- 대회 정보 카드 -->
+                            <div class="competition-card-modern" style="flex: 0 0 340px; min-width: 280px; max-width:400px;">
+                                <div class="competition-title-modern">@((selectedGame?.GameName) ?? "대회명")</div>
+                                <div class="competition-divider"></div>
+                                <dl class="competition-list">
+                                    <dt>일자</dt>
+                                    <dd>@((selectedGame?.GameDate.ToString("yyyy-MM-dd")) ?? "")</dd>
+                                    <dt>상태</dt>
+                                    <dd><span class="status-badge">@((GameStatusHelper.ToDisplay(selectedGame?.Status)) ?? "")</span></dd>
+                                    <dt>참가자</dt>
+                                    <dd>@(selectedGame?.TotalParticipants ?? 0)명 참가</dd>
+                                    <dt>경기장</dt>
+                                    <dd>@((selectedGame?.StadiumName) ?? "")</dd>
+                                    <dt>주최자</dt>
+                                    <dd>@((selectedGame?.GameHost) ?? "")</dd>
+                                    <dt>방식</dt>
+                                    <dd><span class="mode-badge">@((selectedGame?.PlayMode) ?? "")</span></dd>
+                                    <dt>비고</dt>
+                                    <dd>
+                                        <div class="competition-note-modern">
+                                            @((selectedGame?.GameNote) ?? "")
+                                        </div>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <!-- 참가자 정보 카드 -->
+                            <div class="participant-card-modern participant-wide">
+                                <div class="participant-title">참가자 정보</div>
+                                @await Html.PartialAsync("_SearchControl", participantSearchModel)
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0" id="participantTable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width:4rem">No</th>
+                                                <th>이름</th>
+                                                <th>아이디</th>
+                                                <th>참가코드</th>
+                                                <th>참가상태</th>
+                                                <th>취소여부</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.Participants != null)
+                                            {
+                                                for (int i = 0; i < Model.Participants.Count; i++)
+                                                {
+                                                    var p = Model.Participants[i];
+                                                    <tr>
+                                                        <td>@((Model.Participants.PageIndex - 1) * Model.Participants.PageSize + i + 1)</td>
+                                                        <td>@p.Name</td>
+                                                        <td>@p.UserId</td>
+                                                        <td>@p.JoinId</td>
+                                                        <td>@p.JoinStatus</td>
+                                                        <td>@(p.IsCancelled ? "취소" : "참가")</td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                    @await Html.PartialAsync("_Pagination", participantPageModel)
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="tab-pane fade" id="tab-player" role="tabpanel">
-                        <div class="p-3">[참가자 확인 영역]</div>
                     </div>
                     <div class="tab-pane fade" id="tab-course" role="tabpanel">
                         <div class="p-3">[코스 배치 영역]</div>
@@ -95,102 +209,12 @@
                     <div class="card card-body bg-light border-0">
                         <h6><i class="bi bi-question-circle me-1"></i>도움말 & 문의</h6>
                         <ul class="mb-1">
-                            <li>대회명을 클릭하거나 [선택]을 누르면 상세정보가 보입니다.</li>
+                            <li>목록으로 돌아가려면 위의 버튼을 누르세요.</li>
                             <li>기타 문의는 관리자에게 연락하세요.</li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
 </div>
-
-<script>
-    // 대회 선택/해제 토글 - 기본틀 버전
-    document.addEventListener('DOMContentLoaded', function () {
-        const bottomPanel = document.getElementById('selectedPanels');
-        const topPanel = document.getElementById('topPanel');
-        const selectButtons = document.querySelectorAll('.select-game-btn');
-        const statusBarArea = document.getElementById('statusBarArea');
-        const dashboardArea = document.getElementById('dashboardArea');
-        // 대회 상세정보 영역
-        function fillGameInfo(attrs) {
-            document.getElementById('infoName').textContent = attrs.gamename || '파크골프대회';
-            document.getElementById('infoDate').textContent = attrs.gamedate || '2025-09-01';
-            document.getElementById('infoStatus').textContent = attrs.status || '진행중';
-            document.getElementById('infoTotal').textContent = (attrs.total || '32') + '명 참가';
-        }
-        selectButtons.forEach(btn => {
-            btn.addEventListener('click', function () {
-                const attrs = {
-                    gamename: btn.getAttribute('data-gamename'),
-                    gamedate: btn.getAttribute('data-gamedate'),
-                    status: btn.getAttribute('data-status'),
-                    unassigned: btn.getAttribute('data-unassigned'),
-                    total: btn.getAttribute('data-total'),
-                    cancel: btn.getAttribute('data-cancel'),
-                    wait: btn.getAttribute('data-wait'),
-                    todaycancel: btn.getAttribute('data-todaycancel'),
-                    notice: btn.getAttribute('data-notice')
-                };
-                // 상태바/대시보드 채우기(더미)
-                statusBarArea.innerHTML = `
-                    <div class="alert alert-primary shadow-sm mb-3">
-                        현재 대회: <b>${attrs.gamename}</b> | 상태: <span class="text-success">${attrs.status}</span> | 일자: ${attrs.gamedate}
-                        <span class="badge bg-danger ms-3">미배정 ${attrs.unassigned}명</span>
-                        <span class="ms-3"><i class="bi bi-bell-fill text-warning"></i> 공지: ${attrs.notice}</span>
-                    </div>
-                `;
-                dashboardArea.innerHTML = `
-                    <div class="container mb-3">
-                        <div class="row g-2">
-                            <div class="col-6 col-md-3">
-                                <div class="card text-center border-0 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="h3 mb-0">${attrs.total}</div>
-                                        <div class="small text-muted">총 참가자</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="card text-center border-0 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="h3 mb-0 text-danger">${attrs.unassigned}</div>
-                                        <div class="small text-muted">미배정</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="card text-center border-0 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="h3 mb-0">${attrs.todaycancel}</div>
-                                        <div class="small text-muted">참가취소 요청</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="card text-center border-0 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="h3 mb-0">${attrs.wait}</div>
-                                        <div class="small text-muted">배정 대기</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                fillGameInfo(attrs);
-                bottomPanel.style.display = '';
-                topPanel.style.display = 'none';
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            });
-        });
-        // 목록으로 이동(다시 대회선택창 보이기)
-        document.getElementById('backToListBtn').addEventListener('click', function () {
-            bottomPanel.style.display = 'none';
-            topPanel.style.display = '';
-            statusBarArea.innerHTML = '';
-            dashboardArea.innerHTML = '';
-        });
-    });
-</script>

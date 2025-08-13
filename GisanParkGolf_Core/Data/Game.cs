@@ -67,6 +67,9 @@ namespace GisanParkGolf_Core.Data
         public virtual ICollection<GameParticipant> Participants { get; set; } = new List<GameParticipant>();
         public virtual ICollection<GameAwardHistory> AwardHistories { get; set; } = new List<GameAwardHistory>();
         public virtual ICollection<GameUserAssignment> UserAssignments { get; set; } = new List<GameUserAssignment>();
+
+        [ForeignKey("StadiumCode")]
+        public Stadium? Stadium { get; set; }
     }
 
     public class GameViewModel : Game
