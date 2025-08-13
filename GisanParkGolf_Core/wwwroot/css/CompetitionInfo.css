@@ -96,7 +96,7 @@
     padding: 7px 12px;
     min-height: 32px;
     color: #4262b9;
-    white-space: pre-line;
+    white-space: normal;
     font-size: 0.99em;
     margin-top: -2px;
     margin-bottom: -2px;
@@ -160,6 +160,25 @@
 }
 
 .p-status-취소 {
+    background: #faeaea;
+    color: #d12a2a;
+}
+
+/* 기존 뱃지 스타일과 어울리게 추가 */
+.p-cancel-badge {
+    padding: 2px 9px;
+    border-radius: 7px;
+    font-size: 0.93em;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.p-cancel-참가 {
+    background: #e8f6e6;
+    color: #2c9950;
+}
+
+.p-cancel-취소 {
     background: #faeaea;
     color: #d12a2a;
 }

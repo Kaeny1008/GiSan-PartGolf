@@ -154,7 +154,7 @@ ViewData["Title"] as string ?? "제목 없음",
                                     <dt>비고</dt>
                                     <dd>
                                         <div class="competition-note-modern">
-                                            @((selectedGame?.GameNote) ?? "")
+                                            @(Html.Raw((selectedGame?.GameNote ?? "").Replace("\r\n", "<br>").Replace("\n", "<br>").Replace("\r", "<br>")))
                                         </div>
                                     </dd>
                                 </dl>
@@ -187,7 +187,11 @@ ViewData["Title"] as string ?? "제목 없음",
                                                         <td>@p.UserId</td>
                                                         <td>@p.JoinId</td>
                                                         <td>@p.JoinStatus</td>
-                                                        <td>@(p.IsCancelled ? "취소" : "참가")</td>
+                                                        <td>
+                                                            <span class="p-cancel-badge @(p.IsCancelled ? "p-cancel-취소" : "p-cancel-참가")">
+                                                                @(p.IsCancelled ? "취소" : "참가")
+                                                            </span>
+                                                        </td>
                                                     </tr>
                                                 }
                                             }
