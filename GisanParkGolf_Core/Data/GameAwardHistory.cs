@@ -34,5 +34,8 @@ namespace GisanParkGolf_Core.Data
         // Navigation Properties
         [ForeignKey("GameCode")]
         public virtual Game? Game { get; set; }
+
+        [ForeignKey("UserId")]
+        public virtual Player? User { get; set; }
     }
 }

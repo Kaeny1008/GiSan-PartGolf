@@ -6,12 +6,6 @@
 
 @await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음", "대회별 참가자와 취소 내역을 확인, 검색, 관리할 수 있는 페이지입니다."))
 
-@section Scripts {
-    <script>
-
-    </script>
-}
-
 <div class="container mt-4">
     <div class="custom-card">
         <!-- 검색/필터/보기갯수 컨트롤 -->
@@ -59,7 +53,11 @@
                                 <td>@(++no)</td>
                                 <td class="text-nowrap">@p.Game?.GameName</td>
                                 <td class="text-nowrap">@p.UserId</td>
-                                <td class="text-nowrap">@p.JoinDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="text-nowrap">
+                                    @(p.JoinDate.HasValue
+                                    ? p.JoinDate.Value.ToString("yyyy-MM-dd HH:mm")
+                                    : "확인불가")
+                                 </td>
                                 <td>
                                     @if (p.IsCancelled)
                                     {

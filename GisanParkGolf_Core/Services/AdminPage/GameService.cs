@@ -75,6 +75,7 @@ namespace GisanParkGolf_Core.Services.AdminPage
         }
 
         // ############## 아래부터 코스배치관련 메서드 ##############
+        // 대회 목록 불러오기
         public async Task<PaginatedList<CompetitionViewModel>> GetCompetitionsAsync(
             string? searchField, string? searchQuery, int pageIndex, int pageSize)
         {
@@ -98,22 +99,54 @@ namespace GisanParkGolf_Core.Services.AdminPage
             }
 
             var orderedQuery = query.OrderByDescending(g => g.GameDate);
-            var projectedQuery = orderedQuery.Select(g => new CompetitionViewModel
-            {
-                GameCode = g.GameCode,
-                GameName = g.GameName,
-                GameDate = g.GameDate,
-                Status = g.GameStatus,
-                StadiumName = g.Stadium == null ? "(미지정)" : g.Stadium.StadiumName,
-                TotalParticipants = _dbContext.GameParticipants.Count(p => p.GameCode == g.GameCode),
-                GameHost = g.GameHost,
-                PlayMode = PlayModeHelper.ToKorDisplay(g.PlayMode),
-                GameNote = g.GameNote
-            });
 
-            return await PaginatedList<CompetitionViewModel>.CreateAsync(projectedQuery.AsNoTracking(), pageIndex, pageSize);
+            // 1. 대회 목록을 먼저 페이징해서 가져옴
+            var pagedGames = await PaginatedList<Game>.CreateAsync(
+                orderedQuery.AsNoTracking(), pageIndex, pageSize);
+
+            // 2. 각 대회별로 참가자/수상경력 정보 추가
+            var competitionList = new List<CompetitionViewModel>();
+            foreach (var g in pagedGames)
+            {
+                // 참가자 리스트
+                var participants = await _dbContext.GameParticipants
+                    .Where(p => p.GameCode == g.GameCode)
+                    .Include(p => p.User)
+                    .ToListAsync();
+
+                // 참가자별 수상경력 리스트
+                var participantAwards = participants
+                    .Select(p => new ParticipantAwardInfo
+                    {
+                        UserId = p.UserId,
+                        UserName = p.User?.UserName ?? p.UserId ?? "이름없음",
+                        AwardHistories = _dbContext.GameAwardHistories
+                            .Where(a => a.UserId == p.UserId)
+                            .OrderByDescending(a => a.AwardDate)
+                            .ToList()
+                    }).ToList();
+
+                competitionList.Add(new CompetitionViewModel
+                {
+                    GameCode = g.GameCode,
+                    GameName = g.GameName,
+                    GameDate = g.GameDate,
+                    Status = g.GameStatus,
+                    StadiumName = g.Stadium == null ? "(미지정)" : g.Stadium.StadiumName,
+                    TotalParticipants = participants.Count,
+                    GameHost = g.GameHost,
+                    PlayMode = PlayModeHelper.ToKorDisplay(g.PlayMode),
+                    GameNote = g.GameNote,
+                    ParticipantAwards = participantAwards
+                });
+            }
+
+            // 3. CompetitionViewModel 리스트를 PaginatedList로 반환
+            return new PaginatedList<CompetitionViewModel>(
+                competitionList, pagedGames.TotalCount, pagedGames.PageIndex, pagedGames.PageSize);
         }
 
+        // 참가자 목록 불러오기
         public async Task<PaginatedList<ParticipantViewModel>> GetParticipantsAsync(
             string gameCode, string? searchQuery, int pageIndex, int pageSize)
         {

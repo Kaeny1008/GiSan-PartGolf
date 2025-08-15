@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GisanParkGolf_Core.Data
+namespace GisanParkGolf_Core.ViewModels.PlayerPage
 {
     public class MyGameListModel
     {

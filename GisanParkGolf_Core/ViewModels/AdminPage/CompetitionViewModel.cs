@@ -11,5 +11,6 @@
         public string? GameHost { get; set; }
         public string? PlayMode { get; set; }
         public string? GameNote { get; set; }
+        public List<ParticipantAwardInfo> ParticipantAwards { get; set; } = new();
     }
 }

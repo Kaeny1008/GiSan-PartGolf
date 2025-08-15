@@ -20,7 +20,7 @@ namespace GisanParkGolf_Core.Data
         public string? UserId { get; set; }
 
         [Column("join_date")]
-        public DateTime JoinDate { get; set; } = DateTime.Now;
+        public DateTime? JoinDate { get; set; } = DateTime.Now;
 
         [Required]
         [Column("join_ip", TypeName = "varchar(15)")]

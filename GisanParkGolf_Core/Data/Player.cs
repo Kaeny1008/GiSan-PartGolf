@@ -53,7 +53,9 @@ namespace GisanParkGolf_Core.Data
         [Column("user_class")]
         public int UserClass { get; set; } = 3; // 기본값을 3으로 설정 (Member)
 
-        public virtual Player_Handicap? Handicap { get; set; }
+        public virtual Player_Handicap Handicap { get; set; } = new Player_Handicap();
+
+        public virtual ICollection<GameAwardHistory> AwardHistories { get; set; } = new List<GameAwardHistory>();
     }
 
     public static class UserStatus

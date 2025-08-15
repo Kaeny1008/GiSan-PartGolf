@@ -2,6 +2,7 @@
 
 <div class="card-header py-3">
     <form method="get">
+        <input type="hidden" name="gameCode" value="@Context.Request.Query["gameCode"]" />
         <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
             @if (Model.ShowCancelCheckbox)
             {
@@ -27,9 +28,9 @@
             }
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
-            <select name="PageSize" class="form-select" style="width:150px;" onchange="this.form.submit()">
+            <select name="@Model.PageSizeName" class="form-select" style="width:150px;" onchange="this.form.submit()">
                 @{
-                    var pageSizes = new int[] { 10, 20, 50, 100 };
+                    var pageSizes = new int[] { 5, 10, 20, 50, 100 };
                     foreach(var size in pageSizes)
                     {
                         var selected = Model.PageSize == size ? "selected" : "";
@@ -46,7 +47,7 @@
             </select>
             <input id="searchQueryInput" type="text" name="SearchQuery" value="@Model.SearchQuery" class="form-control" placeholder="검색어를 입력하세요..." />
             <button type="submit" class="btn btn-primary">검색</button>
-            <a asp-page="@Model.ResetPageName" class="btn btn-secondary">초기화</a>
+            <a asp-page="@Model.ResetPageName" asp-route-gameCode="@Context.Request.Query["gameCode"]" class="btn btn-secondary">초기화</a>
         </div>
     </form>
 </div>

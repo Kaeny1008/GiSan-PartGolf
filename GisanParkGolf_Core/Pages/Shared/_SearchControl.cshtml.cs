@@ -20,5 +20,6 @@ namespace GisanParkGolf_Core.Pages.Shared
         public string? SearchQuery { get; set; }
         public string ResetPageName { get; set; } = "";
         public List<SearchFieldOption> FieldOptions { get; set; } = new();
+        public string PageSizeName { get; set; } = "PageSize";
     }
 }
