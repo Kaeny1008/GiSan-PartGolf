@@ -24,10 +24,10 @@ namespace GisanParkGolf_Core.Services.AdminPage
                 switch (searchField)
                 {
                     case "StadiumName":
-                        query = query.Where(u => u.StadiumName.Contains(searchQuery));
+                        query = query.Where(u => u.StadiumName != null && u.StadiumName.Contains(searchQuery));
                         break;
                     case "StadiumCode":
-                        query = query.Where(u => u.StadiumCode.Contains(searchQuery));
+                        query = query.Where(u => u.StadiumCode != null && u.StadiumCode.Contains(searchQuery));
                         break;
                     case "RegionName":
                         query = query.Where(u => u.RegionName != null && u.RegionName.Contains(searchQuery));

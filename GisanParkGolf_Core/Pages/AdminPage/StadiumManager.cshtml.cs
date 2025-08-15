@@ -16,6 +16,7 @@ namespace GiSanParkGolf.Pages.AdminPage
         public StadiumManagerModel(IStadiumService stadiumService)
         {
             _stadiumService = stadiumService;
+            StadiumList = new PaginatedList<Stadium>(new List<Stadium>(), 0, 1, 10);
         }
 
         public PaginatedList<Stadium> StadiumList { get; set; }
