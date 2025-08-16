@@ -55,6 +55,7 @@ public class Program
 
         builder.Services.AddRazorPages();
         builder.Services.AddControllers();
+        builder.Services.AddSession();
 
         var app = builder.Build();
 
@@ -67,6 +68,8 @@ public class Program
         app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseRouting();
+
+        app.UseSession();
 
         // 중요: 인증(Authentication)이 허가(Authorization)보다 항상 먼저
         app.UseAuthentication();

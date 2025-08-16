@@ -15,5 +15,12 @@
         public DateTime? CancelDate { get; set; }
         public string? CancelReason { get; set; }
         public string? Approval { get; set; }
+        public string? GenderText { get; set; }
+        public int HandicapValue { get; set; } = 0;
+        public string AgeGroupText { get; set; } = "";
+        public int AwardCount { get; set; } = 0;
+        public int? UserNumber { get; set; }
+        public int? UserGender { get; set; }
+        public HandicapViewModel? Handicap { get; set; }
     }
 }

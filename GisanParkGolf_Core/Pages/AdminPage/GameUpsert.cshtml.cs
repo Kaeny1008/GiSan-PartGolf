@@ -62,15 +62,11 @@ namespace GiSanParkGolf.Pages.AdminPage
                 return Page();
             }
 
-            // Game이 null이면 바로 예외 처리 또는 반환(원하는 방식으로!)
             if (Game == null)
             {
-                // 사용자에게 오류 메시지를 보여주거나, 로그를 남기고 return 등
                 throw new InvalidOperationException("게임 정보가 없습니다.");
-                // 또는: return; // 메서드 종료
             }
 
-            // StadiumCode가 null일 수 있으니, 필요한 경우 추가 체크
             var selectedStadium = (await _stadiumService.GetStadiumsAsync(null, null, 1, 1000))
                 .FirstOrDefault(s => s.StadiumCode == Game.StadiumCode);
 
@@ -84,9 +80,42 @@ namespace GiSanParkGolf.Pages.AdminPage
             }
             else
             {
-                await _gameService.UpdateGameAsync(Game);
-                TempData["SuccessMessage"] = "대회 정보가 성공적으로 수정되었습니다.";
+                if (!string.IsNullOrEmpty(Game.GameCode))
+                {
+                    // 기존 엔티티를 DB에서 조회
+                    var existingGame = await _gameService.GetGameByIdAsync(Game.GameCode);
+                    if (existingGame != null)
+                    {
+                        // 기존 참가자수 유지
+                        Game.ParticipantNumber = existingGame.ParticipantNumber;
+
+                        // 기존 엔티티에 값만 복사해서 업데이트 (EF Core 충돌 방지)
+                        existingGame.GameName = Game.GameName;
+                        existingGame.GameDate = Game.GameDate;
+                        existingGame.StadiumCode = Game.StadiumCode;
+                        existingGame.StadiumName = Game.StadiumName;
+                        existingGame.GameHost = Game.GameHost;
+                        existingGame.HoleMaximum = Game.HoleMaximum;
+                        existingGame.PlayMode = Game.PlayMode;
+                        existingGame.StartRecruiting = Game.StartRecruiting;
+                        existingGame.EndRecruiting = Game.EndRecruiting;
+                        existingGame.GameNote = Game.GameNote;
+                        existingGame.PostIp = Game.PostIp;
+                        // 필요한 나머지 필드 복사
+
+                        await _gameService.UpdateGameAsync(existingGame);
+                    }
+                    else
+                    {
+                        // 기존 엔티티를 못 찾으면 오류 처리
+                        TempData["ErrorMessage"] = "수정할 대회를 찾을 수 없습니다.";
+                        await LoadStadiumsAsync();
+                        return Page();
+                    }
+                }
+                TempData["SuccessMessage"] = "대회 정보가 정상적으로 수정되었습니다.";
             }
+
             return RedirectToPage("./GameList");
         }
 

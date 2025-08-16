@@ -1,5 +1,8 @@
 ﻿@page
 @using GisanParkGolf_Core.Helpers
+@using GisanParkGolf_Core.ViewModels.AdminPage
+@using Newtonsoft.Json
+@using Microsoft.AspNetCore.Http
 @model GiSanParkGolf.Pages.AdminPage.GameSetupModel
 @{
     ViewData["Title"] = "인원 코스 및 배치";
@@ -66,6 +69,16 @@
 
     var activeTab = Request.Query["tab"].ToString();
     if (string.IsNullOrEmpty(activeTab)) activeTab = "tab-info";
+
+    var assignmentResultsJson = HttpContext.Session.GetString("AssignmentResults");
+    var assignmentResults = !string.IsNullOrEmpty(assignmentResultsJson)
+        ? JsonConvert.DeserializeObject<List<CourseAssignmentResultViewModel>>(assignmentResultsJson)
+        : new List<CourseAssignmentResultViewModel>();
+
+    var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
+    var unassigned = !string.IsNullOrEmpty(unassignedJson)
+        ? JsonConvert.DeserializeObject<List<GisanParkGolf_Core.ViewModels.AdminPage.ParticipantViewModel>>(unassignedJson)
+        : new List<GisanParkGolf_Core.ViewModels.AdminPage.ParticipantViewModel>();
 }
 
 @await Html.PartialAsync("Shared/Components/_HeaderCard", (
@@ -387,10 +400,13 @@ ViewData["Title"] as string ?? "제목 없음",
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if (Model.AssignmentResults != null && Model.AssignmentResults.Count > 0)
+                                        @if (assignmentResults != null && assignmentResults.Count > 0)
                                         {
                                             int no = 1;
-                                            foreach (var row in Model.AssignmentResults)
+                                            foreach (var row in assignmentResults
+                                            .OrderBy(x => x.CourseName)
+                                            .ThenBy(x => int.TryParse(x.HoleNumber, out var hn) ? hn : 0)
+                                            .ThenBy(x => int.TryParse(x.TeamNumber, out var tn) ? tn : 0))
                                             {
                                                 <tr>
                                                     <td>@(no++)</td>
@@ -424,6 +440,51 @@ ViewData["Title"] as string ?? "제목 없음",
                                     </tbody>
                                 </table>
                             </div>
+
+                            @* 미배정 인원 + 강제 배정 폼 *@
+                            @if (unassigned != null && unassigned.Count > 0)
+                            {
+                                <div class="alert alert-warning mt-3">
+                                    <strong>미배정 인원 강제 배정</strong>
+                                    <form method="post" asp-page-handler="ForceAssignParticipant" class="row g-2 align-items-end">
+                                        <input type="hidden" name="gameCode" value="@Request.Query["gameCode"]" />
+                                        <div class="col-auto">
+                                            <select name="userId" class="form-select">
+                                                @foreach (var u in unassigned)
+                                                {
+                                                    <option value="@u.UserId">@u.Name (@u.GenderText, @u.UserId)</option>
+                                                }
+                                            </select>
+                                        </div>
+                                            <div class="col-auto">
+                                                <select name="courseName" class="form-select">
+                                                    @foreach (var c in Model.Courses)
+                                                    {
+                                                        <option value="@c.CourseName">@c.CourseName</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <select name="holeNumber" class="form-select">
+                                                    @for (int i = 1; i <= Model.MaxHoleNumber; i++)
+                                                    {
+                                                        <option value="@i">@i</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <button type="submit" class="btn btn-danger">강제 배정</button>
+                                            </div>
+                                    </form>
+                                    <ul class="mt-2">
+                                        @foreach (var u in unassigned)
+                                        {
+                                            <li>@u.Name (@u.GenderText, @u.UserId)</li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+
                             <div class="alert alert-secondary mt-4" role="alert" style="font-size:0.95em;">
                                 <i class="bi bi-info-circle me-1"></i>
                                 배치 결과는 코스배치 실행 후 확인 가능합니다. <br />

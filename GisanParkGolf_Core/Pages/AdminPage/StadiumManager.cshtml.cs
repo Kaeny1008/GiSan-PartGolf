@@ -73,12 +73,20 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         public async Task<IActionResult> OnPostCreateStadiumAsync()
         {
+            ModelState.Clear();
+            TryValidateModel(NewStadium);
+
             if (!ModelState.IsValid)
             {
+                TempData["ErrorTitle"] = "저장 실패";
+                TempData["ErrorMessage"] = "경기장 정보를 다시 확인해주세요.";
                 await OnGetAsync(null, null, showNewForm: true);
                 return Page();
             }
             await _stadiumService.CreateStadiumAsync(NewStadium);
+
+            TempData["SuccessTitle"] = "저장확인";
+            TempData["SuccessMessage"] = "신규 경기장 등록 완료.";
             return RedirectToPage(new { stadiumCode = NewStadium.StadiumCode, PageIndex, PageSize, SearchField, SearchQuery });
         }
 
@@ -86,29 +94,72 @@ namespace GiSanParkGolf.Pages.AdminPage
         {
             if (string.IsNullOrWhiteSpace(NewCourse.CourseName) || NewCourse.HoleCount <= 0)
             {
+                TempData["ErrorTitle"] = "저장 실패";
+                TempData["ErrorMessage"] = "코스 이름과 홀 수를 다시 확인해주세요.";
                 await OnGetAsync(stadiumCode, null);
                 return Page();
             }
             NewCourse.StadiumCode = stadiumCode;
             await _stadiumService.CreateCourseAsync(NewCourse);
+
+            TempData["SuccessTitle"] = "저장확인";
+            TempData["SuccessMessage"] = "코스 등록 완료! 이제 홀 정보를 입력하세요.";
             return RedirectToPage(new { stadiumCode, courseCode = NewCourse.CourseCode, PageIndex, PageSize, SearchField, SearchQuery });
         }
 
         public async Task<IActionResult> OnPostSaveHolesAsync(int courseCode, string stadiumCode)
         {
+            if (HoleDetails == null || !HoleDetails.Any() || HoleDetails.Any(h => string.IsNullOrWhiteSpace(h.HoleName) || h.Distance <= 0 || h.Par <= 0))
+            {
+                TempData["ErrorTitle"] = "저장 실패";
+                TempData["ErrorMessage"] = "홀 정보를 모두 입력해주세요.";
+                await OnGetAsync(stadiumCode, courseCode);
+                return Page();
+            }
+
             await _stadiumService.SaveHolesAsync(courseCode, HoleDetails);
+
+            TempData["SuccessTitle"] = "저장확인";
+            TempData["SuccessMessage"] = "홀 정보가 정상적으로 저장되었습니다.";
             return RedirectToPage(new { stadiumCode, courseCode, PageIndex, PageSize, SearchField, SearchQuery });
         }
 
         public async Task<IActionResult> OnPostDeleteStadiumAsync(string stadiumCode)
         {
-            await _stadiumService.DeleteStadiumAsync(stadiumCode);
+            try
+            {
+                await _stadiumService.DeleteStadiumAsync(stadiumCode);
+                TempData["SuccessTitle"] = "삭제 확인";
+                TempData["SuccessMessage"] = "경기장이 정상적으로 삭제되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorTitle"] = "삭제 실패";
+                TempData["ErrorMessage"] = $"경기장 삭제 중 오류가 발생했습니다: {ex.Message}";
+                // 필요시 로그 ex
+                await OnGetAsync(null, null);
+                return Page();
+            }
+
             return RedirectToPage(new { PageIndex, PageSize, SearchField, SearchQuery });
         }
 
         public async Task<IActionResult> OnPostDeleteCourseAsync(int courseCode, string stadiumCode)
         {
-            await _stadiumService.DeleteCourseAsync(courseCode);
+            try
+            {
+                await _stadiumService.DeleteCourseAsync(courseCode);
+                TempData["SuccessTitle"] = "삭제 확인";
+                TempData["SuccessMessage"] = "코스가 정상적으로 삭제되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorTitle"] = "삭제 실패";
+                TempData["ErrorMessage"] = $"코스 삭제 중 오류가 발생했습니다: {ex.Message}";
+                await OnGetAsync(stadiumCode, null);
+                return Page();
+            }
+
             return RedirectToPage(new { stadiumCode, PageIndex, PageSize, SearchField, SearchQuery });
         }
     }
