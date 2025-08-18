@@ -1,8 +1,19 @@
 ﻿@model GisanParkGolf_Core.Pages.Shared.SearchControlModel
+@{
+    var activeTab = ViewData["activeTab"]?.ToString() ?? Context.Request.Query["tab"];
+    var gameCode = Context.Request.Query["gameCode"].ToString();
+}
 
 <div class="card-header py-3">
     <form method="get">
-        <input type="hidden" name="gameCode" value="@Context.Request.Query["gameCode"]" />
+        @if (!string.IsNullOrEmpty(gameCode))
+        {
+            <input type="hidden" name="gameCode" value="@gameCode" />
+        }
+        @if (!string.IsNullOrEmpty(activeTab))
+        {
+            <input type="hidden" name="tab" value="@activeTab" />
+        }
         <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
             @if (Model.ShowCancelCheckbox)
             {
@@ -45,9 +56,12 @@
                 @:<option value="@opt.Value" @selected>@opt.Text</option>
                 }
             </select>
-            <input id="searchQueryInput" type="text" name="SearchQuery" value="@Model.SearchQuery" class="form-control" placeholder="검색어를 입력하세요..." />
+            <input id="searchQueryInput" type="text" name="@Model.QueryName" value="@Model.SearchQuery" class="form-control" placeholder="검색어를 입력하세요..." />
             <button type="submit" class="btn btn-primary">검색</button>
-            <a asp-page="@Model.ResetPageName" asp-route-gameCode="@Context.Request.Query["gameCode"]" class="btn btn-secondary">초기화</a>
+            <a asp-page="@Model.ResetPageName"
+               asp-route-gameCode="@(string.IsNullOrEmpty(gameCode) ? null : gameCode)"
+               asp-route-tab="@(string.IsNullOrEmpty(activeTab) ? null : activeTab)"
+               class="btn btn-secondary">초기화</a>
         </div>
     </form>
 </div>

@@ -6,12 +6,18 @@
 @model GiSanParkGolf.Pages.AdminPage.GameSetupModel
 @{
     ViewData["Title"] = "인원 코스 및 배치";
+    var activeTab = Request.Query["tab"].ToString();
+    if (string.IsNullOrEmpty(activeTab)) activeTab = "tab-info";
+    var resutTab = "tab-result";
+    var participantTab = "tab-info";
+
     var isSelected = !string.IsNullOrEmpty(Request.Query["gameCode"]);
     var selectedGame = Model.Competitions.FirstOrDefault(c => c.GameCode == Request.Query["gameCode"]);
     var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
     {
         PageSize = Model.PageSize,
         PageSizeName = "PageSize",
+        QueryName = "SearchQuery",
         SearchField = Model.SearchField,
         SearchQuery = Model.SearchQuery,
         ResetPageName = "./GameSetup",
@@ -41,6 +47,7 @@
     {
         PageSize = Model.ParticipantPageSize,
         PageSizeName = "ParticipantPageSize",
+        QueryName = "ParticipantSearchQuery",
         SearchField = Model.ParticipantSearchQuery ?? "UserName",
         SearchQuery = Model.ParticipantSearchQuery,
         ResetPageName = "./GameSetup",
@@ -63,12 +70,41 @@
                 gameCode = Request.Query["gameCode"],
                 ParticipantSearchQuery = Model.ParticipantSearchQuery,
                 ParticipantPageIndex = i,
-                ParticipantPageSize = Model.ParticipantPageSize
+                ParticipantPageSize = Model.ParticipantPageSize,
+                tab = "tab-info"
             }, null) ?? ""
     };
-
-    var activeTab = Request.Query["tab"].ToString();
-    if (string.IsNullOrEmpty(activeTab)) activeTab = "tab-info";
+    var assignmentSearchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+    {
+        PageSize = Model.AssignmentPageSize,
+        PageSizeName = "AssignmentPageSize",
+        QueryName = "AssignmentSearchQuery",
+        SearchField = Model.AssignmentSearchQuery ?? "UserName",
+        SearchQuery = Model.AssignmentSearchQuery,
+        ResetPageName = "./GameSetup",
+        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+        {
+            new() { Value = "UserName", Text = "이름" },
+            new() { Value = "UserId", Text = "아이디" },
+            new() { Value = "JoinId", Text = "참가코드" }
+        }
+    };
+    var assignmentPageModel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+    {
+        PageIndex = Model.AssignmentPageIndex,
+        TotalPages = Model.Assignments?.TotalPages ?? 1,
+        GetPageUrl = i => Url.Page(
+            "./GameSetup",
+            null,
+            new
+            {
+                gameCode = Request.Query["gameCode"],
+                AssignmentSearchQuery = Model.AssignmentSearchQuery,
+                AssignmentPageIndex = i,
+                AssignmentPageSize = Model.AssignmentPageSize,
+                tab = "tab-result"
+            }, null) ?? ""
+    };
 
     var assignmentResultsJson = HttpContext.Session.GetString("AssignmentResults");
     var assignmentResults = !string.IsNullOrEmpty(assignmentResultsJson)
@@ -193,7 +229,7 @@ ViewData["Title"] as string ?? "제목 없음",
                             <!-- 참가자 정보 카드 -->
                             <div class="participant-card-modern participant-wide">
                                 <div class="participant-title">참가자 정보</div>
-                                @await Html.PartialAsync("_SearchControl", participantSearchModel)
+                                @await Html.PartialAsync("_SearchControl", participantSearchModel, new ViewDataDictionary(ViewData) { { "activeTab", participantTab } })
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0" id="participantTable">
                                         <thead class="table-light">
@@ -347,27 +383,27 @@ ViewData["Title"] as string ?? "제목 없음",
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <label class="form-label fw-semibold">연령대 정렬</label>
+                                        <label class="form-label fw-semibold">연령대 정렬<span class="text-danger small">(현재사용X)</span></label>
                                         <div>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="AgeSort" id="AgeSortUse" value="true" @(Model.AgeSort == "true" ? "checked" : "")>
+                                                <input class="form-check-input" type="radio" name="AgeSort" id="AgeSortUse" value="true" disabled title="현재는 사용할 수 없습니다." @(Model.AgeSort == "true" ? "checked" : "")>
                                                 <label class="form-check-label" for="AgeSortUse">사용</label>
                                             </div>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="AgeSort" id="AgeSortNo" value="false" @(Model.AgeSort == "false" ? "checked" : "")>
+                                                <input class="form-check-input" type="radio" name="AgeSort" id="AgeSortNo" value="false" disabled title="현재는 사용할 수 없습니다." @(Model.AgeSort == "false" ? "checked" : "")>
                                                 <label class="form-check-label" for="AgeSortNo">미사용</label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <label class="form-label fw-semibold">수상경력 정렬</label>
+                                        <label class="form-label fw-semibold">수상경력 정렬<span class="text-danger small">(현재사용X)</span></label>
                                         <div>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="AwardSort" id="AwardSortUse" value="true" @(Model.AwardSort == "true" ? "checked" : "")>
+                                                <input class="form-check-input" type="radio" name="AwardSort" id="AwardSortUse" value="true" disabled title="현재는 사용할 수 없습니다." @(Model.AwardSort == "true" ? "checked" : "")>
                                                 <label class="form-check-label" for="AwardSortUse">사용</label>
                                             </div>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="AwardSort" id="AwardSortNo" value="false" @(Model.AwardSort == "false" ? "checked" : "")>
+                                                <input class="form-check-input" type="radio" name="AwardSort" id="AwardSortNo" value="false" disabled title="현재는 사용할 수 없습니다." @(Model.AwardSort == "false" ? "checked" : "")>
                                                 <label class="form-check-label" for="AwardSortNo">미사용</label>
                                             </div>
                                         </div>
@@ -382,7 +418,49 @@ ViewData["Title"] as string ?? "제목 없음",
                     </div>
                     <div class="tab-pane fade @(activeTab == "tab-result" ? "show active" : "")" id="tab-result" role="tabpanel">
                         <div class="p-3">
-                            <h5 class="fw-bold mb-3">코스배치 결과 확인</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0">코스배치 결과 확인</h5>
+                                <!-- 결과저장 버튼: 모달 호출 -->
+                                <button type="button" class="btn btn-primary" id="btnSaveResult" data-bs-toggle="modal" data-bs-target="#saveResultModal"
+                                        @(unassigned != null && unassigned.Count > 0 ? "" : "")>
+                                    결과저장
+                                </button>
+                            </div>
+
+                            <!-- 저장 확인 모달 -->
+                            <div class="modal fade" id="saveResultModal" tabindex="-1" aria-labelledby="saveResultModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <form method="post" asp-page-handler="SaveAssignmentResult" class="modal-content">
+                                        <input type="hidden" name="gameCode" value="@Request.Query["gameCode"]" />
+                                        <div class="modal-header">
+                                            <h5 class="modal-title fw-bold" id="saveResultModalLabel">결과 저장 확인</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="mb-2">정말 배치 결과를 저장하시겠습니까?</p>
+                                            <div class="alert alert-warning" role="alert" style="font-size:0.95em;">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                                <strong>저장된 데이터가 있다면 덮어씌어 집니다.</strong>
+                                            </div>
+                                            @if (unassigned != null && unassigned.Count > 0)
+                                            {
+                                                <div class="alert alert-warning" role="alert" style="font-size:0.95em;">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                                    <strong>미배정 인원이 <span class="text-danger">@unassigned.Count</span>명 있습니다.</strong><br />
+                                                    그래도 저장할 수 있습니다.<br />
+                                                    <span class="text-danger">※ 미배정 인원은 배치 결과에 포함되지 않습니다.</span>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                            <button type="submit" class="btn btn-primary">저장</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            @await Html.PartialAsync("_SearchControl", assignmentSearchModel, new ViewDataDictionary(ViewData) { { "activeTab", resutTab } })
                             <div class="table-responsive">
                                 <table class="table table-bordered align-middle">
                                     <thead class="table-light">
@@ -400,13 +478,10 @@ ViewData["Title"] as string ?? "제목 없음",
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if (assignmentResults != null && assignmentResults.Count > 0)
+                                        @if (Model.Assignments != null && Model.Assignments.Count > 0)
                                         {
                                             int no = 1;
-                                            foreach (var row in assignmentResults
-                                            .OrderBy(x => x.CourseName)
-                                            .ThenBy(x => int.TryParse(x.HoleNumber, out var hn) ? hn : 0)
-                                            .ThenBy(x => int.TryParse(x.TeamNumber, out var tn) ? tn : 0))
+                                            foreach (var row in Model.Assignments)
                                             {
                                                 <tr>
                                                     <td>@(no++)</td>
@@ -440,48 +515,58 @@ ViewData["Title"] as string ?? "제목 없음",
                                     </tbody>
                                 </table>
                             </div>
+                            @await Html.PartialAsync("_Pagination", assignmentPageModel)
 
                             @* 미배정 인원 + 강제 배정 폼 *@
                             @if (unassigned != null && unassigned.Count > 0)
                             {
                                 <div class="alert alert-warning mt-3">
                                     <strong>미배정 인원 강제 배정</strong>
-                                    <form method="post" asp-page-handler="ForceAssignParticipant" class="row g-2 align-items-end">
-                                        <input type="hidden" name="gameCode" value="@Request.Query["gameCode"]" />
-                                        <div class="col-auto">
-                                            <select name="userId" class="form-select">
-                                                @foreach (var u in unassigned)
-                                                {
-                                                    <option value="@u.UserId">@u.Name (@u.GenderText, @u.UserId)</option>
-                                                }
-                                            </select>
-                                        </div>
-                                            <div class="col-auto">
-                                                <select name="courseName" class="form-select">
-                                                    @foreach (var c in Model.Courses)
-                                                    {
-                                                        <option value="@c.CourseName">@c.CourseName</option>
-                                                    }
-                                                </select>
-                                            </div>
-                                            <div class="col-auto">
-                                                <select name="holeNumber" class="form-select">
-                                                    @for (int i = 1; i <= Model.MaxHoleNumber; i++)
-                                                    {
-                                                        <option value="@i">@i</option>
-                                                    }
-                                                </select>
-                                            </div>
-                                            <div class="col-auto">
-                                                <button type="submit" class="btn btn-danger">강제 배정</button>
-                                            </div>
-                                    </form>
-                                    <ul class="mt-2">
-                                        @foreach (var u in unassigned)
-                                        {
-                                            <li>@u.Name (@u.GenderText, @u.UserId)</li>
-                                        }
-                                    </ul>
+                                    <table class="table table-bordered align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>이름</th>
+                                                <th>성별</th>
+                                                <th>아이디</th>
+                                                <th>코스</th>
+                                                <th>홀 번호</th>
+                                                <th>강제 배정</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var u in unassigned)
+                                            {
+                                                <tr>
+                                                    <form method="post" asp-page-handler="ForceAssignParticipant" class="form-inline">
+                                                        <input type="hidden" name="gameCode" value="@Request.Query["gameCode"]" />
+                                                        <input type="hidden" name="userId" value="@u.UserId" />
+                                                    <td>@u.Name</td>
+                                                    <td>@u.GenderText</td>
+                                                    <td>@u.UserId</td>
+                                                    <td>
+                                                        <select name="courseName" class="form-select form-select-sm">
+                                                            @foreach (var c in Model.Courses)
+                                                            {
+                                                                <option value="@c.CourseName">@c.CourseName</option>
+                                                            }
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select name="holeNumber" class="form-select form-select-sm">
+                                                            @for (int i = 1; i <= Model.MaxHoleNumber; i++)
+                                                            {
+                                                                <option value="@i">@i</option>
+                                                            }
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <button type="submit" class="btn btn-danger btn-sm">강제 배정</button>
+                                                    </td>
+                                                    </form>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
                                 </div>
                             }
 

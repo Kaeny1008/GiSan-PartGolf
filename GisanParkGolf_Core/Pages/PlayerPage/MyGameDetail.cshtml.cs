@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Services.PlayerPage;
 using GisanParkGolf_Core.ViewModels.PlayerPage;
@@ -39,6 +40,12 @@ namespace GiSanParkGolf.Pages.PlayerPage
 
         public async Task<IActionResult> OnPostCancelAsync(string gameCode, string CancelReason)
         {
+            if (await _gameService.IsAssignmentLockedAsync(gameCode))
+            {
+                TempData["ErrorMessage"] = "코스배치가 완료되어 참가자 변경이 불가합니다.<br><strong class='text-danger'>관리자에게 요청하여 주십시오.</strong>";
+                return RedirectToPage(new { GameCode = gameCode });
+            }
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(CancelReason))
@@ -59,6 +66,12 @@ namespace GiSanParkGolf.Pages.PlayerPage
 
         public async Task<IActionResult> OnPostRejoinAsync(string gameCode)
         {
+            if (await _gameService.IsAssignmentLockedAsync(gameCode))
+            {
+                TempData["ErrorMessage"] = "코스배치가 완료되어 참가자 변경이 불가합니다.<br><strong class='text-danger'>관리자에게 요청하여 주십시오.</strong>";
+                return RedirectToPage(new { GameCode = gameCode });
+            }
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var result = await _gameService.MyGameRejoinAsync(gameCode, userId);

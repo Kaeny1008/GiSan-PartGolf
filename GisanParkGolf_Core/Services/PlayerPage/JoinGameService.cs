@@ -1,4 +1,5 @@
-﻿using GiSanParkGolf.Pages.PlayerPage;
+﻿using DocumentFormat.OpenXml.InkML;
+using GiSanParkGolf.Pages.PlayerPage;
 using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
 using GisanParkGolf_Core.ViewModels.PlayerPage;
@@ -412,6 +413,12 @@ namespace GisanParkGolf_Core.Services.PlayerPage
             {
                 return new JoinGameResult { Success = false, ErrorMessage = "DB 오류: " + ex.Message };
             }
+        }
+
+        public async Task<bool> IsAssignmentLockedAsync(string gameCode)
+        {
+            var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            return game != null && game.GameStatus == "Assigned";
         }
     }
 }

@@ -11,6 +11,7 @@
                 "준비중" => "Ready",
                 "모집중" => "Recruiting",
                 "모집완료" => "Recruiting End",
+                "배치완료" => "Assigned", // 추가
                 "완료" => "Completed",
                 "취소됨" => "Cancelled",
                 _ => display // 이미 영문일 수도 있음
@@ -25,6 +26,7 @@
                 "Ready" => "준비중",
                 "Recruiting" => "모집중",
                 "Recruiting End" => "모집완료",
+                "Assigned" => "배치완료", // 추가
                 "Completed" => "완료",
                 "Cancelled" => "취소됨",
                 _ => status ?? ""

@@ -195,7 +195,7 @@
         </div>
     </div>
 
-    <script>
+    @* <script>
         function htmlEscape(str) {
             return str
                 .replace(/&/g, "&amp;")
@@ -209,6 +209,18 @@
             document.getElementById('resultModalLabel').textContent = title || '알림';
             // 1. HTML escape 후 2. 줄바꿈 변환
             const safeMsg = htmlEscape(message).replace(/\r\n|\r|\n/g, "<br>");
+            document.getElementById('resultModalBody').innerHTML = safeMsg;
+            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+            modal.show();
+        }
+    </script> *@
+
+    <script>
+        function showResultModal(message, title) {
+            document.getElementById('resultModalLabel').textContent = title || '알림';
+            // <--- 기존 코드: htmlEscape(message)
+            // 1. 줄바꿈 변환만 하고, 2. HTML 태그는 그대로 출력
+            const safeMsg = message.replace(/\r\n|\r|\n/g, "<br>");
             document.getElementById('resultModalBody').innerHTML = safeMsg;
             var modal = new bootstrap.Modal(document.getElementById('resultModal'));
             modal.show();

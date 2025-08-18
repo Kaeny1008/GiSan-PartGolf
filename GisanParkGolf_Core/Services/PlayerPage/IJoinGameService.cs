@@ -27,5 +27,6 @@ namespace GisanParkGolf_Core.Services.PlayerPage
         Task<MyGameDetailViewModel?> GetMyGameInformationAsync(string gameCode, string? userId);
         Task<JoinGameResult> MyGameCancelAsync(string gameCode, string? userId, string cancelReason);
         Task<JoinGameResult> MyGameRejoinAsync(string gameCode, string? userId);
+        Task<bool> IsAssignmentLockedAsync(string gameCode);
     }
 }
