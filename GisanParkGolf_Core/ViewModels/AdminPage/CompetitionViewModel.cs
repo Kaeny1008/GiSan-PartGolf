@@ -12,5 +12,7 @@
         public string? PlayMode { get; set; }
         public string? GameNote { get; set; }
         public List<ParticipantAwardInfo> ParticipantAwards { get; set; } = new();
+        public int JoinedCount { get; set; }
+        public int AssignmentCount { get; set; }
     }
 }

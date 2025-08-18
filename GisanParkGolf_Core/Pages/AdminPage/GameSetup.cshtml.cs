@@ -38,6 +38,7 @@ namespace GiSanParkGolf.Pages.AdminPage
         public int CancelledCount { get; set; }
         public int JoinedCount { get; set; }
         public int MaxHoleNumber => Courses.Any() ? Courses.Max(c => c.HoleCount) : 1;
+        public int AssignableCount { get; set; }
 
         // ------------------- Page Parameters -------------------
         [BindProperty(SupportsGet = true)] public int PageSize { get; set; } = 10;
@@ -150,6 +151,9 @@ namespace GiSanParkGolf.Pages.AdminPage
             Participants = await _gameService.GetParticipantsAsync(
                 gameCode, ParticipantSearchQuery, ParticipantPageIndex, ParticipantPageSize);
 
+            // 참가자수 변수 저장
+            JoinedCount = await _context.GameParticipants.CountAsync(gp => !gp.IsCancelled);
+
             var query = _context.GameParticipants.Include(gp => gp.Game).AsQueryable();
             TotalCount = await query.CountAsync();
             CancelledCount = await _context.GameParticipants.CountAsync(gp => gp.IsCancelled);
@@ -221,8 +225,14 @@ namespace GiSanParkGolf.Pages.AdminPage
         }
 
         // ------------------- 핸들러 (POST) -------------------
-        public async Task<IActionResult> OnPostCancelAssignmentAsync(string gameCode, string userId)
+        public async Task<IActionResult> OnPostCancelAssignmentAsync(string gameCode, string userId, string? cancelReason)
         {
+            if (string.IsNullOrWhiteSpace(cancelReason))
+            {
+                TempData["ErrorMessage"] = "취소 사유를 반드시 입력해야 합니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
             var assignmentResults = GetAssignmentResults(gameCode);
 
             assignmentResults.RemoveAll(r => r.UserId == userId);
@@ -240,6 +250,12 @@ namespace GiSanParkGolf.Pages.AdminPage
                     if (unassigned == null)
                         unassigned = new List<ParticipantViewModel>();
 
+                    participant.IsCancelled = true;
+                    participant.CancelDate = DateTime.Now;
+                    participant.CancelReason = !string.IsNullOrWhiteSpace(cancelReason) ? cancelReason : "코스 배치 취소";
+                    participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
+                    _context.GameParticipants.Update(participant);
+
                     unassigned.Add(new ParticipantViewModel
                     {
                         Name = participant.User?.UserName ?? participant.UserId ?? "",
@@ -249,13 +265,16 @@ namespace GiSanParkGolf.Pages.AdminPage
                         AgeGroupText = GetAgeGroupText(participant.User?.UserNumber ?? 0, participant.User?.UserGender ?? 0),
                         AwardCount = await _context.GameAwardHistories.CountAsync(a => a.UserId == userId)
                     });
+
+                    // 여기서 취소사유를 미리 세션 등에 보관할 수도 있음 (실제 DB 이력은 SaveAssignmentResult에서 기록!)
+                    HttpContext.Session.SetString($"CancelReason_{userId}", cancelReason ?? "");
                 }
             }
 
             SaveAssignmentResults(assignmentResults);
             SaveUnassignedParticipants(unassigned ?? new List<ParticipantViewModel>());
 
-            TempData["SuccessMessage"] = "코스배치 취소가 정상적으로 반영되었습니다.\n결과 저장 시에만 DB에 저장됩니다.";
+            TempData["SuccessMessage"] = "코스배치 취소가 정상적으로 반영되었습니다.";
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
 
@@ -301,10 +320,14 @@ namespace GiSanParkGolf.Pages.AdminPage
             // 1. 배치옵션 저장 (게임 설정 저장)
             var gameSettingObj = new
             {
-                GenderSort = HttpContext.Session.GetString("GenderSort") ?? "false",
-                Handicapped = HttpContext.Session.GetString("Handicapped") ?? "false",
-                AgeSort = HttpContext.Session.GetString("AgeSort") ?? "false",
-                AwardSort = HttpContext.Session.GetString("AwardSort") ?? "false"
+                //GenderSort = HttpContext.Session.GetString("GenderSort") ?? "false",
+                //Handicapped = HttpContext.Session.GetString("Handicapped") ?? "false",
+                //AgeSort = HttpContext.Session.GetString("AgeSort") ?? "false",
+                //AwardSort = HttpContext.Session.GetString("AwardSort") ?? "false"
+                GenderSort = this.GenderSort ?? "false",
+                Handicapped = this.Handicapped ?? "false",
+                AgeSort = this.AgeSort ?? "false",
+                AwardSort = this.AwardSort ?? "false"
             };
             var settingJson = JsonConvert.SerializeObject(gameSettingObj);
 
@@ -338,9 +361,10 @@ namespace GiSanParkGolf.Pages.AdminPage
 
                 if (participant != null)
                 {
+                    var cancelReason = HttpContext.Session.GetString($"CancelReason_{userId}") ?? "코스 배치 취소";
                     participant.IsCancelled = true;
                     participant.CancelDate = DateTime.Now;
-                    participant.CancelReason = "코스 배치 취소";
+                    participant.CancelReason = !string.IsNullOrWhiteSpace(cancelReason) ? cancelReason : "코스 배치 취소";
                     participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
                     _context.GameParticipants.Update(participant);
                 }
@@ -417,8 +441,8 @@ namespace GiSanParkGolf.Pages.AdminPage
             await _context.SaveChangesAsync();
 
             TempData["SuccessTitle"] = "재참가 완료";
-            TempData["SuccessMessage"] = "재참가 처리되었습니다.";
-            return RedirectToPage(new { gameCode = participant.GameCode });
+            TempData["SuccessMessage"] = "재참가 처리되었습니다.\n반드시 코스배치를 다시 실행해야 참가자가 배정됩니다.";
+            return RedirectToPage(new { gameCode = participant.GameCode, tab = "tab-course" });
         }
 
         // ------------------- 코스배치 옵션/실행 부분 -------------------

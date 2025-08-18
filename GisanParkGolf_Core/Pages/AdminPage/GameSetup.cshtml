@@ -115,6 +115,33 @@
         : new List<GisanParkGolf_Core.ViewModels.AdminPage.ParticipantViewModel>();
 }
 
+@section Scripts {
+    <script>
+        function validateCancelReason(textarea) {
+            // 공백만 입력했을 때 막기
+            if (!textarea.value.trim()) {
+                textarea.classList.add('is-invalid');
+            } else {
+                textarea.classList.remove('is-invalid');
+            }
+        }
+
+        // 모달 submit시 추가 검사
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.modal form').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    var textarea = form.querySelector('textarea[name="cancelReason"]');
+                    if (textarea && !textarea.value.trim()) {
+                        textarea.classList.add('is-invalid');
+                        textarea.focus();
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+}
+
 @await Html.PartialAsync("Shared/Components/_HeaderCard", (
 ViewData["Title"] as string ?? "제목 없음",
     "대회를 선택한 후, 배치 옵션을 설정하고 인원을 코스에 배치할 수 있습니다."
@@ -141,6 +168,7 @@ ViewData["Title"] as string ?? "제목 없음",
                                 <th>상태</th>
                                 <th>경기장</th>
                                 <th>총 참가자</th>
+                                <th>배치결과</th>
                                 <th>선택</th>
                             </tr>
                         </thead>
@@ -150,6 +178,8 @@ ViewData["Title"] as string ?? "제목 없음",
                                 @for (int i = 0; i < Model.Competitions.Count; i++)
                                 {
                                     var comp = Model.Competitions[i];
+                                    var assignedCount = comp.AssignmentCount; // 이 값은 VM에서 미리 계산
+                                    var participantCount = comp.JoinedCount;  // 취소 안된 참가자 수
                                     <tr>
                                         <td>@(i + 1)</td>
                                         <td>@comp.GameName</td>
@@ -157,6 +187,16 @@ ViewData["Title"] as string ?? "제목 없음",
                                         <td>@GameStatusHelper.ToDisplay(comp.Status)</td>
                                         <td>@comp.StadiumName</td>
                                         <td>@comp.TotalParticipants</td>
+                                        <td>
+                                            @if (assignedCount < participantCount)
+                                            {
+                                                <span class="badge bg-danger">재배치 필요</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">배치 완료</span>
+                                            }
+                                        </td>
                                         <td>
                                             <a asp-page="./GameSetup"
                                                asp-route-gameCode="@comp.GameCode"
@@ -179,6 +219,16 @@ ViewData["Title"] as string ?? "제목 없음",
     else
     {
         <!-- 대회 선택시만 표시 -->
+        @if ((Model.Assignments?.Count ?? 0) < Model.JoinedCount)
+        {
+            <div class="alert alert-danger mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                <strong>코스배치 누락 경고!</strong><br />
+                배치대상 참가자 수: <span class="fw-bold">@Model.JoinedCount</span>명,
+                코스배치 인원: <span class="fw-bold">@(Model.Assignments?.Count ?? 0)</span>명<br />
+                <span class="text-danger">코스배치되지 않은 참가자가 있습니다. 반드시 코스배치를 다시 실행하세요!</span>
+            </div>
+        }
         <div id="bottomPanel">
             <div class="custom-card p-3 shadow-sm">
                 <div class="mb-3 d-flex align-items-center">
@@ -434,6 +484,10 @@ ViewData["Title"] as string ?? "제목 없음",
                                 <div class="modal-dialog modal-dialog-centered">
                                     <form method="post" asp-page-handler="SaveAssignmentResult" class="modal-content">
                                         <input type="hidden" name="gameCode" value="@Request.Query["gameCode"]" />
+                                        <input type="hidden" name="GenderSort" value="@Model.GenderSort" />
+                                        <input type="hidden" name="Handicapped" value="@Model.Handicapped" />
+                                        <input type="hidden" name="AgeSort" value="@Model.AgeSort" />
+                                        <input type="hidden" name="AwardSort" value="@Model.AwardSort" />
                                         <div class="modal-header">
                                             <h5 class="modal-title fw-bold" id="saveResultModalLabel">결과 저장 확인</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
@@ -518,7 +572,8 @@ ViewData["Title"] as string ?? "제목 없음",
                                                                 data-bs-target="#cancelAssignmentModal_@row.UserId">
                                                             코스배치 취소
                                                         </button>
-                                                        <!-- 취소 확인 모달 -->
+
+                                                        <!-- 취소 확인 & 사유 입력 모달 -->
                                                         <div class="modal fade" id="cancelAssignmentModal_@row.UserId" tabindex="-1" aria-labelledby="cancelAssignmentModalLabel_@row.UserId" aria-hidden="true">
                                                             <div class="modal-dialog modal-dialog-centered">
                                                                 <form method="post" asp-page-handler="CancelAssignment" class="modal-content">
@@ -532,6 +587,18 @@ ViewData["Title"] as string ?? "제목 없음",
                                                                         <p class="mb-2">
                                                                             <span class="fw-bold text-danger">정말 <b>@row.UserName</b> 참가자의 코스배치를 취소하시겠습니까?</span>
                                                                         </p>
+                                                                        <div class="mb-3">
+                                                                            <label for="cancelReason_@row.UserId" class="form-label">취소 사유 입력 <span class="text-danger">*</span></label>
+                                                                            <textarea class="form-control"
+                                                                                id="cancelReason_@row.UserId"
+                                                                                name="cancelReason"
+                                                                                rows="2"
+                                                                                required
+                                                                                oninput="validateCancelReason(this)">참가자 요청</textarea>
+                                                                            <div class="invalid-feedback">
+                                                                                취소 사유를 반드시 입력해야 합니다.
+                                                                            </div>
+                                                                        </div>
                                                                         <div class="alert alert-warning mb-0" role="alert" style="font-size:0.95em;">
                                                                             취소 시 해당 참가자는 미배정 인원으로 이동합니다.
                                                                         </div>

@@ -76,6 +76,8 @@ namespace GisanParkGolf_Core.Services.AdminPage
 
         // ############## 아래부터 코스배치관련 메서드 ##############
         // 대회 목록 불러오기
+        // ... 기존 using 및 namespace ...
+
         public async Task<PaginatedList<CompetitionViewModel>> GetCompetitionsAsync(
             string? searchField, string? searchQuery, int pageIndex, int pageSize)
         {
@@ -100,21 +102,28 @@ namespace GisanParkGolf_Core.Services.AdminPage
 
             var orderedQuery = query.OrderByDescending(g => g.GameDate);
 
-            // 1. 대회 목록을 먼저 페이징해서 가져옴
+            // 1. 대회 목록 페이징
             var pagedGames = await PaginatedList<Game>.CreateAsync(
                 orderedQuery.AsNoTracking(), pageIndex, pageSize);
 
-            // 2. 각 대회별로 참가자/수상경력 정보 추가
+            // 2. 각 대회별로 참가자/코스배치 인원 수 집계
             var competitionList = new List<CompetitionViewModel>();
             foreach (var g in pagedGames)
             {
-                // 참가자 리스트
+                // 참가자 전체 리스트
                 var participants = await _dbContext.GameParticipants
                     .Where(p => p.GameCode == g.GameCode)
                     .Include(p => p.User)
                     .ToListAsync();
 
-                // 참가자별 수상경력 리스트
+                // 코스배치 인원 수 (GameUserAssignments)
+                int assignmentCount = await _dbContext.GameUserAssignments
+                    .CountAsync(a => a.GameCode == g.GameCode);
+
+                // 취소 안된 참가자 수 (IsCancelled == false)
+                int joinedCount = participants.Count(p => !p.IsCancelled);
+
+                // 수상경력 정보 (기존)
                 var participantAwards = participants
                     .Select(p => new ParticipantAwardInfo
                     {
@@ -134,6 +143,8 @@ namespace GisanParkGolf_Core.Services.AdminPage
                     Status = g.GameStatus,
                     StadiumName = g.Stadium == null ? "(미지정)" : g.Stadium.StadiumName,
                     TotalParticipants = participants.Count,
+                    JoinedCount = joinedCount,         // 추가됨
+                    AssignmentCount = assignmentCount, // 추가됨
                     GameHost = g.GameHost,
                     PlayMode = PlayModeHelper.ToKorDisplay(g.PlayMode),
                     GameNote = g.GameNote,
