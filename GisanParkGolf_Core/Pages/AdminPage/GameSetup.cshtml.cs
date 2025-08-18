@@ -27,6 +27,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             Assignments = new PaginatedList<CourseAssignmentResultViewModel>(new List<CourseAssignmentResultViewModel>(), 0, 1, 10);
         }
 
+        // ------------------- ViewModel Properties -------------------
         public PaginatedList<CompetitionViewModel> Competitions { get; set; }
         public PaginatedList<ParticipantViewModel> Participants { get; set; }
         public PaginatedList<CourseAssignmentResultViewModel> Assignments { get; set; }
@@ -38,7 +39,7 @@ namespace GiSanParkGolf.Pages.AdminPage
         public int JoinedCount { get; set; }
         public int MaxHoleNumber => Courses.Any() ? Courses.Max(c => c.HoleCount) : 1;
 
-        // 옵션
+        // ------------------- Page Parameters -------------------
         [BindProperty(SupportsGet = true)] public int PageSize { get; set; } = 10;
         [BindProperty(SupportsGet = true)] public int PageIndex { get; set; } = 1;
         [BindProperty(SupportsGet = true)] public string? SearchField { get; set; } = "GameName";
@@ -53,29 +54,99 @@ namespace GiSanParkGolf.Pages.AdminPage
         [BindProperty] public string? Handicapped { get; set; }
         [BindProperty] public string? AgeSort { get; set; }
         [BindProperty] public string? AwardSort { get; set; }
+        [BindProperty(SupportsGet = true)] public string? Tab { get; set; }
+        [BindProperty(SupportsGet = true)] public string? GameCode { get; set; }
 
-        // 메인 GET
-        public async Task OnGetAsync(string? gameCode)
+        // ------------------- Utility: Session/DB Handling -------------------
+        private List<CourseAssignmentResultViewModel> GetAssignmentResults(string gameCode)
         {
-            // gameCode가 없으면 세션 클리어 (목록/새 진입)
-            if (string.IsNullOrEmpty(gameCode))
+            var assignmentResultsJson = HttpContext.Session.GetString("AssignmentResults");
+            List<CourseAssignmentResultViewModel> results = !string.IsNullOrEmpty(assignmentResultsJson)
+                ? JsonConvert.DeserializeObject<List<CourseAssignmentResultViewModel>>(assignmentResultsJson) ?? new List<CourseAssignmentResultViewModel>()
+                : new List<CourseAssignmentResultViewModel>();
+
+            if (results == null || results.Count == 0)
             {
-                ClearAssignmentSession();
+                // DB에서 불러오기
+                var dbResults = _context.GameUserAssignments
+                    .Include(a => a.Handicap)
+                    .Include(a => a.User)
+                    .Where(a => a.GameCode == gameCode)
+                    .ToList();
+
+                var userIds = dbResults.Select(r => r.UserId ?? "")
+                    .Where(id => !string.IsNullOrEmpty(id))
+                    .Distinct().ToList();
+
+                var awardDict = _context.GameAwardHistories
+                    .Where(a => !string.IsNullOrEmpty(a.UserId) && userIds.Contains(a.UserId))
+                    .GroupBy(a => a.UserId)
+                    .ToDictionary(g => g.Key ?? "", g => g.Count());
+
+                results = dbResults.Select(r => new CourseAssignmentResultViewModel
+                {
+                    CourseName = r.CourseName,
+                    HoleNumber = r.HoleNumber,
+                    TeamNumber = r.TeamNumber,
+                    UserId = r.UserId ?? "",
+                    UserName = r.User?.UserName ?? r.UserId ?? "",
+                    GenderText = r.User?.UserGender == 1 ? "남" : r.User?.UserGender == 2 ? "여" : "",
+                    AgeGroupText = GetAgeGroupText(r.User?.UserNumber ?? 0, r.User?.UserGender ?? 0),
+                    HandicapValue = r.Handicap?.AgeHandicap ?? 0,
+                    AwardCount = awardDict.TryGetValue(r.UserId ?? "", out var cnt) ? cnt : 0
+                }).ToList();
             }
+            return results;
+        }
 
-            // 대회 목록 조회
-            Competitions = await _gameService.GetCompetitionsAsync(SearchField, SearchQuery, PageIndex, PageSize);
+        private List<ParticipantViewModel> GetUnassignedParticipants()
+        {
+            var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
+            return !string.IsNullOrEmpty(unassignedJson)
+                ? JsonConvert.DeserializeObject<List<ParticipantViewModel>>(unassignedJson) ?? new List<ParticipantViewModel>()
+                : new List<ParticipantViewModel>();
+        }
 
-            // gameCode가 있으면 해당 대회 상세 데이터 로드
-            if (!string.IsNullOrEmpty(gameCode))
+        private void SaveAssignmentResults(List<CourseAssignmentResultViewModel> results)
+        {
+            HttpContext.Session.SetString("AssignmentResults", JsonConvert.SerializeObject(results ?? new List<CourseAssignmentResultViewModel>()));
+        }
+
+        private void SaveUnassignedParticipants(List<ParticipantViewModel> participants)
+        {
+            HttpContext.Session.SetString("UnassignedParticipants", JsonConvert.SerializeObject(participants ?? new List<ParticipantViewModel>()));
+        }
+
+        private void RenumberTeamNumbers(List<CourseAssignmentResultViewModel> results)
+        {
+            var grouped = results
+                .GroupBy(r => new { r.CourseName, r.HoleNumber })
+                .ToList();
+
+            foreach (var group in grouped)
             {
-                await LoadGameDetailDataAsync(gameCode);
+                int idx = 1;
+                foreach (var item in group.OrderBy(r => int.TryParse(r.TeamNumber, out var tn) ? tn : 0))
+                {
+                    item.TeamNumber = idx.ToString();
+                    idx++;
+                }
             }
         }
 
-        // 상세 데이터 로드 (참가자/코스/배치결과)
+        // ------------------- GET -------------------
+        public async Task OnGetAsync(string? gameCode)
+        {
+            if (string.IsNullOrEmpty(gameCode)) ClearAssignmentSession();
+
+            Competitions = await _gameService.GetCompetitionsAsync(SearchField, SearchQuery, PageIndex, PageSize);
+
+            if (!string.IsNullOrEmpty(gameCode)) await LoadGameDetailDataAsync(gameCode);
+        }
+
         private async Task LoadGameDetailDataAsync(string gameCode)
         {
+            // 참가자, 통계
             Participants = await _gameService.GetParticipantsAsync(
                 gameCode, ParticipantSearchQuery, ParticipantPageIndex, ParticipantPageSize);
 
@@ -84,7 +155,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             CancelledCount = await _context.GameParticipants.CountAsync(gp => gp.IsCancelled);
             JoinedCount = await _context.GameParticipants.CountAsync(gp => !gp.IsCancelled);
 
-            // 옵션 세션 동기화
+            // 배치 옵션 세션 -> 변수
             GenderSort = HttpContext.Session.GetString("GenderSort");
             Handicapped = HttpContext.Session.GetString("Handicapped");
             AgeSort = HttpContext.Session.GetString("AgeSort");
@@ -98,7 +169,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                     .Select(c => new CourseViewModel { CourseName = c.CourseName, HoleCount = c.HoleCount })
                     .ToListAsync();
 
-                // 옵션 값이 없으면 DB에 저장된 게임설정에서 복원
+                // 옵션값 없으면 DB설정 반영
                 if (string.IsNullOrEmpty(GenderSort) || string.IsNullOrEmpty(Handicapped) ||
                     string.IsNullOrEmpty(AgeSort) || string.IsNullOrEmpty(AwardSort))
                 {
@@ -115,50 +186,16 @@ namespace GiSanParkGolf.Pages.AdminPage
                                 AwardSort ??= setting.AwardSort ?? "false";
                             }
                         }
-                        catch { /* 파싱 에러 무시 */ }
+                        catch { /* 무시 */ }
                     }
                 }
             }
 
-            // 배치 결과: 세션에 있으면 세션에서, 없으면 DB에서
-            var assignmentResultsJson = HttpContext.Session.GetString("AssignmentResults");
-            if (!string.IsNullOrEmpty(assignmentResultsJson))
-            {
-                AssignmentResults = JsonConvert.DeserializeObject<List<CourseAssignmentResultViewModel>>(assignmentResultsJson) ?? new();
-            }
-            else
-            {
-                var dbResults = await _context.GameUserAssignments
-                    .Include(a => a.Handicap)
-                    .Include(a => a.User)
-                    .Where(a => a.GameCode == gameCode)
-                    .ToListAsync();
+            // 코스배치 결과(세션/DB)
+            AssignmentResults = GetAssignmentResults(gameCode);
 
-                var userIds = dbResults.Select(r => r.UserId ?? "")
-                                       .Where(id => !string.IsNullOrEmpty(id))
-                                       .Distinct().ToList();
-
-                var awardDict = await _context.GameAwardHistories
-                    .Where(a => !string.IsNullOrEmpty(a.UserId) && userIds.Contains(a.UserId))
-                    .GroupBy(a => a.UserId)
-                    .ToDictionaryAsync(g => g.Key ?? "", g => g.Count());
-
-                AssignmentResults = dbResults.Select(r => new CourseAssignmentResultViewModel
-                {
-                    CourseName = r.CourseName,
-                    HoleNumber = r.HoleNumber,
-                    TeamNumber = r.TeamNumber,
-                    UserId = r.UserId ?? "",
-                    UserName = r.User?.UserName ?? r.UserId ?? "",
-                    GenderText = r.User?.UserGender == 1 ? "남" : r.User?.UserGender == 2 ? "여" : "",
-                    AgeGroupText = GetAgeGroupText(r.User?.UserNumber ?? 0, r.User?.UserGender ?? 0),
-                    HandicapValue = r.Handicap?.AgeHandicap ?? 0,
-                    AwardCount = awardDict.TryGetValue(r.UserId ?? "", out var cnt) ? cnt : 0
-                }).ToList();
-            }
-
+            // 검색/페이징
             IEnumerable<CourseAssignmentResultViewModel> filteredResults = AssignmentResults;
-
             if (!string.IsNullOrWhiteSpace(AssignmentSearchQuery))
             {
                 var q = AssignmentSearchQuery.Trim();
@@ -183,7 +220,166 @@ namespace GiSanParkGolf.Pages.AdminPage
             );
         }
 
-        // 참가 취소 승인
+        // ------------------- 핸들러 (POST) -------------------
+        public async Task<IActionResult> OnPostCancelAssignmentAsync(string gameCode, string userId)
+        {
+            var assignmentResults = GetAssignmentResults(gameCode);
+
+            assignmentResults.RemoveAll(r => r.UserId == userId);
+            RenumberTeamNumbers(assignmentResults);
+
+            var unassigned = GetUnassignedParticipants();
+            if (!(unassigned?.Any(u => u.UserId == userId) ?? false))
+            {
+                var participant = await _context.GameParticipants
+                    .Include(p => p.User)
+                    .FirstOrDefaultAsync(p => p.GameCode == gameCode && p.UserId == userId);
+
+                if (participant != null)
+                {
+                    if (unassigned == null)
+                        unassigned = new List<ParticipantViewModel>();
+
+                    unassigned.Add(new ParticipantViewModel
+                    {
+                        Name = participant.User?.UserName ?? participant.UserId ?? "",
+                        UserId = participant.UserId ?? "",
+                        GenderText = participant.User?.UserGender == 1 ? "남" : participant.User?.UserGender == 2 ? "여" : "",
+                        HandicapValue = participant.User?.Handicap?.AgeHandicap ?? 0,
+                        AgeGroupText = GetAgeGroupText(participant.User?.UserNumber ?? 0, participant.User?.UserGender ?? 0),
+                        AwardCount = await _context.GameAwardHistories.CountAsync(a => a.UserId == userId)
+                    });
+                }
+            }
+
+            SaveAssignmentResults(assignmentResults);
+            SaveUnassignedParticipants(unassigned ?? new List<ParticipantViewModel>());
+
+            TempData["SuccessMessage"] = "코스배치 취소가 정상적으로 반영되었습니다.\n결과 저장 시에만 DB에 저장됩니다.";
+            return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+        }
+
+        public IActionResult OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
+        {
+            var unassigned = GetUnassignedParticipants();
+            var participant = unassigned.FirstOrDefault(p => p.UserId == userId);
+            if (participant == null)
+            {
+                TempData["ErrorMessage"] = "해당 참가자를 찾을 수 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            var assignmentResults = GetAssignmentResults(gameCode);
+            var assignedCount = assignmentResults.Count(a => a.CourseName == courseName && a.HoleNumber == holeNumber.ToString());
+
+            assignmentResults.Add(new CourseAssignmentResultViewModel
+            {
+                CourseName = courseName,
+                HoleNumber = holeNumber.ToString(),
+                TeamNumber = (assignedCount + 1).ToString(),
+                UserName = participant.Name,
+                UserId = participant.UserId,
+                GenderText = participant.GenderText,
+                AgeGroupText = participant.AgeGroupText ?? "확인불가",
+                HandicapValue = participant.HandicapValue,
+                AwardCount = participant.AwardCount
+            });
+
+            unassigned.Remove(participant);
+
+            SaveAssignmentResults(assignmentResults);
+            SaveUnassignedParticipants(unassigned);
+
+            TempData["SuccessMessage"] = $"강제배정 {courseName} {holeNumber}홀에 배정되었습니다!";
+            return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+        }
+
+        public async Task<IActionResult> OnPostSaveAssignmentResultAsync(string gameCode)
+        {
+            var assignmentResults = GetAssignmentResults(gameCode);
+
+            // 1. 배치옵션 저장 (게임 설정 저장)
+            var gameSettingObj = new
+            {
+                GenderSort = HttpContext.Session.GetString("GenderSort") ?? "false",
+                Handicapped = HttpContext.Session.GetString("Handicapped") ?? "false",
+                AgeSort = HttpContext.Session.GetString("AgeSort") ?? "false",
+                AwardSort = HttpContext.Session.GetString("AwardSort") ?? "false"
+            };
+            var settingJson = JsonConvert.SerializeObject(gameSettingObj);
+
+            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            if (game != null)
+            {
+                game.GameSetting = settingJson;
+                game.GameStatus = "Assigned";
+                _context.Games.Update(game);
+                await _context.SaveChangesAsync();
+            }
+
+            // 2. 기존 DB 배정정보 불러오기
+            var prevAssignments = await _context.GameUserAssignments
+                .Where(a => a.GameCode == gameCode)
+                .ToListAsync();
+
+            // 3. 세션에 남아있는 배정정보와 비교하여 취소자 찾기
+            var assignedUserIds = assignmentResults.Select(r => r.UserId).ToHashSet();
+            var cancelledUsers = prevAssignments
+                .Where(pa => !assignedUserIds.Contains(pa.UserId))
+                .Select(pa => pa.UserId)
+                .Distinct()
+                .ToList();
+
+            // 4. 취소 이력 남기기
+            foreach (var userId in cancelledUsers)
+            {
+                var participant = await _context.GameParticipants
+                    .FirstOrDefaultAsync(p => p.GameCode == gameCode && p.UserId == userId);
+
+                if (participant != null)
+                {
+                    participant.IsCancelled = true;
+                    participant.CancelDate = DateTime.Now;
+                    participant.CancelReason = "코스 배치 취소";
+                    participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
+                    _context.GameParticipants.Update(participant);
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            // 5. 기존 배정 삭제/새 배정 저장
+            var existingAssignments = await _context.GameUserAssignments
+                .Where(a => a.GameCode == gameCode)
+                .ToListAsync();
+
+            if (existingAssignments.Any())
+            {
+                _context.GameUserAssignments.RemoveRange(existingAssignments);
+                await _context.SaveChangesAsync();
+            }
+
+            foreach (var r in assignmentResults)
+            {
+                var assignment = new GameUserAssignment
+                {
+                    GameCode = gameCode,
+                    UserId = r.UserId,
+                    CourseName = r.CourseName,
+                    HoleNumber = r.HoleNumber,
+                    TeamNumber = r.TeamNumber,
+                    AgeHandicap = r.HandicapValue,
+                    AssignmentStatus = "Assigned",
+                    AssignedDate = DateTime.Now
+                };
+                _context.GameUserAssignments.Add(assignment);
+            }
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"코스배치 결과가 정상적으로 저장되었습니다.";
+            return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+        }
+
+        // --- 참가취소, 재참가 등 기존 기능은 그대로 ---
         public async Task<IActionResult> OnPostApproveCancelAsync(string id)
         {
             var participant = await _context.GameParticipants.FirstOrDefaultAsync(p => p.UserId == id);
@@ -196,23 +392,20 @@ namespace GiSanParkGolf.Pages.AdminPage
             participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
             _context.GameParticipants.Update(participant);
             await _context.SaveChangesAsync();
-
-            // 코스배치 결과 세션 초기화
             ClearAssignmentSession();
 
             TempData["SuccessTitle"] = "취소 승인 완료";
-            TempData["SuccessMessage"] = "취소된 참가자를 반영하려면 코스배치를 다시 실행하세요.";
+            TempData["SuccessMessage"] = "참가자 취소가 승인되었습니다. 코스배치 재실행 필요.";
             return RedirectToPage(new { gameCode = participant.GameCode });
         }
 
-        // 참가자 재참가 처리
         public async Task<IActionResult> OnPostRejoinAsync(string id)
         {
             var participant = await _context.GameParticipants.FirstOrDefaultAsync(p => p.UserId == id);
             if (participant == null)
             {
                 TempData["ErrorTitle"] = "오류";
-                TempData["ErrorMessage"] = "참가자 정보를 찾을 수 없습니다.";
+                TempData["ErrorMessage"] = "참가자를 찾을 수 없습니다.";
                 return RedirectToPage();
             }
             participant.IsCancelled = false;
@@ -224,11 +417,11 @@ namespace GiSanParkGolf.Pages.AdminPage
             await _context.SaveChangesAsync();
 
             TempData["SuccessTitle"] = "재참가 완료";
-            TempData["SuccessMessage"] = "재참가 처리되었습니다. 코스배치를 다시 실행해야 반영됩니다.";
+            TempData["SuccessMessage"] = "재참가 처리되었습니다.";
             return RedirectToPage(new { gameCode = participant.GameCode });
         }
 
-        // 코스 배치 실행
+        // ------------------- 코스배치 옵션/실행 부분 -------------------
         public async Task<IActionResult> OnPostCourseAssignmentAsync(string gameCode)
         {
             var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
@@ -440,121 +633,13 @@ namespace GiSanParkGolf.Pages.AdminPage
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
 
-        // 미배정 인원 강제 배정
-        public IActionResult OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
-        {
-            var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
-            List<ParticipantViewModel> UnassignedParticipants = !string.IsNullOrEmpty(unassignedJson)
-                ? JsonConvert.DeserializeObject<List<ParticipantViewModel>>(unassignedJson) ?? new List<ParticipantViewModel>()
-                : new List<ParticipantViewModel>();
-
-            var participant = UnassignedParticipants.FirstOrDefault(p => p.UserId == userId);
-            if (participant == null)
-            {
-                TempData["ErrorMessage"] = "해당 참가자를 찾을 수 없습니다.";
-                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
-            }
-
-            var resultsJson = HttpContext.Session.GetString("AssignmentResults");
-            List<CourseAssignmentResultViewModel> AssignmentResults = !string.IsNullOrEmpty(resultsJson)
-                ? JsonConvert.DeserializeObject<List<CourseAssignmentResultViewModel>>(resultsJson) ?? new List<CourseAssignmentResultViewModel>()
-                : new List<CourseAssignmentResultViewModel>();
-
-            var assignedCount = AssignmentResults.Count(a => a.CourseName == courseName && a.HoleNumber == holeNumber.ToString());
-
-            AssignmentResults.Add(new CourseAssignmentResultViewModel
-            {
-                CourseName = courseName,
-                HoleNumber = holeNumber.ToString(),
-                TeamNumber = (assignedCount + 1).ToString(),
-                UserName = participant.Name,
-                UserId = participant.UserId,
-                GenderText = participant.GenderText,
-                AgeGroupText = participant.AgeGroupText ?? "확인불가",
-                HandicapValue = participant.HandicapValue,
-                AwardCount = participant.AwardCount
-            });
-
-            UnassignedParticipants.Remove(participant);
-
-            HttpContext.Session.SetString("AssignmentResults", JsonConvert.SerializeObject(AssignmentResults));
-            HttpContext.Session.SetString("UnassignedParticipants", JsonConvert.SerializeObject(UnassignedParticipants));
-            TempData["SuccessMessage"] = $"강제배정 {courseName} {holeNumber}홀에 배정되었습니다!";
-
-            return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
-        }
-
-        // 배치 결과 저장
-        public async Task<IActionResult> OnPostSaveAssignmentResultAsync(string gameCode)
-        {
-            var assignmentResultsJson = HttpContext.Session.GetString("AssignmentResults");
-            var assignmentResults = !string.IsNullOrEmpty(assignmentResultsJson)
-                ? JsonConvert.DeserializeObject<List<CourseAssignmentResultViewModel>>(assignmentResultsJson)
-                : new List<CourseAssignmentResultViewModel>();
-
-            if (assignmentResults == null || assignmentResults.Count == 0)
-            {
-                TempData["ErrorMessage"] = "저장할 배치 결과가 없습니다.";
-                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
-            }
-
-            // 옵션 저장
-            var gameSettingObj = new
-            {
-                GenderSort = HttpContext.Session.GetString("GenderSort") ?? "false",
-                Handicapped = HttpContext.Session.GetString("Handicapped") ?? "false",
-                AgeSort = HttpContext.Session.GetString("AgeSort") ?? "false",
-                AwardSort = HttpContext.Session.GetString("AwardSort") ?? "false"
-            };
-            var settingJson = JsonConvert.SerializeObject(gameSettingObj);
-
-            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
-            if (game != null)
-            {
-                game.GameSetting = settingJson;
-                game.GameStatus = "Assigned"; // 상태 변경
-                _context.Games.Update(game);
-                await _context.SaveChangesAsync();
-            }
-
-            var existingAssignments = await _context.GameUserAssignments
-                .Where(a => a.GameCode == gameCode)
-                .ToListAsync();
-
-            if (existingAssignments.Any())
-            {
-                _context.GameUserAssignments.RemoveRange(existingAssignments);
-                await _context.SaveChangesAsync();
-            }
-
-            foreach (var r in assignmentResults)
-            {
-                var assignment = new GameUserAssignment
-                {
-                    GameCode = gameCode,
-                    UserId = r.UserId,
-                    CourseName = r.CourseName,
-                    HoleNumber = r.HoleNumber,
-                    TeamNumber = r.TeamNumber,
-                    AgeHandicap = r.HandicapValue,
-                    AssignmentStatus = "Assigned",
-                    AssignedDate = DateTime.Now
-                };
-                _context.GameUserAssignments.Add(assignment);
-            }
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = $"배치 결과가 정상적으로 저장되었습니다.";
-            return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
-        }
-
-        // 연령대 텍스트 변환
+        // ------------------- 기타 유틸/헬퍼 -------------------
         private string GetAgeGroupText(int age, int gender)
         {
             age = PersonInfoCalculator.CalculateAge(age, gender);
             if (age < 40) return "청년";
             if (age < 60) return "중년";
-            return "노년";
+            return "장년";
         }
 
         private void ClearAssignmentSession()
