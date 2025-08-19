@@ -63,6 +63,9 @@ namespace GisanParkGolf_Core.Data
         [Column("post_user", TypeName = "varchar(25)")]
         public string? PostUser { get; set; }
 
+        [Column("assignment_locked")]
+        public bool AssignmentLocked { get; set; } = false;
+
         // Navigation Properties
         public virtual ICollection<GameParticipant> Participants { get; set; } = new List<GameParticipant>();
         public virtual ICollection<GameAwardHistory> AwardHistories { get; set; } = new List<GameAwardHistory>();

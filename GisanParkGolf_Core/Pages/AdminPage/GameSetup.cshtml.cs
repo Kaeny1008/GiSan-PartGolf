@@ -2,6 +2,7 @@
 using GisanParkGolf_Core.Helpers;
 using GisanParkGolf_Core.Services.AdminPage;
 using GisanParkGolf_Core.ViewModels.AdminPage;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace GiSanParkGolf.Pages.AdminPage
 {
+    [Authorize(Policy = "AdminOnly")]
     public class GameSetupModel : PageModel
     {
         private readonly IGameService _gameService;
@@ -39,6 +41,7 @@ namespace GiSanParkGolf.Pages.AdminPage
         public int JoinedCount { get; set; }
         public int MaxHoleNumber => Courses.Any() ? Courses.Max(c => c.HoleCount) : 1;
         public int AssignableCount { get; set; }
+        public bool AssignmentLocked { get; set; } = false;
 
         // ------------------- Page Parameters -------------------
         [BindProperty(SupportsGet = true)] public int PageSize { get; set; } = 10;
@@ -180,6 +183,8 @@ namespace GiSanParkGolf.Pages.AdminPage
             var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (game != null)
             {
+                AssignmentLocked = game.AssignmentLocked;
+
                 Courses = await _context.Courses
                     .Where(c => c.StadiumCode == game.StadiumCode)
                     .Select(c => new CourseViewModel { CourseName = c.CourseName, HoleCount = c.HoleCount })
@@ -239,6 +244,9 @@ namespace GiSanParkGolf.Pages.AdminPage
         // ------------------- 핸들러 (POST) -------------------
         public async Task<IActionResult> OnPostCancelAssignmentAsync(string gameCode, string userId, string? cancelReason)
         {
+            var reject = await RejectIfAssignmentLockedAsync(gameCode);
+            if (reject != null) return reject;
+
             if (string.IsNullOrWhiteSpace(cancelReason))
             {
                 TempData["ErrorMessage"] = "취소 사유를 반드시 입력해야 합니다.";
@@ -284,8 +292,22 @@ namespace GiSanParkGolf.Pages.AdminPage
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
 
-        public IActionResult OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
+        public async Task<IActionResult> OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
         {
+            // 바로 Reject 검사(중복 호출 가능하므로 내부 async 메서드에서만 검사하도록 정리하면 중복 제거)
+            var reject = await RejectIfAssignmentLockedAsync(gameCode);
+            if (reject != null) return reject;
+
+            // 기존 OnPostForceAssignParticipantAsync 로직을 이 메서드로 옮기거나
+            // 기존 async 메서드를 호출:
+            return await OnPostForceAssignParticipantAsync(userId, courseName, holeNumber, gameCode);
+        }
+
+        public async Task<IActionResult> OnPostForceAssignParticipantAsync(string userId, string courseName, int holeNumber, string gameCode)
+        {
+            var reject = await RejectIfAssignmentLockedAsync(gameCode);
+            if (reject != null) return reject;
+
             var unassigned = GetUnassignedParticipants();
             var participant = unassigned.FirstOrDefault(p => p.UserId == userId);
             if (participant == null)
@@ -365,15 +387,38 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         public async Task<IActionResult> OnPostSaveAssignmentResultAsync(string gameCode)
         {
+            // 0. 기본 유효성 검사
             var assignmentResults = GetAssignmentResults(gameCode);
+            if (assignmentResults == null || assignmentResults.Count == 0)
+            {
+                TempData["ErrorMessage"] = "저장할 배치 결과가 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
 
-            // 1. 배치옵션 저장 (게임 설정 저장)
+            // 0.5 추가 검사: userId 없는 레코드가 있는지 확인
+            var invalidRows = assignmentResults.Where(r => string.IsNullOrWhiteSpace(r.UserId)).ToList();
+            if (invalidRows.Any())
+            {
+                TempData["ErrorMessage"] = $"저장 실패: UserId가 누락된 배치 항목이 {invalidRows.Count}건 있습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            // 서버측 잠금 검사 (추가 안전장치)
+            var gameForCheck = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            if (gameForCheck == null)
+            {
+                TempData["ErrorMessage"] = "대회 정보를 찾을 수 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode });
+            }
+            if (gameForCheck.AssignmentLocked)
+            {
+                TempData["ErrorMessage"] = "이미 확정된 배치입니다. 변경할 수 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            // 1. 게임 설정 JSON 준비
             var gameSettingObj = new
             {
-                //GenderSort = HttpContext.Session.GetString("GenderSort") ?? "false",
-                //Handicapped = HttpContext.Session.GetString("Handicapped") ?? "false",
-                //AgeSort = HttpContext.Session.GetString("AgeSort") ?? "false",
-                //AwardSort = HttpContext.Session.GetString("AwardSort") ?? "false"
                 GenderSort = this.GenderSort ?? "false",
                 Handicapped = this.Handicapped ?? "false",
                 AgeSort = this.AgeSort ?? "false",
@@ -381,60 +426,59 @@ namespace GiSanParkGolf.Pages.AdminPage
             };
             var settingJson = JsonConvert.SerializeObject(gameSettingObj);
 
-            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
-            if (game != null)
+            // 2. 트랜잭션 시작 (원자성 보장)
+            using var tx = await _context.Database.BeginTransactionAsync();
+            try
             {
+                // 3. 게임 엔티티 업데이트(상태, 세팅, 잠금)
+                var game = gameForCheck; // 이미 로드됨
                 game.GameSetting = settingJson;
                 game.GameStatus = "Assigned";
+                game.AssignmentLocked = true; // 자동 확정 정책일 경우
                 _context.Games.Update(game);
                 await _context.SaveChangesAsync();
-            }
 
-            // 2. 기존 DB 배정정보 불러오기
-            var prevAssignments = await _context.GameUserAssignments
-                .Where(a => a.GameCode == gameCode)
-                .ToListAsync();
+                // 4. 이전 배정 로드 (DB)
+                var prevAssignments = await _context.GameUserAssignments
+                    .Where(a => a.GameCode == gameCode)
+                    .ToListAsync();
 
-            // 3. 세션에 남아있는 배정정보와 비교하여 취소자 찾기
-            var assignedUserIds = assignmentResults.Select(r => r.UserId).ToHashSet();
-            var cancelledUsers = prevAssignments
-                .Where(pa => !assignedUserIds.Contains(pa.UserId))
-                .Select(pa => pa.UserId)
-                .Distinct()
-                .ToList();
+                // 5. 세션 결과와 비교하여 취소 대상 찾기
+                var assignedUserIds = assignmentResults.Select(r => r.UserId).ToHashSet();
+                var cancelledUsers = prevAssignments
+                    .Where(pa => !assignedUserIds.Contains(pa.UserId))
+                    .Select(pa => pa.UserId)
+                    .Distinct()
+                    .ToList();
 
-            // 4. 취소 이력 남기기
-            foreach (var userId in cancelledUsers)
-            {
-                var participant = await _context.GameParticipants
-                    .FirstOrDefaultAsync(p => p.GameCode == gameCode && p.UserId == userId);
-
-                if (participant != null)
+                // 6. 참가자(취소) 업데이트
+                if (cancelledUsers.Any())
                 {
-                    var cancelReason = HttpContext.Session.GetString($"CancelReason_{userId}") ?? "코스 배치 취소";
-                    participant.IsCancelled = true;
-                    participant.CancelDate = DateTime.Now;
-                    participant.CancelReason = !string.IsNullOrWhiteSpace(cancelReason) ? cancelReason : "코스 배치 취소";
-                    participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
-                    _context.GameParticipants.Update(participant);
+                    var participantsToCancel = await _context.GameParticipants
+                        .Where(p => p.GameCode == gameCode && cancelledUsers.Contains(p.UserId))
+                        .ToListAsync();
+
+                    foreach (var participant in participantsToCancel)
+                    {
+                        var cancelReason = HttpContext.Session.GetString($"CancelReason_{participant.UserId}") ?? "코스 배치 취소";
+                        participant.IsCancelled = true;
+                        participant.CancelDate = DateTime.Now;
+                        participant.CancelReason = !string.IsNullOrWhiteSpace(cancelReason) ? cancelReason : "코스 배치 취소";
+                        participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
+                        _context.GameParticipants.Update(participant);
+                    }
+                    await _context.SaveChangesAsync();
                 }
-            }
-            await _context.SaveChangesAsync();
 
-            // 5. 기존 배정 삭제/새 배정 저장
-            var existingAssignments = await _context.GameUserAssignments
-                .Where(a => a.GameCode == gameCode)
-                .ToListAsync();
+                // 7. 기존 배정 삭제
+                if (prevAssignments.Any())
+                {
+                    _context.GameUserAssignments.RemoveRange(prevAssignments);
+                    await _context.SaveChangesAsync();
+                }
 
-            if (existingAssignments.Any())
-            {
-                _context.GameUserAssignments.RemoveRange(existingAssignments);
-                await _context.SaveChangesAsync();
-            }
-
-            foreach (var r in assignmentResults)
-            {
-                var assignment = new GameUserAssignment
+                // 8. 새 배정 레코드 준비 및 대량 삽입
+                var newAssignments = assignmentResults.Select(r => new GameUserAssignment
                 {
                     GameCode = gameCode,
                     UserId = r.UserId,
@@ -445,13 +489,40 @@ namespace GiSanParkGolf.Pages.AdminPage
                     AgeHandicap = r.HandicapValue,
                     AssignmentStatus = "Assigned",
                     AssignedDate = DateTime.Now
-                };
-                _context.GameUserAssignments.Add(assignment);
-            }
-            await _context.SaveChangesAsync();
+                }).ToList();
 
-            TempData["SuccessMessage"] = $"코스배치 결과가 정상적으로 저장되었습니다.";
-            return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+                if (newAssignments.Any())
+                {
+                    await _context.GameUserAssignments.AddRangeAsync(newAssignments);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 9. 히스토리 기록 (요약)
+                var summary = new
+                {
+                    SavedBy = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin",
+                    SavedAt = DateTime.Now,
+                    TotalAssigned = newAssignments.Count,
+                    UnassignedCount = GetUnassignedParticipants()?.Count ?? 0,
+                    RemovedUserIds = cancelledUsers
+                };
+                await AddAssignmentHistoryAsync(gameCode, "SaveAndFinalize", summary);
+
+                // 10. 커밋
+                await tx.CommitAsync();
+
+                TempData["SuccessMessage"] = "코스배치 결과가 정상적으로 저장되었습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+            catch (Exception ex)
+            {
+                // 롤백 후 로깅/유저 메시지
+                await tx.RollbackAsync();
+                // TODO: 실제 앱에서는 ILogger로 예외 로깅
+                TempData["ErrorMessage"] = "코스배치 저장 중 오류가 발생했습니다. 관리자에게 문의하세요.";
+                // 예외를 던지거나 상세 메시지를 로그에 남기도록 처리
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
         }
 
         // --- 참가취소, 재참가 등 기존 기능은 그대로 ---
@@ -500,6 +571,10 @@ namespace GiSanParkGolf.Pages.AdminPage
         // ------------------- 코스배치 옵션/실행 부분 -------------------
         public async Task<IActionResult> OnPostCourseAssignmentAsync(string gameCode)
         {
+            // 잠금 검사 — 변경 금지 시 즉시 리다이렉트
+            var reject = await RejectIfAssignmentLockedAsync(gameCode);
+            if (reject != null) return reject;
+
             int maxPerHole = 4; // default
 
             // game 먼저 조회
@@ -789,7 +864,7 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         public IActionResult OnGetExportPdfAsync(string gameCode)
         {
-            // 1. 결과 데이터 준비
+            // 1. 결과 데이터 준비 (세션/DB)
             var results = GetAssignmentResults(gameCode);
             if (results == null || results.Count == 0)
             {
@@ -797,9 +872,23 @@ namespace GiSanParkGolf.Pages.AdminPage
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
 
-            string gameName = results.FirstOrDefault()?.GameName ?? "게임명";
-            string gameDate = results.FirstOrDefault()?.GameDate ?? "게임일자";
-            string stadiumName = results.FirstOrDefault()?.StadiumName ?? "경기장명";
+            // 우선적으로 DB의 Game 엔티티에서 정보를 가져오고, 없으면 results에서 보완
+            var game = _context.Games.FirstOrDefault(g => g.GameCode == gameCode);
+            string gameName = game?.GameName ?? results.FirstOrDefault()?.GameName ?? "게임명";
+            string gameDate = game?.GameDate.ToString("yyyy-MM-dd") ?? results.FirstOrDefault()?.GameDate ?? "게임일자";
+            string stadiumName = game?.StadiumName ?? results.FirstOrDefault()?.StadiumName ?? "경기장명";
+
+            // 안전한 방식: AssignedDate가 non-nullable이더라도 레코드 자체가 없을 수 있으니 null 체크
+            // 방법 선택: 여기서는 nullable 프로젝션(옵션 B)을 사용
+            var latestAssignedDate = _context.GameUserAssignments
+                .Where(a => a.GameCode == gameCode)
+                .OrderByDescending(a => a.AssignedDate)
+                .Select(a => (DateTime?)a.AssignedDate) // nullable로 변환
+                .FirstOrDefault();
+
+            string assignmentCompletedAt = latestAssignedDate.HasValue
+                ? latestAssignedDate.Value.ToString("yyyy-MM-dd HH:mm:ss")
+                : "미등록";
 
             // 2. PDF 파일 메모리 스트림 생성
             using var ms = new MemoryStream();
@@ -817,7 +906,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                     ParticipantID = r.UserId ?? "",
                     Gender = r.GenderText ?? "",
                     Note = ""
-                }).ToList(), ms);
+                }).ToList(), ms, assignmentCompletedAt);
 
             ms.Position = 0;
 
@@ -828,7 +917,7 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         public IActionResult OnGetExportScorecardPdf(string gameCode)
         {
-            // 0. 할당 결과 읽기
+            // 0. 할당 결과 읽기 (세션/DB)
             var results = GetAssignmentResults(gameCode);
             if (results == null || results.Count == 0)
             {
@@ -842,143 +931,186 @@ namespace GiSanParkGolf.Pages.AdminPage
             string gameDate = results.FirstOrDefault()?.GameDate ?? (game?.GameDate.ToString("yyyy-MM-dd") ?? "날짜없음");
             string stadiumName = results.FirstOrDefault()?.StadiumName ?? (game?.StadiumName ?? "경기장");
 
-            // 유틸: 코스명 정규화 (공백제거, 소문자, '코스' 접미사 제거)
-            static string NormalizeCourseName(string? s)
-            {
-                if (string.IsNullOrWhiteSpace(s)) return "";
-                var t = s.Trim();
-                t = t.Replace("코스", "", StringComparison.OrdinalIgnoreCase).Trim();
-                return t.ToLowerInvariant();
-            }
+            // --- 새로 추가: 코스배치 완료 시간 조회 (GameUserAssignments.AssignedDate 최신값)
+            var latestAssignedDate = _context.GameUserAssignments
+                .Where(a => a.GameCode == gameCode)
+                .OrderByDescending(a => a.AssignedDate)
+                .Select(a => (DateTime?)a.AssignedDate) // nullable로 안전하게 프로젝션
+                .FirstOrDefault();
 
-            // DB에서 해당 경기장의 코스들을 가능한 한 읽어온다
-            var dbCourses = new List<(string CourseName, int HoleCount)>();
+            string assignmentCompletedAt = latestAssignedDate.HasValue
+                ? latestAssignedDate.Value.ToString("yyyy-MM-dd HH:mm:ss")
+                : "미등록";
+
+            // DB에서 코스 정의(코스명 + 홀수) 가져오기
+            var courseDefs = new List<(string CourseName, int HoleCount)>();
             if (game != null)
             {
-                dbCourses = _context.Courses
+                courseDefs = _context.Courses
                     .Where(c => c.StadiumCode == game.StadiumCode)
                     .Select(c => new { c.CourseName, c.HoleCount })
                     .AsEnumerable()
                     .Select(x => ((x.CourseName ?? "").Trim(), x.HoleCount))
                     .ToList();
             }
+            else
+            {
+                // 안전하게 결과에서 발견된 코스명으로 채움(홀수는 관측 또는 기본 9)
+                var observedMaxHole = results.Select(r => int.TryParse(r.HoleNumber, out var n) ? n : 0).DefaultIfEmpty(0).Max();
+                var distinctCourses = results.Select(r => (r.CourseName ?? "").Trim()).Distinct().ToList();
+                foreach (var cn in distinctCourses)
+                {
+                    courseDefs.Add((cn, observedMaxHole > 0 ? observedMaxHole : 9));
+                }
+            }
 
-            // assignment에서 관측된 최대 홀 (fallback 기준)
-            int maxHoleFromResults = results
-                .Select(r => int.TryParse(r.HoleNumber, out var n) ? n : 0)
-                .DefaultIfEmpty(0)
-                .Max();
-
-            // 결과에 등장하는 코스명 목록 (원본 문자열)
-            var resultCourseNames = results
-                .Select(r => (r.CourseName ?? "").Trim())
-                .Where(n => !string.IsNullOrEmpty(n))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
+            // 팀별 출력: 각 팀당 한 페이지, 각 페이지에 모든 코스(코스별 표)를 넣음.
+            // 1) 팀 목록(TeamNumber 기준 그룹화)
+            var teamsGrouped = results
+                .Where(r => !string.IsNullOrEmpty(r.TeamNumber))
+                .GroupBy(r => r.TeamNumber)
+                .OrderBy(g => g.Key)
                 .ToList();
 
-            // courseMap: 정규화된 키 -> (표시명, holeCount)
-            var courseMap = new Dictionary<string, (string DisplayName, int HoleCount)>(StringComparer.OrdinalIgnoreCase);
-
-            // 1) DB 코스 우선으로 채우기 (정규화 키 사용)
-            foreach (var dc in dbCourses)
+            // 2) 각 팀의 플레이어 목록(중복 제거, UserId 기준)
+            var teams = new List<TeamScoreCardData>();
+            foreach (var g in teamsGrouped)
             {
-                var name = dc.CourseName;
-                var key = NormalizeCourseName(name);
-                if (!courseMap.ContainsKey(key))
-                {
-                    courseMap[key] = (name, Math.Max(1, dc.HoleCount));
-                }
-            }
-
-            // 2) 결과에만 있는 코스는 DB에서 비슷한 이름이 있는지 시도해 보고, 없으면 안전한 기본값 사용
-            foreach (var rc in resultCourseNames)
-            {
-                var key = NormalizeCourseName(rc);
-                if (courseMap.ContainsKey(key)) continue;
-
-                // DB에서 정규화된 이름으로 탐색(공백/접미사 차이 보정)
-                var matchedDb = dbCourses
-                    .FirstOrDefault(dc => NormalizeCourseName(dc.CourseName) == key);
-
-                int holeCount;
-                string displayName;
-                if (!string.IsNullOrEmpty(matchedDb.CourseName))
-                {
-                    displayName = matchedDb.CourseName;
-                    holeCount = Math.Max(1, matchedDb.HoleCount);
-                }
-                else
-                {
-                    // 추가 탐색: DB의 CourseName에 결과 이름이 포함되는 경우(예: "A 코스" vs "A")
-                    var containsMatch = dbCourses
-                        .FirstOrDefault(dc => (dc.CourseName ?? "").IndexOf(rc, StringComparison.OrdinalIgnoreCase) >= 0);
-
-                    if (!string.IsNullOrEmpty(containsMatch.CourseName))
-                    {
-                        displayName = containsMatch.CourseName;
-                        holeCount = Math.Max(1, containsMatch.HoleCount);
-                    }
-                    else
-                    {
-                        // 최종 fallback: 결과에서 관측된 최대 홀 수, 없으면 안전 기본값 9
-                        displayName = rc;
-                        holeCount = Math.Max(1, Math.Max(maxHoleFromResults, 9));
-                    }
-                }
-
-                courseMap[key] = (displayName, holeCount);
-            }
-
-            // 3) courseMap -> CourseScoreCardData 생성 (정규화된 키로 players 매핑)
-            var courses = courseMap.Select(kvp =>
-            {
-                var normalizedKey = kvp.Key;
-                var displayName = kvp.Value.DisplayName;
-                var holeCount = Math.Max(1, kvp.Value.HoleCount);
-
-                var holeNumbers = Enumerable.Range(1, holeCount).Select(n => n.ToString()).ToList();
-
-                var players = results
-                    .Where(r => !string.IsNullOrEmpty(r.CourseName) &&
-                                NormalizeCourseName(r.CourseName) == normalizedKey)
-                    .Where(r => !string.IsNullOrEmpty(r.UserId))
+                var players = g
                     .GroupBy(r => r.UserId)
-                    .Select(g =>
+                    .Select(u =>
                     {
-                        var first = g.First();
+                        var first = u.First();
                         return new ScoreCardRow
                         {
                             PlayerName = first.UserName ?? "",
-                            PlayerID = g.Key ?? "",
-                            TeamNumber = first.TeamNumber ?? ""
+                            PlayerID = u.Key ?? "",
+                            TeamNumber = first.TeamNumber ?? "",
+                            CourseOrder = first.CourseOrder > 0 ? first.CourseOrder.ToString() : "" // CourseOrder 채움
                         };
                     })
-                    .OrderBy(p => p.TeamNumber)
+                    .OrderBy(p =>
+                    {
+                        // 기본 정렬: 코스순번 있으면 숫자 기준, 없으면 이름
+                        if (int.TryParse(p.CourseOrder, out var ord)) return ord;
+                        return int.MaxValue;
+                    })
                     .ThenBy(p => p.PlayerName)
                     .ToList();
 
-                return new CourseScoreCardData
-                {
-                    CourseName = displayName,
-                    HoleNumbers = holeNumbers,
-                    Players = players
-                };
-            })
-            .OrderBy(c => c.CourseName)
-            .ToList();
+                teams.Add(new TeamScoreCardData { TeamNumber = g.Key ?? "", Players = players });
+            }
 
-            // 4) PDF 생성
+            // 3) coursesTemplate: 각 코스의 HoleNumbers 정보만 전달 (Players는 팀별로 채워짐)
+            var coursesTemplate = courseDefs.Select(cd => new CourseScoreCardData
+            {
+                CourseName = cd.CourseName,
+                HoleNumbers = Enumerable.Range(1, cd.HoleCount).Select(i => i.ToString()).ToList()
+            }).ToList();
+
             using var ms = new MemoryStream();
-            ScoreCardPdfGenerator.GeneratePdf(
-                gameName,
-                gameDate,
-                stadiumName,
-                courses,
-                ms);
-
+            // assignmentCompletedAt을 전달
+            ScoreCardPdfGenerator.GeneratePdfByTeamLandscape(gameName, gameDate, stadiumName, coursesTemplate, teams, ms, assignmentCompletedAt);
             ms.Position = 0;
-            var fileName = $"Scorecard_{gameCode}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+            var fileName = $"Scorecard_{gameCode}_ByTeam_{DateTime.Now:yyyyMMddHHmmss}.pdf";
             return File(ms.ToArray(), "application/pdf", fileName);
+        }
+
+        private async Task AddAssignmentHistoryAsync(string gameCode, string changeType, object detailsObj)
+        {
+            var jsonDetails = JsonConvert.SerializeObject(detailsObj ?? new { });
+            var history = new GameAssignmentHistory
+            {
+                GameCode = gameCode,
+                ChangedBy = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin",
+                ChangeType = changeType,
+                Details = jsonDetails,
+                ChangedAt = DateTime.Now
+            };
+            _context.Add(history);
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<IActionResult?> RejectIfAssignmentLockedAsync(string gameCode)
+        {
+            if (string.IsNullOrEmpty(gameCode)) return null;
+
+            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            if (game != null && game.AssignmentLocked)
+            {
+                TempData["ErrorMessage"] = "코스배치는 확정되어 변경할 수 없습니다. 우선 잠금을 해제하세요.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            return null;
+        }
+
+        public async Task<IActionResult> OnPostUnlockAssignmentAsync(string gameCode)
+        {
+            if (string.IsNullOrEmpty(gameCode))
+            {
+                TempData["ErrorMessage"] = "잘못된 요청입니다. gameCode가 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            // (선택) 정책 기반 접근은 클래스 레벨 [Authorize(Policy = "AdminOnly")]에 의해 이미 적용됨.
+            // 추가 안전장치: Claim 기반 체크도 가능
+            if (!(User.IsInRole("Admin") || User.HasClaim("IsAdmin", "true")))
+            {
+                TempData["ErrorMessage"] = "잠금 해제 권한이 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            if (game == null)
+            {
+                TempData["ErrorMessage"] = "해당 대회를 찾을 수 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            if (!game.AssignmentLocked)
+            {
+                TempData["InfoMessage"] = "이미 잠금이 해제되어 있습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            // 명시적으로 속성만 수정 표시
+            game.AssignmentLocked = false;
+            _context.Entry(game).Property(g => g.AssignmentLocked).IsModified = true;
+
+            try
+            {
+                var affected = await _context.SaveChangesAsync();
+                // 로깅/디버그용: affected는 변경된 row 수
+                if (affected <= 0)
+                {
+                    TempData["ErrorMessage"] = "잠금 해제 시 데이터베이스에 적용되지 않았습니다(영향 행 수 0). 관리자에게 문의하세요.";
+                    return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+                }
+
+                var summary = new
+                {
+                    UnlockedBy = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin",
+                    UnlockedAt = DateTime.Now
+                };
+                await AddAssignmentHistoryAsync(gameCode, "Unlock", summary);
+
+                TempData["SuccessMessage"] = "코스배치 잠금이 해제되었습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                // 동시성 문제 처리
+                TempData["ErrorMessage"] = "잠금 해제 중 동시성 충돌이 발생했습니다. 다시 시도하세요.";
+                // TODO: ILogger로 ex 상세 로깅
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+            catch (Exception ex)
+            {
+                // TODO: ILogger로 ex 상세 로깅
+                TempData["ErrorMessage"] = "잠금 해제 중 오류가 발생했습니다. 관리자에게 문의하세요.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
         }
     }
 }

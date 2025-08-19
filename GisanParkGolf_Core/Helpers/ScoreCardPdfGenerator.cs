@@ -4,12 +4,15 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System;
 
 public class ScoreCardRow
 {
     public string? PlayerName { get; set; }
     public string? PlayerID { get; set; }
     public string? TeamNumber { get; set; }
+    public string? CourseOrder { get; set; }
 }
 
 public class CourseScoreCardData
@@ -19,93 +22,142 @@ public class CourseScoreCardData
     public List<ScoreCardRow> Players { get; set; } = new();
 }
 
+public class TeamScoreCardData
+{
+    public string TeamNumber { get; set; } = "";
+    public List<ScoreCardRow> Players { get; set; } = new();
+}
+
 public class ScoreCardPdfGenerator
 {
-    public static void GeneratePdf(
-    string gameName,
-    string gameDate,
-    string stadiumName,
-    List<CourseScoreCardData> courses, // 코스별 데이터
-    Stream outputStream)
+    public static void GeneratePdfByTeamLandscape(
+        string gameName,
+        string gameDate,
+        string stadiumName,
+        List<CourseScoreCardData> coursesTemplate,
+        List<TeamScoreCardData> teams,
+        Stream outputStream,
+        string? assignmentCompletedAt = null)
     {
+        string assignmentTimeText = !string.IsNullOrEmpty(assignmentCompletedAt) ? assignmentCompletedAt : "미등록";
+
         Document.Create(container =>
         {
-            container.Page(page =>
+            foreach (var team in teams)
             {
-                page.Size(PageSizes.A4);
-                page.Margin(25);
-
-                // 상단 대회 정보
-                page.Header().Column(col =>
+                container.Page(page =>
                 {
-                    col.Item()
-                        .AlignCenter()
-                        .PaddingBottom(8)
-                        .Text($"{gameName} 스코어카드")
-                        .FontFamily("NanumGothic")
-                        .FontSize(22).Bold();
+                    page.Size(PageSizes.A4.Landscape());
+                    page.Margin(18);
 
-                    col.Item().Text($"대회일자    {gameDate}").FontFamily("NanumGothic").FontSize(12);
-                    col.Item().Text($"대회장소    {stadiumName}").FontFamily("NanumGothic").FontSize(12);
-                });
-
-                // **한 번만 사용!**
-                page.Content().Column(contentCol =>
-                {
-                    foreach (var course in courses)
+                    // 상단 — 수정: PaddingTop은 Item() 컨테이너에 적용합니다.
+                    page.Header().Column(col =>
                     {
-                        // 코스명
-                        contentCol.Item()
-                            .PaddingTop(10)
-                            .Text($"코스명: {course.CourseName}").FontFamily("NanumGothic").FontSize(16).Bold();
+                        col.Item()
+                            .AlignCenter()
+                            .PaddingBottom(6)
+                            .Text($"{gameName} 스코어카드")
+                            .FontFamily("NanumGothic")
+                            .FontSize(20).Bold();
 
-                        // 스코어카드 표
-                        contentCol.Item().Table(table =>
+                        // 대회일자(왼쪽) / 코스배치 완료시각(오른쪽)
+                        col.Item().Row(r =>
                         {
-                            table.ColumnsDefinition(columns =>
-                            {
-                                columns.ConstantColumn(32); // No.
-                                columns.ConstantColumn(80); // 참가자명
-                                columns.ConstantColumn(60); // 참가자ID
-                                foreach (var hole in course.HoleNumbers)
-                                    columns.ConstantColumn(35); // 홀별 스코어
-                                columns.ConstantColumn(50); // 합계
-                            });
+                            r.RelativeItem()
+                                .Text($"대회일자: {gameDate}")
+                                .FontFamily("NanumGothic")
+                                .FontSize(11);
 
-                            // 헤더
-                            table.Header(header =>
-                            {
-                                header.Cell().Element(HeaderCell).Text("No.").FontFamily("NanumGothic").FontSize(11).Bold();
-                                header.Cell().Element(HeaderCell).Text("참가자명").FontFamily("NanumGothic").FontSize(11).Bold();
-                                header.Cell().Element(HeaderCell).Text("참가자ID").FontFamily("NanumGothic").FontSize(11).Bold();
-                                foreach (var hole in course.HoleNumbers)
-                                    header.Cell().Element(HeaderCell).Text($"{hole}홀").FontFamily("NanumGothic").FontSize(11).Bold();
-                                header.Cell().Element(HeaderCell).Text("합계").FontFamily("NanumGothic").FontSize(11).Bold();
-                            });
-
-                            // 데이터 행(빈칸)
-                            int no = 1;
-                            foreach (var player in course.Players)
-                            {
-                                table.Cell().Element(CellStyle).Text(no.ToString()).FontFamily("NanumGothic").FontSize(10);
-                                table.Cell().Element(CellStyle).Text(player.PlayerName ?? "").FontFamily("NanumGothic").FontSize(10);
-                                table.Cell().Element(CellStyle).Text(player.PlayerID ?? "").FontFamily("NanumGothic").FontSize(10);
-                                foreach (var hole in course.HoleNumbers)
-                                    table.Cell().Element(CellStyle).Text(""); // 경기 중 직접 입력
-                                table.Cell().Element(CellStyle).Text(""); // 합계
-                                no++;
-                            }
+                            r.ConstantItem(220)
+                                .AlignRight()
+                                .Text($"코스배치 완료시각: {assignmentTimeText}")
+                                .FontFamily("NanumGothic")
+                                .FontSize(10);
                         });
-                    }
+
+                        // 여기서 PaddingTop은 컨테이너에 적용
+                        col.Item().PaddingTop(2)
+                            .Text($"대회장소: {stadiumName}")
+                            .FontFamily("NanumGothic")
+                            .FontSize(12).Bold();
+
+                        // 팀 텍스트도 PaddingTop을 Item()에 적용
+                        col.Item().PaddingTop(2)
+                            .Text($"팀: {team.TeamNumber}")
+                            .FontFamily("NanumGothic")
+                            .FontSize(12).Bold();
+                    });
+
+                    page.Content().Column(contentCol =>
+                    {
+                        foreach (var courseTemplate in coursesTemplate)
+                        {
+                            contentCol.Item()
+                                .PaddingTop(8)
+                                .Text($"코스명: {courseTemplate.CourseName}")
+                                .FontFamily("NanumGothic")
+                                .FontSize(14)
+                                .Bold();
+
+                            contentCol.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(36);
+                                    columns.ConstantColumn(56);
+                                    columns.ConstantColumn(150);
+                                    columns.ConstantColumn(100);
+                                    foreach (var hole in courseTemplate.HoleNumbers)
+                                        columns.RelativeColumn();
+                                    columns.ConstantColumn(70);
+                                });
+
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(HeaderCell).Text("No.").FontFamily("NanumGothic").FontSize(11).Bold();
+                                    header.Cell().Element(HeaderCell).Text("코스순번").FontFamily("NanumGothic").FontSize(11).Bold();
+                                    header.Cell().Element(HeaderCell).Text("참가자명").FontFamily("NanumGothic").FontSize(11).Bold();
+                                    header.Cell().Element(HeaderCell).Text("참가자ID").FontFamily("NanumGothic").FontSize(11).Bold();
+                                    foreach (var hole in courseTemplate.HoleNumbers)
+                                        header.Cell().Element(HeaderCell).Text($"{hole}홀").FontFamily("NanumGothic").FontSize(11).Bold();
+                                    header.Cell().Element(HeaderCell).Text("합계").FontFamily("NanumGothic").FontSize(11).Bold();
+                                });
+
+                                int no = 1;
+                                foreach (var player in team.Players)
+                                {
+                                    table.Cell().Element(CellStyle).Text(no.ToString()).FontFamily("NanumGothic").FontSize(10);
+                                    table.Cell().Element(CellStyle).Text(player.CourseOrder ?? "").FontFamily("NanumGothic").FontSize(10);
+                                    table.Cell().Element(CellStyle).Text(player.PlayerName ?? "").FontFamily("NanumGothic").FontSize(10);
+                                    table.Cell().Element(CellStyle).Text(player.PlayerID ?? "").FontFamily("NanumGothic").FontSize(10);
+                                    foreach (var hole in courseTemplate.HoleNumbers)
+                                        table.Cell().Element(CellStyle).Text("");
+                                    table.Cell().Element(CellStyle).Text("");
+                                    no++;
+                                }
+
+                                if (!team.Players.Any())
+                                {
+                                    table.Cell().Element(CellStyle).Text("1");
+                                    table.Cell().Element(CellStyle).Text("");
+                                    table.Cell().Element(CellStyle).Text("참가자가 없습니다");
+                                    table.Cell().Element(CellStyle).Text("");
+                                    foreach (var hole in courseTemplate.HoleNumbers)
+                                        table.Cell().Element(CellStyle).Text("");
+                                    table.Cell().Element(CellStyle).Text("");
+                                }
+                            });
+                        }
+                    });
                 });
-            });
+            }
         })
         .GeneratePdf(outputStream);
     }
 
     static IContainer HeaderCell(IContainer container) =>
-        container.Border(1).Background("#F5F5F5").AlignCenter().AlignMiddle().PaddingVertical(4);
+        container.Border(1).Background("#F5F5F5").AlignCenter().AlignMiddle().PaddingVertical(6);
 
     static IContainer CellStyle(IContainer container) =>
-        container.Border(1).AlignCenter().AlignMiddle().PaddingVertical(3);
+        container.Border(1).AlignCenter().AlignMiddle().PaddingVertical(6).PaddingHorizontal(4);
 }

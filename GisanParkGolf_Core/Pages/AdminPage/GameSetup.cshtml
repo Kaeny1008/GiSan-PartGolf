@@ -468,19 +468,80 @@ ViewData["Title"] as string ?? "제목 없음",
                                 </div>
                                 <div class="mt-3">
                                     <input type="hidden" name="gameCode" value="@Request.Query["gameCode"]" />
-                                    <button type="submit" class="btn btn-success">코스배치 시작</button>
+                                    <button type="submit" class="btn btn-success" @(Model.AssignmentLocked ? "disabled" : "")>코스배치 시작</button>
                                 </div>
                             </form>
                         </div>
                     </div>
                     <div class="tab-pane fade @(activeTab == "tab-result" ? "show active" : "")" id="tab-result" role="tabpanel">
                         <div class="p-3">
+                            @if (Model.AssignmentLocked)
+                            {
+                                <div class="alert alert-info d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-lock-fill me-1"></i>
+                                        이 대회의 코스배치가 확정(잠금)되어 있습니다. 변경하려면 관리자 권한으로 잠금을 해제하세요.
+                                    </div>
+
+                                    <div>
+                                        @* 관리자일 경우 잠금해제 버튼 노출 *@
+                                        @if (User.HasClaim("IsAdmin", "true"))
+                                        {
+                                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#unlockModal">
+                                                잠금 해제
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="관리자 권한 필요">
+                                                잠금 해제 (관리자만 가능)
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+
+                                @* 잠금 해제 확인 모달 *@
+                                <div class="modal fade" id="unlockModal" tabindex="-1" aria-labelledby="unlockModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <form method="post" asp-page-handler="UnlockAssignment" class="modal-content">
+                                            <input type="hidden" name="gameCode" value="@Request.Query["gameCode"]" />
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold" id="unlockModalLabel">코스배치 잠금 해제 확인</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p class="mb-2">정말 이 대회의 코스배치 잠금을 해제하시겠습니까?</p>
+                                                <div class="alert alert-warning mb-0" role="alert">
+                                                    <strong>주의:</strong> 잠금 해제하면 코스배치를 변경할 수 있습니다. 변경 내역은 히스토리에 기록됩니다.
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                                <button type="submit" class="btn btn-danger">잠금 해제</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="fw-bold mb-0">코스배치 결과 확인</h5>
                                 <div>
-                                    <button type="button" class="btn btn-primary" id="btnSaveResult" data-bs-toggle="modal" data-bs-target="#saveResultModal">결과저장</button>
-                                    <button type="button" class="btn btn-outline-secondary" id="btnExportPdf" onclick="location.href='@Url.Page("./GameSetup", "ExportPdf", new { gameCode = Request.Query["gameCode"] })'">PDF로 출력</button>
-                                    <button type="button" class="btn btn-outline-success" id="btnExportScorecardPdf" onclick="location.href='@Url.Page("./GameSetup", "ExportScorecardPdf", new { gameCode = Request.Query["gameCode"] })'">스코어카드 출력</button>
+                                    <button type="button" class="btn btn-primary" 
+                                            id="btnSaveResult" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#saveResultModal" @(Model.AssignmentLocked ? "disabled" : "")>
+                                        결과저장
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" 
+                                        id="btnExportPdf" 
+                                        onclick="location.href='@Url.Page("./GameSetup", "ExportPdf", new { gameCode = Request.Query["gameCode"] })'">
+                                        코스배치표 출력
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success"
+                                            id="btnExportScorecardByTeam"
+                                            onclick="location.href='@Url.Page("./GameSetup", "ExportScorecardPdf", new { gameCode = Request.Query["gameCode"] })'">
+                                        스코어카드 출력
+                                    </button>
                                 </div>
                             </div>
 
@@ -583,7 +644,8 @@ ViewData["Title"] as string ?? "제목 없음",
                                                         <button type="button"
                                                                 class="btn btn-danger btn-sm"
                                                                 data-bs-toggle="modal"
-                                                                data-bs-target="#cancelAssignmentModal_@row.UserId">
+                                                                data-bs-target="#cancelAssignmentModal_@row.UserId"
+                                                                @(Model.AssignmentLocked ? "disabled" : "")>
                                                             코스배치 취소
                                                         </button>
 
