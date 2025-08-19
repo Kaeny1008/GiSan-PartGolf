@@ -541,7 +541,7 @@ ViewData["Title"] as string ?? "제목 없음",
                                             <th>연령대</th>
                                             <th>핸디캡</th>
                                             <th>수상경력</th>
-                                            <th>배치취소</th>
+                                            <th>배치취소(참가취소)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -614,7 +614,8 @@ ViewData["Title"] as string ?? "제목 없음",
                                                                             </div>
                                                                         </div>
                                                                         <div class="alert alert-warning mb-0" role="alert" style="font-size:0.95em;">
-                                                                            취소 시 해당 참가자는 미배정 인원으로 이동합니다.
+                                                                            취소 시 해당 참가자는 <span class="fw-bold text-danger">대회 참가가 취소</span>되며, 미배정 인원 목록에는 표시되지 않습니다.<br>
+                                                                            취소된 참가자는 '참가자 정보' 탭에서 <span class="fw-bold">취소 상태</span>로 확인 및 재참가 처리할 수 있습니다.
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-footer">

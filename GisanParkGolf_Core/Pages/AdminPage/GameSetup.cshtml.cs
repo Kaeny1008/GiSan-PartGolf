@@ -88,6 +88,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                 {
                     CourseName = r.CourseName,
                     HoleNumber = r.HoleNumber,
+                    TeamNumber = r.TeamNumber ?? "",
                     CourseOrder = r.CourseOrder ?? 0,
                     UserId = r.UserId ?? "",
                     UserName = r.User?.UserName ?? r.UserId ?? "",
@@ -240,52 +241,46 @@ namespace GiSanParkGolf.Pages.AdminPage
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
 
+            // 1. 세션 데이터에서 배치 삭제
             var assignmentResults = GetAssignmentResults(gameCode);
-
             assignmentResults.RemoveAll(r => r.UserId == userId);
             RenumberCourseOrders(assignmentResults);
 
-            var unassigned = GetUnassignedParticipants();
-            if (!(unassigned?.Any(u => u.UserId == userId) ?? false))
+            // 2. DB에서 코스배치 기록 삭제
+            var userAssignments = await _context.GameUserAssignments
+                .Where(a => a.GameCode == gameCode && a.UserId == userId)
+                .ToListAsync();
+            if (userAssignments.Any())
             {
-                var participant = await _context.GameParticipants
-                    .Include(p => p.User)
-                    .FirstOrDefaultAsync(p => p.GameCode == gameCode && p.UserId == userId);
-
-                if (participant != null)
-                {
-                    if (unassigned == null)
-                        unassigned = new List<ParticipantViewModel>();
-
-                    participant.IsCancelled = true;
-                    participant.CancelDate = DateTime.Now;
-                    participant.CancelReason = !string.IsNullOrWhiteSpace(cancelReason) ? cancelReason : "코스 배치 취소";
-                    participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
-                    _context.GameParticipants.Update(participant);
-
-                    unassigned.Add(new ParticipantViewModel
-                    {
-                        Name = participant.User?.UserName ?? participant.UserId ?? "",
-                        UserId = participant.UserId ?? "",
-                        GenderText = participant.User?.UserGender == 1 ? "남" : participant.User?.UserGender == 2 ? "여" : "",
-                        HandicapValue = participant.User?.Handicap?.AgeHandicap ?? 0,
-                        AgeGroupText = GetAgeGroupText(participant.User?.UserNumber ?? 0, participant.User?.UserGender ?? 0),
-                        AwardCount = await _context.GameAwardHistories.CountAsync(a => a.UserId == userId)
-                    });
-
-                    // 여기서 취소사유를 미리 세션 등에 보관할 수도 있음 (실제 DB 이력은 SaveAssignmentResult에서 기록!)
-                    HttpContext.Session.SetString($"CancelReason_{userId}", cancelReason ?? "");
-                }
+                _context.GameUserAssignments.RemoveRange(userAssignments);
+                await _context.SaveChangesAsync();
             }
 
-            SaveAssignmentResults(assignmentResults);
-            SaveUnassignedParticipants(unassigned ?? new List<ParticipantViewModel>());
+            // 3. 참가자 상태 취소 처리 (참가취소)
+            var participant = await _context.GameParticipants
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.GameCode == gameCode && p.UserId == userId);
+            if (participant != null)
+            {
+                participant.IsCancelled = true;
+                participant.CancelDate = DateTime.Now;
+                participant.CancelReason = cancelReason;
+                participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
+                _context.GameParticipants.Update(participant);
+                await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "코스배치 취소가 정상적으로 반영되었습니다.";
+                HttpContext.Session.SetString($"CancelReason_{userId}", cancelReason ?? "");
+            }
+
+            // 4. 세션 업데이트
+            SaveAssignmentResults(assignmentResults);
+            SaveUnassignedParticipants(GetUnassignedParticipants() ?? new List<ParticipantViewModel>());
+
+            TempData["SuccessMessage"] = "참가자가 취소 처리되었습니다. (코스배치 및 참가 취소가 DB에 즉시 반영)";
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
 
-        public async Task<IActionResult> OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
+        public IActionResult OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
         {
             var unassigned = GetUnassignedParticipants();
             var participant = unassigned.FirstOrDefault(p => p.UserId == userId);
@@ -466,6 +461,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                 return RedirectToPage();
             }
             participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
+            
             _context.GameParticipants.Update(participant);
             await _context.SaveChangesAsync();
             ClearAssignmentSession();
