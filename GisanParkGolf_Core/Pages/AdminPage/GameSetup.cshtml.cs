@@ -500,6 +500,9 @@ namespace GiSanParkGolf.Pages.AdminPage
         // ------------------- 코스배치 옵션/실행 부분 -------------------
         public async Task<IActionResult> OnPostCourseAssignmentAsync(string gameCode)
         {
+            int maxPerHole = 4; // default
+
+            // game 먼저 조회
             var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (game == null)
             {
@@ -508,15 +511,25 @@ namespace GiSanParkGolf.Pages.AdminPage
                 return Page();
             }
 
+            // game이 null 아님이 확정된 뒤 설정 읽기
+            if (!string.IsNullOrEmpty(game.GameSetting))
+            {
+                var setting = JsonConvert.DeserializeObject<dynamic>(game.GameSetting);
+                maxPerHole = setting?.MaxPerHole ?? 4;
+            }
+
+            // User는 항상 존재한다고 전제 → null-억제 연산자 사용
             var participants = await _context.GameParticipants
                 .Where(p => p.GameCode == gameCode && !p.IsCancelled)
-                .Include(p => p.User)
+                .Include(p => p.User!)
                 .ThenInclude(u => u.Handicap)
                 .ToListAsync();
 
-            var userIds = participants.Select(p => p.UserId ?? "")
-                                     .Where(id => !string.IsNullOrEmpty(id))
-                                     .Distinct().ToList();
+            var userIds = participants
+                .Select(p => p.UserId ?? "")
+                .Where(id => !string.IsNullOrEmpty(id))
+                .Distinct()
+                .ToList();
 
             var awardDict = await _context.GameAwardHistories
                 .Where(a => !string.IsNullOrEmpty(a.UserId) && userIds.Contains(a.UserId))
@@ -525,13 +538,16 @@ namespace GiSanParkGolf.Pages.AdminPage
 
             bool useGenderSort = GenderSort == "true";
             bool useHandicap = Handicapped == "true";
-            int maxPerHole = 4;
-            var courses = await _context.Courses.Where(c => c.StadiumCode == game.StadiumCode).ToListAsync();
+
+            // 여기서 game.StadiumCode 안전하게 접근 가능
+            var courses = await _context.Courses
+                .Where(c => c.StadiumCode == game.StadiumCode)
+                .ToListAsync();
 
             var assignmentResults = new List<CourseAssignmentResultViewModel>();
             var unassigned = new List<ParticipantViewModel>();
 
-            // 기존 알고리즘 유지, null 안전 추가
+            // --- 기존 배정 로직 그대로 ---
             if (useGenderSort)
             {
                 var maleParticipants = participants.Where(p => p.User?.UserGender == 1).ToList();
@@ -539,8 +555,10 @@ namespace GiSanParkGolf.Pages.AdminPage
 
                 if (useHandicap)
                 {
-                    maleParticipants = maleParticipants.OrderByDescending(p => p.User?.Handicap?.AgeHandicap ?? 0).ToList();
-                    femaleParticipants = femaleParticipants.OrderByDescending(p => p.User?.Handicap?.AgeHandicap ?? 0).ToList();
+                    maleParticipants = maleParticipants
+                        .OrderByDescending(p => p.User?.Handicap?.AgeHandicap ?? 0).ToList();
+                    femaleParticipants = femaleParticipants
+                        .OrderByDescending(p => p.User?.Handicap?.AgeHandicap ?? 0).ToList();
                 }
                 else
                 {
@@ -589,6 +607,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                         }
                         continue;
                     }
+
                     int courseIdx = 0;
                     int holeIdx = teamIdx + 1;
                     int acc = 0;
@@ -628,7 +647,8 @@ namespace GiSanParkGolf.Pages.AdminPage
                 IEnumerable<GameParticipant> sortedParticipants = participants;
                 if (useHandicap)
                 {
-                    sortedParticipants = sortedParticipants.OrderByDescending(p => p.User?.Handicap?.AgeHandicap ?? 0);
+                    sortedParticipants = sortedParticipants
+                        .OrderByDescending(p => p.User?.Handicap?.AgeHandicap ?? 0);
                 }
                 else
                 {
@@ -636,10 +656,10 @@ namespace GiSanParkGolf.Pages.AdminPage
                 }
 
                 var teams = sortedParticipants
-                        .Select((p, i) => new { p, idx = i / maxPerHole })
-                        .GroupBy(x => x.idx)
-                        .Select(g => g.Select(x => x.p).ToList())
-                        .ToList();
+                    .Select((p, i) => new { p, idx = i / maxPerHole })
+                    .GroupBy(x => x.idx)
+                    .Select(g => g.Select(x => x.p).ToList())
+                    .ToList();
 
                 teams = teams.OrderBy(_ => Guid.NewGuid()).ToList();
 
@@ -664,6 +684,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                         }
                         continue;
                     }
+
                     int courseIdx = 0;
                     int holeIdx = teamIdx + 1;
                     int acc = 0;
@@ -717,30 +738,33 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         private async Task AssignTeamNumbers(List<CourseAssignmentResultViewModel> assignmentResults, string gameCode)
         {
+            int maxPerHole = 4; // default
             var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
-            int maxPerHole = 4; // 기본값
             if (!string.IsNullOrEmpty(game?.GameSetting))
             {
                 var setting = JsonConvert.DeserializeObject<dynamic>(game.GameSetting);
                 maxPerHole = setting?.MaxPerHole ?? 4;
             }
 
+            // 코스/홀별 그룹핑 (각 그룹이 하나의 팀)
+            var allTeams = assignmentResults
+                .GroupBy(r => new { r.CourseName, r.HoleNumber })
+                .OrderBy(g => g.Key.CourseName)
+                .ThenBy(g => int.TryParse(g.Key.HoleNumber, out var hn) ? hn : 0)
+                .ToList();
+
             int teamSeq = 1;
-            int memberCount = 0;
-            string currentTeamNumber = $"T{teamSeq:D2}";
-
-            for (int i = 0; i < assignmentResults.Count; i++)
+            foreach (var group in allTeams)
             {
-                assignmentResults[i].TeamNumber = currentTeamNumber;
-                assignmentResults[i].CourseOrder = memberCount + 1;
-
-                memberCount++;
-                if (memberCount >= maxPerHole)
+                string currentTeamNumber = $"T{teamSeq:D2}";
+                int memberCount = 1;
+                foreach (var item in group.OrderBy(r => r.CourseOrder))
                 {
-                    teamSeq++;
-                    currentTeamNumber = $"T{teamSeq:D2}";
-                    memberCount = 0;
+                    item.TeamNumber = currentTeamNumber;
+                    item.CourseOrder = memberCount;
+                    memberCount++;
                 }
+                teamSeq++;
             }
         }
 
