@@ -801,5 +801,55 @@ namespace GiSanParkGolf.Pages.AdminPage
             var fileName = $"코스배치표_{gameCode}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
             return File(ms.ToArray(), "application/pdf", fileName);
         }
+
+        public IActionResult OnGetExportScorecardPdf(string gameCode)
+        {
+            // 1. 배치 결과 가져오기 (혹은 DB에서 직접 조회)
+            var results = GetAssignmentResults(gameCode);
+            if (results == null || results.Count == 0)
+            {
+                TempData["ErrorMessage"] = "배치 결과 데이터가 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            string gameName = results.FirstOrDefault()?.GameName ?? "대회명";
+            string gameDate = results.FirstOrDefault()?.GameDate ?? "대회일자";
+            string stadiumName = results.FirstOrDefault()?.StadiumName ?? "경기장";
+
+            // 2. 코스별로 그룹화, 홀 정보 추출
+            var courses = results
+                .GroupBy(r => r.CourseName)
+                .Select(g => new CourseScoreCardData
+                {
+                    CourseName = g.Key ?? "",
+                    HoleNumbers = g.Select(x => x.HoleNumber ?? "")
+                    .Where(h => !string.IsNullOrEmpty(h))
+                    .Distinct()
+                    .OrderBy(h => int.TryParse(h, out var n) ? n : 0)
+                    .ToList(),
+                    Players = g.Select(x => new ScoreCardRow
+                    {
+                        PlayerName = x.UserName ?? "",
+                        PlayerID = x.UserId ?? "",
+                        TeamNumber = x.TeamNumber ?? ""
+                    }).ToList()
+                })
+                .ToList();
+
+            // 3. PDF 생성
+            using var ms = new MemoryStream();
+            ScoreCardPdfGenerator.GeneratePdf(
+                gameName,
+                gameDate,
+                stadiumName,
+                courses,
+                ms);
+
+            ms.Position = 0;
+
+            // 4. PDF 파일 반환
+            var fileName = $"스코어카드_{gameCode}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+            return File(ms.ToArray(), "application/pdf", fileName);
+        }
     }
 }
