@@ -52,8 +52,10 @@ namespace GisanParkGolf_Core.Services.AdminPage
 
         public async Task CreateGameAsync(Game game)
         {
-            // 게임 코드 생성 로직 (예시)
-            game.GameCode = DateTime.Now.ToString("yyMMdd"); // 실제로는 더 정교한 방법 필요
+            // 게임 코드 생성: 날짜 + GUID 일부 (중복 거의 없음, 가독성도 어느 정도)
+            var datePart = DateTime.Now.ToString("yyMMdd");
+            var guidPart = Guid.NewGuid().ToString("N").Substring(0, 6); // 6자리
+            game.GameCode = $"{datePart}-{guidPart}";
             _dbContext.Games.Add(game);
             await _dbContext.SaveChangesAsync();
         }
