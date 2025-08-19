@@ -11,6 +11,8 @@
         public string? AgeGroupText { get; set; }
         public int HandicapValue { get; set; }
         public int AwardCount { get; set; }
+        public int GroupNumber { get; set; }
+        public int CourseOrder { get; set; }
         // 필요하다면 수상 상세 리스트도 추가 가능
     }
 }

@@ -113,6 +113,11 @@
     var unassigned = !string.IsNullOrEmpty(unassignedJson)
         ? JsonConvert.DeserializeObject<List<GisanParkGolf_Core.ViewModels.AdminPage.ParticipantViewModel>>(unassignedJson)
         : new List<GisanParkGolf_Core.ViewModels.AdminPage.ParticipantViewModel>();
+
+    string? prevCourse = null;
+    string? prevHole = null;
+    int colorIdx = 0;
+    var colorClasses = new[] { "bg-soft-a", "bg-soft-b" };
 }
 
 @section Scripts {
@@ -526,6 +531,7 @@ ViewData["Title"] as string ?? "제목 없음",
                                     <thead class="table-light">
                                         <tr>
                                             <th>No</th>
+                                            <th>팀명</th>
                                             <th>코스명</th>
                                             <th>홀 번호</th>
                                             <th>순번</th>
@@ -544,17 +550,25 @@ ViewData["Title"] as string ?? "제목 없음",
                                             @for (int no = 1; no <= Model.Assignments.Count; no++)
                                             {
                                                 var row = Model.Assignments[no - 1];
+                                                // 코스 또는 홀 변경될 때 색상 인덱스 변경
+                                                if (row.CourseName != prevCourse || row.HoleNumber != prevHole)
+                                                {
+                                                    colorIdx = (colorIdx + 1) % colorClasses.Length;
+                                                }
+                                                prevCourse = row.CourseName;
+                                                prevHole = row.HoleNumber;
                                                 <tr>
-                                                    <td>@no</td>
-                                                    <td>@row.CourseName</td>
-                                                    <td>@row.HoleNumber</td>
-                                                    <td>@row.TeamNumber</td>
-                                                    <td>@row.UserName</td>
-                                                    <td>@row.UserId</td>
-                                                    <td>@row.GenderText</td>
-                                                    <td>@row.AgeGroupText</td>
-                                                    <td>@row.HandicapValue</td>
-                                                    <td>
+                                                    <td class="@colorClasses[colorIdx]">@no</td>
+                                                    <td class="@colorClasses[colorIdx]">@row.TeamNumber</td>
+                                                    <td class="@colorClasses[colorIdx]">@row.CourseName</td>
+                                                    <td class="@colorClasses[colorIdx]">@row.HoleNumber</td>
+                                                    <td class="@colorClasses[colorIdx]">@row.CourseOrder</td>
+                                                    <td class="@colorClasses[colorIdx]">@row.UserName</td>
+                                                    <td class="@colorClasses[colorIdx]">@row.UserId</td>
+                                                    <td class="@colorClasses[colorIdx]">@row.GenderText</td>
+                                                    <td class="@colorClasses[colorIdx]">@row.AgeGroupText</td>
+                                                    <td class="@colorClasses[colorIdx]">@row.HandicapValue</td>
+                                                    <td class="@colorClasses[colorIdx]">
                                                         @if (row.AwardCount > 0)
                                                         {
                                                             <span class="badge bg-info text-dark">@row.AwardCount 건</span>
@@ -564,7 +578,7 @@ ViewData["Title"] as string ?? "제목 없음",
                                                             <span class="text-muted">없음</span>
                                                         }
                                                     </td>
-                                                    <td>
+                                                    <td class="@colorClasses[colorIdx]">
                                                         <!-- 코스배치 취소 버튼 -->
                                                         <button type="button"
                                                                 class="btn btn-danger btn-sm"

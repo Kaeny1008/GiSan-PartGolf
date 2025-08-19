@@ -306,3 +306,12 @@ textarea.form-control {
         font-size: 0.95rem;
         color: #6c757d;
     }
+
+.bg-soft-a {
+    background-color: #f8fafd !important;
+}
+/* 밝은 파스텔 블루 */
+.bg-soft-b {
+    background-color: #e6f0fa !important;
+}
+/* 블루+그레이 조합 */

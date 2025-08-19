@@ -88,7 +88,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                 {
                     CourseName = r.CourseName,
                     HoleNumber = r.HoleNumber,
-                    TeamNumber = r.TeamNumber,
+                    CourseOrder = r.CourseOrder ?? 0,
                     UserId = r.UserId ?? "",
                     UserName = r.User?.UserName ?? r.UserId ?? "",
                     GenderText = r.User?.UserGender == 1 ? "남" : r.User?.UserGender == 2 ? "여" : "",
@@ -108,6 +108,12 @@ namespace GiSanParkGolf.Pages.AdminPage
                 : new List<ParticipantViewModel>();
         }
 
+        private async Task SaveAssignmentResultsAsync(List<CourseAssignmentResultViewModel> results, string gameCode)
+        {
+            await AssignTeamNumbers(results, gameCode); // 팀넘버 배정
+            HttpContext.Session.SetString("AssignmentResults", JsonConvert.SerializeObject(results ?? new List<CourseAssignmentResultViewModel>()));
+        }
+
         private void SaveAssignmentResults(List<CourseAssignmentResultViewModel> results)
         {
             HttpContext.Session.SetString("AssignmentResults", JsonConvert.SerializeObject(results ?? new List<CourseAssignmentResultViewModel>()));
@@ -118,7 +124,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             HttpContext.Session.SetString("UnassignedParticipants", JsonConvert.SerializeObject(participants ?? new List<ParticipantViewModel>()));
         }
 
-        private void RenumberTeamNumbers(List<CourseAssignmentResultViewModel> results)
+        private void RenumberCourseOrders(List<CourseAssignmentResultViewModel> results)
         {
             var grouped = results
                 .GroupBy(r => new { r.CourseName, r.HoleNumber })
@@ -127,9 +133,10 @@ namespace GiSanParkGolf.Pages.AdminPage
             foreach (var group in grouped)
             {
                 int idx = 1;
-                foreach (var item in group.OrderBy(r => int.TryParse(r.TeamNumber, out var tn) ? tn : 0))
+                // CourseOrder 기준 정렬!
+                foreach (var item in group.OrderBy(r => r.CourseOrder))
                 {
-                    item.TeamNumber = idx.ToString();
+                    item.CourseOrder = idx;
                     idx++;
                 }
             }
@@ -214,7 +221,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             var pagedResults = filteredResults
                 .OrderBy(r => r.CourseName)
                 .ThenBy(r => int.TryParse(r.HoleNumber, out var hn) ? hn : 0)
-                .ThenBy(r => int.TryParse(r.TeamNumber, out var tn) ? tn : 0)
+                .ThenBy(r => r.CourseOrder)
                 .Skip((AssignmentPageIndex - 1) * AssignmentPageSize)
                 .Take(AssignmentPageSize)
                 .ToList();
@@ -236,7 +243,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             var assignmentResults = GetAssignmentResults(gameCode);
 
             assignmentResults.RemoveAll(r => r.UserId == userId);
-            RenumberTeamNumbers(assignmentResults);
+            RenumberCourseOrders(assignmentResults);
 
             var unassigned = GetUnassignedParticipants();
             if (!(unassigned?.Any(u => u.UserId == userId) ?? false))
@@ -278,7 +285,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
 
-        public IActionResult OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
+        public async Task<IActionResult> OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
         {
             var unassigned = GetUnassignedParticipants();
             var participant = unassigned.FirstOrDefault(p => p.UserId == userId);
@@ -289,28 +296,72 @@ namespace GiSanParkGolf.Pages.AdminPage
             }
 
             var assignmentResults = GetAssignmentResults(gameCode);
-            var assignedCount = assignmentResults.Count(a => a.CourseName == courseName && a.HoleNumber == holeNumber.ToString());
 
-            assignmentResults.Add(new CourseAssignmentResultViewModel
+            // 기존 해당 코스/홀 참가자 순서 보존
+            var sameHoleList = assignmentResults
+                .Where(r => r.CourseName == courseName && r.HoleNumber == holeNumber.ToString())
+                .OrderBy(r => r.CourseOrder)
+                .ToList();
+
+            assignmentResults.RemoveAll(r => r.CourseName == courseName && r.HoleNumber == holeNumber.ToString());
+
+            // 기존 참가자 중 가장 큰 CourseOrder 값
+            int maxCourseOrder = sameHoleList.Count > 0 ? sameHoleList.Max(x => x.CourseOrder) : 0;
+
+            // 강제배정자를 "마지막 순번"으로 추가
+            sameHoleList.Add(new CourseAssignmentResultViewModel
             {
                 CourseName = courseName,
                 HoleNumber = holeNumber.ToString(),
-                TeamNumber = (assignedCount + 1).ToString(),
+                CourseOrder = maxCourseOrder + 1, // 바로 여기!
                 UserName = participant.Name,
                 UserId = participant.UserId,
                 GenderText = participant.GenderText,
-                AgeGroupText = participant.AgeGroupText ?? "확인불가",
+                AgeGroupText = participant.AgeGroupText ?? "확인필요",
                 HandicapValue = participant.HandicapValue,
                 AwardCount = participant.AwardCount
             });
 
+            assignmentResults.AddRange(sameHoleList);
             unassigned.Remove(participant);
+
+            // 순번 재정렬(코스/홀별로 1부터)
+            RenumberCourseOrders(assignmentResults);
+
+            // 코스명>홀번호>순번대로 정렬
+            assignmentResults = assignmentResults
+                .OrderBy(r => r.CourseName)
+                .ThenBy(r => int.TryParse(r.HoleNumber, out var hn) ? hn : 0)
+                .ThenBy(r => r.CourseOrder)
+                .ToList();
+
+            // 팀넘버 할당(코스/홀별로 하나, 초과허용)
+            AssignTeamNumbersAllowOverflow(assignmentResults);
 
             SaveAssignmentResults(assignmentResults);
             SaveUnassignedParticipants(unassigned);
 
-            TempData["SuccessMessage"] = $"강제배정 {courseName} {holeNumber}홀에 배정되었습니다!";
+            TempData["SuccessMessage"] = $"강제배정자가 {courseName} {holeNumber}홀의 마지막 순번에 배정되었습니다!";
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+        }
+
+        // 팀넘버 할당(코스/홀별로 하나, 초과허용)
+        private static void AssignTeamNumbersAllowOverflow(List<CourseAssignmentResultViewModel> assignmentResults)
+        {
+            var grouped = assignmentResults
+                .GroupBy(r => new { r.CourseName, r.HoleNumber })
+                .ToList();
+
+            int teamSeq = 1;
+            foreach (var group in grouped)
+            {
+                string currentTeamNumber = $"T{teamSeq:D2}";
+                foreach (var item in group.OrderBy(r => r.CourseOrder))
+                {
+                    item.TeamNumber = currentTeamNumber;
+                }
+                teamSeq++;
+            }
         }
 
         public async Task<IActionResult> OnPostSaveAssignmentResultAsync(string gameCode)
@@ -390,6 +441,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                     UserId = r.UserId,
                     CourseName = r.CourseName,
                     HoleNumber = r.HoleNumber,
+                    CourseOrder = r.CourseOrder,
                     TeamNumber = r.TeamNumber,
                     AgeHandicap = r.HandicapValue,
                     AssignmentStatus = "Assigned",
@@ -559,7 +611,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                         {
                             CourseName = course.CourseName,
                             HoleNumber = holeIdx.ToString(),
-                            TeamNumber = (i + 1).ToString(),
+                            CourseOrder = i + 1,
                             UserName = p.User?.UserName ?? p.UserId ?? "이름없음",
                             UserId = p.UserId ?? "",
                             GenderText = t.gender,
@@ -634,7 +686,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                         {
                             CourseName = course.CourseName,
                             HoleNumber = holeIdx.ToString(),
-                            TeamNumber = (i + 1).ToString(),
+                            CourseOrder = i + 1,
                             UserName = p.User?.UserName ?? p.UserId ?? "이름없음",
                             UserId = p.UserId ?? "",
                             GenderText = p.User?.UserGender == 1 ? "남" : "여",
@@ -654,7 +706,42 @@ namespace GiSanParkGolf.Pages.AdminPage
             HttpContext.Session.SetString("AgeSort", AgeSort ?? "false");
             HttpContext.Session.SetString("AwardSort", AwardSort ?? "false");
 
+            // === 팀넘버 배정 ===
+            await AssignTeamNumbers(assignmentResults, gameCode);
+
+            // 다시 저장 (혹은 위에 배정 직전에 해도 됨)
+            HttpContext.Session.SetString("AssignmentResults", JsonConvert.SerializeObject(assignmentResults));
+
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+        }
+
+        private async Task AssignTeamNumbers(List<CourseAssignmentResultViewModel> assignmentResults, string gameCode)
+        {
+            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            int maxPerHole = 4; // 기본값
+            if (!string.IsNullOrEmpty(game?.GameSetting))
+            {
+                var setting = JsonConvert.DeserializeObject<dynamic>(game.GameSetting);
+                maxPerHole = setting?.MaxPerHole ?? 4;
+            }
+
+            int teamSeq = 1;
+            int memberCount = 0;
+            string currentTeamNumber = $"T{teamSeq:D2}";
+
+            for (int i = 0; i < assignmentResults.Count; i++)
+            {
+                assignmentResults[i].TeamNumber = currentTeamNumber;
+                assignmentResults[i].CourseOrder = memberCount + 1;
+
+                memberCount++;
+                if (memberCount >= maxPerHole)
+                {
+                    teamSeq++;
+                    currentTeamNumber = $"T{teamSeq:D2}";
+                    memberCount = 0;
+                }
+            }
         }
 
         // ------------------- 기타 유틸/헬퍼 -------------------
