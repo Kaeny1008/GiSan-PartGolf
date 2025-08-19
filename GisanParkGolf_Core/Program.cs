@@ -3,6 +3,7 @@ using GisanParkGolf_Core.Services.Account;
 using GisanParkGolf_Core.Services.AdminPage;
 using GisanParkGolf_Core.Services.PlayerPage;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 using T_Engine;
 
 public class Program
@@ -10,6 +11,8 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        QuestPDF.Settings.License = LicenseType.Community;
 
         var connectionString = builder.Configuration.GetConnectionString("MariaDb");
 

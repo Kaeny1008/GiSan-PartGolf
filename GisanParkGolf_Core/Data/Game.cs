@@ -7,7 +7,7 @@ namespace GisanParkGolf_Core.Data
     public class Game
     {
         [Key]
-        [Column("game_code", TypeName = "varchar(6)")]
+        [Column("game_code", TypeName = "varchar(13)")]
         public string? GameCode { get; set; }
 
         [Required(ErrorMessage = "대회명을 입력하세요.")]

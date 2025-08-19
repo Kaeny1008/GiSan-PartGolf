@@ -13,6 +13,10 @@
         public int AwardCount { get; set; }
         public int GroupNumber { get; set; }
         public int CourseOrder { get; set; }
-        // 필요하다면 수상 상세 리스트도 추가 가능
+
+        // 대회 정보 필드
+        public string? GameName { get; set; }
+        public string? GameDate { get; set; }
+        public string? StadiumName { get; set; }
     }
 }

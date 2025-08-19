@@ -72,6 +72,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                 var dbResults = _context.GameUserAssignments
                     .Include(a => a.Handicap)
                     .Include(a => a.User)
+                    .Include(a => a.Game)
                     .Where(a => a.GameCode == gameCode)
                     .ToList();
 
@@ -95,7 +96,10 @@ namespace GiSanParkGolf.Pages.AdminPage
                     GenderText = r.User?.UserGender == 1 ? "남" : r.User?.UserGender == 2 ? "여" : "",
                     AgeGroupText = GetAgeGroupText(r.User?.UserNumber ?? 0, r.User?.UserGender ?? 0),
                     HandicapValue = r.Handicap?.AgeHandicap ?? 0,
-                    AwardCount = awardDict.TryGetValue(r.UserId ?? "", out var cnt) ? cnt : 0
+                    AwardCount = awardDict.TryGetValue(r.UserId ?? "", out var cnt) ? cnt : 0,
+                    GameName = r.Game?.GameName ?? "",
+                    GameDate = r.Game?.GameDate.ToString("yyyy-MM-dd"),
+                    StadiumName = r.Game?.StadiumName ?? ""
                 }).ToList();
             }
             return results;
@@ -757,6 +761,45 @@ namespace GiSanParkGolf.Pages.AdminPage
             HttpContext.Session.Remove("Handicapped");
             HttpContext.Session.Remove("AgeSort");
             HttpContext.Session.Remove("AwardSort");
+        }
+
+        public IActionResult OnGetExportPdfAsync(string gameCode)
+        {
+            // 1. 결과 데이터 준비
+            var results = GetAssignmentResults(gameCode);
+            if (results == null || results.Count == 0)
+            {
+                TempData["ErrorMessage"] = "배치 결과 데이터가 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            string gameName = results.FirstOrDefault()?.GameName ?? "게임명";
+            string gameDate = results.FirstOrDefault()?.GameDate ?? "게임일자";
+            string stadiumName = results.FirstOrDefault()?.StadiumName ?? "경기장명";
+
+            // 2. PDF 파일 메모리 스트림 생성
+            using var ms = new MemoryStream();
+            CourseAssignmentPdfGenerator.GeneratePdf(
+                results.Select(r => new CourseAssignmentRow
+                {
+                    GameName = gameName,
+                    GameDate = gameDate,
+                    StadiumName = stadiumName,
+                    CourseName = r.CourseName ?? "",
+                    HoleNumber = r.HoleNumber ?? "",
+                    CourseOrder = r.CourseOrder.ToString(),
+                    TeamNumber = r.TeamNumber ?? "",
+                    ParticipantName = r.UserName ?? "",
+                    ParticipantID = r.UserId ?? "",
+                    Gender = r.GenderText ?? "",
+                    Note = ""
+                }).ToList(), ms);
+
+            ms.Position = 0;
+
+            // 3. PDF 파일 직접 다운로드
+            var fileName = $"코스배치표_{gameCode}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+            return File(ms.ToArray(), "application/pdf", fileName);
         }
     }
 }

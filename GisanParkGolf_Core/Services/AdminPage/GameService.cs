@@ -78,8 +78,6 @@ namespace GisanParkGolf_Core.Services.AdminPage
 
         // ############## 아래부터 코스배치관련 메서드 ##############
         // 대회 목록 불러오기
-        // ... 기존 using 및 namespace ...
-
         public async Task<PaginatedList<CompetitionViewModel>> GetCompetitionsAsync(
             string? searchField, string? searchQuery, int pageIndex, int pageSize)
         {
