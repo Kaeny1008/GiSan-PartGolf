@@ -1,4 +1,4 @@
-using GisanParkGolf_Core.Data;
+ï»¿using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
 using GisanParkGolf_Core.Services.AdminPage;
 using GisanParkGolf_Core.ViewModels.AdminPage;
@@ -68,7 +68,7 @@ namespace GiSanParkGolf.Pages.AdminPage
 
             if (results == null || results.Count == 0)
             {
-                // DB¿¡¼­ ºÒ·¯¿À±â
+                // DBì—ì„œ ë¶ˆëŸ¬ì˜¤ê¸°
                 var dbResults = _context.GameUserAssignments
                     .Include(a => a.Handicap)
                     .Include(a => a.User)
@@ -93,7 +93,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                     CourseOrder = r.CourseOrder ?? 0,
                     UserId = r.UserId ?? "",
                     UserName = r.User?.UserName ?? r.UserId ?? "",
-                    GenderText = r.User?.UserGender == 1 ? "³²" : r.User?.UserGender == 2 ? "¿©" : "",
+                    GenderText = r.User?.UserGender == 1 ? "ë‚¨" : r.User?.UserGender == 2 ? "ì—¬" : "",
                     AgeGroupText = GetAgeGroupText(r.User?.UserNumber ?? 0, r.User?.UserGender ?? 0),
                     HandicapValue = r.Handicap?.AgeHandicap ?? 0,
                     AwardCount = awardDict.TryGetValue(r.UserId ?? "", out var cnt) ? cnt : 0,
@@ -115,7 +115,7 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         private async Task SaveAssignmentResultsAsync(List<CourseAssignmentResultViewModel> results, string gameCode)
         {
-            await AssignTeamNumbers(results, gameCode); // ÆÀ³Ñ¹ö ¹èÁ¤
+            await AssignTeamNumbers(results, gameCode); // íŒ€ë„˜ë²„ ë°°ì •
             HttpContext.Session.SetString("AssignmentResults", JsonConvert.SerializeObject(results ?? new List<CourseAssignmentResultViewModel>()));
         }
 
@@ -138,7 +138,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             foreach (var group in grouped)
             {
                 int idx = 1;
-                // CourseOrder ±âÁØ Á¤·Ä!
+                // CourseOrder ê¸°ì¤€ ì •ë ¬!
                 foreach (var item in group.OrderBy(r => r.CourseOrder))
                 {
                     item.CourseOrder = idx;
@@ -159,11 +159,11 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         private async Task LoadGameDetailDataAsync(string gameCode)
         {
-            // Âü°¡ÀÚ, Åë°è
+            // ì°¸ê°€ì, í†µê³„
             Participants = await _gameService.GetParticipantsAsync(
                 gameCode, ParticipantSearchQuery, ParticipantPageIndex, ParticipantPageSize);
 
-            // Âü°¡ÀÚ¼ö º¯¼ö ÀúÀå
+            // ì°¸ê°€ììˆ˜ ë³€ìˆ˜ ì €ì¥
             JoinedCount = await _context.GameParticipants.CountAsync(gp => !gp.IsCancelled);
 
             var query = _context.GameParticipants.Include(gp => gp.Game).AsQueryable();
@@ -171,7 +171,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             CancelledCount = await _context.GameParticipants.CountAsync(gp => gp.IsCancelled);
             JoinedCount = await _context.GameParticipants.CountAsync(gp => !gp.IsCancelled);
 
-            // ¹èÄ¡ ¿É¼Ç ¼¼¼Ç -> º¯¼ö
+            // ë°°ì¹˜ ì˜µì…˜ ì„¸ì…˜ -> ë³€ìˆ˜
             GenderSort = HttpContext.Session.GetString("GenderSort");
             Handicapped = HttpContext.Session.GetString("Handicapped");
             AgeSort = HttpContext.Session.GetString("AgeSort");
@@ -185,7 +185,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                     .Select(c => new CourseViewModel { CourseName = c.CourseName, HoleCount = c.HoleCount })
                     .ToListAsync();
 
-                // ¿É¼Ç°ª ¾øÀ¸¸é DB¼³Á¤ ¹İ¿µ
+                // ì˜µì…˜ê°’ ì—†ìœ¼ë©´ DBì„¤ì • ë°˜ì˜
                 if (string.IsNullOrEmpty(GenderSort) || string.IsNullOrEmpty(Handicapped) ||
                     string.IsNullOrEmpty(AgeSort) || string.IsNullOrEmpty(AwardSort))
                 {
@@ -202,15 +202,15 @@ namespace GiSanParkGolf.Pages.AdminPage
                                 AwardSort ??= setting.AwardSort ?? "false";
                             }
                         }
-                        catch { /* ¹«½Ã */ }
+                        catch { /* ë¬´ì‹œ */ }
                     }
                 }
             }
 
-            // ÄÚ½º¹èÄ¡ °á°ú(¼¼¼Ç/DB)
+            // ì½”ìŠ¤ë°°ì¹˜ ê²°ê³¼(ì„¸ì…˜/DB)
             AssignmentResults = GetAssignmentResults(gameCode);
 
-            // °Ë»ö/ÆäÀÌÂ¡
+            // ê²€ìƒ‰/í˜ì´ì§•
             IEnumerable<CourseAssignmentResultViewModel> filteredResults = AssignmentResults;
             if (!string.IsNullOrWhiteSpace(AssignmentSearchQuery))
             {
@@ -236,21 +236,21 @@ namespace GiSanParkGolf.Pages.AdminPage
             );
         }
 
-        // ------------------- ÇÚµé·¯ (POST) -------------------
+        // ------------------- í•¸ë“¤ëŸ¬ (POST) -------------------
         public async Task<IActionResult> OnPostCancelAssignmentAsync(string gameCode, string userId, string? cancelReason)
         {
             if (string.IsNullOrWhiteSpace(cancelReason))
             {
-                TempData["ErrorMessage"] = "Ãë¼Ò »çÀ¯¸¦ ¹İµå½Ã ÀÔ·ÂÇØ¾ß ÇÕ´Ï´Ù.";
+                TempData["ErrorMessage"] = "ì·¨ì†Œ ì‚¬ìœ ë¥¼ ë°˜ë“œì‹œ ì…ë ¥í•´ì•¼ í•©ë‹ˆë‹¤.";
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
 
-            // 1. ¼¼¼Ç µ¥ÀÌÅÍ¿¡¼­ ¹èÄ¡ »èÁ¦
+            // 1. ì„¸ì…˜ ë°ì´í„°ì—ì„œ ë°°ì¹˜ ì‚­ì œ
             var assignmentResults = GetAssignmentResults(gameCode);
             assignmentResults.RemoveAll(r => r.UserId == userId);
             RenumberCourseOrders(assignmentResults);
 
-            // 2. DB¿¡¼­ ÄÚ½º¹èÄ¡ ±â·Ï »èÁ¦
+            // 2. DBì—ì„œ ì½”ìŠ¤ë°°ì¹˜ ê¸°ë¡ ì‚­ì œ
             var userAssignments = await _context.GameUserAssignments
                 .Where(a => a.GameCode == gameCode && a.UserId == userId)
                 .ToListAsync();
@@ -260,7 +260,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                 await _context.SaveChangesAsync();
             }
 
-            // 3. Âü°¡ÀÚ »óÅÂ Ãë¼Ò Ã³¸® (Âü°¡Ãë¼Ò)
+            // 3. ì°¸ê°€ì ìƒíƒœ ì·¨ì†Œ ì²˜ë¦¬ (ì°¸ê°€ì·¨ì†Œ)
             var participant = await _context.GameParticipants
                 .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.GameCode == gameCode && p.UserId == userId);
@@ -276,11 +276,11 @@ namespace GiSanParkGolf.Pages.AdminPage
                 HttpContext.Session.SetString($"CancelReason_{userId}", cancelReason ?? "");
             }
 
-            // 4. ¼¼¼Ç ¾÷µ¥ÀÌÆ®
+            // 4. ì„¸ì…˜ ì—…ë°ì´íŠ¸
             SaveAssignmentResults(assignmentResults);
             SaveUnassignedParticipants(GetUnassignedParticipants() ?? new List<ParticipantViewModel>());
 
-            TempData["SuccessMessage"] = "Âü°¡ÀÚ°¡ Ãë¼Ò Ã³¸®µÇ¾ú½À´Ï´Ù. (ÄÚ½º¹èÄ¡ ¹× Âü°¡ Ãë¼Ò°¡ DB¿¡ Áï½Ã ¹İ¿µ)";
+            TempData["SuccessMessage"] = "ì°¸ê°€ìê°€ ì·¨ì†Œ ì²˜ë¦¬ë˜ì—ˆìŠµë‹ˆë‹¤. (ì½”ìŠ¤ë°°ì¹˜ ë° ì°¸ê°€ ì·¨ì†Œê°€ DBì— ì¦‰ì‹œ ë°˜ì˜)";
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
 
@@ -290,13 +290,13 @@ namespace GiSanParkGolf.Pages.AdminPage
             var participant = unassigned.FirstOrDefault(p => p.UserId == userId);
             if (participant == null)
             {
-                TempData["ErrorMessage"] = "ÇØ´ç Âü°¡ÀÚ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.";
+                TempData["ErrorMessage"] = "í•´ë‹¹ ì°¸ê°€ìë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.";
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
 
             var assignmentResults = GetAssignmentResults(gameCode);
 
-            // ±âÁ¸ ÇØ´ç ÄÚ½º/È¦ Âü°¡ÀÚ ¼ø¼­ º¸Á¸
+            // ê¸°ì¡´ í•´ë‹¹ ì½”ìŠ¤/í™€ ì°¸ê°€ì ìˆœì„œ ë³´ì¡´
             var sameHoleList = assignmentResults
                 .Where(r => r.CourseName == courseName && r.HoleNumber == holeNumber.ToString())
                 .OrderBy(r => r.CourseOrder)
@@ -304,19 +304,19 @@ namespace GiSanParkGolf.Pages.AdminPage
 
             assignmentResults.RemoveAll(r => r.CourseName == courseName && r.HoleNumber == holeNumber.ToString());
 
-            // ±âÁ¸ Âü°¡ÀÚ Áß °¡Àå Å« CourseOrder °ª
+            // ê¸°ì¡´ ì°¸ê°€ì ì¤‘ ê°€ì¥ í° CourseOrder ê°’
             int maxCourseOrder = sameHoleList.Count > 0 ? sameHoleList.Max(x => x.CourseOrder) : 0;
 
-            // °­Á¦¹èÁ¤ÀÚ¸¦ "¸¶Áö¸· ¼ø¹ø"À¸·Î Ãß°¡
+            // ê°•ì œë°°ì •ìë¥¼ "ë§ˆì§€ë§‰ ìˆœë²ˆ"ìœ¼ë¡œ ì¶”ê°€
             sameHoleList.Add(new CourseAssignmentResultViewModel
             {
                 CourseName = courseName,
                 HoleNumber = holeNumber.ToString(),
-                CourseOrder = maxCourseOrder + 1, // ¹Ù·Î ¿©±â!
+                CourseOrder = maxCourseOrder + 1, // ë°”ë¡œ ì—¬ê¸°!
                 UserName = participant.Name,
                 UserId = participant.UserId,
                 GenderText = participant.GenderText,
-                AgeGroupText = participant.AgeGroupText ?? "È®ÀÎÇÊ¿ä",
+                AgeGroupText = participant.AgeGroupText ?? "í™•ì¸í•„ìš”",
                 HandicapValue = participant.HandicapValue,
                 AwardCount = participant.AwardCount
             });
@@ -324,27 +324,27 @@ namespace GiSanParkGolf.Pages.AdminPage
             assignmentResults.AddRange(sameHoleList);
             unassigned.Remove(participant);
 
-            // ¼ø¹ø ÀçÁ¤·Ä(ÄÚ½º/È¦º°·Î 1ºÎÅÍ)
+            // ìˆœë²ˆ ì¬ì •ë ¬(ì½”ìŠ¤/í™€ë³„ë¡œ 1ë¶€í„°)
             RenumberCourseOrders(assignmentResults);
 
-            // ÄÚ½º¸í>È¦¹øÈ£>¼ø¹ø´ë·Î Á¤·Ä
+            // ì½”ìŠ¤ëª…>í™€ë²ˆí˜¸>ìˆœë²ˆëŒ€ë¡œ ì •ë ¬
             assignmentResults = assignmentResults
                 .OrderBy(r => r.CourseName)
                 .ThenBy(r => int.TryParse(r.HoleNumber, out var hn) ? hn : 0)
                 .ThenBy(r => r.CourseOrder)
                 .ToList();
 
-            // ÆÀ³Ñ¹ö ÇÒ´ç(ÄÚ½º/È¦º°·Î ÇÏ³ª, ÃÊ°úÇã¿ë)
+            // íŒ€ë„˜ë²„ í• ë‹¹(ì½”ìŠ¤/í™€ë³„ë¡œ í•˜ë‚˜, ì´ˆê³¼í—ˆìš©)
             AssignTeamNumbersAllowOverflow(assignmentResults);
 
             SaveAssignmentResults(assignmentResults);
             SaveUnassignedParticipants(unassigned);
 
-            TempData["SuccessMessage"] = $"°­Á¦¹èÁ¤ÀÚ°¡ {courseName} {holeNumber}È¦ÀÇ ¸¶Áö¸· ¼ø¹ø¿¡ ¹èÁ¤µÇ¾ú½À´Ï´Ù!";
+            TempData["SuccessMessage"] = $"ê°•ì œë°°ì •ìê°€ {courseName} {holeNumber}í™€ì˜ ë§ˆì§€ë§‰ ìˆœë²ˆì— ë°°ì •ë˜ì—ˆìŠµë‹ˆë‹¤!";
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
 
-        // ÆÀ³Ñ¹ö ÇÒ´ç(ÄÚ½º/È¦º°·Î ÇÏ³ª, ÃÊ°úÇã¿ë)
+        // íŒ€ë„˜ë²„ í• ë‹¹(ì½”ìŠ¤/í™€ë³„ë¡œ í•˜ë‚˜, ì´ˆê³¼í—ˆìš©)
         private static void AssignTeamNumbersAllowOverflow(List<CourseAssignmentResultViewModel> assignmentResults)
         {
             var grouped = assignmentResults
@@ -367,7 +367,7 @@ namespace GiSanParkGolf.Pages.AdminPage
         {
             var assignmentResults = GetAssignmentResults(gameCode);
 
-            // 1. ¹èÄ¡¿É¼Ç ÀúÀå (°ÔÀÓ ¼³Á¤ ÀúÀå)
+            // 1. ë°°ì¹˜ì˜µì…˜ ì €ì¥ (ê²Œì„ ì„¤ì • ì €ì¥)
             var gameSettingObj = new
             {
                 //GenderSort = HttpContext.Session.GetString("GenderSort") ?? "false",
@@ -390,12 +390,12 @@ namespace GiSanParkGolf.Pages.AdminPage
                 await _context.SaveChangesAsync();
             }
 
-            // 2. ±âÁ¸ DB ¹èÁ¤Á¤º¸ ºÒ·¯¿À±â
+            // 2. ê¸°ì¡´ DB ë°°ì •ì •ë³´ ë¶ˆëŸ¬ì˜¤ê¸°
             var prevAssignments = await _context.GameUserAssignments
                 .Where(a => a.GameCode == gameCode)
                 .ToListAsync();
 
-            // 3. ¼¼¼Ç¿¡ ³²¾ÆÀÖ´Â ¹èÁ¤Á¤º¸¿Í ºñ±³ÇÏ¿© Ãë¼ÒÀÚ Ã£±â
+            // 3. ì„¸ì…˜ì— ë‚¨ì•„ìˆëŠ” ë°°ì •ì •ë³´ì™€ ë¹„êµí•˜ì—¬ ì·¨ì†Œì ì°¾ê¸°
             var assignedUserIds = assignmentResults.Select(r => r.UserId).ToHashSet();
             var cancelledUsers = prevAssignments
                 .Where(pa => !assignedUserIds.Contains(pa.UserId))
@@ -403,7 +403,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                 .Distinct()
                 .ToList();
 
-            // 4. Ãë¼Ò ÀÌ·Â ³²±â±â
+            // 4. ì·¨ì†Œ ì´ë ¥ ë‚¨ê¸°ê¸°
             foreach (var userId in cancelledUsers)
             {
                 var participant = await _context.GameParticipants
@@ -411,17 +411,17 @@ namespace GiSanParkGolf.Pages.AdminPage
 
                 if (participant != null)
                 {
-                    var cancelReason = HttpContext.Session.GetString($"CancelReason_{userId}") ?? "ÄÚ½º ¹èÄ¡ Ãë¼Ò";
+                    var cancelReason = HttpContext.Session.GetString($"CancelReason_{userId}") ?? "ì½”ìŠ¤ ë°°ì¹˜ ì·¨ì†Œ";
                     participant.IsCancelled = true;
                     participant.CancelDate = DateTime.Now;
-                    participant.CancelReason = !string.IsNullOrWhiteSpace(cancelReason) ? cancelReason : "ÄÚ½º ¹èÄ¡ Ãë¼Ò";
+                    participant.CancelReason = !string.IsNullOrWhiteSpace(cancelReason) ? cancelReason : "ì½”ìŠ¤ ë°°ì¹˜ ì·¨ì†Œ";
                     participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
                     _context.GameParticipants.Update(participant);
                 }
             }
             await _context.SaveChangesAsync();
 
-            // 5. ±âÁ¸ ¹èÁ¤ »èÁ¦/»õ ¹èÁ¤ ÀúÀå
+            // 5. ê¸°ì¡´ ë°°ì • ì‚­ì œ/ìƒˆ ë°°ì • ì €ì¥
             var existingAssignments = await _context.GameUserAssignments
                 .Where(a => a.GameCode == gameCode)
                 .ToListAsync();
@@ -450,18 +450,18 @@ namespace GiSanParkGolf.Pages.AdminPage
             }
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = $"ÄÚ½º¹èÄ¡ °á°ú°¡ Á¤»óÀûÀ¸·Î ÀúÀåµÇ¾ú½À´Ï´Ù.";
+            TempData["SuccessMessage"] = $"ì½”ìŠ¤ë°°ì¹˜ ê²°ê³¼ê°€ ì •ìƒì ìœ¼ë¡œ ì €ì¥ë˜ì—ˆìŠµë‹ˆë‹¤.";
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
 
-        // --- Âü°¡Ãë¼Ò, ÀçÂü°¡ µî ±âÁ¸ ±â´ÉÀº ±×´ë·Î ---
+        // --- ì°¸ê°€ì·¨ì†Œ, ì¬ì°¸ê°€ ë“± ê¸°ì¡´ ê¸°ëŠ¥ì€ ê·¸ëŒ€ë¡œ ---
         public async Task<IActionResult> OnPostApproveCancelAsync(string id)
         {
             var participant = await _context.GameParticipants.FirstOrDefaultAsync(p => p.UserId == id);
             if (participant == null)
             {
-                TempData["ErrorTitle"] = "¿À·ù";
-                TempData["ErrorMessage"] = "Âü°¡ÀÚ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.";
+                TempData["ErrorTitle"] = "ì˜¤ë¥˜";
+                TempData["ErrorMessage"] = "ì°¸ê°€ìë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.";
                 return RedirectToPage();
             }
             participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
@@ -470,8 +470,8 @@ namespace GiSanParkGolf.Pages.AdminPage
             await _context.SaveChangesAsync();
             ClearAssignmentSession();
 
-            TempData["SuccessTitle"] = "Ãë¼Ò ½ÂÀÎ ¿Ï·á";
-            TempData["SuccessMessage"] = "Âü°¡ÀÚ Ãë¼Ò°¡ ½ÂÀÎµÇ¾ú½À´Ï´Ù. ÄÚ½º¹èÄ¡ Àç½ÇÇà ÇÊ¿ä.";
+            TempData["SuccessTitle"] = "ì·¨ì†Œ ìŠ¹ì¸ ì™„ë£Œ";
+            TempData["SuccessMessage"] = "ì°¸ê°€ì ì·¨ì†Œê°€ ìŠ¹ì¸ë˜ì—ˆìŠµë‹ˆë‹¤. ì½”ìŠ¤ë°°ì¹˜ ì¬ì‹¤í–‰ í•„ìš”.";
             return RedirectToPage(new { gameCode = participant.GameCode });
         }
 
@@ -480,8 +480,8 @@ namespace GiSanParkGolf.Pages.AdminPage
             var participant = await _context.GameParticipants.FirstOrDefaultAsync(p => p.UserId == id);
             if (participant == null)
             {
-                TempData["ErrorTitle"] = "¿À·ù";
-                TempData["ErrorMessage"] = "Âü°¡ÀÚ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.";
+                TempData["ErrorTitle"] = "ì˜¤ë¥˜";
+                TempData["ErrorMessage"] = "ì°¸ê°€ìë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.";
                 return RedirectToPage();
             }
             participant.IsCancelled = false;
@@ -492,33 +492,33 @@ namespace GiSanParkGolf.Pages.AdminPage
             _context.GameParticipants.Update(participant);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessTitle"] = "ÀçÂü°¡ ¿Ï·á";
-            TempData["SuccessMessage"] = "ÀçÂü°¡ Ã³¸®µÇ¾ú½À´Ï´Ù.\n¹İµå½Ã ÄÚ½º¹èÄ¡¸¦ ´Ù½Ã ½ÇÇàÇØ¾ß Âü°¡ÀÚ°¡ ¹èÁ¤µË´Ï´Ù.";
+            TempData["SuccessTitle"] = "ì¬ì°¸ê°€ ì™„ë£Œ";
+            TempData["SuccessMessage"] = "ì¬ì°¸ê°€ ì²˜ë¦¬ë˜ì—ˆìŠµë‹ˆë‹¤.\në°˜ë“œì‹œ ì½”ìŠ¤ë°°ì¹˜ë¥¼ ë‹¤ì‹œ ì‹¤í–‰í•´ì•¼ ì°¸ê°€ìê°€ ë°°ì •ë©ë‹ˆë‹¤.";
             return RedirectToPage(new { gameCode = participant.GameCode, tab = "tab-course" });
         }
 
-        // ------------------- ÄÚ½º¹èÄ¡ ¿É¼Ç/½ÇÇà ºÎºĞ -------------------
+        // ------------------- ì½”ìŠ¤ë°°ì¹˜ ì˜µì…˜/ì‹¤í–‰ ë¶€ë¶„ -------------------
         public async Task<IActionResult> OnPostCourseAssignmentAsync(string gameCode)
         {
             int maxPerHole = 4; // default
 
-            // game ¸ÕÀú Á¶È¸
+            // game ë¨¼ì € ì¡°íšŒ
             var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (game == null)
             {
-                TempData["ErrorTitle"] = "¿À·ù";
-                TempData["ErrorMessage"] = "´ëÈ¸ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.";
+                TempData["ErrorTitle"] = "ì˜¤ë¥˜";
+                TempData["ErrorMessage"] = "ëŒ€íšŒ ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.";
                 return Page();
             }
 
-            // gameÀÌ null ¾Æ´ÔÀÌ È®Á¤µÈ µÚ ¼³Á¤ ÀĞ±â
+            // gameì´ null ì•„ë‹˜ì´ í™•ì •ëœ ë’¤ ì„¤ì • ì½ê¸°
             if (!string.IsNullOrEmpty(game.GameSetting))
             {
                 var setting = JsonConvert.DeserializeObject<dynamic>(game.GameSetting);
                 maxPerHole = setting?.MaxPerHole ?? 4;
             }
 
-            // User´Â Ç×»ó Á¸ÀçÇÑ´Ù°í ÀüÁ¦ ¡æ null-¾ïÁ¦ ¿¬»êÀÚ »ç¿ë
+            // UserëŠ” í•­ìƒ ì¡´ì¬í•œë‹¤ê³  ì „ì œ â†’ null-ì–µì œ ì—°ì‚°ì ì‚¬ìš©
             var participants = await _context.GameParticipants
                 .Where(p => p.GameCode == gameCode && !p.IsCancelled)
                 .Include(p => p.User!)
@@ -539,7 +539,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             bool useGenderSort = GenderSort == "true";
             bool useHandicap = Handicapped == "true";
 
-            // ¿©±â¼­ game.StadiumCode ¾ÈÀüÇÏ°Ô Á¢±Ù °¡´É
+            // ì—¬ê¸°ì„œ game.StadiumCode ì•ˆì „í•˜ê²Œ ì ‘ê·¼ ê°€ëŠ¥
             var courses = await _context.Courses
                 .Where(c => c.StadiumCode == game.StadiumCode)
                 .ToListAsync();
@@ -547,7 +547,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             var assignmentResults = new List<CourseAssignmentResultViewModel>();
             var unassigned = new List<ParticipantViewModel>();
 
-            // --- ±âÁ¸ ¹èÁ¤ ·ÎÁ÷ ±×´ë·Î ---
+            // --- ê¸°ì¡´ ë°°ì • ë¡œì§ ê·¸ëŒ€ë¡œ ---
             if (useGenderSort)
             {
                 var maleParticipants = participants.Where(p => p.User?.UserGender == 1).ToList();
@@ -579,8 +579,8 @@ namespace GiSanParkGolf.Pages.AdminPage
                     .ToList();
 
                 var allTeams = new List<(string gender, List<GameParticipant> team)>();
-                allTeams.AddRange(maleTeams.Select(t => ("³²", t)));
-                allTeams.AddRange(femaleTeams.Select(t => ("¿©", t)));
+                allTeams.AddRange(maleTeams.Select(t => ("ë‚¨", t)));
+                allTeams.AddRange(femaleTeams.Select(t => ("ì—¬", t)));
 
                 allTeams = allTeams.OrderByDescending(t => t.team.Count)
                                    .ThenBy(_ => Guid.NewGuid())
@@ -597,7 +597,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                         {
                             unassigned.Add(new ParticipantViewModel
                             {
-                                Name = p.User?.UserName ?? p.UserId ?? "ÀÌ¸§¾øÀ½",
+                                Name = p.User?.UserName ?? p.UserId ?? "ì´ë¦„ì—†ìŒ",
                                 UserId = p.UserId ?? "",
                                 GenderText = t.gender,
                                 HandicapValue = p.User?.Handicap?.AgeHandicap ?? 0,
@@ -631,7 +631,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                             CourseName = course.CourseName,
                             HoleNumber = holeIdx.ToString(),
                             CourseOrder = i + 1,
-                            UserName = p.User?.UserName ?? p.UserId ?? "ÀÌ¸§¾øÀ½",
+                            UserName = p.User?.UserName ?? p.UserId ?? "ì´ë¦„ì—†ìŒ",
                             UserId = p.UserId ?? "",
                             GenderText = t.gender,
                             AgeGroupText = GetAgeGroupText(p.User?.UserNumber ?? 0, p.User?.UserGender ?? 0),
@@ -674,9 +674,9 @@ namespace GiSanParkGolf.Pages.AdminPage
                         {
                             unassigned.Add(new ParticipantViewModel
                             {
-                                Name = p.User?.UserName ?? p.UserId ?? "ÀÌ¸§¾øÀ½",
+                                Name = p.User?.UserName ?? p.UserId ?? "ì´ë¦„ì—†ìŒ",
                                 UserId = p.UserId ?? "",
-                                GenderText = p.User?.UserGender == 1 ? "³²" : "¿©",
+                                GenderText = p.User?.UserGender == 1 ? "ë‚¨" : "ì—¬",
                                 HandicapValue = p.User?.Handicap?.AgeHandicap ?? 0,
                                 AgeGroupText = GetAgeGroupText(p.User?.UserNumber ?? 0, p.User?.UserGender ?? 0),
                                 AwardCount = awardDict.TryGetValue(p.UserId ?? "", out var cnt) ? cnt : 0
@@ -708,9 +708,9 @@ namespace GiSanParkGolf.Pages.AdminPage
                             CourseName = course.CourseName,
                             HoleNumber = holeIdx.ToString(),
                             CourseOrder = i + 1,
-                            UserName = p.User?.UserName ?? p.UserId ?? "ÀÌ¸§¾øÀ½",
+                            UserName = p.User?.UserName ?? p.UserId ?? "ì´ë¦„ì—†ìŒ",
                             UserId = p.UserId ?? "",
-                            GenderText = p.User?.UserGender == 1 ? "³²" : "¿©",
+                            GenderText = p.User?.UserGender == 1 ? "ë‚¨" : "ì—¬",
                             AgeGroupText = GetAgeGroupText(p.User?.UserNumber ?? 0, p.User?.UserGender ?? 0),
                             HandicapValue = p.User?.Handicap?.AgeHandicap ?? 0,
                             AwardCount = awardDict.TryGetValue(p.UserId ?? "", out var cnt) ? cnt : 0
@@ -727,10 +727,10 @@ namespace GiSanParkGolf.Pages.AdminPage
             HttpContext.Session.SetString("AgeSort", AgeSort ?? "false");
             HttpContext.Session.SetString("AwardSort", AwardSort ?? "false");
 
-            // === ÆÀ³Ñ¹ö ¹èÁ¤ ===
+            // === íŒ€ë„˜ë²„ ë°°ì • ===
             await AssignTeamNumbers(assignmentResults, gameCode);
 
-            // ´Ù½Ã ÀúÀå (È¤Àº À§¿¡ ¹èÁ¤ Á÷Àü¿¡ ÇØµµ µÊ)
+            // ë‹¤ì‹œ ì €ì¥ (í˜¹ì€ ìœ„ì— ë°°ì • ì§ì „ì— í•´ë„ ë¨)
             HttpContext.Session.SetString("AssignmentResults", JsonConvert.SerializeObject(assignmentResults));
 
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
@@ -746,7 +746,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                 maxPerHole = setting?.MaxPerHole ?? 4;
             }
 
-            // ÄÚ½º/È¦º° ±×·ìÇÎ (°¢ ±×·ìÀÌ ÇÏ³ªÀÇ ÆÀ)
+            // ì½”ìŠ¤/í™€ë³„ ê·¸ë£¹í•‘ (ê° ê·¸ë£¹ì´ í•˜ë‚˜ì˜ íŒ€)
             var allTeams = assignmentResults
                 .GroupBy(r => new { r.CourseName, r.HoleNumber })
                 .OrderBy(g => g.Key.CourseName)
@@ -768,13 +768,13 @@ namespace GiSanParkGolf.Pages.AdminPage
             }
         }
 
-        // ------------------- ±âÅ¸ À¯Æ¿/ÇïÆÛ -------------------
+        // ------------------- ê¸°íƒ€ ìœ í‹¸/í—¬í¼ -------------------
         private string GetAgeGroupText(int age, int gender)
         {
             age = PersonInfoCalculator.CalculateAge(age, gender);
-            if (age < 40) return "Ã»³â";
-            if (age < 60) return "Áß³â";
-            return "Àå³â";
+            if (age < 40) return "ì²­ë…„";
+            if (age < 60) return "ì¤‘ë…„";
+            return "ì¥ë…„";
         }
 
         private void ClearAssignmentSession()
@@ -789,19 +789,19 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         public IActionResult OnGetExportPdfAsync(string gameCode)
         {
-            // 1. °á°ú µ¥ÀÌÅÍ ÁØºñ
+            // 1. ê²°ê³¼ ë°ì´í„° ì¤€ë¹„
             var results = GetAssignmentResults(gameCode);
             if (results == null || results.Count == 0)
             {
-                TempData["ErrorMessage"] = "¹èÄ¡ °á°ú µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù.";
+                TempData["ErrorMessage"] = "ë°°ì¹˜ ê²°ê³¼ ë°ì´í„°ê°€ ì—†ìŠµë‹ˆë‹¤.";
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
 
-            string gameName = results.FirstOrDefault()?.GameName ?? "°ÔÀÓ¸í";
-            string gameDate = results.FirstOrDefault()?.GameDate ?? "°ÔÀÓÀÏÀÚ";
-            string stadiumName = results.FirstOrDefault()?.StadiumName ?? "°æ±âÀå¸í";
+            string gameName = results.FirstOrDefault()?.GameName ?? "ê²Œì„ëª…";
+            string gameDate = results.FirstOrDefault()?.GameDate ?? "ê²Œì„ì¼ì";
+            string stadiumName = results.FirstOrDefault()?.StadiumName ?? "ê²½ê¸°ì¥ëª…";
 
-            // 2. PDF ÆÄÀÏ ¸Ş¸ğ¸® ½ºÆ®¸² »ı¼º
+            // 2. PDF íŒŒì¼ ë©”ëª¨ë¦¬ ìŠ¤íŠ¸ë¦¼ ìƒì„±
             using var ms = new MemoryStream();
             CourseAssignmentPdfGenerator.GeneratePdf(
                 results.Select(r => new CourseAssignmentRow
@@ -821,46 +821,153 @@ namespace GiSanParkGolf.Pages.AdminPage
 
             ms.Position = 0;
 
-            // 3. PDF ÆÄÀÏ Á÷Á¢ ´Ù¿î·Îµå
-            var fileName = $"ÄÚ½º¹èÄ¡Ç¥_{gameCode}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+            // 3. PDF íŒŒì¼ ì§ì ‘ ë‹¤ìš´ë¡œë“œ
+            var fileName = $"ì½”ìŠ¤ë°°ì¹˜í‘œ_{gameCode}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
             return File(ms.ToArray(), "application/pdf", fileName);
         }
 
         public IActionResult OnGetExportScorecardPdf(string gameCode)
         {
-            // 1. ¹èÄ¡ °á°ú °¡Á®¿À±â (È¤Àº DB¿¡¼­ Á÷Á¢ Á¶È¸)
+            // 0. í• ë‹¹ ê²°ê³¼ ì½ê¸°
             var results = GetAssignmentResults(gameCode);
             if (results == null || results.Count == 0)
             {
-                TempData["ErrorMessage"] = "¹èÄ¡ °á°ú µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù.";
+                TempData["ErrorMessage"] = "ê²Œì„ í• ë‹¹ ê²°ê³¼ê°€ ì—†ìŠµë‹ˆë‹¤.";
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
 
-            string gameName = results.FirstOrDefault()?.GameName ?? "´ëÈ¸¸í";
-            string gameDate = results.FirstOrDefault()?.GameDate ?? "´ëÈ¸ÀÏÀÚ";
-            string stadiumName = results.FirstOrDefault()?.StadiumName ?? "°æ±âÀå";
+            // 1. ê²Œì„/ëŒ€íšŒ ì •ë³´ (PDF ìƒë‹¨)
+            var game = _context.Games.FirstOrDefault(g => g.GameCode == gameCode);
+            string gameName = results.FirstOrDefault()?.GameName ?? (game?.GameName ?? "ê²½ê¸°ëª…");
+            string gameDate = results.FirstOrDefault()?.GameDate ?? (game?.GameDate.ToString("yyyy-MM-dd") ?? "ë‚ ì§œì—†ìŒ");
+            string stadiumName = results.FirstOrDefault()?.StadiumName ?? (game?.StadiumName ?? "ê²½ê¸°ì¥");
 
-            // 2. ÄÚ½ºº°·Î ±×·ìÈ­, È¦ Á¤º¸ ÃßÃâ
-            var courses = results
-                .GroupBy(r => r.CourseName)
-                .Select(g => new CourseScoreCardData
-                {
-                    CourseName = g.Key ?? "",
-                    HoleNumbers = g.Select(x => x.HoleNumber ?? "")
-                    .Where(h => !string.IsNullOrEmpty(h))
-                    .Distinct()
-                    .OrderBy(h => int.TryParse(h, out var n) ? n : 0)
-                    .ToList(),
-                    Players = g.Select(x => new ScoreCardRow
-                    {
-                        PlayerName = x.UserName ?? "",
-                        PlayerID = x.UserId ?? "",
-                        TeamNumber = x.TeamNumber ?? ""
-                    }).ToList()
-                })
+            // ìœ í‹¸: ì½”ìŠ¤ëª… ì •ê·œí™” (ê³µë°±ì œê±°, ì†Œë¬¸ì, 'ì½”ìŠ¤' ì ‘ë¯¸ì‚¬ ì œê±°)
+            static string NormalizeCourseName(string? s)
+            {
+                if (string.IsNullOrWhiteSpace(s)) return "";
+                var t = s.Trim();
+                t = t.Replace("ì½”ìŠ¤", "", StringComparison.OrdinalIgnoreCase).Trim();
+                return t.ToLowerInvariant();
+            }
+
+            // DBì—ì„œ í•´ë‹¹ ê²½ê¸°ì¥ì˜ ì½”ìŠ¤ë“¤ì„ ê°€ëŠ¥í•œ í•œ ì½ì–´ì˜¨ë‹¤
+            var dbCourses = new List<(string CourseName, int HoleCount)>();
+            if (game != null)
+            {
+                dbCourses = _context.Courses
+                    .Where(c => c.StadiumCode == game.StadiumCode)
+                    .Select(c => new { c.CourseName, c.HoleCount })
+                    .AsEnumerable()
+                    .Select(x => ((x.CourseName ?? "").Trim(), x.HoleCount))
+                    .ToList();
+            }
+
+            // assignmentì—ì„œ ê´€ì¸¡ëœ ìµœëŒ€ í™€ (fallback ê¸°ì¤€)
+            int maxHoleFromResults = results
+                .Select(r => int.TryParse(r.HoleNumber, out var n) ? n : 0)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            // ê²°ê³¼ì— ë“±ì¥í•˜ëŠ” ì½”ìŠ¤ëª… ëª©ë¡ (ì›ë³¸ ë¬¸ìì—´)
+            var resultCourseNames = results
+                .Select(r => (r.CourseName ?? "").Trim())
+                .Where(n => !string.IsNullOrEmpty(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            // 3. PDF »ı¼º
+            // courseMap: ì •ê·œí™”ëœ í‚¤ -> (í‘œì‹œëª…, holeCount)
+            var courseMap = new Dictionary<string, (string DisplayName, int HoleCount)>(StringComparer.OrdinalIgnoreCase);
+
+            // 1) DB ì½”ìŠ¤ ìš°ì„ ìœ¼ë¡œ ì±„ìš°ê¸° (ì •ê·œí™” í‚¤ ì‚¬ìš©)
+            foreach (var dc in dbCourses)
+            {
+                var name = dc.CourseName;
+                var key = NormalizeCourseName(name);
+                if (!courseMap.ContainsKey(key))
+                {
+                    courseMap[key] = (name, Math.Max(1, dc.HoleCount));
+                }
+            }
+
+            // 2) ê²°ê³¼ì—ë§Œ ìˆëŠ” ì½”ìŠ¤ëŠ” DBì—ì„œ ë¹„ìŠ·í•œ ì´ë¦„ì´ ìˆëŠ”ì§€ ì‹œë„í•´ ë³´ê³ , ì—†ìœ¼ë©´ ì•ˆì „í•œ ê¸°ë³¸ê°’ ì‚¬ìš©
+            foreach (var rc in resultCourseNames)
+            {
+                var key = NormalizeCourseName(rc);
+                if (courseMap.ContainsKey(key)) continue;
+
+                // DBì—ì„œ ì •ê·œí™”ëœ ì´ë¦„ìœ¼ë¡œ íƒìƒ‰(ê³µë°±/ì ‘ë¯¸ì‚¬ ì°¨ì´ ë³´ì •)
+                var matchedDb = dbCourses
+                    .FirstOrDefault(dc => NormalizeCourseName(dc.CourseName) == key);
+
+                int holeCount;
+                string displayName;
+                if (!string.IsNullOrEmpty(matchedDb.CourseName))
+                {
+                    displayName = matchedDb.CourseName;
+                    holeCount = Math.Max(1, matchedDb.HoleCount);
+                }
+                else
+                {
+                    // ì¶”ê°€ íƒìƒ‰: DBì˜ CourseNameì— ê²°ê³¼ ì´ë¦„ì´ í¬í•¨ë˜ëŠ” ê²½ìš°(ì˜ˆ: "A ì½”ìŠ¤" vs "A")
+                    var containsMatch = dbCourses
+                        .FirstOrDefault(dc => (dc.CourseName ?? "").IndexOf(rc, StringComparison.OrdinalIgnoreCase) >= 0);
+
+                    if (!string.IsNullOrEmpty(containsMatch.CourseName))
+                    {
+                        displayName = containsMatch.CourseName;
+                        holeCount = Math.Max(1, containsMatch.HoleCount);
+                    }
+                    else
+                    {
+                        // ìµœì¢… fallback: ê²°ê³¼ì—ì„œ ê´€ì¸¡ëœ ìµœëŒ€ í™€ ìˆ˜, ì—†ìœ¼ë©´ ì•ˆì „ ê¸°ë³¸ê°’ 9
+                        displayName = rc;
+                        holeCount = Math.Max(1, Math.Max(maxHoleFromResults, 9));
+                    }
+                }
+
+                courseMap[key] = (displayName, holeCount);
+            }
+
+            // 3) courseMap -> CourseScoreCardData ìƒì„± (ì •ê·œí™”ëœ í‚¤ë¡œ players ë§¤í•‘)
+            var courses = courseMap.Select(kvp =>
+            {
+                var normalizedKey = kvp.Key;
+                var displayName = kvp.Value.DisplayName;
+                var holeCount = Math.Max(1, kvp.Value.HoleCount);
+
+                var holeNumbers = Enumerable.Range(1, holeCount).Select(n => n.ToString()).ToList();
+
+                var players = results
+                    .Where(r => !string.IsNullOrEmpty(r.CourseName) &&
+                                NormalizeCourseName(r.CourseName) == normalizedKey)
+                    .Where(r => !string.IsNullOrEmpty(r.UserId))
+                    .GroupBy(r => r.UserId)
+                    .Select(g =>
+                    {
+                        var first = g.First();
+                        return new ScoreCardRow
+                        {
+                            PlayerName = first.UserName ?? "",
+                            PlayerID = g.Key ?? "",
+                            TeamNumber = first.TeamNumber ?? ""
+                        };
+                    })
+                    .OrderBy(p => p.TeamNumber)
+                    .ThenBy(p => p.PlayerName)
+                    .ToList();
+
+                return new CourseScoreCardData
+                {
+                    CourseName = displayName,
+                    HoleNumbers = holeNumbers,
+                    Players = players
+                };
+            })
+            .OrderBy(c => c.CourseName)
+            .ToList();
+
+            // 4) PDF ìƒì„±
             using var ms = new MemoryStream();
             ScoreCardPdfGenerator.GeneratePdf(
                 gameName,
@@ -870,9 +977,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                 ms);
 
             ms.Position = 0;
-
-            // 4. PDF ÆÄÀÏ ¹İÈ¯
-            var fileName = $"½ºÄÚ¾îÄ«µå_{gameCode}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+            var fileName = $"Scorecard_{gameCode}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
             return File(ms.ToArray(), "application/pdf", fileName);
         }
     }
