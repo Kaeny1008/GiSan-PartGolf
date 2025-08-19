@@ -1,8 +1,9 @@
-using GisanParkGolf_Core.Data;
+Ôªøusing GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Services.Account;
 using GisanParkGolf_Core.Services.AdminPage;
 using GisanParkGolf_Core.Services.PlayerPage;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Drawing;
 using QuestPDF.Infrastructure;
 using T_Engine;
 
@@ -13,6 +14,12 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         QuestPDF.Settings.License = LicenseType.Community;
+        if (OperatingSystem.IsLinux())
+        {
+            var linuxFont = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf";
+            if (File.Exists(linuxFont))
+                FontManager.RegisterFont(File.OpenRead(linuxFont));
+        }
 
         var connectionString = builder.Configuration.GetConnectionString("MariaDb");
 
@@ -29,23 +36,23 @@ public class Program
         builder.Services.AddScoped<IGameService, GameService>();
         builder.Services.AddScoped<IJoinGameService, JoinGameService>();
 
-        // ∑Œ±◊¿Œ Ω√Ω∫≈€ º≥¡§
-        // ∫π¿‚«— Identity Ω√Ω∫≈€ ¥ÎΩ≈, ∞£¥‹«œ∞Ì ∫¸∏• 'ƒÌ≈∞ ¿Œ¡ı' Ω√Ω∫≈€¿ª ªÁøÎ
-        builder.Services.AddAuthentication("Identity.Application") // ¿Ã ¿Ã∏ß¿« ƒÌ≈∞∏¶ ªÁøÎ
+        // Î°úÍ∑∏Ïù∏ ÏãúÏä§ÌÖú ÏÑ§Ï†ï
+        // Î≥µÏû°Ìïú Identity ÏãúÏä§ÌÖú ÎåÄÏã†, Í∞ÑÎã®ÌïòÍ≥† Îπ†Î•∏ 'Ïø†ÌÇ§ Ïù∏Ï¶ù' ÏãúÏä§ÌÖúÏùÑ ÏÇ¨Ïö©
+        builder.Services.AddAuthentication("Identity.Application") // Ïù¥ Ïù¥Î¶ÑÏùò Ïø†ÌÇ§Î•º ÏÇ¨Ïö©
             .AddCookie("Identity.Application", options =>
             {
-                // ∑Œ±◊¿Œ«œ¡ˆ æ ¿∫ ªÁøÎ¿⁄∞° ±««—¿Ã « ø‰«— ∆‰¿Ã¡ˆø° ø¿∏È, ø©±‚∑Œ
+                // Î°úÍ∑∏Ïù∏ÌïòÏßÄ ÏïäÏùÄ ÏÇ¨Ïö©ÏûêÍ∞Ä Í∂åÌïúÏù¥ ÌïÑÏöîÌïú ÌéòÏù¥ÏßÄÏóê Ïò§Î©¥, Ïó¨Í∏∞Î°ú
                 options.LoginPath = "/Account/Login";
 
-                // ±««—¿∫ ¿÷¡ˆ∏∏ µÓ±ﬁ¿Ã ≥∑æ∆º≠ ¡¢±Ÿ ∏¯«“ ∂ß, ø©±‚∑Œ
+                // Í∂åÌïúÏùÄ ÏûàÏßÄÎßå Îì±Í∏âÏù¥ ÎÇÆÏïÑÏÑú Ï†ëÍ∑º Î™ªÌï† Îïå, Ïó¨Í∏∞Î°ú
                 options.AccessDeniedPath = "/Account/AccessDenied";
 
-                // ƒÌ≈∞ ¿Ã∏ß∞˙ ¿Ø»øΩ√∞£ º≥¡§
+                // Ïø†ÌÇ§ Ïù¥Î¶ÑÍ≥º Ïú†Ìö®ÏãúÍ∞Ñ ÏÑ§Ï†ï
                 options.Cookie.Name = "GisanParkGolf.AuthCookie";
-                options.ExpireTimeSpan = TimeSpan.FromHours(8); // 8Ω√∞£ µøæ» ∑Œ±◊¿Œ ¿Ø¡ˆ
+                options.ExpireTimeSpan = TimeSpan.FromHours(8); // 8ÏãúÍ∞Ñ ÎèôÏïà Î°úÍ∑∏Ïù∏ Ïú†ÏßÄ
             });
 
-        // '∞¸∏Æ¿⁄' ¡§√•
+        // 'Í¥ÄÎ¶¨Ïûê' Ï†ïÏ±Ö
         builder.Services.AddAuthorization(options =>
         {
             options.AddPolicy("AdminOnly", policy =>
@@ -74,7 +81,7 @@ public class Program
 
         app.UseSession();
 
-        // ¡ﬂø‰: ¿Œ¡ı(Authentication)¿Ã «„∞°(Authorization)∫∏¥Ÿ «◊ªÛ ∏’¿˙
+        // Ï§ëÏöî: Ïù∏Ï¶ù(Authentication)Ïù¥ ÌóàÍ∞Ä(Authorization)Î≥¥Îã§ Ìï≠ÏÉÅ Î®ºÏ†Ä
         app.UseAuthentication();
         app.UseAuthorization();
 

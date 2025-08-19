@@ -1,4 +1,5 @@
-﻿using QuestPDF.Fluent;
+﻿using QuestPDF.Drawing;
+using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System.Collections.Generic;
@@ -40,10 +41,12 @@ public class ScoreCardPdfGenerator
                     col.Item()
                         .AlignCenter()
                         .PaddingBottom(8)
-                        .Text($"{gameName} 스코어카드").FontSize(22).Bold();
+                        .Text($"{gameName} 스코어카드")
+                        .FontFamily("NanumGothic")
+                        .FontSize(22).Bold();
 
-                    col.Item().Text($"대회일자    {gameDate}").FontSize(12);
-                    col.Item().Text($"대회장소    {stadiumName}").FontSize(12);
+                    col.Item().Text($"대회일자    {gameDate}").FontFamily("NanumGothic").FontSize(12);
+                    col.Item().Text($"대회장소    {stadiumName}").FontFamily("NanumGothic").FontSize(12);
                 });
 
                 // **한 번만 사용!**
@@ -54,7 +57,7 @@ public class ScoreCardPdfGenerator
                         // 코스명
                         contentCol.Item()
                             .PaddingTop(10)
-                            .Text($"코스명: {course.CourseName}").FontSize(16).Bold();
+                            .Text($"코스명: {course.CourseName}").FontFamily("NanumGothic").FontSize(16).Bold();
 
                         // 스코어카드 표
                         contentCol.Item().Table(table =>
@@ -72,21 +75,21 @@ public class ScoreCardPdfGenerator
                             // 헤더
                             table.Header(header =>
                             {
-                                header.Cell().Element(HeaderCell).Text("No.").FontSize(11).Bold();
-                                header.Cell().Element(HeaderCell).Text("참가자명").FontSize(11).Bold();
-                                header.Cell().Element(HeaderCell).Text("참가자ID").FontSize(11).Bold();
+                                header.Cell().Element(HeaderCell).Text("No.").FontFamily("NanumGothic").FontSize(11).Bold();
+                                header.Cell().Element(HeaderCell).Text("참가자명").FontFamily("NanumGothic").FontSize(11).Bold();
+                                header.Cell().Element(HeaderCell).Text("참가자ID").FontFamily("NanumGothic").FontSize(11).Bold();
                                 foreach (var hole in course.HoleNumbers)
-                                    header.Cell().Element(HeaderCell).Text($"{hole}홀").FontSize(11).Bold();
-                                header.Cell().Element(HeaderCell).Text("합계").FontSize(11).Bold();
+                                    header.Cell().Element(HeaderCell).Text($"{hole}홀").FontFamily("NanumGothic").FontSize(11).Bold();
+                                header.Cell().Element(HeaderCell).Text("합계").FontFamily("NanumGothic").FontSize(11).Bold();
                             });
 
                             // 데이터 행(빈칸)
                             int no = 1;
                             foreach (var player in course.Players)
                             {
-                                table.Cell().Element(CellStyle).Text(no.ToString()).FontSize(10);
-                                table.Cell().Element(CellStyle).Text(player.PlayerName ?? "").FontSize(10);
-                                table.Cell().Element(CellStyle).Text(player.PlayerID ?? "").FontSize(10);
+                                table.Cell().Element(CellStyle).Text(no.ToString()).FontFamily("NanumGothic").FontSize(10);
+                                table.Cell().Element(CellStyle).Text(player.PlayerName ?? "").FontFamily("NanumGothic").FontSize(10);
+                                table.Cell().Element(CellStyle).Text(player.PlayerID ?? "").FontFamily("NanumGothic").FontSize(10);
                                 foreach (var hole in course.HoleNumbers)
                                     table.Cell().Element(CellStyle).Text(""); // 경기 중 직접 입력
                                 table.Cell().Element(CellStyle).Text(""); // 합계

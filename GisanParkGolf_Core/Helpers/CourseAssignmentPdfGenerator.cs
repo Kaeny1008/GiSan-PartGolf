@@ -50,16 +50,17 @@ public class CourseAssignmentPdfGenerator
                         .AlignCenter()
                         .PaddingBottom(8)
                         .Text(gameName)
-                            .FontSize(22)
-                            .Bold();
+                        .FontFamily("NanumGothic")
+                        .FontSize(22)
+                        .Bold();
 
                     col.Item().Row(row =>
                     {
-                        row.RelativeItem().Text($"대회일자    {gameDate}").FontSize(12);
+                        row.RelativeItem().Text($"대회일자    {gameDate}").FontFamily("NanumGothic").FontSize(12);
                     });
                     col.Item().Row(row =>
                     {
-                        row.RelativeItem().Text($"대회장소    {stadiumName}").FontSize(12);
+                        row.RelativeItem().Text($"대회장소    {stadiumName}").FontFamily("NanumGothic").FontSize(12);
                     });
                 });
 
@@ -83,23 +84,23 @@ public class CourseAssignmentPdfGenerator
                     table.Header(header =>
                     {
                         header.Cell().Element(HeaderCell)
-                            .Text("No.").FontSize(11).Bold();
+                            .Text("No.").FontFamily("NanumGothic").FontSize(11).Bold();
                         header.Cell().Element(HeaderCell)
-                            .Text("팀번호").FontSize(11).Bold();
+                            .Text("팀번호").FontFamily("NanumGothic").FontSize(11).Bold();
                         header.Cell().Element(HeaderCell)
-                            .Text("코스명").FontSize(11).Bold();
+                            .Text("코스명").FontFamily("NanumGothic").FontSize(11).Bold();
                         header.Cell().Element(HeaderCell)
-                            .Text("홀번호").FontSize(11).Bold();
+                            .Text("홀번호").FontFamily("NanumGothic").FontSize(11).Bold();
                         header.Cell().Element(HeaderCell)
-                            .Text("코스순번").FontSize(11).Bold();
+                            .Text("코스순번").FontFamily("NanumGothic").FontSize(11).Bold();
                         header.Cell().Element(HeaderCell)
-                            .Text("참가자명").FontSize(11).Bold();
+                            .Text("참가자명").FontFamily("NanumGothic").FontSize(11).Bold();
                         header.Cell().Element(HeaderCell)
-                            .Text("참가자ID").FontSize(11).Bold();
+                            .Text("참가자ID").FontFamily("NanumGothic").FontSize(11).Bold();
                         header.Cell().Element(HeaderCell)
-                            .Text("성별").FontSize(11).Bold();
+                            .Text("성별").FontFamily("NanumGothic").FontSize(11).Bold();
                         header.Cell().Element(HeaderCell)
-                            .Text("비고").FontSize(11).Bold();
+                            .Text("비고").FontFamily("NanumGothic").FontSize(11).Bold();
                     });
 
                     // 데이터 행
@@ -107,23 +108,23 @@ public class CourseAssignmentPdfGenerator
                     foreach (var row in rows)
                     {
                         table.Cell().Element(CellStyle)
-                            .Text(row.TeamNumber != null ? no.ToString() : "").FontSize(10);
+                            .Text(row.TeamNumber != null ? no.ToString() : "").FontFamily("NanumGothic").FontSize(10);
                         table.Cell().Element(CellStyle)
-                            .Text(row.TeamNumber ?? "").FontSize(10);
+                            .Text(row.TeamNumber ?? "").FontFamily("NanumGothic").FontSize(10);
                         table.Cell().Element(CellStyle)
-                            .Text(row.CourseName ?? "").FontSize(10);
+                            .Text(row.CourseName ?? "").FontFamily("NanumGothic").FontSize(10);
                         table.Cell().Element(CellStyle)
-                            .Text(row.HoleNumber ?? "").FontSize(10);
+                            .Text(row.HoleNumber ?? "").FontFamily("NanumGothic").FontSize(10);
                         table.Cell().Element(CellStyle)
-                            .Text(row.CourseOrder ?? "").FontSize(10);
+                            .Text(row.CourseOrder ?? "").FontFamily("NanumGothic").FontSize(10);
                         table.Cell().Element(CellStyle)
-                            .Text(row.ParticipantName ?? "").FontSize(10);
+                            .Text(row.ParticipantName ?? "").FontFamily("NanumGothic").FontSize(10);
                         table.Cell().Element(CellStyle)
-                            .Text(row.ParticipantID ?? "").FontSize(10);
+                            .Text(row.ParticipantID ?? "").FontFamily("NanumGothic").FontSize(10);
                         table.Cell().Element(CellStyle)
-                            .Text(row.Gender ?? "").FontSize(10);
+                            .Text(row.Gender ?? "").FontFamily("NanumGothic").FontSize(10);
                         table.Cell().Element(CellStyle)
-                            .Text(row.Note ?? "").FontSize(10);
+                            .Text(row.Note ?? "").FontFamily("NanumGothic").FontSize(10);
                         no++;
                     }
                 });
