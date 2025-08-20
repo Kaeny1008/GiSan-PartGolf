@@ -1324,23 +1324,6 @@ namespace GiSanParkGolf.Pages.AdminPage
             target.CourseName = courseName;
             target.HoleNumber = holeNumber.ToString();
 
-            // 7) 새 그룹과(필요하면) 이전 그룹을 재번호화
-            // helper: 재번호화 후에 해당 그룹 항목을 반환
-            List<CourseAssignmentResultViewModel> RenumberAndReturnGroup(string grpCourse, string grpHole, List<CourseAssignmentResultViewModel> source)
-            {
-                var grp = source
-                    .Where(r => r.CourseName == grpCourse && r.HoleNumber == grpHole)
-                    .OrderBy(r => r.CourseOrder)
-                    .ToList();
-
-                int idx = 1;
-                foreach (var it in grp)
-                {
-                    it.CourseOrder = idx++;
-                }
-                return grp;
-            }
-
             string newHoleStr = target.HoleNumber;
 
             // 재번호화가 필요한 그룹 키들을 수집 (중복 제거)
