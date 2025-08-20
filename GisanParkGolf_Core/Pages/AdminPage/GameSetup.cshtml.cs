@@ -912,6 +912,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             HttpContext.Session.Remove("Handicapped");
             HttpContext.Session.Remove("AgeSort");
             HttpContext.Session.Remove("AwardSort");
+            HttpContext.Session.Remove("AssignmentJustRun");
         }
 
         public IActionResult OnGetExportPdfAsync(string gameCode)
