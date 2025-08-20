@@ -1,10 +1,9 @@
 ﻿using GisanParkGolf_Core.Helpers;
 using GisanParkGolf_Core.Pages.AdminPage;
-using GisanParkGolf_Core.ViewModels.AdminPage;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Services.AdminPage
+namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
 {
     public interface IHandicapService
     {

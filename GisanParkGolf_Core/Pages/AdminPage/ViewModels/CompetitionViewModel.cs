@@ -1,4 +1,4 @@
-﻿namespace GisanParkGolf_Core.ViewModels.AdminPage
+﻿namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
 {
     public class CompetitionViewModel
     {
@@ -14,5 +14,6 @@
         public List<ParticipantAwardInfo> ParticipantAwards { get; set; } = new();
         public int JoinedCount { get; set; }
         public int AssignmentCount { get; set; }
+        public bool AssignmentLocked { get; set; } = false;
     }
 }

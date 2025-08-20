@@ -1,7 +1,7 @@
 ﻿using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
 
-namespace GisanParkGolf_Core.Services.AdminPage
+namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
 {
     public interface IStadiumService
     {

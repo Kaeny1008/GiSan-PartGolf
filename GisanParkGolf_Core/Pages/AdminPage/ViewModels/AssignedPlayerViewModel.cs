@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GisanParkGolf_Core.ViewModels.AdminPage
+namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
 {
     /// <summary>
     /// 대회 참가자 배정(코스, 팀, 순번 등) 결과를 표시하는 ViewModel

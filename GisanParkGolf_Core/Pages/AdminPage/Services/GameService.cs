@@ -3,10 +3,9 @@ using GiSanParkGolf.Pages.AdminPage;
 using GiSanParkGolf.Pages.PlayerPage;
 using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
-using GisanParkGolf_Core.ViewModels.AdminPage;
 using Microsoft.EntityFrameworkCore;
 
-namespace GisanParkGolf_Core.Services.AdminPage
+namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
 {
     public class GameService : IGameService
     {
@@ -148,7 +147,8 @@ namespace GisanParkGolf_Core.Services.AdminPage
                     GameHost = g.GameHost,
                     PlayMode = PlayModeHelper.ToKorDisplay(g.PlayMode),
                     GameNote = g.GameNote,
-                    ParticipantAwards = participantAwards
+                    ParticipantAwards = participantAwards,
+                    AssignmentLocked = g.AssignmentLocked
                 });
             }
 
@@ -167,9 +167,9 @@ namespace GisanParkGolf_Core.Services.AdminPage
 
             if (!string.IsNullOrWhiteSpace(searchQuery))
                 query = query.Where(p =>
-                    (p.User != null && p.User.UserName.Contains(searchQuery)) ||
-                    (p.UserId != null && p.UserId.Contains(searchQuery)) ||
-                    (p.JoinId != null && p.JoinId.Contains(searchQuery))
+                    p.User != null && p.User.UserName.Contains(searchQuery) ||
+                    p.UserId != null && p.UserId.Contains(searchQuery) ||
+                    p.JoinId != null && p.JoinId.Contains(searchQuery)
                 );
 
             var projected = query.OrderBy(p => p.JoinDate)

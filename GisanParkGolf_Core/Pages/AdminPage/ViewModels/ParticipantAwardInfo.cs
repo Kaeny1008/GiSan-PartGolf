@@ -1,6 +1,6 @@
 ﻿using GisanParkGolf_Core.Data;
 
-namespace GisanParkGolf_Core.ViewModels.AdminPage
+namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
 {
     public class ParticipantAwardInfo
     {

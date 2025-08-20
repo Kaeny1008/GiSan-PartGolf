@@ -1,4 +1,4 @@
-﻿namespace GisanParkGolf_Core.ViewModels.AdminPage
+﻿namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
 {
     public class ParticipantViewModel
     {
@@ -7,7 +7,7 @@
         public string Name { get; set; } = "";
         public DateTime? JoinDate { get; set; }
         public string JoinDateText =>
-            (JoinDate == null || JoinDate == DateTime.MinValue)
+            JoinDate == null || JoinDate == DateTime.MinValue
             ? "확인불가"
             : JoinDate.Value.ToString("yyyy-MM-dd");
         public string JoinStatus { get; set; } = "";

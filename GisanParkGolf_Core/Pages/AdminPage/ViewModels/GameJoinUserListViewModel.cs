@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GisanParkGolf_Core.ViewModels.AdminPage
+namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
 {
     /// <summary>
     /// 대회 참가자 명단(및 미배정 인원 등)에 사용되는 참가자 ViewModel

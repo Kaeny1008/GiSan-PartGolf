@@ -2,7 +2,7 @@
 using GisanParkGolf_Core.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-namespace GisanParkGolf_Core.Services.AdminPage
+namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
 {
     public class StadiumService : IStadiumService
     {
