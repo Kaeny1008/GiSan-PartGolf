@@ -117,6 +117,8 @@
         ? JsonConvert.DeserializeObject<List<GisanParkGolf_Core.Pages.AdminPage.ViewModels.ParticipantViewModel>>(unassignedJson)
         : new List<GisanParkGolf_Core.Pages.AdminPage.ViewModels.ParticipantViewModel>();
 
+    var assignmentJustRun = HttpContext.Session.GetString("AssignmentJustRun") == "true";
+
     string? prevCourse = null;
     string? prevHole = null;
     int colorIdx = 0;
@@ -658,14 +660,38 @@ ViewData["Title"] as string ?? "제목 없음",
                                                         }
                                                     </td>
                                                     <td class="@colorClasses[colorIdx]">
-                                                        <!-- 코스배치 취소 버튼 -->
+                                                        <!-- 편집 버튼(기존) -->
                                                         <button type="button"
-                                                                class="btn btn-danger btn-sm"
+                                                                class="btn btn-sm btn-outline-secondary me-1"
                                                                 data-bs-toggle="modal"
-                                                                data-bs-target="#cancelAssignmentModal_@row.UserId"
+                                                                data-bs-target="#editAssignmentModal_@row.UserId"
                                                                 @(Model.AssignmentLocked ? "disabled" : "")>
-                                                            코스배치 취소
+                                                            편집
                                                         </button>
+
+                                                        @{
+                                                            var locked = Model.AssignmentLocked;
+                                                            // assignmentJustRun은 상단에서 이미 읽어온 값입니다.
+                                                        }
+
+                                                        @if (locked)
+                                                        {
+                                                            <button type="button" class="btn btn-danger btn-sm" disabled title="잠금 상태: 관리자만 잠금 해제 후 변경 가능">코스배치 취소</button>
+                                                        }
+                                                        else if (assignmentJustRun)
+                                                        {
+                                                            @* 방금 자동배치 실행 직후(세션만 있는 상태)에는 취소 불가 *@
+                                                            <button type="button" class="btn btn-danger btn-sm" disabled title="방금 배치 실행(저장 전)입니다. '결과저장' 후에만 취소할 수 있습니다.">코스배치 취소</button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button type="button"
+                                                                    class="btn btn-danger btn-sm"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#cancelAssignmentModal_@row.UserId">
+                                                                코스배치 취소
+                                                            </button>
+                                                        }
 
                                                         <!-- 취소 확인 & 사유 입력 모달 -->
                                                         <div class="modal fade" id="cancelAssignmentModal_@row.UserId" tabindex="-1" aria-labelledby="cancelAssignmentModalLabel_@row.UserId" aria-hidden="true">
@@ -701,6 +727,69 @@ ViewData["Title"] as string ?? "제목 없음",
                                                                     <div class="modal-footer">
                                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                                                                         <button type="submit" class="btn btn-danger">코스배치 취소</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                        <!-- 편집 모달: Course / Hole / Order 변경 -->
+                                                        <div class="modal fade" id="editAssignmentModal_@row.UserId" tabindex="-1" aria-labelledby="editAssignmentModalLabel_@row.UserId" aria-hidden="true">
+                                                            <div class="modal-dialog modal-dialog-centered">
+                                                                <form method="post" asp-page-handler="EditAssignment" class="modal-content">
+                                                                    <input type="hidden" name="gameCode" value="@Request.Query["gameCode"]" />
+                                                                    <input type="hidden" name="userId" value="@row.UserId" />
+
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title fw-bold" id="editAssignmentModalLabel_@row.UserId">코스배치 수정 — @row.UserName</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                                                                    </div>
+
+                                                                    <div class="modal-body">
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">코스 선택</label>
+                                                                            <select name="courseName" class="form-select form-select-sm" required>
+                                                                                @foreach (var c in Model.Courses)
+                                                                                {
+                                                                                    if (c.CourseName == row.CourseName)
+                                                                                    {
+                                                                                        <option value="@c.CourseName" selected>@c.CourseName</option>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <option value="@c.CourseName">@c.CourseName</option>
+                                                                                    }
+                                                                                }
+                                                                            </select>
+                                                                        </div>
+
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">홀 번호</label>
+                                                                            <select name="holeNumber" class="form-select form-select-sm" required>
+                                                                                @* 각 코스마다 실제 HoleCount가 다를 수 있으나 여기서는 표준 최대값(Model.MaxHoleNumber)을 사용합니다.
+                                                                                   (서버에서 선택한 코스의 HoleCount 검증을 수행합니다.) *@
+                                                                                @for (int i = 1; i <= Model.MaxHoleNumber; i++)
+                                                                                {
+                                                                                    if (i.ToString() == row.HoleNumber)
+                                                                                    {
+                                                                                        <option value="@i" selected>@i</option>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <option value="@i">@i</option>
+                                                                                    }
+                                                                                }
+                                                                            </select>
+                                                                        </div>
+
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">순번 (CourseOrder)</label>
+                                                                            <input type="number" name="courseOrder" class="form-control form-control-sm" value="@row.CourseOrder" min="1" required />
+                                                                            <div class="form-text small">같은 코스/홀 내에서의 우선순위(1부터). 저장 시 서버에서 해당 코스/홀별로 순번을 재정렬합니다.</div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                                                        <button type="submit" class="btn btn-primary">저장</button>
                                                                     </div>
                                                                 </form>
                                                             </div>

@@ -37,7 +37,7 @@ namespace GiSanParkGolf.Pages.AdminPage
         public PaginatedList<CourseAssignmentResultViewModel> Assignments { get; set; }
         public PaginatedList<AssignmentHistoryViewModel> AssignmentHistories { get; set; }
         public List<CourseAssignmentResultViewModel> AssignmentResults { get; set; } = new();
-        public List<CourseViewModel> Courses { get; set; } = new();
+        public List<CourseViewModel> Courses { get; set; } = new(); 
 
         public int TotalCount { get; set; }
         public int CancelledCount { get; set; }
@@ -286,6 +286,12 @@ namespace GiSanParkGolf.Pages.AdminPage
         // ------------------- 핸들러 (POST) -------------------
         public async Task<IActionResult> OnPostCancelAssignmentAsync(string gameCode, string userId, string? cancelReason)
         {
+            if (HttpContext.Session.GetString("AssignmentJustRun") == "true")
+            {
+                TempData["ErrorMessage"] = "방금 자동배치 실행 상태입니다. '결과저장' 후에 취소할 수 있습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
             var reject = await RejectIfAssignmentLockedAsync(gameCode);
             if (reject != null) return reject;
 
@@ -334,16 +340,16 @@ namespace GiSanParkGolf.Pages.AdminPage
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
 
-        public async Task<IActionResult> OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
-        {
-            // 바로 Reject 검사(중복 호출 가능하므로 내부 async 메서드에서만 검사하도록 정리하면 중복 제거)
-            var reject = await RejectIfAssignmentLockedAsync(gameCode);
-            if (reject != null) return reject;
+        //public async Task<IActionResult> OnPostForceAssignParticipant(string userId, string courseName, int holeNumber, string gameCode)
+        //{
+        //    // 바로 Reject 검사(중복 호출 가능하므로 내부 async 메서드에서만 검사하도록 정리하면 중복 제거)
+        //    var reject = await RejectIfAssignmentLockedAsync(gameCode);
+        //    if (reject != null) return reject;
 
-            // 기존 OnPostForceAssignParticipantAsync 로직을 이 메서드로 옮기거나
-            // 기존 async 메서드를 호출:
-            return await OnPostForceAssignParticipantAsync(userId, courseName, holeNumber, gameCode);
-        }
+        //    // 기존 OnPostForceAssignParticipantAsync 로직을 이 메서드로 옮기거나
+        //    // 기존 async 메서드를 호출:
+        //    return await OnPostForceAssignParticipantAsync(userId, courseName, holeNumber, gameCode);
+        //}
 
         public async Task<IActionResult> OnPostForceAssignParticipantAsync(string userId, string courseName, int holeNumber, string gameCode)
         {
@@ -552,6 +558,8 @@ namespace GiSanParkGolf.Pages.AdminPage
 
                 // 10. 커밋
                 await tx.CommitAsync();
+
+                HttpContext.Session.Remove("AssignmentJustRun");
 
                 TempData["SuccessMessage"] = "코스배치 결과가 정상적으로 저장되었습니다.";
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
@@ -849,6 +857,8 @@ namespace GiSanParkGolf.Pages.AdminPage
 
             // 다시 저장 (혹은 위에 배정 직전에 해도 됨)
             HttpContext.Session.SetString("AssignmentResults", JsonConvert.SerializeObject(assignmentResults));
+
+            HttpContext.Session.SetString("AssignmentJustRun", "true");
 
             return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
@@ -1256,6 +1266,150 @@ namespace GiSanParkGolf.Pages.AdminPage
             }
 
             return list;
+        }
+
+        // Replace the existing OnPostEditAssignmentAsync method with this implementation
+        public async Task<IActionResult> OnPostEditAssignmentAsync(string gameCode, string userId, string courseName, int holeNumber, int courseOrder)
+        {
+            // 1) 잠금 검사
+            var reject = await RejectIfAssignmentLockedAsync(gameCode);
+            if (reject != null) return reject;
+
+            // 2) 입력 유효성(간단한 서버측 검증)
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(courseName))
+            {
+                TempData["ErrorMessage"] = "잘못된 요청입니다. 필수값이 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            // 3) 선택한 코스가 해당 게임(경기장)에 존재하는지 확인하고 해당 코스의 HoleCount 검증
+            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            if (game == null)
+            {
+                TempData["ErrorMessage"] = "대회 정보를 찾을 수 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            var courseEntity = await _context.Courses.FirstOrDefaultAsync(c => c.CourseName == courseName && c.StadiumCode == game.StadiumCode);
+            if (courseEntity == null)
+            {
+                TempData["ErrorMessage"] = "선택한 코스가 존재하지 않습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            if (holeNumber < 1 || holeNumber > courseEntity.HoleCount)
+            {
+                TempData["ErrorMessage"] = $"유효하지 않은 홀 번호입니다. 선택한 코스의 홀 수 범위는 1 ~ {courseEntity.HoleCount} 입니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            // 4) 세션에서 현재 배정 결과 불러와 수정
+            var assignmentResults = GetAssignmentResults(gameCode);
+            var target = assignmentResults.FirstOrDefault(r => r.UserId == userId);
+            if (target == null)
+            {
+                TempData["ErrorMessage"] = "해당 참가자의 배치 항목을 찾을 수 없습니다.";
+                return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
+            }
+
+            // 저장 전 원래 그룹 키(코스+홀)를 기록
+            var oldCourse = target.CourseName;
+            var oldHole = target.HoleNumber;
+
+            // 5) 목록에서 대상 항목을 제거(우선)
+            assignmentResults.RemoveAll(r => r.UserId == userId);
+
+            // 6) 대상 항목에 변경 값 적용 (홀은 문자열로 저장됨)
+            target.CourseName = courseName;
+            target.HoleNumber = holeNumber.ToString();
+
+            // 7) 새 그룹과(필요하면) 이전 그룹을 재번호화
+            // helper: 재번호화 후에 해당 그룹 항목을 반환
+            List<CourseAssignmentResultViewModel> RenumberAndReturnGroup(string grpCourse, string grpHole, List<CourseAssignmentResultViewModel> source)
+            {
+                var grp = source
+                    .Where(r => r.CourseName == grpCourse && r.HoleNumber == grpHole)
+                    .OrderBy(r => r.CourseOrder)
+                    .ToList();
+
+                int idx = 1;
+                foreach (var it in grp)
+                {
+                    it.CourseOrder = idx++;
+                }
+                return grp;
+            }
+
+            string newHoleStr = target.HoleNumber;
+
+            // 재번호화가 필요한 그룹 키들을 수집 (중복 제거)
+            var groupsToProcess = new List<(string course, string hole)>();
+            // 이전 그룹 (원래 있던 그룹) — 단, oldCourse/oldHole이 null 체크는 불필요하지만 안전하게 처리
+            if (!string.IsNullOrEmpty(oldCourse) && !string.IsNullOrEmpty(oldHole))
+                groupsToProcess.Add((oldCourse, oldHole));
+            // 새 그룹
+            groupsToProcess.Add((courseName, newHoleStr));
+
+            // 기타 항목(그룹에 속하지 않는)과 그룹별 항목을 분리
+            var others = assignmentResults
+                .Where(r => !(r.CourseName == courseName && r.HoleNumber == newHoleStr) && !(r.CourseName == oldCourse && r.HoleNumber == oldHole))
+                .ToList();
+
+            // build newGroup (items currently in new group)
+            var newGroup = assignmentResults
+                .Where(r => r.CourseName == courseName && r.HoleNumber == newHoleStr)
+                .OrderBy(r => r.CourseOrder)
+                .ToList();
+
+            // Insert target into newGroup at requested index (courseOrder is 1-based)
+            int insertIndex = Math.Max(0, Math.Min(courseOrder - 1, newGroup.Count));
+            newGroup.Insert(insertIndex, target);
+
+            // Renumber newGroup sequentially
+            int seq = 1;
+            foreach (var it in newGroup)
+            {
+                it.CourseOrder = seq++;
+            }
+
+            // If old group is different from new group, renumber old group as well
+            List<CourseAssignmentResultViewModel> oldGroupRenumbered = new List<CourseAssignmentResultViewModel>();
+            if (!(oldCourse == courseName && oldHole == newHoleStr))
+            {
+                var oldGroup = assignmentResults
+                    .Where(r => r.CourseName == oldCourse && r.HoleNumber == oldHole)
+                    .OrderBy(r => r.CourseOrder)
+                    .ToList();
+
+                seq = 1;
+                foreach (var it in oldGroup)
+                {
+                    it.CourseOrder = seq++;
+                }
+                oldGroupRenumbered = oldGroup;
+            }
+
+            // 재조합: others + renumbered old group (if any) + renumbered new group
+            var recomposed = new List<CourseAssignmentResultViewModel>();
+            recomposed.AddRange(others);
+            if (oldGroupRenumbered.Any()) recomposed.AddRange(oldGroupRenumbered);
+            recomposed.AddRange(newGroup);
+
+            // 8) 전체를 코스명 > 홀번호 > 순번 기준으로 정렬하여 일관성 유지
+            assignmentResults = recomposed
+                .OrderBy(r => r.CourseName)
+                .ThenBy(r => int.TryParse(r.HoleNumber, out var hn) ? hn : 0)
+                .ThenBy(r => r.CourseOrder)
+                .ToList();
+
+            // 9) 팀번호 재할당 (기존 로직 사용)
+            await AssignTeamNumbers(assignmentResults, gameCode);
+
+            // 10) 세션 저장
+            SaveAssignmentResults(assignmentResults);
+
+            TempData["SuccessMessage"] = "배치 항목이 수정되었습니다.";
+            return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
         }
     }
 }
