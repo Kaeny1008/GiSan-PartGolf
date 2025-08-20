@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
+namespace GisanParkGolf_Core.Pages.AdminPage.ViewModels
 {
     // 핸디캡 변경 로그를 화면에 보여주기 위한 전용 모델
     public class HandicapChangeLogViewModel

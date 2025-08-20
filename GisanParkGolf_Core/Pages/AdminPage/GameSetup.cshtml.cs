@@ -1,6 +1,7 @@
 ﻿using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Helpers;
 using GisanParkGolf_Core.Pages.AdminPage.AdminPage;
+using GisanParkGolf_Core.Pages.AdminPage.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -518,7 +519,7 @@ namespace GiSanParkGolf.Pages.AdminPage
                 // 롤백 후 로깅/유저 메시지
                 await tx.RollbackAsync();
                 // TODO: 실제 앱에서는 ILogger로 예외 로깅
-                TempData["ErrorMessage"] = "코스배치 저장 중 오류가 발생했습니다. 관리자에게 문의하세요.";
+                TempData["ErrorMessage"] = "코스배치 저장 중 오류가 발생했습니다. 관리자에게 문의하세요.\n" + ex.Message;
                 // 예외를 던지거나 상세 메시지를 로그에 남기도록 처리
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
@@ -1100,14 +1101,14 @@ namespace GiSanParkGolf.Pages.AdminPage
             catch (DbUpdateConcurrencyException ex)
             {
                 // 동시성 문제 처리
-                TempData["ErrorMessage"] = "잠금 해제 중 동시성 충돌이 발생했습니다. 다시 시도하세요.";
+                TempData["ErrorMessage"] = "잠금 해제 중 동시성 충돌이 발생했습니다. 다시 시도하세요.\n" + ex.Message;
                 // TODO: ILogger로 ex 상세 로깅
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
             catch (Exception ex)
             {
                 // TODO: ILogger로 ex 상세 로깅
-                TempData["ErrorMessage"] = "잠금 해제 중 오류가 발생했습니다. 관리자에게 문의하세요.";
+                TempData["ErrorMessage"] = "잠금 해제 중 오류가 발생했습니다. 관리자에게 문의하세요.\n" + ex.Message;
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
         }

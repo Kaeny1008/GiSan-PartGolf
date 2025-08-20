@@ -1,6 +1,7 @@
 ﻿@page
 @using GisanParkGolf_Core.Helpers
-@using GisanParkGolf_Core.ViewModels.AdminPage
+@using GisanParkGolf_Core.Pages.AdminPage.AdminPage
+@using GisanParkGolf_Core.Pages.AdminPage.ViewModels
 @using Newtonsoft.Json
 @using Microsoft.AspNetCore.Http
 @model GiSanParkGolf.Pages.AdminPage.GameSetupModel
@@ -111,8 +112,8 @@
 
     var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
     var unassigned = !string.IsNullOrEmpty(unassignedJson)
-        ? JsonConvert.DeserializeObject<List<GisanParkGolf_Core.ViewModels.AdminPage.ParticipantViewModel>>(unassignedJson)
-        : new List<GisanParkGolf_Core.ViewModels.AdminPage.ParticipantViewModel>();
+        ? JsonConvert.DeserializeObject<List<GisanParkGolf_Core.Pages.AdminPage.ViewModels.ParticipantViewModel>>(unassignedJson)
+        : new List<GisanParkGolf_Core.Pages.AdminPage.ViewModels.ParticipantViewModel>();
 
     string? prevCourse = null;
     string? prevHole = null;

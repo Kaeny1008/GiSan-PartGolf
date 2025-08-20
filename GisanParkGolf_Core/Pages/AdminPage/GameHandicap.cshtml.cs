@@ -1,5 +1,6 @@
 using GisanParkGolf_Core.Helpers;
 using GisanParkGolf_Core.Pages.AdminPage.AdminPage;
+using GisanParkGolf_Core.Pages.AdminPage.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

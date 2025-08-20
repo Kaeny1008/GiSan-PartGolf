@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
+namespace GisanParkGolf_Core.Pages.AdminPage.ViewModels
 {
     /// <summary>
     /// 관리자 대회 목록 화면에 표시되는 대회 정보 ViewModel
