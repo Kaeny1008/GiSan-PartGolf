@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -35,6 +36,7 @@ namespace GiSanParkGolf.Pages.AdminPage
         public PaginatedList<CourseAssignmentResultViewModel> Assignments { get; set; }
         public List<CourseAssignmentResultViewModel> AssignmentResults { get; set; } = new();
         public List<CourseViewModel> Courses { get; set; } = new();
+        public List<AssignmentHistoryViewModel> AssignmentHistoryViewModels { get; set; } = new List<AssignmentHistoryViewModel>();
 
         public int TotalCount { get; set; }
         public int CancelledCount { get; set; }
@@ -214,6 +216,15 @@ namespace GiSanParkGolf.Pages.AdminPage
 
             // 코스배치 결과(세션/DB)
             AssignmentResults = GetAssignmentResults(gameCode);
+
+            // --- 히스토리 로드 (최근 100건) ---
+            var histories = await _context.Set<GameAssignmentHistory>()
+                .Where(h => h.GameCode == gameCode)
+                .OrderByDescending(h => h.ChangedAt)
+                .Take(100)
+                .ToListAsync();
+
+            AssignmentHistoryViewModels = BuildHistoryViewModels(histories);
 
             // 검색/페이징
             IEnumerable<CourseAssignmentResultViewModel> filteredResults = AssignmentResults;
@@ -1111,6 +1122,109 @@ namespace GiSanParkGolf.Pages.AdminPage
                 TempData["ErrorMessage"] = "잠금 해제 중 오류가 발생했습니다. 관리자에게 문의하세요.\n" + ex.Message;
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
+        }
+
+        private List<AssignmentHistoryViewModel> BuildHistoryViewModels(IEnumerable<GameAssignmentHistory> histories)
+        {
+            var list = new List<AssignmentHistoryViewModel>();
+            if (histories == null) return list;
+
+            foreach (var h in histories)
+            {
+                var vm = new AssignmentHistoryViewModel
+                {
+                    HistoryId = h.HistoryId,
+                    ChangeType = h.ChangeType,
+                    ChangedBy = h.ChangedBy,
+                    ChangedAt = h.ChangedAt,
+                    RawDetailsJson = h.Details ?? ""
+                };
+
+                JObject? token = null;
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(h.Details))
+                    {
+                        token = JObject.Parse(h.Details);
+                    }
+                }
+                catch
+                {
+                    token = null;
+                }
+
+                var dict = new Dictionary<string, string>();
+                if (token != null)
+                {
+                    foreach (var prop in token.Properties())
+                    {
+                        var val = prop.Value;
+                        switch (val.Type)
+                        {
+                            case JTokenType.Array:
+                                var arr = val as JArray;
+                                if (arr != null && arr.Count > 0)
+                                {
+                                    var items = arr.Select(x => x.ToString()).ToList();
+                                    var preview = items.Count <= 5 ? string.Join(", ", items) : string.Join(", ", items.Take(5)) + $" 외 {items.Count - 5}건";
+                                    dict[prop.Name] = preview;
+                                }
+                                else dict[prop.Name] = "없음";
+                                break;
+                            case JTokenType.Object:
+                                dict[prop.Name] = val.ToString(Formatting.None);
+                                break;
+                            default:
+                                dict[prop.Name] = val.ToString() ?? "";
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    dict["Message"] = h.Details ?? "";
+                }
+
+                // 간단한 요약 생성 (ChangeType 기반)
+                string summary;
+                var t = (h.ChangeType ?? "").ToLowerInvariant();
+                if (t.Contains("save"))
+                {
+                    var savedBy = dict.ContainsKey("SavedBy") ? dict["SavedBy"] : (h.ChangedBy ?? "-");
+                    var totalAssigned = dict.ContainsKey("TotalAssigned") ? dict["TotalAssigned"] : (dict.ContainsKey("TotalAssignedCount") ? dict["TotalAssignedCount"] : "-");
+                    var unassigned = dict.ContainsKey("UnassignedCount") ? dict["UnassignedCount"] : "-";
+                    var removed = dict.ContainsKey("RemovedUserIds") ? dict["RemovedUserIds"] : "-";
+                    summary = $"{savedBy} 님이 배치를 저장(확정)했습니다. 배정: {totalAssigned}명, 미배정: {unassigned}명, 제거: {removed}";
+                }
+                else if (t == "unlock" || t.Contains("unlock"))
+                {
+                    var by = dict.ContainsKey("UnlockedBy") ? dict["UnlockedBy"] : (h.ChangedBy ?? "-");
+                    summary = $"{by} 님이 잠금을 해제했습니다.";
+                }
+                else if (t.Contains("cancel") || t.Contains("approve"))
+                {
+                    var who = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : (h.ChangedBy ?? "-");
+                    var reason = dict.ContainsKey("CancelReason") ? dict["CancelReason"] : dict.ContainsKey("Reason") ? dict["Reason"] : "";
+                    summary = $"{h.ChangedBy} 님이 참가자 {who} 에 대해 취소 처리{(string.IsNullOrWhiteSpace(reason) ? "" : $"(사유: {reason})")}";
+                }
+                else if (t.Contains("forceassign") || t.Contains("assign"))
+                {
+                    var user = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : "-";
+                    var course = dict.ContainsKey("CourseName") ? dict["CourseName"] : "-";
+                    var hole = dict.ContainsKey("HoleNumber") ? dict["HoleNumber"] : dict.ContainsKey("Hole") ? dict["Hole"] : "-";
+                    summary = $"{h.ChangedBy} 님이 {user} 를 {course} {hole}홀에 강제 배정했습니다.";
+                }
+                else
+                {
+                    summary = $"{h.ChangedBy} 님이 {h.ChangeType ?? "변경"} 작업을 수행했습니다.";
+                }
+
+                vm.Summary = summary;
+                vm.DetailsDict = dict;
+                list.Add(vm);
+            }
+
+            return list;
         }
     }
 }

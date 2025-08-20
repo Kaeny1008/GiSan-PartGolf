@@ -262,6 +262,9 @@ ViewData["Title"] as string ?? "제목 없음",
                     <li class="nav-item">
                         <a class="nav-link @(activeTab == "tab-result" ? "active" : "")" data-bs-toggle="tab" href="#tab-result" role="tab">코스배치 결과 확인</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(activeTab == "tab-history" ? "active" : "")" data-bs-toggle="tab" href="#tab-history" role="tab">히스토리</a>
+                    </li>
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane fade @(activeTab == "tab-info" ? "show active" : "")" id="tab-info" role="tabpanel">
@@ -773,6 +776,10 @@ ViewData["Title"] as string ?? "제목 없음",
                                 <span class="text-danger">※ 참가자 정보나 옵션이 변경되면 재배치가 필요합니다.</span>
                             </div>
                         </div>
+                    </div>
+                    <div class="tab-pane fade @(activeTab == "tab-history" ? "show active" : "")" id="tab-history" role="tabpanel">
+                        @* 히스토리 탭: 잠금/해제, 저장 등 배치 관련 히스토리를 표시합니다 *@
+                        @await Html.PartialAsync("~/Pages/AdminPage/Partials/_GameSetup_TabHistory.cshtml", Model.AssignmentHistoryViewModels)
                     </div>
                 </div>
                 <div id="faq" class="mt-4">
