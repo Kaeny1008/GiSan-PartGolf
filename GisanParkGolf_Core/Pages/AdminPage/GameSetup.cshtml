@@ -1,4 +1,6 @@
 ﻿@page
+@using System.Globalization
+@using System.Linq
 @using GisanParkGolf_Core.Helpers
 @using GisanParkGolf_Core.Pages.AdminPage.AdminPage
 @using GisanParkGolf_Core.Pages.AdminPage.ViewModels
@@ -187,14 +189,14 @@ ViewData["Title"] as string ?? "제목 없음",
                                     var comp = Model.Competitions[i];
                                     var assignedCount = comp.AssignmentCount; // 이 값은 VM에서 미리 계산
                                     var participantCount = comp.JoinedCount;  // 취소 안된 참가자 수
-                                    <tr>
-                                        <td>@(i + 1)</td>
-                                        <td>@comp.GameName</td>
-                                        <td>@comp.GameDate.ToString("yyyy-MM-dd")</td>
-                                        <td>@GameStatusHelper.ToDisplay(comp.Status)</td>
-                                        <td>@comp.StadiumName</td>
-                                        <td>@comp.TotalParticipants</td>
-                                        <td>
+                                                                              <tr>
+                                                                                  <td>@(i + 1)</td>
+                                                                                  <td>@comp.GameName</td>
+                                                                                  <td>@comp.GameDate.ToString("yyyy-MM-dd")</td>
+                                                                                  <td>@GameStatusHelper.ToDisplay(comp.Status)</td>
+                                                                                  <td>@comp.StadiumName</td>
+                                                                                  <td>@comp.TotalParticipants</td>
+                                                                                  <td>
                                             @if (assignedCount < participantCount)
                                             {
                                                 <span class="badge bg-danger">재배치 필요</span>
@@ -297,25 +299,25 @@ ViewData["Title"] as string ?? "제목 없음",
                             <!-- 참가자 정보 카드 -->
                             <div class="participant-card-modern participant-wide">
                                 <div class="participant-title">참가자 정보</div>
-                                @await Html.PartialAsync("_SearchControl", participantSearchModel, new 
+                                @await Html.PartialAsync("_SearchControl", participantSearchModel, new
                                 ViewDataDictionary(ViewData) {
                                     { "activeTab", "tab-info" },
-                                    { "gameCode", gameCode }
+                                                        { "gameCode", gameCode }
                                 })
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0" id="participantTable">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th style="width:4rem">No</th>
-                                                <th>이름</th>
-                                                <th>아이디</th>
-                                                <th>참가일자</th>
-                                                <th>참가상태</th>
-                                                <th>관리</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if (Model.Participants != null)
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0" id="participantTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width:4rem">No</th>
+                                            <th>이름</th>
+                                            <th>아이디</th>
+                                            <th>참가일자</th>
+                                            <th>참가상태</th>
+                                            <th>관리</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (Model.Participants != null)
                                             {
                                                 for (int i = 0; i < Model.Participants.Count; i++)
                                                 {
@@ -488,6 +490,7 @@ ViewData["Title"] as string ?? "제목 없음",
                             </form>
                         </div>
                     </div>
+
                     <div class="tab-pane fade @(activeTab == "tab-result" ? "show active" : "")" id="tab-result" role="tabpanel">
                         <div class="p-3">
                             @if (Model.AssignmentLocked)
@@ -541,15 +544,15 @@ ViewData["Title"] as string ?? "제목 없음",
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="fw-bold mb-0">코스배치 결과 확인</h5>
                                 <div>
-                                    <button type="button" class="btn btn-primary" 
-                                            id="btnSaveResult" 
-                                            data-bs-toggle="modal" 
+                                    <button type="button" class="btn btn-primary"
+                                            id="btnSaveResult"
+                                            data-bs-toggle="modal"
                                             data-bs-target="#saveResultModal" @(Model.AssignmentLocked ? "disabled" : "")>
                                         결과저장
                                     </button>
-                                    <button type="button" class="btn btn-outline-secondary" 
-                                        id="btnExportPdf" 
-                                        onclick="location.href='@Url.Page("./GameSetup", "ExportPdf", new { gameCode = Request.Query["gameCode"] })'">
+                                    <button type="button" class="btn btn-outline-secondary"
+                                            id="btnExportPdf"
+                                            onclick="location.href='@Url.Page("./GameSetup", "ExportPdf", new { gameCode = Request.Query["gameCode"] })'">
                                         코스배치표 출력
                                     </button>
                                     <button type="button" class="btn btn-outline-success"
@@ -597,31 +600,31 @@ ViewData["Title"] as string ?? "제목 없음",
                                 </div>
                             </div>
 
-                            @await Html.PartialAsync("_SearchControl", assignmentSearchModel, new 
+                            @await Html.PartialAsync("_SearchControl", assignmentSearchModel, new
                             ViewDataDictionary(ViewData) {
                                 { "activeTab", "tab-result" },
-                                { "gameCode", gameCode }
+                                                { "gameCode", gameCode }
                             })
-                            <div class="table-responsive">
-                                <table class="table table-bordered align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>No</th>
-                                            <th>팀명</th>
-                                            <th>코스명</th>
-                                            <th>홀 번호</th>
-                                            <th>순번</th>
-                                            <th>참가자 이름</th>
-                                            <th>아이디</th>
-                                            <th>성별</th>
-                                            <th>연령대</th>
-                                            <th>핸디캡</th>
-                                            <th>수상경력</th>
-                                            <th>배치취소(참가취소)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @if (Model.Assignments != null && Model.Assignments.Count > 0)
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>팀명</th>
+                                        <th>코스명</th>
+                                        <th>홀 번호</th>
+                                        <th>순번</th>
+                                        <th>참가자 이름</th>
+                                        <th>아이디</th>
+                                        <th>성별</th>
+                                        <th>연령대</th>
+                                        <th>핸디캡</th>
+                                        <th>수상경력</th>
+                                        <th>배치취소(참가취소)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Assignments != null && Model.Assignments.Count > 0)
                                         {
                                             @for (int no = 1; no <= Model.Assignments.Count; no++)
                                             {
@@ -681,11 +684,11 @@ ViewData["Title"] as string ?? "제목 없음",
                                                                         <div class="mb-3">
                                                                             <label for="cancelReason_@row.UserId" class="form-label">취소 사유 입력 <span class="text-danger">*</span></label>
                                                                             <textarea class="form-control"
-                                                                                id="cancelReason_@row.UserId"
-                                                                                name="cancelReason"
-                                                                                rows="2"
-                                                                                required
-                                                                                oninput="validateCancelReason(this)">참가자 요청</textarea>
+                                                                          id="cancelReason_@row.UserId"
+                                                                          name="cancelReason"
+                                                                          rows="2"
+                                                                          required
+                                                                          oninput="validateCancelReason(this)">참가자 요청</textarea>
                                                                             <div class="invalid-feedback">
                                                                                 취소 사유를 반드시 입력해야 합니다.
                                                                             </div>
@@ -777,9 +780,112 @@ ViewData["Title"] as string ?? "제목 없음",
                             </div>
                         </div>
                     </div>
+
                     <div class="tab-pane fade @(activeTab == "tab-history" ? "show active" : "")" id="tab-history" role="tabpanel">
-                        @* 히스토리 탭: 잠금/해제, 저장 등 배치 관련 히스토리를 표시합니다 *@
-                        @await Html.PartialAsync("~/Pages/AdminPage/Partials/_GameSetup_TabHistory.cshtml", Model.AssignmentHistoryViewModels)
+
+                        @* --- 히스토리용 검색 컨트롤 생성 --- *@
+                        @{
+                            var historySearchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                            {
+                                PageSize = Model.HistoryPageSize,
+                                PageSizeName = "HistoryPageSize",
+                                QueryName = "HistorySearchQuery",
+                                SearchField = Model.HistorySearchQuery ?? "ChangeType",
+                                SearchQuery = Model.HistorySearchQuery,
+                                ResetPageName = "./GameSetup",
+                                FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                                        {
+                                        new() { Value = "ChangeType", Text = "변경유형" },
+                                        new() { Value = "ChangedBy", Text = "변경자" },
+                                        new() { Value = "Details", Text = "상세(JSON)" }
+                                        }
+                            };
+
+                            var historyPageModel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+                            {
+                                PageIndex = Model.HistoryPageIndex,
+                                TotalPages = Model.AssignmentHistories?.TotalPages ?? 1,
+                                GetPageUrl = i => Url.Page(
+                                "./GameSetup",
+                                null,
+                                new
+                                {
+                                    gameCode = Request.Query["gameCode"],
+                                    HistorySearchQuery = Model.HistorySearchQuery,
+                                    HistoryPageIndex = i,
+                                    HistoryPageSize = Model.HistoryPageSize,
+                                    tab = "tab-history"
+                                }, null) ?? ""
+                            };
+                        }
+
+                        @* SearchControl partial 재사용: ViewData로 activeTab, gameCode 전달 (기존 방식과 동일) *@
+                        @await Html.PartialAsync("_SearchControl", historySearchModel, new ViewDataDictionary(ViewData) {
+                            { "activeTab", "tab-history" }, 
+                            { "gameCode", gameCode }
+                        })
+
+                        @* --- 실제 히스토리 리스트 출력 --- *@
+                        @if (Model.AssignmentHistories == null || Model.AssignmentHistories.Count == 0)
+                        {
+                            <div class="alert alert-secondary">
+                                <i class="bi bi-clock-history me-1"></i> 히스토리 기록이 없습니다.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="list-group">
+                                @foreach (var h in Model.AssignmentHistories)
+                                {
+                                    var collapseId = $"historyDetails_{h.HistoryId}";
+                                    <div class="list-group-item list-group-item-action mb-2">
+                                        <div class="d-flex w-100 justify-content-between align-items-start">
+                                            <div class="me-2">
+                                                <div class="fw-semibold">@h.Summary</div>
+                                                <small class="text-muted">
+                                                    <span class="me-2"><i class="bi bi-person-fill"></i> @(!string.IsNullOrEmpty(h.ChangedBy) ? h.ChangedBy : "Unknown")</span>
+                                                    <span><i class="bi bi-calendar-event"></i> @h.ChangedAt.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)</span>
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-light text-dark mb-2">@h.ChangeType</span>
+                                                <div>
+                                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                                        상세보기
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="collapse mt-3" id="@collapseId">
+                                            <div class="card card-body bg-light">
+                                                <h6 class="mb-2">요약 필드</h6>
+                                                @if (h.DetailsDict != null && h.DetailsDict.Any())
+                                                {
+                                                    <dl class="row mb-3">
+                                                        @foreach (var kv in h.DetailsDict)
+                                                        {
+                                                            <dt class="col-sm-4 text-truncate">@kv.Key</dt>
+                                                            <dd class="col-sm-8"><small class="text-muted">@kv.Value</small></dd>
+                                                        }
+                                                    </dl>
+                                                }
+                                                else
+                                                {
+                                                    <div class="mb-3 text-muted">요약 정보가 없습니다.</div>
+                                                }
+
+                                                <h6 class="mb-2">원본 JSON</h6>
+                                                <pre class="small bg-white p-2 border rounded" style="max-height:240px; overflow:auto;">@Html.Raw(System.Net.WebUtility.HtmlEncode(h.RawDetailsJson ?? ""))</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            @* 히스토리 페이징 출력 (기존 _Pagination partial 재사용) *@
+                            @await Html.PartialAsync("_Pagination", historyPageModel)
+                        }
                     </div>
                 </div>
                 <div id="faq" class="mt-4">

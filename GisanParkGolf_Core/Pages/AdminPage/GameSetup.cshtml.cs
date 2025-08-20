@@ -28,15 +28,16 @@ namespace GiSanParkGolf.Pages.AdminPage
             Competitions = new PaginatedList<CompetitionViewModel>(new List<CompetitionViewModel>(), 0, 1, 10);
             Participants = new PaginatedList<ParticipantViewModel>(new List<ParticipantViewModel>(), 0, 1, 10);
             Assignments = new PaginatedList<CourseAssignmentResultViewModel>(new List<CourseAssignmentResultViewModel>(), 0, 1, 10);
+            AssignmentHistories = new PaginatedList<AssignmentHistoryViewModel>(new List<AssignmentHistoryViewModel>(), 0, 1, 10);
         }
 
         // ------------------- ViewModel Properties -------------------
         public PaginatedList<CompetitionViewModel> Competitions { get; set; }
         public PaginatedList<ParticipantViewModel> Participants { get; set; }
         public PaginatedList<CourseAssignmentResultViewModel> Assignments { get; set; }
+        public PaginatedList<AssignmentHistoryViewModel> AssignmentHistories { get; set; }
         public List<CourseAssignmentResultViewModel> AssignmentResults { get; set; } = new();
         public List<CourseViewModel> Courses { get; set; } = new();
-        public List<AssignmentHistoryViewModel> AssignmentHistoryViewModels { get; set; } = new List<AssignmentHistoryViewModel>();
 
         public int TotalCount { get; set; }
         public int CancelledCount { get; set; }
@@ -62,6 +63,9 @@ namespace GiSanParkGolf.Pages.AdminPage
         [BindProperty] public string? AwardSort { get; set; }
         [BindProperty(SupportsGet = true)] public string? Tab { get; set; }
         [BindProperty(SupportsGet = true)] public string? GameCode { get; set; }
+        [BindProperty(SupportsGet = true)] public int HistoryPageIndex { get; set; } = 1;
+        [BindProperty(SupportsGet = true)] public int HistoryPageSize { get; set; } = 10;
+        [BindProperty(SupportsGet = true)] public string? HistorySearchQuery { get; set; }
 
         // ------------------- Utility: Session/DB Handling -------------------
         private List<CourseAssignmentResultViewModel> GetAssignmentResults(string gameCode)
@@ -214,17 +218,44 @@ namespace GiSanParkGolf.Pages.AdminPage
                 }
             }
 
-            // 코스배치 결과(세션/DB)
-            AssignmentResults = GetAssignmentResults(gameCode);
+            /* 히스토리 로드 (검색 + 페이징)
+               - HistorySearchQuery: ChangeType, ChangedBy, Details(JSON)에 대해 단순 contains 검색
+               - HistoryPageIndex/HistoryPageSize 로 페이징
+            */
+            var historyQuery = _context.Set<GameAssignmentHistory>()
+                .Where(h => h.GameCode == gameCode);
 
-            // --- 히스토리 로드 (최근 100건) ---
-            var histories = await _context.Set<GameAssignmentHistory>()
-                .Where(h => h.GameCode == gameCode)
-                .OrderByDescending(h => h.ChangedAt)
-                .Take(100)
+            // 검색어가 있으면 ChangeType, ChangedBy, Details 에 대해 contains 검색
+            if (!string.IsNullOrWhiteSpace(HistorySearchQuery))
+            {
+                var q = HistorySearchQuery.Trim();
+                historyQuery = historyQuery.Where(h =>
+                    (!string.IsNullOrEmpty(h.ChangeType) && h.ChangeType.Contains(q)) ||
+                    (!string.IsNullOrEmpty(h.ChangedBy) && h.ChangedBy.Contains(q)) ||
+                    (!string.IsNullOrEmpty(h.Details) && h.Details.Contains(q))
+                );
+            }
+
+            // 정렬(최신순) 유지
+            historyQuery = historyQuery.OrderByDescending(h => h.ChangedAt);
+
+            // 전체 카운트 및 페이징된 데이터 로드
+            int historyTotalCount = await historyQuery.CountAsync();
+            var historyPageItems = await historyQuery
+                .Skip((HistoryPageIndex - 1) * HistoryPageSize)
+                .Take(HistoryPageSize)
                 .ToListAsync();
 
-            AssignmentHistoryViewModels = BuildHistoryViewModels(histories);
+            // BuildHistoryViewModels는 IEnumerable<GameAssignmentHistory> 를 받아 ViewModel 리스트를 반환합니다.
+            var historyViewModels = BuildHistoryViewModels(historyPageItems);
+
+            // PaginatedList로 포장하여 뷰에 전달
+            AssignmentHistories = new PaginatedList<AssignmentHistoryViewModel>(
+                historyViewModels, historyTotalCount, HistoryPageIndex, HistoryPageSize
+            );
+
+            // 코스배치 결과(세션/DB)
+            AssignmentResults = GetAssignmentResults(gameCode);
 
             // 검색/페이징
             IEnumerable<CourseAssignmentResultViewModel> filteredResults = AssignmentResults;
