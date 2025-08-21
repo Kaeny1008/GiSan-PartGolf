@@ -249,7 +249,9 @@ ViewData["Title"] as string ?? "제목 없음",
                         vdTabInfo["gameCode"] = gameCode;
                         vdTabInfo["activeTab"] = "tab-info";
                     }
-                    @await Html.PartialAsync("Partials/_GameSetup_TabInfo", Model, vdTabInfo)
+                    <div class="tab-pane fade @(activeTab == "tab-info" ? "show active" : "")" id="tab-info">
+                        @await Html.PartialAsync("Partials/_GameSetup_TabInfo", Model, vdTabInfo)
+                    </div>
                     <div class="tab-pane fade @(activeTab == "tab-course" ? "show active" : "")" id="tab-course" role="tabpanel">
                         <div class="p-3">
                             <h5 class="mb-3 fw-bold">코스배치 옵션 선택</h5>
