@@ -31,5 +31,8 @@
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Pages\AdminPage\Partials\" />
+  </ItemGroup>
 
 </Project>
