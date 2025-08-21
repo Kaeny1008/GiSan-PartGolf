@@ -125,33 +125,6 @@
     var colorClasses = new[] { "bg-soft-a", "bg-soft-b" };
 }
 
-@section Scripts {
-    <script>
-        function validateCancelReason(textarea) {
-            // 공백만 입력했을 때 막기
-            if (!textarea.value.trim()) {
-                textarea.classList.add('is-invalid');
-            } else {
-                textarea.classList.remove('is-invalid');
-            }
-        }
-
-        // 모달 submit시 추가 검사
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.modal form').forEach(function(form) {
-                form.addEventListener('submit', function(e) {
-                    var textarea = form.querySelector('textarea[name="cancelReason"]');
-                    if (textarea && !textarea.value.trim()) {
-                        textarea.classList.add('is-invalid');
-                        textarea.focus();
-                        e.preventDefault();
-                    }
-                });
-            });
-        });
-    </script>
-}
-
 @await Html.PartialAsync("Shared/Components/_HeaderCard", (
 ViewData["Title"] as string ?? "제목 없음",
     "대회를 선택한 후, 배치 옵션을 설정하고 인원을 코스에 배치할 수 있습니다."
@@ -732,64 +705,98 @@ ViewData["Title"] as string ?? "제목 없음",
                                                             </div>
                                                         </div>
                                                         <!-- 편집 모달: Course / Hole / Order 변경 -->
-                                                        <div class="modal fade" id="editAssignmentModal_@row.UserId" tabindex="-1" aria-labelledby="editAssignmentModalLabel_@row.UserId" aria-hidden="true">
-                                                            <div class="modal-dialog modal-dialog-centered">
-                                                                <form method="post" asp-page-handler="EditAssignment" class="modal-content">
+                                                        @{
+                                                            // 모달의 고유 ID(사용자 ID 기반)
+                                                            var modalId = $"editAssignmentModal_{row.UserId}";
+                                                            var modalLabelId = $"editAssignmentModalLabel_{row.UserId}";
+                                                        }
+
+                                                        <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@modalLabelId" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="true">
+                                                            <div class="modal-dialog modal-dialog-centered modal-md">
+                                                                <form method="post" asp-page-handler="EditAssignment" class="modal-content needs-validation" novalidate>
+                                                                    @* 숨김 필드: 게임 코드와 사용자 ID를 서버로 전송 *@
                                                                     <input type="hidden" name="gameCode" value="@Request.Query["gameCode"]" />
                                                                     <input type="hidden" name="userId" value="@row.UserId" />
 
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title fw-bold" id="editAssignmentModalLabel_@row.UserId">코스배치 수정 — @row.UserName</h5>
+                                                                    <div class="modal-header border-0 pb-0">
+                                                                        <div class="d-flex align-items-center gap-3">
+                                                                            @* 사용자 이니셜을 원형 아이콘으로 표시 *@
+                                                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;font-weight:600;">
+                                                                                @row.UserName?[0].ToString().ToUpper()
+                                                                            </div>
+                                                                            <div>
+                                                                                <h5 class="modal-title mb-0" id="@modalLabelId">코스배치 수정</h5>
+                                                                                <div class="text-muted small">@row.UserName — @row.UserId</div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        @* 모달 닫기 버튼 *@
                                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
                                                                     </div>
 
-                                                                    <div class="modal-body">
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label">코스 선택</label>
-                                                                            <select name="courseName" class="form-select form-select-sm" required>
-                                                                                @foreach (var c in Model.Courses)
-                                                                                {
-                                                                                    if (c.CourseName == row.CourseName)
-                                                                                    {
-                                                                                        <option value="@c.CourseName" selected>@c.CourseName</option>
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                        <option value="@c.CourseName">@c.CourseName</option>
-                                                                                    }
-                                                                                }
-                                                                            </select>
-                                                                        </div>
+                                                                    <div class="modal-body pt-3">
+                                                                        <div class="container-fluid">
+                                                                            <div class="row g-3">
+                                                                                @* 코스 선택 드롭다운 *@
+                                                                                <div class="col-12 col-md-6">
+                                                                                    <label for="courseSelect_@row.UserId" class="form-label fw-semibold">코스 선택</label>
+                                                                                    <select id="courseSelect_@row.UserId" name="courseName" class="form-select form-select-sm" required>
+                                                                                        <option value="" disabled selected hidden>코스를 선택하세요</option>
+                                                                                        @foreach (var c in Model.Courses)
+                                                                                        {
+                                                                                            if (c.CourseName == row.CourseName)
+                                                                                            {
+                                                                                                <option value="@c.CourseName" selected>@c.CourseName</option>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <option value="@c.CourseName">@c.CourseName</option>
+                                                                                            }
+                                                                                        }
+                                                                                    </select>
+                                                                                    <div class="invalid-feedback">코스를 선택해 주세요.</div>
+                                                                                </div>
 
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label">홀 번호</label>
-                                                                            <select name="holeNumber" class="form-select form-select-sm" required>
-                                                                                @* 각 코스마다 실제 HoleCount가 다를 수 있으나 여기서는 표준 최대값(Model.MaxHoleNumber)을 사용합니다.
-                                                                                   (서버에서 선택한 코스의 HoleCount 검증을 수행합니다.) *@
-                                                                                @for (int i = 1; i <= Model.MaxHoleNumber; i++)
-                                                                                {
-                                                                                    if (i.ToString() == row.HoleNumber)
-                                                                                    {
-                                                                                        <option value="@i" selected>@i</option>
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                        <option value="@i">@i</option>
-                                                                                    }
-                                                                                }
-                                                                            </select>
-                                                                        </div>
+                                                                                @* 홀 번호 선택 (최대값은 Model.MaxHoleNumber 사용) *@
+                                                                                <div class="col-12 col-md-3">
+                                                                                    <label for="holeSelect_@row.UserId" class="form-label fw-semibold">홀 번호</label>
+                                                                                    <select id="holeSelect_@row.UserId" name="holeNumber" class="form-select form-select-sm" required>
+                                                                                        <option value="" disabled hidden>번호</option>
+                                                                                        @for (int i = 1; i <= Model.MaxHoleNumber; i++)
+                                                                                        {
+                                                                                            if (i.ToString() == row.HoleNumber)
+                                                                                            {
+                                                                                                <option value="@i" selected>@i</option>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <option value="@i">@i</option>
+                                                                                            }
+                                                                                        }
+                                                                                    </select>
+                                                                                    <div class="invalid-feedback">홀 번호를 선택해 주세요.</div>
+                                                                                </div>
 
-                                                                        <div class="mb-3">
-                                                                            <label class="form-label">순번 (CourseOrder)</label>
-                                                                            <input type="number" name="courseOrder" class="form-control form-control-sm" value="@row.CourseOrder" min="1" required />
-                                                                            <div class="form-text small">같은 코스/홀 내에서의 우선순위(1부터). 저장 시 서버에서 해당 코스/홀별로 순번을 재정렬합니다.</div>
+                                                                                @* 순번 입력 *@
+                                                                                <div class="col-12 col-md-3">
+                                                                                    <label for="orderInput_@row.UserId" class="form-label fw-semibold">순번</label>
+                                                                                    <input id="orderInput_@row.UserId" name="courseOrder" type="number" class="form-control form-control-sm" value="@row.CourseOrder" min="1" step="1" required />
+                                                                                </div>
+
+                                                                                @* 안내 문구 *@
+                                                                                <div class="col-12">
+                                                                                    <div class="alert alert-info mb-0 py-2" role="status">
+                                                                                        <strong class="me-1">안내:</strong>
+                                                                                        같은 코스/홀 내 우선순위 (1부터). 서버에서 저장 시 자동 정렬됩니다.
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
 
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                                                        <button type="submit" class="btn btn-primary">저장</button>
+                                                                    <div class="modal-footer border-0">
+                                                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">취소</button>
+                                                                        <button type="submit" class="btn btn-primary btn-sm">저장</button>
                                                                     </div>
                                                                 </form>
                                                             </div>
@@ -990,3 +997,60 @@ ViewData["Title"] as string ?? "제목 없음",
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        // 취소 사유 입력 검증: 공백만 있는 경우 invalid 표시
+        function validateCancelReason(textarea) {
+            if (!textarea || !textarea.value) return;
+            if (!textarea.value.trim()) {
+                textarea.classList.add('is-invalid');
+            } else {
+                textarea.classList.remove('is-invalid');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 전역 제출 이벤트 감지 (모달 안의 폼만 검사)
+            document.addEventListener('submit', function (e) {
+                var form = e.target;
+                if (!form || !form.closest) return;
+                // 모달 내부 폼이 아니면 무시
+                if (!form.closest('.modal')) return;
+
+                // 1) 취소 사유 textarea 검사 (있으면 필수)
+                var textarea = form.querySelector('textarea[name="cancelReason"]');
+                if (textarea && !textarea.value.trim()) {
+                    textarea.classList.add('is-invalid');
+                    textarea.focus();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+
+                // 2) needs-validation 클래스가 있으면 Bootstrap 스타일 유효성 검사 적용
+                if (form.classList.contains('needs-validation')) {
+                    if (!form.checkValidity()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        form.classList.add('was-validated');
+                        return false;
+                    }
+                }
+
+                // 정상 제출이면 통과
+            }, true);
+
+            // Bootstrap 모달이 열린 후 포커스 설정 (전역 처리)
+            document.addEventListener('shown.bs.modal', function (e) {
+                var modalEl = e.target;
+                if (!modalEl) return;
+                // 우선순위: course select -> hole select -> order input -> cancelReason
+                var focusEl = modalEl.querySelector('select[name="courseName"], select[name="holeNumber"], input[name="courseOrder"], textarea[name="cancelReason"]');
+                if (focusEl && typeof focusEl.focus === 'function') {
+                    try { focusEl.focus(); } catch (err) { /* 무시 */ }
+                }
+            });
+        });
+    </script>
+}
