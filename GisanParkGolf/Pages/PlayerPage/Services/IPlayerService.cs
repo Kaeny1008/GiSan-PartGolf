@@ -1,9 +1,9 @@
-﻿using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Helpers;
+﻿using GisanParkGolf.Data;
+using GisanParkGolf.Helpers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Services.PlayerPage
+namespace GisanParkGolf.Services.PlayerPage
 {
     public interface IPlayerService
     {

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages
+namespace GisanParkGolf.Pages
 {
     [AllowAnonymous]
     public class IndexModel : PageModel

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace GisanParkGolf_Core.Pages.License
+namespace GisanParkGolf.Pages.License
 {
     public class LicenseModel : PageModel
     {

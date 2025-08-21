@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GisanParkGolf_Core.Pages.AdminPage.ViewModels
+namespace GisanParkGolf.Pages.AdminPage.ViewModels
 {
     // 화면에 핸디캡 정보를 표시하기 위한 전용 모델
     public class HandicapViewModel

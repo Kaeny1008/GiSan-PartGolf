@@ -1,6 +1,6 @@
-﻿using GisanParkGolf_Core.Data;
+﻿using GisanParkGolf.Data;
 
-namespace GisanParkGolf_Core.ViewModels.Account
+namespace GisanParkGolf.ViewModels.Account
 {
     public class MyInfo_InputModel : UserUpdate_InputModel
     {

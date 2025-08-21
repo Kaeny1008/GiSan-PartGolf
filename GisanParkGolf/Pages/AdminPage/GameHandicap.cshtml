@@ -1,5 +1,5 @@
 ﻿@page
-@model GisanParkGolf_Core.Pages.AdminPage.GameHandicapModel
+@model GisanParkGolf.Pages.AdminPage.GameHandicapModel
 @{
     ViewData["Title"] = "핸디캡 관리";
 }
@@ -104,13 +104,13 @@
         <div class="card-header py-3">
             <div class="d-flex justify-content-between align-items-center">
                 @{
-                    var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                    var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
                     {
                         PageSize = Model.PageSize,
                         SearchField = Model.SearchField,
                         SearchQuery = Model.SearchQuery,
                         ResetPageName = "./GameHandicap",
-                        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
                                 {
                                 new() { Value = "UserName", Text = "이름" },
                                 new() { Value = "UserId", Text = "ID" }
@@ -198,7 +198,7 @@
 
             <!-- 페이지네이션 컨트롤 -->
             @{
-                var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+                var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
                 {
                     PageIndex = Model.Handicaps.PageIndex,
                     TotalPages = Model.Handicaps.TotalPages,

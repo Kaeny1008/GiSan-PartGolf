@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GisanParkGolf_Core.Data
+namespace GisanParkGolf.Data
 {
     [Table("sys_course_list")]
     public class Course

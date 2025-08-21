@@ -24,13 +24,13 @@
     <div class="custom-card">
         <!-- 필터 및 버튼 영역 -->
         @{
-            var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+            var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
             {
                 PageSize = Model.PageSize,
                 SearchField = Model.SearchField,
                 SearchQuery = Model.SearchQuery,
                 ResetPageName = "./MyGame",
-                FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
                 {
                 new() { Value = "GameName", Text = "대회명" },
                 new() { Value = "StadiumName", Text = "경기장" },
@@ -70,7 +70,7 @@
                             <td>@game.GameDate.ToString("yyyy-MM-dd")</td>
                             <td>@game.StartRecruiting.ToString("yyyy-MM-dd")</td>
                             <td>@game.EndRecruiting.ToString("yyyy-MM-dd")</td>
-                            <td>@GisanParkGolf_Core.Helpers.GameStatusHelper.ToDisplay(game.GameStatus)</td>
+                            <td>@GisanParkGolf.Helpers.GameStatusHelper.ToDisplay(game.GameStatus)</td>
                             <td>@game.IsCancelledText</td>
                             <td>
                                 <a asp-page="MyGameDetail" asp-route-GameCode="@game.GameCode"
@@ -96,7 +96,7 @@
 
         <!-- 페이지네이션 컨트롤 -->
         @{
-            var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+            var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
             {
                 PageIndex = Model.PageIndex,
                 TotalPages = Model.GameList?.TotalPages ?? 1,

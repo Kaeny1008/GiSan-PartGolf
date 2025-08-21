@@ -1,10 +1,10 @@
 ﻿using System.Security.Claims;
-using GisanParkGolf_Core.Data;
+using GisanParkGolf.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using GisanParkGolf_Core.Security;
+using GisanParkGolf.Security;
 
-namespace GisanParkGolf_Core.Services.Account
+namespace GisanParkGolf.Services.Account
 {
     public class Playerservice : IPlayerservice
     {

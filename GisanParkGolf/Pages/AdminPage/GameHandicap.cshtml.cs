@@ -1,13 +1,13 @@
-using GisanParkGolf_Core.Helpers;
-using GisanParkGolf_Core.Pages.AdminPage.AdminPage;
-using GisanParkGolf_Core.Pages.AdminPage.ViewModels;
+using GisanParkGolf.Helpers;
+using GisanParkGolf.Pages.AdminPage.AdminPage;
+using GisanParkGolf.Pages.AdminPage.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.AdminPage
+namespace GisanParkGolf.Pages.AdminPage
 {
     [Authorize(Policy = "AdminOnly")]
     public class GameHandicapModel : PageModel

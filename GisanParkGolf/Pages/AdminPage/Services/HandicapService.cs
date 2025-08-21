@@ -1,6 +1,6 @@
-﻿using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Helpers;
-using GisanParkGolf_Core.Pages.AdminPage.ViewModels;
+﻿using GisanParkGolf.Data;
+using GisanParkGolf.Helpers;
+using GisanParkGolf.Pages.AdminPage.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
+namespace GisanParkGolf.Pages.AdminPage.AdminPage
 {
     public class HandicapService : IHandicapService
     {

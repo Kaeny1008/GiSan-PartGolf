@@ -1,8 +1,8 @@
-﻿using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Helpers; // PlayModeHelper 네임스페이스 추가!
+﻿using GisanParkGolf.Data;
+using GisanParkGolf.Helpers; // PlayModeHelper 네임스페이스 추가!
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GisanParkGolf_Core.ViewModels.PlayerPage
+namespace GisanParkGolf.ViewModels.PlayerPage
 {
     public class MyGameDetailViewModel
     {

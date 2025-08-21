@@ -3,7 +3,7 @@
     Model: PaginationModel (아래 정의 참고)
 *@
 
-@model GisanParkGolf_Core.Pages.Shared.PaginationModel
+@model GisanParkGolf.Pages.Shared.PaginationModel
 @{
     var prevDisabled = Model.PageIndex <= 1 ? "disabled" : "";
     var nextDisabled = Model.PageIndex >= Model.TotalPages ? "disabled" : "";

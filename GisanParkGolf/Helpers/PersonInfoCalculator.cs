@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GisanParkGolf_Core.Helpers
+namespace GisanParkGolf.Helpers
 {
     public static class PersonInfoCalculator
     {

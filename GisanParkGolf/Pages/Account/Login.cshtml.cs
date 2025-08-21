@@ -1,4 +1,4 @@
-﻿using GisanParkGolf_Core.Services.Account;
+﻿using GisanParkGolf.Services.Account;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.Account
+namespace GisanParkGolf.Pages.Account
 {
     public class LoginModel : PageModel
     {

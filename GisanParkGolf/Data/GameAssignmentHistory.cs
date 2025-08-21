@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GisanParkGolf_Core.Data
+namespace GisanParkGolf.Data
 {
     [Table("game_assignment_history")]
     public class GameAssignmentHistory

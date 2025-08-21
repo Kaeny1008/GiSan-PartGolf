@@ -135,13 +135,13 @@
 
                 <!-- 필터 및 버튼 영역 -->
                 @{
-                    var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                    var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
                     {
                         PageSize = Model.PageSize,
                         SearchField = Model.SearchField,
                         SearchQuery = Model.SearchQuery,
                         ResetPageName = "./StadiumManager",
-                        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
                                 {
                                 new() { Value = "StadiumName", Text = "경기장 이름" },
                                 new() { Value = "StadiumCode", Text = "경기장 코드" },
@@ -209,7 +209,7 @@
 
                 <!-- 페이지네이션 컨트롤 -->
                 @{
-                    var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+                    var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
                     {
                         PageIndex = Model.PageIndex,
                         TotalPages = Model.StadiumList?.TotalPages ?? 1,

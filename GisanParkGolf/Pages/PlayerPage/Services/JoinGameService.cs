@@ -1,13 +1,13 @@
 ﻿using DocumentFormat.OpenXml.InkML;
 using GiSanParkGolf.Pages.PlayerPage;
-using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Helpers;
-using GisanParkGolf_Core.ViewModels.PlayerPage;
+using GisanParkGolf.Data;
+using GisanParkGolf.Helpers;
+using GisanParkGolf.ViewModels.PlayerPage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace GisanParkGolf_Core.Services.PlayerPage
+namespace GisanParkGolf.Services.PlayerPage
 {
     public class JoinGameService : IJoinGameService
     {

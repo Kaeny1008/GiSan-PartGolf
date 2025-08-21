@@ -1,12 +1,12 @@
-using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Security;
-using GisanParkGolf_Core.ViewModels.Account;
+using GisanParkGolf.Data;
+using GisanParkGolf.Security;
+using GisanParkGolf.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace GisanParkGolf_Core.Pages.AdminPage
+namespace GisanParkGolf.Pages.AdminPage
 {
     [Authorize(Policy = "AdminOnly")]
     public class EditPlayerModel : PageModel

@@ -1,11 +1,11 @@
-using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Security;
-using GisanParkGolf_Core.ViewModels.Account;
+using GisanParkGolf.Data;
+using GisanParkGolf.Security;
+using GisanParkGolf.ViewModels.Account;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace GisanParkGolf_Core.Pages.Account
+namespace GisanParkGolf.Pages.Account
 {
     public class RegisterModel : PageModel
     {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.Account
+namespace GisanParkGolf.Pages.Account
 {
     public class LogoutModel : PageModel
     {

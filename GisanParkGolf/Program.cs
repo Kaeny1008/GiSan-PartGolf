@@ -1,8 +1,8 @@
-﻿using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Pages.AdminPage.AdminPage;
-using GisanParkGolf_Core.Security;
-using GisanParkGolf_Core.Services.Account;
-using GisanParkGolf_Core.Services.PlayerPage;
+﻿using GisanParkGolf.Data;
+using GisanParkGolf.Pages.AdminPage.AdminPage;
+using GisanParkGolf.Security;
+using GisanParkGolf.Services.Account;
+using GisanParkGolf.Services.PlayerPage;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Drawing;
 using QuestPDF.Infrastructure;

@@ -1,9 +1,9 @@
 ﻿@page
 @using System.Globalization
 @using System.Linq
-@using GisanParkGolf_Core.Helpers
-@using GisanParkGolf_Core.Pages.AdminPage.AdminPage
-@using GisanParkGolf_Core.Pages.AdminPage.ViewModels
+@using GisanParkGolf.Helpers
+@using GisanParkGolf.Pages.AdminPage.AdminPage
+@using GisanParkGolf.Pages.AdminPage.ViewModels
 @using Newtonsoft.Json
 @using Microsoft.AspNetCore.Http
 @model GiSanParkGolf.Pages.AdminPage.GameSetupModel
@@ -14,7 +14,7 @@
 
     var isSelected = !string.IsNullOrEmpty(Request.Query["gameCode"]);
     var selectedGame = Model.Competitions.FirstOrDefault(c => c.GameCode == Request.Query["gameCode"]);
-    var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+    var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
     {
         PageSize = Model.PageSize,
         PageSizeName = "PageSize",
@@ -22,14 +22,14 @@
         SearchField = Model.SearchField,
         SearchQuery = Model.SearchQuery,
         ResetPageName = "./GameSetup",
-        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
         {
             new() { Value = "GameName", Text = "대회명" },
             new() { Value = "GameHost", Text = "주최" },
             new() { Value = "StadiumName", Text = "경기장" }
         }
     };
-    var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+    var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
     {
         PageIndex = Model.PageIndex,
         TotalPages = Model.Competitions?.TotalPages ?? 1,
@@ -44,7 +44,7 @@
                 PageSize = Model.PageSize
             }, null) ?? ""
     };
-    var participantSearchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+    var participantSearchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
     {
         PageSize = Model.ParticipantPageSize,
         PageSizeName = "ParticipantPageSize",
@@ -52,14 +52,14 @@
         SearchField = Model.ParticipantSearchQuery ?? "UserName",
         SearchQuery = Model.ParticipantSearchQuery,
         ResetPageName = "./GameSetup",
-        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
         {
             new() { Value = "UserName", Text = "이름" },
             new() { Value = "UserId", Text = "아이디" },
             new() { Value = "JoinId", Text = "참가코드" }
         }
     };
-    var participantPageModel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+    var participantPageModel = new GisanParkGolf.Pages.Shared.PaginationModel
     {
         PageIndex = Model.ParticipantPageIndex,
         TotalPages = Model.Participants?.TotalPages ?? 1,
@@ -75,7 +75,7 @@
                 tab = "tab-info"
             }, null) ?? ""
     };
-    var assignmentSearchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+    var assignmentSearchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
     {
         PageSize = Model.AssignmentPageSize,
         PageSizeName = "AssignmentPageSize",
@@ -83,14 +83,14 @@
         SearchField = Model.AssignmentSearchQuery ?? "UserName",
         SearchQuery = Model.AssignmentSearchQuery,
         ResetPageName = "./GameSetup",
-        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
         {
             new() { Value = "UserName", Text = "이름" },
             new() { Value = "UserId", Text = "아이디" },
             new() { Value = "JoinId", Text = "참가코드" }
         }
     };
-    var assignmentPageModel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+    var assignmentPageModel = new GisanParkGolf.Pages.Shared.PaginationModel
     {
         PageIndex = Model.AssignmentPageIndex,
         TotalPages = Model.Assignments?.TotalPages ?? 1,
@@ -114,8 +114,8 @@
 
     var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
     var unassigned = !string.IsNullOrEmpty(unassignedJson)
-        ? JsonConvert.DeserializeObject<List<GisanParkGolf_Core.Pages.AdminPage.ViewModels.ParticipantViewModel>>(unassignedJson)
-        : new List<GisanParkGolf_Core.Pages.AdminPage.ViewModels.ParticipantViewModel>();
+        ? JsonConvert.DeserializeObject<List<GisanParkGolf.Pages.AdminPage.ViewModels.ParticipantViewModel>>(unassignedJson)
+        : new List<GisanParkGolf.Pages.AdminPage.ViewModels.ParticipantViewModel>();
 
     var assignmentJustRun = HttpContext.Session.GetString("AssignmentJustRun") == "true";
 
@@ -882,7 +882,7 @@ ViewData["Title"] as string ?? "제목 없음",
 
                         @* --- 히스토리용 검색 컨트롤 생성 --- *@
                         @{
-                            var historySearchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                            var historySearchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
                             {
                                 PageSize = Model.HistoryPageSize,
                                 PageSizeName = "HistoryPageSize",
@@ -890,7 +890,7 @@ ViewData["Title"] as string ?? "제목 없음",
                                 SearchField = Model.HistorySearchQuery ?? "ChangeType",
                                 SearchQuery = Model.HistorySearchQuery,
                                 ResetPageName = "./GameSetup",
-                                FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                                FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
                                         {
                                         new() { Value = "ChangeType", Text = "변경유형" },
                                         new() { Value = "ChangedBy", Text = "변경자" },
@@ -898,7 +898,7 @@ ViewData["Title"] as string ?? "제목 없음",
                                         }
                             };
 
-                            var historyPageModel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+                            var historyPageModel = new GisanParkGolf.Pages.Shared.PaginationModel
                             {
                                 PageIndex = Model.HistoryPageIndex,
                                 TotalPages = Model.AssignmentHistories?.TotalPages ?? 1,

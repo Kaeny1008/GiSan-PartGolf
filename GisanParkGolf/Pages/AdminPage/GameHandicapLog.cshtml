@@ -1,5 +1,5 @@
 ﻿@page
-@model GisanParkGolf_Core.Pages.AdminPage.GameHandicapLogModel
+@model GisanParkGolf.Pages.AdminPage.GameHandicapLogModel
 @{
     ViewData["Title"] = "핸디캡 변경 이력";
     int rowNum = 1;
@@ -15,13 +15,13 @@
         <div class="row mb-4">
             <div class="col-md-8">
                 @{
-                    var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                    var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
                     {
                         PageSize = Model.PageSize,
                         SearchField = Model.SearchField,
                         SearchQuery = Model.SearchQuery,
                         ResetPageName = "./GameHandicapLog",
-                        FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
                                 {
                                 new() { Value = "UserName", Text = "이름" },
                                 new() { Value = "UserId", Text = "ID" }
@@ -89,7 +89,7 @@
 
         <!-- 페이지네이션 컨트롤 -->
         @{
-            var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+            var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
             {
                 PageIndex = Model.PageIndex,
                 TotalPages = Model.Logs.TotalPages,

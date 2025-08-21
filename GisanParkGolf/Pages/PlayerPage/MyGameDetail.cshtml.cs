@@ -1,7 +1,7 @@
 using DocumentFormat.OpenXml.Spreadsheet;
-using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Services.PlayerPage;
-using GisanParkGolf_Core.ViewModels.PlayerPage;
+using GisanParkGolf.Data;
+using GisanParkGolf.Services.PlayerPage;
+using GisanParkGolf.ViewModels.PlayerPage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

@@ -1,4 +1,4 @@
-﻿namespace GisanParkGolf_Core.Extensions
+﻿namespace GisanParkGolf.Extensions
 {
     public static class UserRoleExtensions
     {

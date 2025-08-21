@@ -1,4 +1,4 @@
-﻿namespace GisanParkGolf_Core.ViewModels.Shared
+﻿namespace GisanParkGolf.ViewModels.Shared
 {
     public class PagingButtonViewModel
     {

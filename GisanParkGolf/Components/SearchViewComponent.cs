@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 
-namespace GisanParkGolf_Core.Components
+namespace GisanParkGolf.Components
 {
     public class SearchViewComponent : ViewComponent
     {

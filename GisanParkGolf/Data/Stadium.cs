@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GisanParkGolf_Core.Data
+namespace GisanParkGolf.Data
 {
     // 클래스 이름을 단수형으로 변경 (C# Naming Convention)
     [Table("sys_stadium_list")]

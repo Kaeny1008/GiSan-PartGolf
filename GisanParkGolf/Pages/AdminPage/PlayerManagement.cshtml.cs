@@ -1,7 +1,7 @@
 using ClosedXML.Excel;
-using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Helpers;
-using GisanParkGolf_Core.Services.PlayerPage;
+using GisanParkGolf.Data;
+using GisanParkGolf.Helpers;
+using GisanParkGolf.Services.PlayerPage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.AdminPage
+namespace GisanParkGolf.Pages.AdminPage
 {
     [Authorize(Policy = "AdminOnly")]
     public class PlayerManagementModel : PageModel

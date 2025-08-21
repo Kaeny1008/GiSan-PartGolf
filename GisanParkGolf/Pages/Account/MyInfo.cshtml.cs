@@ -1,6 +1,6 @@
-using GisanParkGolf_Core.Data; // SYS_User 모델이 있는 곳
-using GisanParkGolf_Core.Security;
-using GisanParkGolf_Core.ViewModels.Account;
+using GisanParkGolf.Data; // SYS_User 모델이 있는 곳
+using GisanParkGolf.Security;
+using GisanParkGolf.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Pages.Account
+namespace GisanParkGolf.Pages.Account
 {
     [Authorize] // ★★★ 로그인한 사용자만 접근 가능! ★★★
     public class MyInfoModel : PageModel

@@ -1,6 +1,6 @@
 using DocumentFormat.OpenXml.Wordprocessing;
-using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Pages.AdminPage.AdminPage;
+using GisanParkGolf.Data;
+using GisanParkGolf.Pages.AdminPage.AdminPage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

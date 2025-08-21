@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GisanParkGolf_Core.Data
+namespace GisanParkGolf.Data
 {
     // MariaDB의 'sys_PlayerHandicaps' 테이블과 정확히 일치하도록 설정
     [Table("sys_userhandicaps")]

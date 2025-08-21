@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using GisanParkGolf_Core.Services.Account;
+using GisanParkGolf.Services.Account;
 
-namespace GisanParkGolf_Core.Controllers
+namespace GisanParkGolf.Controllers
 {
     [ApiController]
     [Route("api/account")]

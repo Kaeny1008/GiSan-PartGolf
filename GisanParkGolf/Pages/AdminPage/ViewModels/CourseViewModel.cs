@@ -1,4 +1,4 @@
-﻿namespace GisanParkGolf_Core.Pages.AdminPage.ViewModels
+﻿namespace GisanParkGolf.Pages.AdminPage.ViewModels
 {
     public class CourseViewModel
     {

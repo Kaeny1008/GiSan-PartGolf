@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace GisanParkGolf_Core.Security
+namespace GisanParkGolf.Security
 {
     /// <summary>
     /// PBKDF2 (HMACSHA256) 기반 비밀번호 해시 유틸리티.

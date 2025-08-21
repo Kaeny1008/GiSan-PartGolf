@@ -15,13 +15,13 @@
         <!-- 필터 및 버튼 영역 -->
         <div class="card-header py-3">
             @{
-                var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
                 {
                     PageSize = Model.PageSize,
                     SearchField = Model.SearchField,
                     SearchQuery = Model.SearchQuery,
                     ResetPageName = "./GameList",
-                    FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                    FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
                         {
                         new() { Value = "GameName", Text = "대회명" },
                         new() { Value = "GameHost", Text = "주최" },
@@ -73,7 +73,7 @@
 
         <!-- 페이지네이션 컨트롤 -->
         @{
-            var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+            var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
             {
                 PageIndex = Model.PageIndex,
                 TotalPages = Model.GameList?.TotalPages ?? 1,

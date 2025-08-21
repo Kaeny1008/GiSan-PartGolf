@@ -10,13 +10,13 @@
     <div class="custom-card">
         <!-- 검색/필터/보기갯수 컨트롤 -->
         @{
-            var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+            var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
             {
                 PageSize = Model.PageSize,
                 SearchField = Model.SearchField,
                 SearchQuery = Model.SearchQuery,
                 ResetPageName = "./AdminGameParticipants",
-                FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
                 {
                     new() { Value = "GameName", Text = "대회명" },
                     new() { Value = "UserId", Text = "참가자ID" }
@@ -163,7 +163,7 @@
 
         <!-- 페이징 컨트롤 -->
         @{
-            var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+            var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
             {
                 PageIndex = Model.PageIndex,
                 TotalPages = Model.TotalPages,

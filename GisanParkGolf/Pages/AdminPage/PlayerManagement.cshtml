@@ -1,6 +1,6 @@
 ﻿@page
-@model GisanParkGolf_Core.Pages.AdminPage.PlayerManagementModel
-@using GisanParkGolf_Core.Extensions
+@model GisanParkGolf.Pages.AdminPage.PlayerManagementModel
+@using GisanParkGolf.Extensions
 @{
     ViewData["Title"] = "선수 정보관리";
 }
@@ -75,13 +75,13 @@
         <div class="card-body">
             <!-- 필터 및 버튼 영역 -->
             @{
-                var searchModel = new GisanParkGolf_Core.Pages.Shared.SearchControlModel
+                var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
                 {
                     PageSize = Model.PageSize,
                     SearchField = Model.SearchField,
                     SearchQuery = Model.SearchQuery,
                     ResetPageName = "./PlayerManagement",
-                    FieldOptions = new List<GisanParkGolf_Core.Pages.Shared.SearchFieldOption>
+                    FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
                     {
                         new() { Value = "UserName", Text = "이름" },
                         new() { Value = "UserId", Text = "아이디" },
@@ -139,7 +139,7 @@
 
             <!-- 페이지네이션 컨트롤 -->
             @{
-                var pagemodel = new GisanParkGolf_Core.Pages.Shared.PaginationModel
+                var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
                 {
                     PageIndex = Model.PageIndex,
                     TotalPages = Model.Players?.TotalPages ?? 1,

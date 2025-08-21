@@ -1,10 +1,10 @@
 ﻿using GiSanParkGolf.Pages.AdminPage;
 using GiSanParkGolf.Pages.PlayerPage;
-using GisanParkGolf_Core.Data;
-using GisanParkGolf_Core.Helpers;
-using GisanParkGolf_Core.Pages.AdminPage.ViewModels;
+using GisanParkGolf.Data;
+using GisanParkGolf.Helpers;
+using GisanParkGolf.Pages.AdminPage.ViewModels;
 
-namespace GisanParkGolf_Core.Pages.AdminPage.AdminPage
+namespace GisanParkGolf.Pages.AdminPage.AdminPage
 {
     public interface IGameService
     {

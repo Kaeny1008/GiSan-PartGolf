@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace GisanParkGolf_Core.Pages.AdminPage
+namespace GisanParkGolf.Pages.AdminPage
 {
     public class DashboardModel : PageModel
     {

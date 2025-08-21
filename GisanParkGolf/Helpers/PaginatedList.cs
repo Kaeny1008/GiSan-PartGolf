@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GisanParkGolf_Core.Helpers
+namespace GisanParkGolf.Helpers
 {
     // T는 어떤 타입의 데이터든 담을 수 있다는 의미 (예: HandicapViewModel)
     public class PaginatedList<T> : List<T>

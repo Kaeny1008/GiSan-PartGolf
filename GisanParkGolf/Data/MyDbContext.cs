@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace GisanParkGolf_Core.Data
+namespace GisanParkGolf.Data
 {
     public class MyDbContext : DbContext
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GisanParkGolf_Core.ViewModels.Account
+namespace GisanParkGolf.ViewModels.Account
 {
     public class Register_InputModel : UserBase_InputModel
     {
