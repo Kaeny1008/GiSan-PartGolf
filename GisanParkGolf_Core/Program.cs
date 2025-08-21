@@ -1,11 +1,11 @@
 ﻿using GisanParkGolf_Core.Data;
 using GisanParkGolf_Core.Pages.AdminPage.AdminPage;
+using GisanParkGolf_Core.Security;
 using GisanParkGolf_Core.Services.Account;
 using GisanParkGolf_Core.Services.PlayerPage;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Drawing;
 using QuestPDF.Infrastructure;
-using T_Engine;
 
 public class Program
 {
@@ -28,7 +28,7 @@ public class Program
         );
 
         builder.Services.AddHttpContextAccessor();
-        builder.Services.AddSingleton<Cryptography>();
+        builder.Services.AddScoped<PasswordHasher>();
         builder.Services.AddScoped<IPlayerservice, Playerservice>();
         builder.Services.AddScoped<IHandicapService, HandicapService>();
         builder.Services.AddScoped<IPlayerService, PlayerService>();

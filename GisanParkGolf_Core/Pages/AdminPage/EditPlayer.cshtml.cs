@@ -1,10 +1,10 @@
 using GisanParkGolf_Core.Data;
+using GisanParkGolf_Core.Security;
 using GisanParkGolf_Core.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using T_Engine;
 
 namespace GisanParkGolf_Core.Pages.AdminPage
 {
@@ -12,12 +12,12 @@ namespace GisanParkGolf_Core.Pages.AdminPage
     public class EditPlayerModel : PageModel
     {
         private readonly MyDbContext _context;
-        private readonly Cryptography _crypt;
+        private readonly PasswordHasher _hasher;
 
-        public EditPlayerModel(MyDbContext context, Cryptography crypt)
+        public EditPlayerModel(MyDbContext context, PasswordHasher hasher)
         {
             _context = context;
-            _crypt = crypt;
+            _hasher = hasher;
         }
 
         [BindProperty]
@@ -116,7 +116,7 @@ namespace GisanParkGolf_Core.Pages.AdminPage
             // 새 비밀번호가 입력되었을 때만 암호화하여 변경
             if (!string.IsNullOrEmpty(Input.NewPassword))
             {
-                userToUpdate.UserPassword = _crypt.GetEncoding("ParkGolf", Input.NewPassword);
+                userToUpdate.UserPassword = _hasher.Hash(Input.NewPassword);
             }
 
             await _context.SaveChangesAsync();

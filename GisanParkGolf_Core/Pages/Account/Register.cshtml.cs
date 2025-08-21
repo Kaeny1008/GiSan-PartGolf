@@ -1,16 +1,16 @@
 using GisanParkGolf_Core.Data;
+using GisanParkGolf_Core.Security;
 using GisanParkGolf_Core.ViewModels.Account;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using T_Engine;
 
 namespace GisanParkGolf_Core.Pages.Account
 {
     public class RegisterModel : PageModel
     {
         private readonly MyDbContext _dbContext;
-        private readonly Cryptography _crypt;
+        private readonly PasswordHasher _hasher;
 
         private readonly List<string> _reservedUserIds = new List<string>
         {
@@ -18,10 +18,10 @@ namespace GisanParkGolf_Core.Pages.Account
             "system", "master", "webmaster", "sysadmin", "관리자", "운영자"
         };
 
-        public RegisterModel(MyDbContext dbContext)
+        public RegisterModel(MyDbContext dbContext, PasswordHasher hasher)
         {
             _dbContext = dbContext;
-            _crypt = new Cryptography();
+            _hasher = hasher;
         }
 
         [BindProperty]
@@ -59,7 +59,7 @@ namespace GisanParkGolf_Core.Pages.Account
             var newUser = new Player
             {
                 UserId = Input.UserId,
-                UserPassword = _crypt.GetEncoding("ParkGolf", Input.Password),
+                UserPassword = _hasher.Hash(Input.Password),
                 UserName = Input.UserName,
                 UserNumber = int.Parse(Input.UserNumber),
                 UserGender = int.Parse(Input.UserGender),

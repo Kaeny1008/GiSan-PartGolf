@@ -1,4 +1,5 @@
 using GisanParkGolf_Core.Data; // SYS_User 모델이 있는 곳
+using GisanParkGolf_Core.Security;
 using GisanParkGolf_Core.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using T_Engine; // Cryptography를 위해 추가
 
 namespace GisanParkGolf_Core.Pages.Account
 {
@@ -15,12 +15,12 @@ namespace GisanParkGolf_Core.Pages.Account
     public class MyInfoModel : PageModel
     {
         private readonly MyDbContext _context;
-        private readonly Cryptography _crypt;
+        private readonly PasswordHasher _hasher;
 
-        public MyInfoModel(MyDbContext context, Cryptography crypt)
+        public MyInfoModel(MyDbContext context, PasswordHasher hasher)
         {
             _context = context;
-            _crypt = crypt;
+            _hasher = hasher;
         }
 
         [BindProperty]
@@ -82,7 +82,7 @@ namespace GisanParkGolf_Core.Pages.Account
             // 새 비밀번호가 입력되었는지 확인
             if (!string.IsNullOrEmpty(Input.NewPassword))
             {
-                userToUpdate.UserPassword = _crypt.GetEncoding("ParkGolf", Input.NewPassword);
+                userToUpdate.UserPassword = _hasher.Hash(Input.NewPassword);
             }
 
             try

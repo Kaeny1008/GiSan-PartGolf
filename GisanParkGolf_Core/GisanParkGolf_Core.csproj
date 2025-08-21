@@ -24,10 +24,6 @@
     <PackageReference Include="QuestPDF" Version="2025.7.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\T-Engine\T-Engine.csproj" />
-  </ItemGroup>
-
   <!--서버에서 DB 아이피를 127.0.0.1로 고정하기 위해서-->
   <ItemGroup>
     <None Update="appsettings.json">
