@@ -244,12 +244,12 @@ ViewData["Title"] as string ?? "제목 없음",
                     </li>
                 </ul>
                 <div class="tab-content">
-                    @{
-                        var vdTabInfo = new ViewDataDictionary(ViewData);
-                        vdTabInfo["gameCode"] = gameCode;
-                        vdTabInfo["activeTab"] = "tab-info";
-                    }
                     <div class="tab-pane fade @(activeTab == "tab-info" ? "show active" : "")" id="tab-info">
+                        @{
+                            var vdTabInfo = new ViewDataDictionary(ViewData);
+                            vdTabInfo["gameCode"] = gameCode;
+                            vdTabInfo["activeTab"] = "tab-info";
+                        }
                         @await Html.PartialAsync("Partials/_GameSetup_TabInfo", Model, vdTabInfo)
                     </div>
                     <div class="tab-pane fade @(activeTab == "tab-course" ? "show active" : "")" id="tab-course" role="tabpanel">
@@ -260,7 +260,6 @@ ViewData["Title"] as string ?? "제목 없음",
                         }
                         @await Html.PartialAsync("Partials/_GameSetup_TabCourse", Model, vdTabCourse)
                     </div>
-
                     <div class="tab-pane fade @(activeTab == "tab-result" ? "show active" : "")" id="tab-result" role="tabpanel">
                         @{
                             var vdTabResult = new ViewDataDictionary(ViewData);

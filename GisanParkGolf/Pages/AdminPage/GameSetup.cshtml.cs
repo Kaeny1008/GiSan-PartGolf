@@ -114,12 +114,63 @@ namespace GiSanParkGolf.Pages.AdminPage
             return results;
         }
 
-        private List<ParticipantViewModel> GetUnassignedParticipants()
+        //private List<ParticipantViewModel> GetUnassignedParticipants()
+        //{
+        //    var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
+        //    return !string.IsNullOrEmpty(unassignedJson)
+        //        ? JsonConvert.DeserializeObject<List<ParticipantViewModel>>(unassignedJson) ?? new List<ParticipantViewModel>()
+        //        : new List<ParticipantViewModel>();
+        //}
+
+        private List<ParticipantViewModel> GetUnassignedParticipants(string? gameCode = null)
         {
             var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
-            return !string.IsNullOrEmpty(unassignedJson)
+            var list = !string.IsNullOrEmpty(unassignedJson)
                 ? JsonConvert.DeserializeObject<List<ParticipantViewModel>>(unassignedJson) ?? new List<ParticipantViewModel>()
                 : new List<ParticipantViewModel>();
+
+            // 이미 세션에 값이 있으면 그대로 반환
+            if (list.Any()) return list;
+
+            // 세션 비어있고 gameCode가 없다면 계산 불가 -> 빈 리스트 반환
+            if (string.IsNullOrEmpty(gameCode)) return new List<ParticipantViewModel>();
+
+            // DB에서 참가자(취소되지 않은) 로드
+            var participants = _context.GameParticipants
+                .Include(p => p.User)
+                .ThenInclude(u => u.Handicap)
+                .Where(p => p.GameCode == gameCode && !p.IsCancelled)
+                .ToList();
+
+            // 할당된 userId 집합 (세션에 있는 AssignmentResults 또는 DB에서 읽은 결과)
+            var assignmentResults = GetAssignmentResults(gameCode);
+            var assignedUserIds = assignmentResults
+                .Select(r => r.UserId ?? "")
+                .Where(id => !string.IsNullOrEmpty(id))
+                .ToHashSet();
+
+            // 수상기록 카운트(가능하면)
+            var userIds = participants.Select(p => p.UserId ?? "").Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+            var awardDict = _context.GameAwardHistories
+                .Where(a => !string.IsNullOrEmpty(a.UserId) && userIds.Contains(a.UserId))
+                .GroupBy(a => a.UserId)
+                .ToDictionary(g => g.Key ?? "", g => g.Count());
+
+            // 미배정인원은 참가자 중 할당되지 않은 사람
+            var result = participants
+                .Where(p => !assignedUserIds.Contains(p.UserId))
+                .Select(p => new ParticipantViewModel
+                {
+                    Name = p.User?.UserName ?? p.UserId ?? "",
+                    UserId = p.UserId ?? "",
+                    GenderText = p.User?.UserGender == 1 ? "남" : p.User?.UserGender == 2 ? "여" : "",
+                    HandicapValue = p.User?.Handicap?.AgeHandicap ?? 0,
+                    AgeGroupText = GetAgeGroupText(p.User?.UserNumber ?? 0, p.User?.UserGender ?? 0),
+                    AwardCount = awardDict.TryGetValue(p.UserId ?? "", out var cnt) ? cnt : 0
+                })
+                .ToList();
+
+            return result;
         }
 
         private async Task SaveAssignmentResultsAsync(List<CourseAssignmentResultViewModel> results, string gameCode)
@@ -256,6 +307,14 @@ namespace GiSanParkGolf.Pages.AdminPage
 
             // 코스배치 결과(세션/DB)
             AssignmentResults = GetAssignmentResults(gameCode);
+
+            // 세션에 미배정 정보가 없으면 DB/참가자 기반으로 계산해서 세션에 저장
+            var existingUnassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
+            if (string.IsNullOrEmpty(existingUnassignedJson))
+            {
+                var computedUnassigned = GetUnassignedParticipants(gameCode);
+                SaveUnassignedParticipants(computedUnassigned);
+            }
 
             // 검색/페이징
             IEnumerable<CourseAssignmentResultViewModel> filteredResults = AssignmentResults;
