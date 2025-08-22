@@ -253,7 +253,7 @@
                                     <tbody>
                                         @{
                                             var myUserId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
-                                            int rowNo = 1;
+                                            int rowNo = ((Model?.PageIndex ?? 1) - 1) * (Model?.PageSize ?? 5) + 1;
                                         }
                                         @if (Model?.AssignmentResult != null)
                                         {
