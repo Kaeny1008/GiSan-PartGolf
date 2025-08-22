@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GisanParkGolf.ViewModels.PlayerPage
+﻿namespace GisanParkGolf.Pages.PlayerPage.ViewModels
 {
     public class MyGameListModel
     {
