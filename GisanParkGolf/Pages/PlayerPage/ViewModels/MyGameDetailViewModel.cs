@@ -30,5 +30,26 @@ namespace GisanParkGolf.ViewModels.PlayerPage
         public string? CancelReason { get; set; }
         public string? AssignmentStatus { get; set; }
         public string? Approval { get; set; }
+
+        // 코스배치 결과 관련
+        public string? AssignedCourseName { get; set; }
+        public string? AssignedHoleNumber { get; set; }
+        public string? AssignedTeamNumber { get; set; }
+        public int? AssignedCourseOrder { get; set; }
+
+        public List<GameAssignmentResultViewModel>? AllAssignments { get; set; }
+    }
+
+    public class GameAssignmentResultViewModel
+    {
+        public string? UserName { get; set; }
+        public string? UserId { get; set; }
+        public string? CourseName { get; set; }
+        public string? HoleNumber { get; set; }
+        public string? TeamNumber { get; set; }
+        public int? CourseOrder { get; set; }
+        public int? UserGender { get; set; }
+        public int? UserHandicap { get; set; }
+        public int? UserAge { get; set; }
     }
 }
