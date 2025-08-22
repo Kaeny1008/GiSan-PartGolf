@@ -213,13 +213,13 @@ ViewData["Title"] as string ?? "제목 없음",
     else
     {
         <!-- 대회 선택시만 표시 -->
-        @if ((Model.Assignments?.Count ?? 0) < Model.JoinedCount)
+        @if ((Model.AssignmentResults?.Count ?? 0) < Model.JoinedCount)
         {
             <div class="alert alert-danger mt-3" role="alert">
                 <i class="bi bi-exclamation-triangle me-1"></i>
                 <strong>코스배치 누락 경고!</strong><br />
                 배치대상 참가자 수: <span class="fw-bold">@Model.JoinedCount</span>명,
-                코스배치 인원: <span class="fw-bold">@(Model.Assignments?.Count ?? 0)</span>명<br />
+                코스배치 인원: <span class="fw-bold">@(Model.AssignmentResults?.Count ?? 0)</span>명<br />
                 <span class="text-danger">코스배치되지 않은 참가자가 있습니다. 반드시 코스배치를 다시 실행하세요!</span>
             </div>
         }
