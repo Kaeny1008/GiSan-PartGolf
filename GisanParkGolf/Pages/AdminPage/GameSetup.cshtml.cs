@@ -130,7 +130,7 @@ namespace GiSanParkGolf.Pages.AdminPage
             // DB에서 참가자(취소되지 않은) 로드
             var participants = _context.GameParticipants
                 .Include(p => p.User)
-                .ThenInclude(u => u.Handicap)
+                .ThenInclude(u => u == null ? null : u.Handicap)
                 .Where(p => p.GameCode == gameCode && !p.IsCancelled)
                 .ToList();
 
