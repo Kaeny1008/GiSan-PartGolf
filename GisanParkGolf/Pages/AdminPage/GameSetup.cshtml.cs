@@ -114,14 +114,6 @@ namespace GiSanParkGolf.Pages.AdminPage
             return results;
         }
 
-        //private List<ParticipantViewModel> GetUnassignedParticipants()
-        //{
-        //    var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
-        //    return !string.IsNullOrEmpty(unassignedJson)
-        //        ? JsonConvert.DeserializeObject<List<ParticipantViewModel>>(unassignedJson) ?? new List<ParticipantViewModel>()
-        //        : new List<ParticipantViewModel>();
-        //}
-
         private List<ParticipantViewModel> GetUnassignedParticipants(string? gameCode = null)
         {
             var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
@@ -158,7 +150,7 @@ namespace GiSanParkGolf.Pages.AdminPage
 
             // 미배정인원은 참가자 중 할당되지 않은 사람
             var result = participants
-                .Where(p => !assignedUserIds.Contains(p.UserId))
+                .Where(p => !string.IsNullOrEmpty(p.UserId) && !assignedUserIds.Contains(p.UserId ?? ""))
                 .Select(p => new ParticipantViewModel
                 {
                     Name = p.User?.UserName ?? p.UserId ?? "",
