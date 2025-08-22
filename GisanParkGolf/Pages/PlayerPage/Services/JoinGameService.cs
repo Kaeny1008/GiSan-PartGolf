@@ -1,8 +1,9 @@
 ﻿using DocumentFormat.OpenXml.InkML;
-using GiSanParkGolf.Pages.PlayerPage;
 using GisanParkGolf.Data;
 using GisanParkGolf.Helpers;
+using GisanParkGolf.Pages.PlayerPage.ViewModels;
 using GisanParkGolf.ViewModels.PlayerPage;
+using GiSanParkGolf.Pages.PlayerPage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -291,6 +292,27 @@ namespace GisanParkGolf.Services.PlayerPage
 
             var game = participant.Game;
 
+            // 본인 배정정보 조회
+            var assignment = await _dbContext.GameUserAssignments
+                .Where(x => x.GameCode == gameCode && x.UserId == userId)
+                .FirstOrDefaultAsync();
+
+            // 전체 배정 결과 조회
+            var allAssignments = await _dbContext.GameUserAssignments
+                .Where(x => x.GameCode == gameCode)
+                .Include(x => x.User) // User 테이블이 있으면
+                .OrderBy(x => x.CourseName).ThenBy(x => x.HoleNumber).ThenBy(x => x.CourseOrder)
+                .Select(x => new GameAssignmentResultViewModel
+                {
+                    UserName = x.User != null ? x.User.UserName : x.UserId,
+                    UserId = x.UserId,
+                    CourseName = x.CourseName,
+                    HoleNumber = x.HoleNumber,
+                    TeamNumber = x.TeamNumber,
+                    CourseOrder = x.CourseOrder
+                })
+                .ToListAsync();
+
             // PlayModeToText 등은 필요에 따라 변환 로직 추가
             return new MyGameDetailViewModel
             {
@@ -309,7 +331,12 @@ namespace GisanParkGolf.Services.PlayerPage
                 CancelDate = participant.CancelDate,
                 CancelReason = participant.CancelReason,
                 Approval = participant.Approval,
-                AssignmentStatus = null // 필요시 추가
+                AssignmentStatus = null,
+                AssignedCourseName = assignment?.CourseName,
+                AssignedHoleNumber = assignment?.HoleNumber,
+                AssignedTeamNumber = assignment?.TeamNumber,
+                AssignedCourseOrder = assignment?.CourseOrder,
+                AllAssignments = allAssignments
             };
         }
 
@@ -419,6 +446,53 @@ namespace GisanParkGolf.Services.PlayerPage
         {
             var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             return game != null && game.GameStatus == "Assigned";
+        }
+
+        public async Task<PaginatedList<AssignmentResultModel>> GetAssignmentResultAsync(
+            string gameCode,
+            string? searchField,
+            string? searchQuery,
+            int pageIndex,
+            int pageSize
+        )
+        {
+            var query = _dbContext.GameUserAssignments
+                .Where(x => x.GameCode == gameCode);
+
+            // 검색조건
+            if (!string.IsNullOrWhiteSpace(searchQuery) && !string.IsNullOrWhiteSpace(searchField))
+            {
+                var kw = searchQuery.Trim();
+                switch (searchField)
+                {
+                    case "UserName":
+                        query = query.Where(a => (a.User != null ? a.User.UserName : a.UserId ?? "").Contains(kw));
+                        break;
+                    case "UserId":
+                        query = query.Where(a => (a.UserId ?? "").Contains(kw));
+                        break;
+                    case "TeamNumber":
+                        query = query.Where(a => (a.TeamNumber ?? "").Contains(kw));
+                        break;
+                        // 필요하면 코스명, 홀번호 등도 추가
+                }
+            }
+
+            var projected = query
+                .OrderBy(x => x.CourseName ?? "")
+                .ThenBy(x => x.HoleNumber ?? "")
+                .ThenBy(x => x.CourseOrder)
+                .Select(x => new AssignmentResultModel
+                {
+                    UserName = x.User != null && !string.IsNullOrEmpty(x.User.UserName) ? x.User.UserName : (x.UserId ?? ""),
+                    UserId = x.UserId ?? "",
+                    CourseName = x.CourseName ?? "",
+                    HoleNumber = x.HoleNumber ?? "",
+                    TeamNumber = x.TeamNumber ?? "",
+                    CourseOrder = x.CourseOrder
+                });
+
+            return await PaginatedList<AssignmentResultModel>.CreateAsync(projected, pageIndex, pageSize);
         }
     }
 }

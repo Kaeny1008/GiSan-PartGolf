@@ -1,10 +1,13 @@
 using DocumentFormat.OpenXml.Spreadsheet;
 using GisanParkGolf.Data;
+using GisanParkGolf.Helpers;
+using GisanParkGolf.Pages.PlayerPage.ViewModels;
 using GisanParkGolf.Services.PlayerPage;
 using GisanParkGolf.ViewModels.PlayerPage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace GiSanParkGolf.Pages.PlayerPage
@@ -19,10 +22,14 @@ namespace GiSanParkGolf.Pages.PlayerPage
             _gameService = gameService;
         }
 
-        [BindProperty(SupportsGet = true)]
-        public string? GameCode { get; set; }
+        [BindProperty(SupportsGet = true)] public string? GameCode { get; set; }
+        [BindProperty(SupportsGet = true)] public string? SearchField { get; set; } = "UserName";
+        [BindProperty(SupportsGet = true)] public string? SearchQuery { get; set; }
+        [BindProperty(SupportsGet = true)] public int PageIndex { get; set; } = 1;
+        [BindProperty(SupportsGet = true)] public int PageSize { get; set; } = 5;
 
         public MyGameDetailViewModel? Game { get; set; }
+        public PaginatedList<AssignmentResultModel>? AssignmentResult { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string? gameCode)
         {
@@ -34,6 +41,14 @@ namespace GiSanParkGolf.Pages.PlayerPage
 
             if (Game == null)
                 return RedirectToPage("MyGame");
+
+            AssignmentResult = await _gameService.GetAssignmentResultAsync(
+                gameCode,
+                SearchField,
+                SearchQuery,
+                PageIndex,
+                PageSize
+            );
 
             return Page();
         }

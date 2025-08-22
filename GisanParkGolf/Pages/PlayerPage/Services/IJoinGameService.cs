@@ -1,8 +1,9 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
-using GiSanParkGolf.Pages.PlayerPage;
 using GisanParkGolf.Data;
 using GisanParkGolf.Helpers;
+using GisanParkGolf.Pages.PlayerPage.ViewModels;
 using GisanParkGolf.ViewModels.PlayerPage;
+using GiSanParkGolf.Pages.PlayerPage;
 using System.Security.Claims;
 using static GisanParkGolf.Services.PlayerPage.JoinGameService;
 
@@ -28,5 +29,13 @@ namespace GisanParkGolf.Services.PlayerPage
         Task<JoinGameResult> MyGameCancelAsync(string gameCode, string? userId, string cancelReason);
         Task<JoinGameResult> MyGameRejoinAsync(string gameCode, string? userId);
         Task<bool> IsAssignmentLockedAsync(string gameCode);
+
+        Task<PaginatedList<AssignmentResultModel>> GetAssignmentResultAsync(
+            string gameCode,
+            string? searchField,
+            string? searchQuery,
+            int pageIndex,
+            int pageSize
+        );
     }
 }

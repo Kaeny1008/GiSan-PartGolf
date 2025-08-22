@@ -1,11 +1,10 @@
-using GiSanParkGolf.Pages.AdminPage;
 using GisanParkGolf.Helpers;
 using GisanParkGolf.Services.PlayerPage;
-using GisanParkGolf.ViewModels.PlayerPage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
+using GisanParkGolf.Pages.PlayerPage.ViewModels;
 
 namespace GiSanParkGolf.Pages.PlayerPage
 {
