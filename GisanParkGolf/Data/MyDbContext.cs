@@ -19,6 +19,7 @@ namespace GisanParkGolf.Data
         public DbSet<GameUserAssignment> GameUserAssignments { get; set; }
         public DbSet<GameAssignmentHistory> GameAssignmentHistory { get; set; }
         public DbSet<GameJoinHistory> GameJoinHistories { get; set; } = null!;
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

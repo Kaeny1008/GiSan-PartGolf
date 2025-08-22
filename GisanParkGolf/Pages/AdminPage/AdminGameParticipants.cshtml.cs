@@ -78,19 +78,54 @@ namespace GiSanParkGolf.Pages.AdminPage
 
         public async Task<IActionResult> OnPostApproveCancelAsync(string id)
         {
-            var participant = await _dbContext.GameParticipants.FirstOrDefaultAsync(p => p.UserId == id);
-            if (participant != null && participant.IsCancelled && string.IsNullOrEmpty(participant.Approval))
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
             {
-                participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
-                await _dbContext.SaveChangesAsync();
-                TempData["SuccessTitle"] = "취소 승인 완료";
-                TempData["SuccessMessage"] = "취소 승인이 완료되었습니다.";
+                var participant = await _dbContext.GameParticipants
+                    .Include(p => p.Game)
+                    .FirstOrDefaultAsync(p => p.UserId == id);
+
+                if (participant != null && participant.IsCancelled && string.IsNullOrEmpty(participant.Approval))
+                {
+                    participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
+                    await _dbContext.SaveChangesAsync();
+
+                    // 알림 메시지에 대회명 추가 예시
+                    var gameName = participant.Game?.GameName ?? "";
+                    var notification = new Notification
+                    {
+                        UserId = participant.UserId ?? "",
+                        Type = NotificationTypes.CancelApproved,
+                        Title = "참가 취소 승인",
+                        Message = $"회원님의 {(string.IsNullOrEmpty(gameName) ? "" : $"[{gameName}] ")}참가 취소가 승인되었습니다.",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    _dbContext.Notifications.Add(notification);
+                    await _dbContext.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+
+                    TempData["SuccessTitle"] = "취소 승인 완료";
+                    TempData["SuccessMessage"] = "취소 승인이 완료되었습니다.";
+                }
+                else
+                {
+                    TempData["ErrorTitle"] = "오류";
+                    TempData["ErrorMessage"] = "취소 승인 처리에 실패했습니다.";
+                    await transaction.RollbackAsync();
+                }
             }
-            else
+            catch (Exception ex)
             {
                 TempData["ErrorTitle"] = "오류";
-                TempData["ErrorMessage"] = "취소 승인 처리에 실패했습니다.";
+                TempData["ErrorMessage"] = $"취소 승인 중 오류가 발생했습니다: {ex.Message}";
+                // 여기서 로깅(예: _logger.LogError(ex, ...))
+                await transaction.RollbackAsync();
             }
+
             return RedirectToPage();
         }
 
@@ -103,6 +138,20 @@ namespace GiSanParkGolf.Pages.AdminPage
                 participant.CancelDate = null;
                 participant.CancelReason = null;
                 participant.Approval = null;
+                await _dbContext.SaveChangesAsync();
+
+                // 재참가 알림 추가
+                var notification = new Notification
+                {
+                    UserId = participant.UserId ?? "",
+                    Type = NotificationTypes.RejoinApproved,
+                    Title = "재참가 처리 완료",
+                    Message = "회원님이 대회에 다시 참가 처리되었습니다.",
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                };
+
+                _dbContext.Notifications.Add(notification);
                 await _dbContext.SaveChangesAsync();
 
                 TempData["SuccessTitle"] = "재참가 완료";
