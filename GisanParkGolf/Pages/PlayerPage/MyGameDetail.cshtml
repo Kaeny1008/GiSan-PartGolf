@@ -62,14 +62,15 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
 
-            <!-- 대회 정보 카드 -->
-            <div class="custom-card mb-4 shadow-sm">
+            <!-- 1. 대회 정보 (항상 표시/접히지 않음) -->
+            <div class="custom-card mb-3 shadow-sm">
                 <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-flag-fill text-primary me-2" style="font-size:1.5em;"></i>
+                    <i class="bi bi-flag-fill me-2 text-primary"></i>
                     <h5 class="card-title mb-0 fw-bold">대회 정보</h5>
                 </div>
                 <hr class="mt-2 mb-3" />
                 <div class="row g-3">
+                    <!-- ...대회 정보 내용... -->
                     <div class="col-md-6">
                         <label class="form-label">대회명</label>
                         <input class="form-control" value="@Model.Game?.GameName" disabled />
@@ -101,103 +102,127 @@
                 </div>
             </div>
 
-            <!-- 참가 상태 카드 -->
-            @if (Model.Game?.IsCancelled == 1)
-            {
-                <div class="custom-card mb-4 shadow-sm">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-person-check-fill text-success me-2" style="font-size:1.5em;"></i>
-                        <h5 class="card-title mb-0 fw-bold">참가 상태</h5>
-                    </div>
-                    <hr class="mt-2 mb-3" />
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">취소일자</label>
-                            <input class="form-control" value="@Model.Game?.CancelDate?.ToString("yyyy-MM-dd HH:mm:ss")" disabled />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">취소사유</label>
-                            <input class="form-control" value="@Model.Game?.CancelReason" disabled />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">관리자 취소 승인</label>
-                            <input class="form-control"
-                                   value="@(string.IsNullOrEmpty(Model.Game?.Approval) ? "아니오" : "예")"
-                                   disabled />
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @if (Model.Game?.AssignedCourseName != null)
-            {
-                <div class="custom-card mb-4 shadow-sm">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-map text-info me-2" style="font-size:1.5em;"></i>
-                        <h5 class="card-title mb-0 fw-bold">코스배치 결과</h5>
-                    </div>
-                    <hr class="mt-2 mb-3" />
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">코스명</label>
-                            <input class="form-control" value="@Model.Game.AssignedCourseName" disabled />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">홀번호</label>
-                            <input class="form-control" value="@Model.Game.AssignedHoleNumber" disabled />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">팀번호</label>
-                            <input class="form-control" value="@Model.Game.AssignedTeamNumber" disabled />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">순번</label>
-                            <input class="form-control" value="@Model.Game.AssignedCourseOrder" disabled />
+            <div class="accordion" id="gameDetailAccordion">
+                <!-- 2. 참가 상태 -->
+                @if (Model.Game?.IsCancelled == 1)
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingStatus">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseStatus" aria-expanded="false" aria-controls="collapseStatus">
+                                <i class="bi bi-person-check-fill me-2 text-success"></i> 참가 상태
+                            </button>
+                        </h2>
+                        <div id="collapseStatus" class="accordion-collapse collapse" aria-labelledby="headingStatus">
+                            <div class="accordion-body">
+                                <!-- 참가 상태 카드 내용 -->
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">취소일자</label>
+                                        <input class="form-control" value="@Model.Game?.CancelDate?.ToString("yyyy-MM-dd HH:mm:ss")" disabled />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">취소사유</label>
+                                        <input class="form-control" value="@Model.Game?.CancelReason" disabled />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">관리자 취소 승인</label>
+                                        <input class="form-control"
+                                               value="@(string.IsNullOrEmpty(Model.Game?.Approval) ? "아니오" : "예")"
+                                               disabled />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            }
-
-            @if (Model.Game?.AllAssignments != null && Model.Game.AllAssignments.Count > 0)
-            {
-                <div class="custom-card mb-4 shadow-sm">
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-table text-primary me-2" style="font-size:1.5em;"></i>
-                        <h5 class="card-title mb-0 fw-bold">전체 코스배치 결과</h5>
+                }
+                <!-- 3. 코스배치 결과 -->
+                @if (Model.Game?.AssignedCourseName != null)
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingAssign">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseAssign" aria-expanded="false" aria-controls="collapseAssign">
+                                <i class="bi bi-map me-2 text-info"></i> 코스배치 결과
+                            </button>
+                        </h2>
+                        <div id="collapseAssign" class="accordion-collapse collapse" aria-labelledby="headingAssign">
+                            <div class="accordion-body">
+                                <!-- 코스배치 결과 카드 내용 -->
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">코스명</label>
+                                        <input class="form-control" value="@Model.Game.AssignedCourseName" disabled />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">홀번호</label>
+                                        <input class="form-control" value="@Model.Game.AssignedHoleNumber" disabled />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">팀번호</label>
+                                        <input class="form-control" value="@Model.Game.AssignedTeamNumber" disabled />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">순번</label>
+                                        <input class="form-control" value="@Model.Game.AssignedCourseOrder" disabled />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <hr class="mt-2 mb-3" />
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>이름</th>
-                                    <th>아이디</th>
-                                    <th>코스명</th>
-                                    <th>홀번호</th>
-                                    <th>팀번호</th>
-                                    <th>순번</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    var myUserId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
-                                }
-                                @foreach (var assign in Model.Game.AllAssignments)
-                                {
-                                    <tr class="@(assign.UserId == myUserId ? "table-info" : "")">
-                                        <td>@assign.UserName</td>
-                                        <td>@assign.UserId</td>
-                                        <td>@assign.CourseName</td>
-                                        <td>@assign.HoleNumber</td>
-                                        <td>@assign.TeamNumber</td>
-                                        <td>@assign.CourseOrder</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                }
+                <!-- 4. 전체 배정 결과 -->
+                @if (Model.Game?.AllAssignments != null && Model.Game.AllAssignments.Count > 0)
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingAllAssign">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseAllAssign" aria-expanded="false" aria-controls="collapseAllAssign">
+                                <i class="bi bi-table me-2 text-primary"></i> 전체 코스배치 결과
+                            </button>
+                        </h2>
+                        <div id="collapseAllAssign" class="accordion-collapse collapse" aria-labelledby="headingAllAssign">
+                            <div class="accordion-body">
+                                <!-- 전체 배정 결과 테이블 내용 -->
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>이름</th>
+                                                <th>아이디</th>
+                                                <th>코스명</th>
+                                                <th>홀번호</th>
+                                                <th>팀번호</th>
+                                                <th>순번</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @{
+                                                var myUserId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                                                int rowNo = 1;
+                                            }
+                                            @foreach (var assign in Model.Game.AllAssignments)
+                                            {
+                                                <tr class="@(assign.UserId == myUserId ? "table-info" : "")">
+                                                    <td>@rowNo</td>
+                                                    <td>@assign.UserName</td>
+                                                    <td>@assign.UserId</td>
+                                                    <td>@assign.CourseName</td>
+                                                    <td>@assign.HoleNumber</td>
+                                                    <td>@assign.TeamNumber</td>
+                                                    <td>@assign.CourseOrder</td>
+                                                </tr>
+                                                rowNo++;
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
 
             <div class="text-center mt-4">
                 <a asp-page="MyGame" class="btn btn-secondary btn-lg">목록으로</a>
