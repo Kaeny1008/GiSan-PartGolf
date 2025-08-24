@@ -5,233 +5,230 @@
 
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - 기산 파크골프</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="~/css/site.css" />
-    <link rel="stylesheet" href="~/css/custom-modal.css">
-    <link rel="stylesheet" href="~/css/competitionInfo.css">
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>@ViewData["Title"] - 기산 파크골프</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="~/css/site.css" />
+        <link rel="stylesheet" href="~/css/custom-modal.css">
+        <link rel="stylesheet" href="~/css/competitionInfo.css">
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-    <style>
-        .site-footer {
-            background-color: #f8f9fa;
-            padding: 2rem 0;
-            margin-top: 4rem;
-            border-top: 1px solid #e9ecef;
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-
-            .site-footer a {
-                color: #0d6efd;
-                text-decoration: none;
-                transition: text-decoration 0.2s ease-in-out;
+        <style>
+            .site-footer {
+                background-color: #f8f9fa;
+                padding: 2rem 0;
+                margin-top: 4rem;
+                border-top: 1px solid #e9ecef;
+                font-size: 0.9rem;
+                color: #6c757d;
             }
 
-                .site-footer a:hover {
-                    text-decoration: underline;
+                .site-footer a {
+                    color: #0d6efd;
+                    text-decoration: none;
+                    transition: text-decoration 0.2s ease-in-out;
                 }
 
-        .footer-logo {
-            font-weight: bold;
-            color: #343a40;
-        }
+                    .site-footer a:hover {
+                        text-decoration: underline;
+                    }
 
-        .navbar-brand-custom {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem; /* 아이콘과 텍스트 사이 간격 */
-            transition: transform 0.2s ease-in-out; /* 부드러운 효과 */
-        }
-
-            .navbar-brand-custom:hover {
-                transform: scale(1.05); /* 마우스를 올리면 살짝 커지는 효과 */
+            .footer-logo {
+                font-weight: bold;
+                color: #343a40;
             }
 
-        .brand-icon {
-            font-size: 1.6rem; /* 아이콘 크기 키우기 */
-            color: #198754; /* 잔디를 닮은 초록색 */
-        }
-
-        .brand-text {
-            font-weight: 600; /* 텍스트 살짝 두껍게 */
-            font-size: 1.15rem; /* 텍스트 크기 키우기 */
-        }
-    </style>
-</head>
-<body>
-    <script>
-        window.addEventListener("DOMContentLoaded", function () {
-            const header = document.querySelector(".header-fixed");
-            const bodyContent = document.querySelector(".body-content");
-            if (header && bodyContent) {
-                bodyContent.style.marginTop = header.offsetHeight + "px";
+            .navbar-brand-custom {
+                display: flex;
+                align-items: center;
+                gap: 0.6rem; /* 아이콘과 텍스트 사이 간격 */
+                transition: transform 0.2s ease-in-out; /* 부드러운 효과 */
             }
-        });
-    </script>
-    <div class="header-fixed">
-        <nav class="navbar navbar-expand-lg navbar-custom">
-            <div class="container">
-                <a class="navbar-brand navbar-brand-custom" asp-page="/Index">
-                    <i class="bi bi-flag-fill brand-icon"></i>
-                    <span class="brand-text">기산 파크골프</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="mainNavbar">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                        @{
-                            var isAdmin = (await AuthorizationService.AuthorizeAsync(User, "AdminOnly")).Succeeded;
-                            var isManager = (await AuthorizationService.AuthorizeAsync(User, "ManagerOnly")).Succeeded;
-                        }
+                .navbar-brand-custom:hover {
+                    transform: scale(1.05); /* 마우스를 올리면 살짝 커지는 효과 */
+                }
 
-                        @if (isAdmin)
-                        {
+            .brand-icon {
+                font-size: 1.6rem; /* 아이콘 크기 키우기 */
+                color: #198754; /* 잔디를 닮은 초록색 */
+            }
+
+            .brand-text {
+                font-weight: 600; /* 텍스트 살짝 두껍게 */
+                font-size: 1.15rem; /* 텍스트 크기 키우기 */
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            window.addEventListener("DOMContentLoaded", function () {
+                const header = document.querySelector(".header-fixed");
+                const bodyContent = document.querySelector(".body-content");
+                if (header && bodyContent) {
+                    bodyContent.style.marginTop = header.offsetHeight + "px";
+                }
+            });
+        </script>
+        <div class="header-fixed">
+            <nav class="navbar navbar-expand-lg navbar-custom">
+                <div class="container">
+                    <a class="navbar-brand navbar-brand-custom" asp-page="/Index">
+                        <i class="bi bi-flag-fill brand-icon"></i>
+                        <span class="brand-text">기산 파크골프</span>
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="mainNavbar">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                            @{
+                                var isAdmin = (await AuthorizationService.AuthorizeAsync(User, "AdminOnly")).Succeeded;
+                                var isManager = (await AuthorizationService.AuthorizeAsync(User, "ManagerOnly")).Succeeded;
+                            }
+
+                            @if (isAdmin)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">관리자 페이지</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="/Admin/PlayerManagement">선수 정보관리</a></li>
+                                        <li><a class="dropdown-item" href="/Admin/GameHandicap">Handicap 설정</a></li>
+                                        <li><a class="dropdown-item" href="/Admin/StadiumManager">경기장 설정</a></li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li><a class="dropdown-item" href="/Admin/GameList">대회개최</a></li>
+                                        <li><a class="dropdown-item" href="/Admin/AdminGameParticipants">참가/취소 내역 관리</a></li>
+                                        <li><a class="dropdown-item" href="/Admin/GameSetup">인원 코스 및 배치</a></li>
+                                    </ul>
+                                </li>
+                            }
+
+                            @if (isManager || isAdmin)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">매니저 페이지</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="/Manager/GameResult">대회결과 입력</a></li>
+                                    </ul>
+                                </li>
+                            }
+
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">선수 페이지</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="/Player/JoinGame">대회참가 신청</a></li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li><a class="dropdown-item" href="/Player/MyGame">내 대회</a></li>
+                                    </ul>
+                                </li>
+                            }
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">관리자 페이지</a>
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">게시판</a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/AdminPage/PlayerManagement">선수 정보관리</a></li>
-                                    <li><a class="dropdown-item" href="/AdminPage/GameHandicap">Handicap 설정</a></li>
-                                    <li><a class="dropdown-item" href="/AdminPage/StadiumManager">경기장 설정</a></li>
-                                    <li><hr class="dropdown-divider" /></li>
-                                    <li><a class="dropdown-item" href="/AdminPage/GameList">대회개최</a></li>
-                                    @* 이걸 별로 필요 없을듯. 필요하면 나중에 *@
-                                    <li><a class="dropdown-item" href="/AdminPage/AdminGameParticipants">참가/취소 내역 관리</a></li>
-                                    <li><a class="dropdown-item" href="/AdminPage/GameSetup">인원 코스 및 배치</a></li>
+                                    <li><a class="dropdown-item" href="/BBS/Notice">공지사항</a></li>
                                 </ul>
                             </li>
-                        }
+                        </ul>
+                    </div>
+                </div>
+            </nav>
 
-                        @if (isManager)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">매니저 페이지</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/Manager/GameResult">대회결과 입력</a></li>
-                                </ul>
-                            </li>
-                        }
-
+            <div class="container mt-1">
+                <div class="card-welcome d-flex justify-content-between align-items-center">
+                    <div></div>
+                    <!-- 오른쪽 구역 -->
+                    <div class="d-flex align-items-center gap-2">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">선수 페이지</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/PlayerPage/JoinGame">대회참가 신청</a></li>
-                                    <li><hr class="dropdown-divider" /></li>
-                                    <li><a class="dropdown-item" href="/PlayerPage/MyGame">내 대회</a></li>
-                                </ul>
-                            </li>
+                            @await Component.InvokeAsync("NotificationBell")
                         }
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">게시판</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="/BBS/Notice">공지사항</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-        <div class="container mt-1">
-            <div class="card-welcome d-flex justify-content-between align-items-center">
-                <div></div>
-                <!-- 오른쪽 구역 -->
-                <div class="d-flex align-items-center gap-2">
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        @await Component.InvokeAsync("NotificationBell")
-                    }
-                    <span>@((User?.Identity?.IsAuthenticated ?? false) ? User?.Identity?.Name : "손")님, 반갑습니다.</span>
-                    @if (User?.Identity?.IsAuthenticated == true)
-                    {
-                        <form asp-page="/Account/Logout" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-danger btn-sm">로그아웃</button>
-                        </form>
-                        <a asp-page="/Account/MyInfo" class="btn btn-outline-secondary btn-sm">정보수정</a>
-                    }
-                    else
-                    {
-                        <a asp-page="/Account/Login" class="btn btn-outline-primary btn-sm">로그인</a>
-                    }
+                        <span>@((User?.Identity?.IsAuthenticated ?? false) ? User?.Identity?.Name : "손")님, 반갑습니다.</span>
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <form asp-page="/Account/Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">로그아웃</button>
+                            </form>
+                            <a asp-page="/Account/MyInfo" class="btn btn-outline-secondary btn-sm">정보수정</a>
+                        }
+                        else
+                        {
+                            <a asp-page="/Account/Login" class="btn btn-outline-primary btn-sm">로그인</a>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="container body-content">
-        @RenderBody()
-    </div>
-
-    <footer class="site-footer">
-        <div class="container text-center">
-            <p class="footer-logo mb-2">&copy; @DateTime.Now.Year 기산 파크골프 시스템</p>
-            <p class="mb-2">
-                본 사이트는 오픈소스 소프트웨어 및 GitHub Copilot을 활용하여 구축되었습니다.
-            </p>
-            <a href="/License/License">오픈소스 및 AI 라이선스 안내</a>
+        <div class="container body-content">
+            @RenderBody()
         </div>
-    </footer>
 
-    <!-- 결과 알림 모달 -->
-    <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="resultModalLabel">알림</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-                </div>
-                <div class="modal-body" id="resultModalBody">
-                    <!-- 여기에 결과 메시지가 들어감 -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+        <footer class="site-footer">
+            <div class="container text-center">
+                <p class="footer-logo mb-2">&copy; @DateTime.Now.Year 기산 파크골프 시스템</p>
+                <p class="mb-2">
+                    본 사이트는 오픈소스 소프트웨어 및 GitHub Copilot을 활용하여 구축되었습니다.
+                </p>
+                <a href="/License/License">오픈소스 및 AI 라이선스 안내</a>
+            </div>
+        </footer>
+
+        <!-- 결과 알림 모달 -->
+        <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="resultModalLabel">알림</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                    </div>
+                    <div class="modal-body" id="resultModalBody">
+                        <!-- 여기에 결과 메시지가 들어감 -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        function showResultModal(message, title) {
-            document.getElementById('resultModalLabel').textContent = title || '알림';
-            // <--- 기존 코드: htmlEscape(message)
-            // 1. 줄바꿈 변환만 하고, 2. HTML 태그는 그대로 출력
-            const safeMsg = message.replace(/\r\n|\r|\n/g, "<br>");
-            document.getElementById('resultModalBody').innerHTML = safeMsg;
-            var modal = new bootstrap.Modal(document.getElementById('resultModal'));
-            modal.show();
+        <script>
+            function showResultModal(message, title) {
+                document.getElementById('resultModalLabel').textContent = title || '알림';
+                const safeMsg = message.replace(/\r\n|\r|\n/g, "<br>");
+                document.getElementById('resultModalBody').innerHTML = safeMsg;
+                var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+                modal.show();
+            }
+        </script>
+
+        @{
+            var successMsg = TempData["SuccessMessage"] as string;
+            var successTitle = TempData["SuccessTitle"] as string ?? "완료";
+            var errorMsg = TempData["ErrorMessage"] as string;
+            var errorTitle = TempData["ErrorTitle"] as string ?? "실패";
         }
-    </script>
+        @if (successMsg != null)
+        {
+            <script>
+                showResultModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMsg)), 
+                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successTitle)));
+            </script>
+        }
+        @if (errorMsg != null)
+        {
+            <script>
+                showResultModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(errorMsg)),
+                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(errorTitle)));
+            </script>
+        }
 
-    @{
-        var successMsg = TempData["SuccessMessage"] as string;
-        var successTitle = TempData["SuccessTitle"] as string ?? "완료";
-        var errorMsg = TempData["ErrorMessage"] as string;
-        var errorTitle = TempData["ErrorTitle"] as string ?? "실패";
-    }
-    @if (successMsg != null)
-    {
-        <script>
-            showResultModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMsg)), 
-                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successTitle)));
-        </script>
-    }
-    @if (errorMsg != null)
-    {
-        <script>
-            showResultModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(errorMsg)),
-                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(errorTitle)));
-        </script>
-    }
-
-    @RenderSection("Scripts", required: false)
-</body>
+        @RenderSection("Scripts", required: false)
+    </body>
 </html>

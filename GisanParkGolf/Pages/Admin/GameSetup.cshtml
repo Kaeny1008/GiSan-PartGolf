@@ -1,0 +1,351 @@
+﻿@page
+@using System.Globalization
+@using System.Linq
+@using GisanParkGolf.Helpers
+@using GisanParkGolf.Pages.Admin.Admin
+@using GisanParkGolf.Pages.Admin.ViewModels
+@using Newtonsoft.Json
+@using Microsoft.AspNetCore.Http
+@model GiSanParkGolf.Pages.Admin.GameSetupModel
+@{
+    ViewData["Title"] = "인원 코스 및 배치";
+    var activeTab = Model.Tab ?? "tab-info"; // 반드시 Model에서 받아야 함
+    var gameCode = Model.GameCode;           // 필요하면 이렇게
+
+    var isSelected = !string.IsNullOrEmpty(Request.Query["gameCode"]);
+    var selectedGame = Model.Competitions.FirstOrDefault(c => c.GameCode == Request.Query["gameCode"]);
+    var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
+    {
+        PageSize = Model.PageSize,
+        PageSizeName = "PageSize",
+        QueryName = "SearchQuery",
+        SearchField = Model.SearchField,
+        SearchQuery = Model.SearchQuery,
+        ResetPageName = "./GameSetup",
+        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+        {
+            new() { Value = "GameName", Text = "대회명" },
+            new() { Value = "GameHost", Text = "주최" },
+            new() { Value = "StadiumName", Text = "경기장" }
+        }
+    };
+    var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
+    {
+        PageIndex = Model.PageIndex,
+        TotalPages = Model.Competitions?.TotalPages ?? 1,
+        GetPageUrl = i => Url.Page(
+            "./GameSetup",
+            null,
+            new
+            {
+                SearchField = Model.SearchField,
+                SearchQuery = Model.SearchQuery,
+                PageIndex = i,
+                PageSize = Model.PageSize
+            }, null) ?? ""
+    };
+    var participantSearchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
+    {
+        PageSize = Model.ParticipantPageSize,
+        PageSizeName = "ParticipantPageSize",
+        QueryName = "ParticipantSearchQuery",
+        SearchField = Model.ParticipantSearchQuery ?? "UserName",
+        SearchQuery = Model.ParticipantSearchQuery,
+        ResetPageName = "./GameSetup",
+        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+        {
+            new() { Value = "UserName", Text = "이름" },
+            new() { Value = "UserId", Text = "아이디" },
+            new() { Value = "JoinId", Text = "참가코드" }
+        }
+    };
+    var participantPageModel = new GisanParkGolf.Pages.Shared.PaginationModel
+    {
+        PageIndex = Model.ParticipantPageIndex,
+        TotalPages = Model.Participants?.TotalPages ?? 1,
+        GetPageUrl = i => Url.Page(
+            "./GameSetup",
+            null,
+            new
+            {
+                gameCode = Request.Query["gameCode"],
+                ParticipantSearchQuery = Model.ParticipantSearchQuery,
+                ParticipantPageIndex = i,
+                ParticipantPageSize = Model.ParticipantPageSize,
+                tab = "tab-info"
+            }, null) ?? ""
+    };
+    var assignmentSearchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
+    {
+        PageSize = Model.AssignmentPageSize,
+        PageSizeName = "AssignmentPageSize",
+        QueryName = "AssignmentSearchQuery",
+        SearchField = Model.AssignmentSearchQuery ?? "UserName",
+        SearchQuery = Model.AssignmentSearchQuery,
+        ResetPageName = "./GameSetup",
+        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+        {
+            new() { Value = "UserName", Text = "이름" },
+            new() { Value = "UserId", Text = "아이디" },
+            new() { Value = "JoinId", Text = "참가코드" }
+        }
+    };
+    var assignmentPageModel = new GisanParkGolf.Pages.Shared.PaginationModel
+    {
+        PageIndex = Model.AssignmentPageIndex,
+        TotalPages = Model.Assignments?.TotalPages ?? 1,
+        GetPageUrl = i => Url.Page(
+            "./GameSetup",
+            null,
+            new
+            {
+                gameCode = Request.Query["gameCode"],
+                AssignmentSearchQuery = Model.AssignmentSearchQuery,
+                AssignmentPageIndex = i,
+                AssignmentPageSize = Model.AssignmentPageSize,
+                tab = "tab-result"
+            }, null) ?? ""
+    };
+
+    var assignmentResultsJson = HttpContext.Session.GetString("AssignmentResults");
+    var assignmentResults = !string.IsNullOrEmpty(assignmentResultsJson)
+        ? JsonConvert.DeserializeObject<List<CourseAssignmentResultViewModel>>(assignmentResultsJson)
+        : new List<CourseAssignmentResultViewModel>();
+
+    var unassignedJson = HttpContext.Session.GetString("UnassignedParticipants");
+    var unassigned = !string.IsNullOrEmpty(unassignedJson)
+        ? JsonConvert.DeserializeObject<List<GisanParkGolf.Pages.Admin.ViewModels.ParticipantViewModel>>(unassignedJson)
+        : new List<GisanParkGolf.Pages.Admin.ViewModels.ParticipantViewModel>();
+
+    var assignmentJustRun = HttpContext.Session.GetString("AssignmentJustRun") == "true";
+
+    var colorClasses = new[] { "bg-soft-a", "bg-soft-b" };
+}
+
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (
+ViewData["Title"] as string ?? "제목 없음",
+    "대회를 선택한 후, 배치 옵션을 설정하고 인원을 코스에 배치할 수 있습니다."
+))
+
+<div class="container mt-2">
+    @if (!isSelected)
+    {
+        <!-- 대회 선택 패널(항상 보임) -->
+        <div id="topPanel" class="mb-4">
+            <div class="custom-card p-3 shadow-sm">
+                <h4 class="card-title">대회 선택</h4>
+                <p class="mb-2 text-muted">대회명을 클릭하여 세부정보를 확인하세요.</p>
+                <div class="card-header py-3">
+                    @await Html.PartialAsync("_SearchControl", searchModel)
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="gameTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:4rem">No</th>
+                                <th>대회명</th>
+                                <th>대회일자</th>
+                                <th>상태</th>
+                                <th>경기장</th>
+                                <th>총 참가자</th>
+                                <th>배치결과</th>
+                                <th>배치잠금</th>
+                                <th>선택</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Competitions != null)
+                            {
+                                @for (int i = 0; i < Model.Competitions.Count; i++)
+                                {
+                                    var comp = Model.Competitions[i];
+                                    var assignedCount = comp.AssignmentCount; // 이 값은 VM에서 미리 계산
+                                    var participantCount = comp.JoinedCount;  // 취소 안된 참가자 수
+                                                                              <tr>
+                                                                                  <td>@(i + 1)</td>
+                                                                                  <td>@comp.GameName</td>
+                                                                                  <td>@comp.GameDate.ToString("yyyy-MM-dd")</td>
+                                                                                  <td>@GameStatusHelper.ToDisplay(comp.Status)</td>
+                                                                                  <td>@comp.StadiumName</td>
+                                                                                  <td>@comp.TotalParticipants</td>
+                                                                                  <td>
+                                            @if (assignedCount < participantCount)
+                                            {
+                                                <span class="badge bg-danger">재배치 필요</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">배치 완료</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (comp.AssignmentLocked)
+                                            {
+                                                <span class="badge bg-secondary" title="코스배치 잠김"><i class="bi bi-lock-fill"></i> 잠김</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-dark border" title="코스배치 열림"><i class="bi bi-unlock"></i> 열림</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a asp-page="./GameSetup"
+                                               asp-route-gameCode="@comp.GameCode"
+                                               class="btn btn-outline-primary btn-sm">선택</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="7">대회 데이터가 없습니다.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                    @await Html.PartialAsync("_Pagination", pagemodel)
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- 대회 선택시만 표시 -->
+        @if ((Model.AssignmentResults?.Count ?? 0) < Model.JoinedCount)
+        {
+            <div class="alert alert-danger mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                <strong>코스배치 누락 경고!</strong><br />
+                배치대상 참가자 수: <span class="fw-bold">@Model.JoinedCount</span>명,
+                코스배치 인원: <span class="fw-bold">@(Model.AssignmentResults?.Count ?? 0)</span>명<br />
+                <span class="text-danger">코스배치되지 않은 참가자가 있습니다. 반드시 코스배치를 다시 실행하세요!</span>
+            </div>
+        }
+        <div id="bottomPanel">
+            <div class="custom-card p-3 shadow-sm">
+                <div class="mb-3 d-flex align-items-center">
+                    <h4 class="card-title mb-0 flex-grow-1">대회 상세정보</h4>
+                    <a asp-page="./GameSetup" class="btn btn-outline-success btn-sm">목록으로 이동</a>
+                </div>
+                <ul class="nav nav-tabs mb-3" id="gameSetupTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link @(activeTab == "tab-info" ? "active" : "")" data-bs-toggle="tab" href="#tab-info" role="tab">정보 및 참가자</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(activeTab == "tab-course" ? "active" : "")" data-bs-toggle="tab" href="#tab-course" role="tab">코스배치</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(activeTab == "tab-result" ? "active" : "")" data-bs-toggle="tab" href="#tab-result" role="tab">코스배치 결과 확인</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(activeTab == "tab-history" ? "active" : "")" data-bs-toggle="tab" href="#tab-history" role="tab">히스토리</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade @(activeTab == "tab-info" ? "show active" : "")" id="tab-info">
+                        @{
+                            var vdTabInfo = new ViewDataDictionary(ViewData);
+                            vdTabInfo["gameCode"] = gameCode;
+                            vdTabInfo["activeTab"] = "tab-info";
+                        }
+                        @await Html.PartialAsync("Partials/_GameSetup_TabInfo", Model, vdTabInfo)
+                    </div>
+                    <div class="tab-pane fade @(activeTab == "tab-course" ? "show active" : "")" id="tab-course" role="tabpanel">
+                        @{
+                            var vdTabCourse = new ViewDataDictionary(ViewData);
+                            vdTabCourse["gameCode"] = gameCode;
+                            vdTabCourse["activeTab"] = "tab-course";
+                        }
+                        @await Html.PartialAsync("Partials/_GameSetup_TabCourse", Model, vdTabCourse)
+                    </div>
+                    <div class="tab-pane fade @(activeTab == "tab-result" ? "show active" : "")" id="tab-result" role="tabpanel">
+                        @{
+                            var vdTabResult = new ViewDataDictionary(ViewData);
+                            vdTabResult["gameCode"] = gameCode;
+                            vdTabResult["activeTab"] = "tab-result";
+                            vdTabResult["AssignmentResults"] = assignmentResults;
+                            vdTabResult["UnassignedParticipants"] = unassigned;
+                            vdTabResult["AssignmentJustRun"] = assignmentJustRun;
+                            vdTabResult["ColorClasses"] = colorClasses;
+                        }
+                        @await Html.PartialAsync("Partials/_GameSetup_TabResult", Model, vdTabResult)
+                    </div>
+
+                    <div class="tab-pane fade @(activeTab == "tab-history" ? "show active" : "")" id="tab-history" role="tabpanel">
+                        @{
+                            var vdTabHistory = new ViewDataDictionary(ViewData);
+                            vdTabHistory["gameCode"] = gameCode;
+                            vdTabHistory["activeTab"] = "tab-history";
+                        }
+                        @await Html.PartialAsync("Partials/_GameSetup_TabHistory", Model, vdTabHistory)
+                    </div>
+                </div>
+                <div id="faq" class="mt-4">
+                    <div class="card card-body bg-light border-0">
+                        <h6><i class="bi bi-question-circle me-1"></i>도움말 & 문의</h6>
+                        <ul class="mb-1">
+                            <li>목록으로 돌아가려면 위의 버튼을 누르세요.</li>
+                            <li>기타 문의는 관리자에게 연락하세요.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // 취소 사유 입력 검증: 공백만 있는 경우 invalid 표시
+        function validateCancelReason(textarea) {
+            if (!textarea || !textarea.value) return;
+            if (!textarea.value.trim()) {
+                textarea.classList.add('is-invalid');
+            } else {
+                textarea.classList.remove('is-invalid');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 전역 제출 이벤트 감지 (모달 안의 폼만 검사)
+            document.addEventListener('submit', function (e) {
+                var form = e.target;
+                if (!form || !form.closest) return;
+                // 모달 내부 폼이 아니면 무시
+                if (!form.closest('.modal')) return;
+
+                // 1) 취소 사유 textarea 검사 (있으면 필수)
+                var textarea = form.querySelector('textarea[name="cancelReason"]');
+                if (textarea && !textarea.value.trim()) {
+                    textarea.classList.add('is-invalid');
+                    textarea.focus();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+
+                // 2) needs-validation 클래스가 있으면 Bootstrap 스타일 유효성 검사 적용
+                if (form.classList.contains('needs-validation')) {
+                    if (!form.checkValidity()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        form.classList.add('was-validated');
+                        return false;
+                    }
+                }
+
+                // 정상 제출이면 통과
+            }, true);
+
+            // Bootstrap 모달이 열린 후 포커스 설정 (전역 처리)
+            document.addEventListener('shown.bs.modal', function (e) {
+                var modalEl = e.target;
+                if (!modalEl) return;
+                // 우선순위: course select -> hole select -> order input -> cancelReason
+                var focusEl = modalEl.querySelector('select[name="courseName"], select[name="holeNumber"], input[name="courseOrder"], textarea[name="cancelReason"]');
+                if (focusEl && typeof focusEl.focus === 'function') {
+                    try { focusEl.focus(); } catch (err) { /* 무시 */ }
+                }
+            });
+        });
+    </script>
+}

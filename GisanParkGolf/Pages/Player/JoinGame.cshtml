@@ -1,0 +1,186 @@
+﻿@page
+@model GiSanParkGolf.Pages.Player.JoinGameModel
+@{
+    ViewData["Title"] = "참여가능 대회 목록";
+}
+
+@using GisanParkGolf.Helpers
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let targetForm = null;
+
+            $('.btn-action').on('click', function(e) {
+                e.preventDefault();
+                targetForm = $(this).closest('form');
+                const action = $(this).data('action');
+                const gamename = $(this).data('gamename');
+                let msg = '';
+
+                if (action === 'join') {
+                    msg = `<strong>[${gamename}]</strong> 대회에 참가 신청하시겠습니까?`;
+                } else if (action === 'leave') {
+                    msg = `<strong>[${gamename}]</strong> 대회 참가를 취소하시겠습니까?`;
+                } else {
+                    msg = "이 작업을 진행하시겠습니까?";
+                }
+                $('#actionConfirmModalBody').html(msg);
+                $('#actionConfirmModal').modal('show');
+            });
+
+            $('#actionConfirmBtn').on('click', function() {
+                if (targetForm) {
+                    targetForm.submit();
+                    $('#actionConfirmModal').modal('hide');
+                    targetForm = null;
+                }
+            });
+        });
+    </script>
+}
+
+<!-- 공통 Modal -->
+<div class="modal fade" id="actionConfirmModal" tabindex="-1" aria-labelledby="actionConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actionConfirmModalLabel">확인</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body" id="actionConfirmModalBody">
+                <!-- 동적으로 메시지 변경됨 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="actionConfirmBtn">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음"
+    , "참가하려는 대회명을 선택하여 참가신청을 하십시오."))
+
+<div class="container mt-4">
+    <div class="custom-card">
+        <!-- 필터 및 버튼 영역 -->
+        @{
+            var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
+            {
+                PageSize = Model.PageSize,
+                SearchField = Model.SearchField,
+                SearchQuery = Model.SearchQuery,
+                ResetPageName = "./JoinGame",
+                FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+                {
+                new() { Value = "GameName", Text = "대회명" },
+                new() { Value = "StadiumName", Text = "경기장" },
+                new() { Value = "GameHost", Text = "주최자" }
+                }
+            };
+        }
+        @await Html.PartialAsync("_SearchControl", searchModel)
+
+        <!-- 목록 테이블 -->
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>No</th>
+                    <th>대회명</th>
+                    <th>경기장</th>
+                    <th>주최자</th>
+                    <th>대회일자</th>
+                    <th>모집시작</th>
+                    <th>모집종료</th>
+                    <th>참가자</th>
+                    <th>상태</th>
+                    <th>신청</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.GameList != null && Model.GameList.Any())
+                {
+                    int no = (Model.PageIndex - 1) * Model.PageSize;
+                    foreach (var game in Model.GameList)
+                    {
+                        <tr>
+                            <td>@(++no)</td>
+                            <td>@game.GameName</td>
+                            <td>@game.StadiumName</td>
+                            <td>@game.GameHost</td>
+                            <td>@game.GameDate.ToString("yyyy-MM-dd")</td>
+                            <td>@game.StartRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@game.EndRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@game.ParticipantNumber</td>
+                            <td>
+                                <span class="@(GameStatusHelper.ToDisplay(game.GameStatus) == "모집중" ? "text-primary" : "")">
+                                    @GameStatusHelper.ToDisplay(game.GameStatus)
+                                </span>
+                            </td>
+                            <td>
+                                @if (GameStatusHelper.ToDisplay(game.GameStatus) == "모집중")
+                                {
+                                    @if (!string.IsNullOrEmpty(game.GameCode) && Model.JoinedGameCodes.Contains(game.GameCode))
+                                    {
+                                        // <form method="post" asp-page-handler="Leave" asp-route-gameCode="@game.GameCode" style="display:inline" class="action-form">
+                                        //     <button type="button"
+                                        //             class="btn btn-danger btn-sm btn-action"
+                                        //             data-action="leave"
+                                        //             data-gamename="@game.GameName">
+                                        //         참가취소
+                                        //     </button>
+                                        // </form>
+                                        // 참가 취소는 내대회에서 처리하도록 변경
+                                        <span class="badge bg-secondary align-middle" style="font-size:1em;">참가완료</span>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-page-handler="Join" asp-route-gameCode="@game.GameCode" style="display:inline" class="action-form">
+                                            <button type="button"
+                                                    class="btn btn-success btn-sm btn-action"
+                                                    data-action="join"
+                                                    data-gamename="@game.GameName">
+                                                참가신청
+                                            </button>
+                                        </form>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10" class="text-center text-muted">참가 신청 가능한 대회가 없습니다.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <!-- 총 건수 -->
+        <div style="text-align:right">
+            참가가능 대회수: <span>@(Model.GameList?.TotalCount ?? 0)</span>
+        </div>
+        
+        <!-- 페이지네이션 컨트롤 -->
+        @{
+            var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
+            {
+                PageIndex = Model.PageIndex,
+                TotalPages = Model.GameList?.TotalPages ?? 1,
+                GetPageUrl = i => Url.Page(
+                "./JoinGame",
+                null,
+                new
+                {
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    PageIndex = i,
+                    PageSize = Model.PageSize
+                }, null) ?? ""
+            };
+        }
+        @await Html.PartialAsync("_Pagination", pagemodel)
+    </div>
+</div>

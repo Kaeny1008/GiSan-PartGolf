@@ -1,0 +1,94 @@
+﻿@page
+@model GiSanParkGolf.Pages.Admin.GameListModel
+@{
+    ViewData["Title"] = "대회 목록";
+}
+
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음"
+    , "대회를 개최, 수정 및 관리할 수 있는 페이지입니다."))
+
+<div class="container mt-4">
+    <div class="custom-card">
+        <div class="d-flex gap-2">
+            <a asp-page="./GameUpsert" class="btn btn-primary">신규 대회 개최</a>
+        </div>
+        <!-- 필터 및 버튼 영역 -->
+        <div class="card-header py-3">
+            @{
+                var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
+                {
+                    PageSize = Model.PageSize,
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    ResetPageName = "./GameList",
+                    FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+                        {
+                        new() { Value = "GameName", Text = "대회명" },
+                        new() { Value = "GameHost", Text = "주최" },
+                        new() { Value = "StadiumName", Text = "경기장" }
+                        }
+                };
+            }
+            @await Html.PartialAsync("_SearchControl", searchModel)
+        </div>
+
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>상태</th>
+                    <th>대회명</th>
+                    <th>대회일시</th>
+                    <th>경기장</th>
+                    <th>주최</th>
+                    <th>참가인원</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.GameList != null && Model.GameList.Any())
+                {
+                    foreach (var game in Model.GameList)
+                    {
+                        <tr>
+                            <td><span class="badge bg-secondary">@game.GameStatus</span></td>
+                            <td>@game.GameName</td>
+                            <td>@game.GameDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@game.StadiumName</td>
+                            <td>@game.GameHost</td>
+                            <td>@game.ParticipantNumber</td>
+                            <td>
+                                <a asp-page="./GameUpsert" asp-route-gameCode="@game.GameCode" class="btn btn-sm btn-outline-secondary">수정</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">데이터가 없습니다.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- 페이지네이션 컨트롤 -->
+        @{
+            var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
+            {
+                PageIndex = Model.PageIndex,
+                TotalPages = Model.GameList?.TotalPages ?? 1,
+                GetPageUrl = i => Url.Page(
+                "./GameList",
+                null,
+                new
+                {
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    PageIndex = i,
+                    PageSize = Model.PageSize
+                }, null) ?? ""
+            };
+        }
+        @await Html.PartialAsync("_Pagination", pagemodel)
+    </div>
+</div>
