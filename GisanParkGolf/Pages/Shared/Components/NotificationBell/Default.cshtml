@@ -2,12 +2,13 @@
 <link rel="stylesheet" href="~/css/custom-notification.css" />
 
 <div class="position-relative d-inline-block">
-    <button type="button" class="btn btn-link position-relative" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-bell" style="font-size:1.3rem;"></i>
-        <span class="badge @(Model.Count > 0 ? "bg-danger" : "bg-secondary") notification-badge">
-            @(Model.Count > 0 ? Model.Count.ToString() : "없음")
-        </span>
-    </button>
+    @if (Model.Count > 0)
+    {
+        <button type="button" class="btn btn-link position-relative" data-bs-toggle="dropdown" aria-expanded="false" title="알림">
+            <i class="bi bi-bell" style="font-size:1.3rem;"></i>
+            <span class="badge bg-danger notification-badge">@Model.Count</span>
+        </button>
+    }
     <ul class="dropdown-menu dropdown-menu-end notification-dropdown wide-notification-dropdown">
         <li class="dropdown-header">알림 목록</li>
         <li><hr class="dropdown-divider" /></li>
