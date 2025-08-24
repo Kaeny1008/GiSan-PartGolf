@@ -16,24 +16,24 @@ namespace GisanParkGolf.Services.Player
             _dbContext = context;
         }
 
-        public async Task<PaginatedList<Player>> GetPlayersAsync(string? searchField, string? searchQuery, bool readyUserOnly, int pageIndex, int pageSize)
+        public async Task<PaginatedList<Member>> GetPlayersAsync(string? searchField, string? searchQuery, bool readyUserOnly, int pageIndex, int pageSize)
         {
             var query = GetFilteredPlayersQuery(searchField, searchQuery, readyUserOnly);
             var orderedQuery = query.OrderByDescending(u => u.UserRegistrationDate);
 
-            return await PaginatedList<Player>.CreateAsync(orderedQuery, pageIndex, pageSize);
+            return await PaginatedList<Member>.CreateAsync(orderedQuery, pageIndex, pageSize);
         }
 
-        public async Task<List<Player>> GetPlayersForExcelAsync(string? searchField, string? searchQuery, bool readyUserOnly)
+        public async Task<List<Member>> GetPlayersForExcelAsync(string? searchField, string? searchQuery, bool readyUserOnly)
         {
             var query = GetFilteredPlayersQuery(searchField, searchQuery, readyUserOnly);
             return await query.OrderByDescending(u => u.UserRegistrationDate).ToListAsync();
         }
 
         // 여러 곳에서 사용되는 필터링 로직을 private 메서드로 추출하여 코드 중복 방지
-        private IQueryable<Player> GetFilteredPlayersQuery(string? searchField, string? searchQuery, bool readyUserOnly)
+        private IQueryable<Member> GetFilteredPlayersQuery(string? searchField, string? searchQuery, bool readyUserOnly)
         {
-            IQueryable<Player> PlayersIQ = _dbContext.Players.AsQueryable();
+            IQueryable<Member> PlayersIQ = _dbContext.Players.AsQueryable();
 
             if (readyUserOnly)
             {

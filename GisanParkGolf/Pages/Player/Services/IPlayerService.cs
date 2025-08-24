@@ -7,8 +7,8 @@ namespace GisanParkGolf.Services.Player
 {
     public interface IPlayerService
     {
-        Task<PaginatedList<Player>> GetPlayersAsync(string? searchField, string? searchQuery, bool readyUserOnly, int pageIndex, int pageSize);
-        Task<List<Player>> GetPlayersForExcelAsync(string? searchField, string? searchQuery, bool readyUserOnly);
+        Task<PaginatedList<Member>> GetPlayersAsync(string? searchField, string? searchQuery, bool readyUserOnly, int pageIndex, int pageSize);
+        Task<List<Member>> GetPlayersForExcelAsync(string? searchField, string? searchQuery, bool readyUserOnly);
         Task ApproveReadyUsersAsync();
     }
 }

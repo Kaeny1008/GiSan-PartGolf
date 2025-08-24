@@ -45,7 +45,7 @@ namespace GisanParkGolf.Data
 
         // 관계: Player (Navigation property)
         [ForeignKey("UserId")]
-        public virtual Player? User { get; set; }
+        public virtual Member? User { get; set; }
     }
 
     public static class NotificationTypes

@@ -33,6 +33,6 @@ namespace GisanParkGolf.Data
         // 이 핸디캡 정보가 어떤 사용자의 것인지 알려주는 '연결고리' 역할
         // 실제 데이터베이스 컬럼으로 생성되지는 않음
         [ForeignKey("UserId")]
-        public virtual Player User { get; set; } = null!;
+        public virtual Member User { get; set; } = null!;
     }
 }

@@ -41,7 +41,7 @@ namespace GisanParkGolf.Pages.Admin
         [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 10;
 
-        public PaginatedList<Player> Players { get; set; } = null!;
+        public PaginatedList<Member> Players { get; set; } = null!;
 
         // --- 메서드들 ---
         public async Task OnGetAsync()
