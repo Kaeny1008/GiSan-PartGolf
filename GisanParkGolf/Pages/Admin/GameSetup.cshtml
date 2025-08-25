@@ -161,15 +161,15 @@ ViewData["Title"] as string ?? "제목 없음",
                                     var comp = Model.Competitions[i];
                                     var assignedCount = comp.AssignmentCount; // 이 값은 VM에서 미리 계산
                                     var participantCount = comp.JoinedCount;  // 취소 안된 참가자 수
-                                                                              <tr>
-                                                                                  <td>@(i + 1)</td>
-                                                                                  <td>@comp.GameName</td>
-                                                                                  <td>@comp.GameDate.ToString("yyyy-MM-dd")</td>
-                                                                                  <td>@GameStatusHelper.ToDisplay(comp.Status)</td>
-                                                                                  <td>@comp.StadiumName</td>
-                                                                                  <td>@comp.TotalParticipants</td>
-                                                                                  <td>
-                                            @if (assignedCount < participantCount)
+                                    <tr>
+                                        <td>@(i + 1)</td>
+                                        <td>@comp.GameName</td>
+                                        <td>@comp.GameDate.ToString("yyyy-MM-dd")</td>
+                                        <td>@GameStatusHelper.ToDisplay(comp.Status)</td>
+                                        <td>@comp.StadiumName</td>
+                                        <td>@comp.TotalParticipants</td>
+                                        <td>
+                                            @if (assignedCount != participantCount)
                                             {
                                                 <span class="badge bg-danger">재배치 필요</span>
                                             }
@@ -210,7 +210,7 @@ ViewData["Title"] as string ?? "제목 없음",
     else
     {
         <!-- 대회 선택시만 표시 -->
-        @if ((Model.AssignmentResults?.Count ?? 0) < Model.JoinedCount)
+        @if ((Model.AssignmentResults?.Count ?? 0) != Model.JoinedCount)
         {
             <div class="alert alert-danger mt-3" role="alert">
                 <i class="bi bi-exclamation-triangle me-1"></i>
