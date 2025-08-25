@@ -1,0 +1,163 @@
+﻿@page
+@model GiSanParkGolf.Pages.Manager.GameResultModel
+@{
+    ViewData["Title"] = "대회 결과 입력";
+}
+
+<!-- 커스텀 카드: 순차 드롭다운 + 서치/페이징 포함 -->
+<div class="card my-4 shadow-sm" style="border-radius: 1rem; background: linear-gradient(90deg, #e3ffe3 0%, #f7f7ff 100%);">
+    <div class="card-body d-flex flex-wrap gap-4 align-items-center">
+        <div>
+            <label for="selectGame" class="form-label fw-bold mb-1">대회 선택</label>
+            <select id="selectGame" name="GameCode" class="form-select" asp-for="GameCode" asp-items="Model.GameOptions" style="border-radius: 0.5rem;">
+                <option value="">대회를 선택하세요</option>
+            </select>
+        </div>
+        <div>
+            <label for="selectCourse" class="form-label fw-bold mb-1">코스 선택</label>
+            <select id="selectCourse" name="CourseName" class="form-select" asp-for="CourseName" style="border-radius: 0.5rem;" disabled>
+                <option value="">코스를 선택하세요</option>
+            </select>
+        </div>
+        <div>
+            <label for="selectHole" class="form-label fw-bold mb-1">홀 선택</label>
+            <select id="selectHole" name="HoleNumber" class="form-select" asp-for="HoleNumber" style="border-radius: 0.5rem;" disabled>
+                <option value="">홀을 선택하세요</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-success ms-2" id="searchBtn" style="border-radius: 0.5rem;">조회</button>
+    </div>
+</div>
+
+<!-- 결과 입력 테이블 (상단에 서치/페이징 포함) -->
+<div class="card custom-card mb-4" style="border-radius: 1rem;">
+    <div class="card-body">
+        <form method="get" id="searchForm" class="row g-2 mb-3 align-items-center">
+            <div class="col-auto">
+                <input type="text" name="SearchParticipant" id="SearchParticipant" value="@Model.SearchParticipant" class="form-control" placeholder="참가자명 검색" style="border-radius: 0.5rem;" />
+            </div>
+            <div class="col-auto">
+                <input type="text" name="SearchTeam" id="SearchTeam" value="@Model.SearchTeam" class="form-control" placeholder="팀번호 검색" style="border-radius: 0.5rem;" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-primary" style="border-radius: 0.5rem;">검색</button>
+            </div>
+            <div class="col-auto ms-auto">
+                <span class="text-muted">총 건수: <strong>@Model.TotalCount</strong></span>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle" style="border-radius: 0.75rem; overflow: hidden;">
+                <thead style="background: #e3ffe3;">
+                    <tr>
+                        <th>코스</th>
+                        <th>홀</th>
+                        <th>팀번호</th>
+                        <th>코스순번</th>
+                        <th>참가자명</th>
+                        <th>타수</th>
+                        <th>비고</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTableBody">
+                    @foreach (var r in Model.PagedHoleResults)
+                    {
+                        <tr>
+                            <td>@r.CourseName</td>
+                            <td>@r.HoleNumber</td>
+                            <td>@r.TeamNumber</td>
+                            <td>@r.CourseOrder</td>
+                            <td>@r.ParticipantName</td>
+                            <td>
+                                <input type="number" class="form-control" name="Score_@r.ParticipantId" value="@r.Score" min="1" max="20" style="border-radius: 0.5rem;" />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="Note_@r.ParticipantId" value="@r.Note" style="border-radius: 0.5rem;" />
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.PagedHoleResults.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">검색 결과가 없습니다.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!-- 페이지네이션 -->
+        <nav aria-label="테이블 페이지네이션" class="mt-3">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
+                    <a class="page-link" href="?PageIndex=@(Model.PageIndex - 1)&SearchParticipant=@Model.SearchParticipant&SearchTeam=@Model.SearchTeam">이전</a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link" href="?PageIndex=@i&SearchParticipant=@Model.SearchParticipant&SearchTeam=@Model.SearchTeam">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" href="?PageIndex=@(Model.PageIndex + 1)&SearchParticipant=@Model.SearchParticipant&SearchTeam=@Model.SearchTeam">다음</a>
+                </li>
+            </ul>
+        </nav>
+        <div class="mt-3 text-end">
+            <button type="submit" class="btn btn-primary px-4" style="border-radius: 0.5rem;">저장</button>
+        </div>
+    </div>
+</div>
+
+<div id="validationMessage" class="mt-4 text-danger"></div>
+
+<div class="mt-2 text-end">
+    <a href="@Url.Page("/Manager/GameResult", new { gameCode = Model.GameCode, export = "pdf" })" class="btn btn-outline-dark me-1" style="border-radius: 0.5rem;">PDF 저장</a>
+    <a href="@Url.Page("/Manager/GameResult", new { gameCode = Model.GameCode, export = "excel" })" class="btn btn-outline-success" style="border-radius: 0.5rem;">엑셀 저장</a>
+</div>
+
+@section Scripts {
+    <script>
+        // 순차적 드롭다운 (대회 > 코스 > 홀)
+        document.getElementById('selectGame').addEventListener('change', function () {
+            var gameCode = this.value;
+            var courseSelect = document.getElementById('selectCourse');
+            var holeSelect = document.getElementById('selectHole');
+
+            // 코스 초기화 및 활성화
+            courseSelect.disabled = !gameCode;
+            courseSelect.innerHTML = '<option value="">코스를 선택하세요</option>';
+            holeSelect.disabled = true;
+            holeSelect.innerHTML = '<option value="">홀을 선택하세요</option>';
+
+            if (gameCode) {
+                // fetch 코스 목록 (ajax 예시, 실제는 서버에서 불러옴)
+                fetch('/Manager/GameResult?handler=Courses&gameCode=' + gameCode)
+                    .then(res => res.json())
+                    .then(list => {
+                        list.forEach(row => {
+                            courseSelect.innerHTML += `<option value="${row.value}">${row.text}</option>`;
+                        });
+                    });
+            }
+        });
+
+        document.getElementById('selectCourse').addEventListener('change', function () {
+            var gameCode = document.getElementById('selectGame').value;
+            var courseName = this.value;
+            var holeSelect = document.getElementById('selectHole');
+            holeSelect.disabled = !courseName;
+            holeSelect.innerHTML = '<option value="">홀을 선택하세요</option>';
+
+            if (gameCode && courseName) {
+                // fetch 홀 목록 (ajax 예시)
+                fetch(`/Manager/GameResult?handler=Holes&gameCode=${gameCode}&courseName=${courseName}`)
+                    .then(res => res.json())
+                    .then(list => {
+                        list.forEach(row => {
+                            holeSelect.innerHTML += `<option value="${row.value}">${row.text}</option>`;
+                        });
+                    });
+            }
+        });
+    </script>
+}
