@@ -46,44 +46,57 @@
                 <span class="text-muted">총 건수: <strong>@Model.TotalCount</strong></span>
             </div>
         </form>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle" style="border-radius: 0.75rem; overflow: hidden;">
-                <thead style="background: #e3ffe3;">
-                    <tr>
-                        <th>코스</th>
-                        <th>홀</th>
-                        <th>팀번호</th>
-                        <th>코스순번</th>
-                        <th>참가자명</th>
-                        <th>타수</th>
-                        <th>비고</th>
-                    </tr>
-                </thead>
-                <tbody id="resultTableBody">
-                    @foreach (var r in Model.PagedHoleResults)
-                    {
-                        <tr>
-                            <td>@r.CourseName</td>
-                            <td>@r.HoleNumber</td>
-                            <td>@r.TeamNumber</td>
-                            <td>@r.CourseOrder</td>
-                            <td>@r.ParticipantName</td>
-                            <td>
-                                <input type="number" class="form-control" name="Score_@r.ParticipantId" value="@r.Score" min="1" max="20" style="border-radius: 0.5rem;" />
-                            </td>
-                            <td>
-                                <input type="text" class="form-control" name="Note_@r.ParticipantId" value="@r.Note" style="border-radius: 0.5rem;" />
-                            </td>
-                        </tr>
-                    }
-                    @if (!Model.PagedHoleResults.Any())
-                    {
-                        <tr>
-                            <td colspan="7" class="text-center text-muted">검색 결과가 없습니다.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="container my-4">
+            @foreach (var course in Model.ScoreCardCourses) // ScoreCardCourses: List<CourseScoreCard>
+            {
+                <div class="mb-5">
+                    <h5 class="fw-bold mb-2">코스명: @course.CourseName</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle text-center" style="background:#fff;">
+                            <thead style="background:#f7f7f7;">
+                                <tr>
+                                    <th style="width:40px;">No.</th>
+                                    <th style="width:60px;">코스순번</th>
+                                    <th style="width:120px;">참가자명</th>
+                                    <th style="width:120px;">참가자ID</th>
+                                    @foreach (var h in course.HoleNumbers) // List<int> 1~9
+                                    {
+                                        <th style="width:60px;">@h 홀</th>
+                                    }
+                                    <th style="width:60px;">합계</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < course.Participants.Count; i++)
+                                {
+                                    var p = course.Participants[i];
+                                    <tr>
+                                        <td>@(i + 1)</td>
+                                        <td>@p.CourseOrder</td>
+                                        <td>@p.ParticipantName</td>
+                                        <td>@p.ParticipantId</td>
+                                        @foreach (var h in course.HoleNumbers)
+                                        {
+                                            <td>
+                                                <input type="number" class="form-control text-center"
+                                                       name="Score_@course.CourseName@p.ParticipantId@h"
+                                                       value="@(p.Scores.ContainsKey(h) ? p.Scores[h].ToString() : "")"
+                                                       min="1" max="20" style="width:55px; display:inline-block;" />
+                                            </td>
+                                        }
+                                        <td>
+                                            @{
+                                                int total = course.HoleNumbers.Sum(h => p.Scores.ContainsKey(h) ? p.Scores[h] : 0);
+                                            }
+                                            <span>@total</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
         </div>
         <!-- 페이지네이션 -->
         <nav aria-label="테이블 페이지네이션" class="mt-3">

@@ -25,28 +25,55 @@ namespace GiSanParkGolf.Pages.Manager
         public List<HoleResultRow> HoleResults { get; set; } = new();
         public List<HoleResultRow> PagedHoleResults { get; set; } = new();
 
+        public List<CourseScoreCard> ScoreCardCourses { get; set; } = new();
+
         public void OnGet()
         {
-            // 예시: 옵션, 전체 데이터 생성
-            GameOptions = new List<SelectListItem> { new("2024년 대회", "G2024"), new("2025년 대회", "G2025") };
-            CourseOptions = new List<SelectListItem> { new("A코스", "A"), new("B코스", "B") };
-            HoleOptions = new List<SelectListItem> { new("1번홀", "1"), new("2번홀", "2") };
+            // 예시 데이터: 실제로는 DB에서 대회/코스/홀/참가자 정보 불러옴
+            ScoreCardCourses = new List<CourseScoreCard>
+            {
+                new CourseScoreCard
+                {
+                    CourseName = "A 코스",
+                    HoleNumbers = Enumerable.Range(1,9).ToList(),
+                    Participants = new List<ScoreCardParticipant>
+                    {
+                        new ScoreCardParticipant { CourseOrder=1, ParticipantName="회원2", ParticipantId="A122" },
+                        new ScoreCardParticipant { CourseOrder=2, ParticipantName="회원4", ParticipantId="A125" },
+                        new ScoreCardParticipant { CourseOrder=3, ParticipantName="회원3", ParticipantId="A123" },
+                        new ScoreCardParticipant { CourseOrder=4, ParticipantName="회원44", ParticipantId="A124" },
+                        new ScoreCardParticipant { CourseOrder=5, ParticipantName="관리자", ParticipantId="1" }
+                    }
+                },
+                new CourseScoreCard
+                {
+                    CourseName = "B 코스",
+                    HoleNumbers = Enumerable.Range(1,9).ToList(),
+                    Participants = new List<ScoreCardParticipant>
+                    {
+                        new ScoreCardParticipant { CourseOrder=1, ParticipantName="회원2", ParticipantId="A122" },
+                        new ScoreCardParticipant { CourseOrder=2, ParticipantName="회원4", ParticipantId="A125" },
+                        new ScoreCardParticipant { CourseOrder=3, ParticipantName="회원3", ParticipantId="A123" },
+                        new ScoreCardParticipant { CourseOrder=4, ParticipantName="회원44", ParticipantId="A124" },
+                        new ScoreCardParticipant { CourseOrder=5, ParticipantName="관리자", ParticipantId="1" }
+                    }
+                }
+            };
+        }
 
-            HoleResults = new List<HoleResultRow>
+        public class CourseScoreCard
         {
-            new() { CourseName="A", HoleNumber=1, TeamNumber="T1", CourseOrder=1, ParticipantName="홍길동", ParticipantId="U1", Score=3, Note="" },
-            new() { CourseName="A", HoleNumber=1, TeamNumber="T2", CourseOrder=2, ParticipantName="김철수", ParticipantId="U2", Score=4, Note="" },
-            new() { CourseName="B", HoleNumber=2, TeamNumber="T3", CourseOrder=3, ParticipantName="이영희", ParticipantId="U3", Score=5, Note="" }
-        };
+            public string CourseName { get; set; }
+            public List<int> HoleNumbers { get; set; } = new();
+            public List<ScoreCardParticipant> Participants { get; set; } = new();
+        }
 
-            // 검색 필터
-            var filtered = HoleResults
-                .Where(r => (string.IsNullOrEmpty(SearchParticipant) || r.ParticipantName.Contains(SearchParticipant))
-                         && (string.IsNullOrEmpty(SearchTeam) || r.TeamNumber.Contains(SearchTeam)))
-                .ToList();
-
-            TotalCount = filtered.Count;
-            PagedHoleResults = filtered.Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+        public class ScoreCardParticipant
+        {
+            public int CourseOrder { get; set; }
+            public string ParticipantName { get; set; }
+            public string ParticipantId { get; set; }
+            public Dictionary<int, int> Scores { get; set; } = new(); // key: 홀번호, value: 점수
         }
 
         public IActionResult OnPost()
