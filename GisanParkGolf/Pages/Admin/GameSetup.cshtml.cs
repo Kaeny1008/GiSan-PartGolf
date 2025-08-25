@@ -1261,6 +1261,9 @@ namespace GiSanParkGolf.Pages.Admin
             game.AssignmentLocked = false;
             _dbContext.Entry(game).Property(g => g.AssignmentLocked).IsModified = true;
 
+            game.GameStatus = "Assigning";
+            _dbContext.Entry(game).Property(g => g.GameStatus).IsModified = true;
+
             try
             {
                 var affected = await _dbContext.SaveChangesAsync();
@@ -1377,29 +1380,29 @@ namespace GiSanParkGolf.Pages.Admin
                 {
                     var who = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : (h.ChangedBy ?? "-");
                     var reason = dict.ContainsKey("CancelReason") ? dict["CancelReason"] : dict.ContainsKey("Reason") ? dict["Reason"] : "";
-                    summary = $"참가자 {who}가 대회참가 취소 요청{(string.IsNullOrWhiteSpace(reason) ? "" : $"(사유: {reason})")}";
+                    summary = $"참가자 {who} 님이 대회참가 취소 요청{(string.IsNullOrWhiteSpace(reason) ? "" : $"(사유: {reason})")}";
                 }
                 else if (t == "cancelapproval")
                 {
                     var who = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : (h.ChangedBy ?? "-");
-                    summary = $"{h.ChangedBy} 님이 참가자 {who} 에 대해 대회 참가취소 처리(승인)";
+                    summary = $"{h.ChangedBy} 님이 참가자 {who} 님을 대회 참가취소 처리(승인) 및 잠금 해제 하였습니다.";
                 }
                 else if (t == "rejoinrequest")
                 {
                     var who = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : (h.ChangedBy ?? "-");
-                    summary = $"참가자 {who}가 대회 재참가 요청";
+                    summary = $"참가자 {who} 님이 대회 재참가 요청";
                 }
                 else if (t == "rejoinapproval")
                 {
                     var who = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : (h.ChangedBy ?? "-");
-                    summary = $"{h.ChangedBy} 님이 참가자 {who} 에 대해 대회 재참가 처리(승인)";
+                    summary = $"{h.ChangedBy} 님이 참가자 {who} 님을 대회 재참가 처리(승인) 및 잠금 해제 하였습니다.";
                 }
                 else if (t.Contains("forceassign") || t.Contains("assign"))
                 {
                     var user = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : "-";
                     var course = dict.ContainsKey("CourseName") ? dict["CourseName"] : "-";
                     var hole = dict.ContainsKey("HoleNumber") ? dict["HoleNumber"] : dict.ContainsKey("Hole") ? dict["Hole"] : "-";
-                    summary = $"{h.ChangedBy} 님이 {user} 를 {course} {hole}홀에 강제 배정했습니다.";
+                    summary = $"{h.ChangedBy} 님이 {user} 님을 {course} {hole}홀에 강제 배정했습니다.";
                 }
                 else
                 {

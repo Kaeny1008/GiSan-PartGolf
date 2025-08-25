@@ -286,11 +286,18 @@ namespace GisanParkGolf.Services.Player
 
         private async Task AddAssignmentHistoryAsync(string gameCode, string userId, string changeType, object detailsObj)
         {
+            var participant = await _dbContext.GameParticipants
+                .Include(gp => gp.Game)
+                .FirstOrDefaultAsync(gp => gp.GameCode == gameCode && gp.UserId == userId);
+
+            //if (participant == null || participant.Game == null)
+            //    return null;
+
             var jsonDetails = JsonConvert.SerializeObject(detailsObj ?? new { });
             var history = new GameAssignmentHistory
             {
                 GameCode = gameCode,
-                ChangedBy = userId,
+                ChangedBy = participant?.User?.UserName ?? "",
                 ChangeType = changeType,
                 Details = jsonDetails,
                 ChangedAt = DateTime.Now

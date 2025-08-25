@@ -3,6 +3,7 @@
 @model GiSanParkGolf.Pages.Player.MyGameDetailModel
 @{
     ViewData["Title"] = "대회 정보";
+    var myId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
 @section Scripts {
@@ -197,8 +198,14 @@
                                     <div class="col-12 mt-3">
                                         @if (Model.Game?.Approval == null)
                                         {
-                                            <span class="badge bg-danger" style="font-size:1.2em;">
-                                                <i class="bi bi-x-circle-fill"></i> 현재 <strong>대회 참가 취소요청됨</strong>
+                                            <span class="badge bg-info text-dark" style="font-size:1.2em;">
+                                                <i class="bi bi-exclamation-circle-fill"></i> 현재 <strong>대회 참가 취소요청됨</strong>
+                                            </span>
+                                        }
+                                        else if (Model.Game?.Approval == myId)
+                                        {
+                                            <span class="badge bg-warning text-dark" style="font-size:1.2em;">
+                                                <i class="bi bi-exclamation-circle-fill"></i> 현재 <strong>대회 재참가 요청됨</strong>
                                             </span>
                                         }
                                         else
@@ -362,7 +369,7 @@
                         <button type="button" class="btn btn-danger btn-lg" onclick="showCustomModal('cancelrequest')">참가취소 요청</button>
                     </form>
                 }
-                else if ((Model?.Game?.IsCancelled ?? 1) == 1 && (Model?.Game?.Approval != null))
+                else if ((Model?.Game?.IsCancelled ?? 1) == 1 && (Model?.Game?.Approval != null && Model?.Game?.Approval != myId))
                 {
                     <form id="rejoinRequestForm"
                           method="post"

@@ -138,6 +138,16 @@ namespace GiSanParkGolf.Pages.Admin
                     {
                         TempData["SuccessMessage"] += "\n코스배치가 완료 되어 있으므로 <strong style='color:red; font-size:1.2em;'>코스 재배치</strong>가 필요합니다.";
                     }
+
+                    if (participant.Game != null && participant.Game.AssignmentLocked)
+                    {
+                        participant.Game.AssignmentLocked = false;
+                        participant.Game.GameStatus = "Assigning";
+                        _dbContext.Games.Update(participant.Game);
+                        await _dbContext.SaveChangesAsync();
+                    }
+
+                    return RedirectToPage("/Admin/GameSetup", new { gameCode = participant.GameCode, tab = "tab-course" });
                 }
                 else
                 {
@@ -208,6 +218,16 @@ namespace GiSanParkGolf.Pages.Admin
                     {
                         TempData["SuccessMessage"] += "\n코스배치가 완료 되어 있으므로 <strong style='color:red; font-size:1.2em;'>코스 재배치</strong>가 필요합니다.";
                     }
+
+                    if (participant.Game != null && participant.Game.AssignmentLocked)
+                    {
+                        participant.Game.AssignmentLocked = false;
+                        participant.Game.GameStatus = "Assigning";
+                        _dbContext.Games.Update(participant.Game);
+                        await _dbContext.SaveChangesAsync();
+                    }
+
+                    return RedirectToPage("/Admin/GameSetup", new { gameCode = participant.GameCode, tab = "tab-course" });
                 }
                 else
                 {

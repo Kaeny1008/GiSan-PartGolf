@@ -1,20 +1,9 @@
 ﻿@page
+@using System.Security.Claims
 @model GiSanParkGolf.Pages.Player.MyGameModel
 @{
     ViewData["Title"] = "참여 대회 목록";
-}
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            // Enter키로 검색
-            $('#SearchQuery').keypress(function (e) {
-                if (e.which === 13) {
-                    $(this).closest('form').submit();
-                }
-            });
-        });
-    </script>
+    var myId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
 @await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음"
@@ -77,14 +66,29 @@
                             }
                             else if (game.IsCancelled == true)
                             {
-                                if (game.Approval == null)
+                                @if (game.Approval == null)
                                 {
-                                    <td class="text-danger">참가취소 요청중</td>
+                                    <td>
+                                        <span class="badge bg-info text-dark" style="font-size:1em;">
+                                            참가취소 요청중
+                                        </span>
+                                    </td>
+                                }
+                                else if (game.Approval == myId)
+                                {
+                                    <td>
+                                        <span class="badge bg-warning text-dark" style="font-size:1em;">
+                                            재참가 요청중
+                                        </span>
+                                    </td>
                                 }
                                 else
                                 {
-                                    <td class="text-danger">참가취소</td>
-
+                                    <td>
+                                        <span class="badge bg-danger" style="font-size:1em;">
+                                            참가취소
+                                        </span>
+                                    </td>
                                 }
                             }
                             <td>
