@@ -65,6 +65,12 @@
             }
         </style>
     </head>
+
+    @{
+        var isAdmin = (await AuthorizationService.AuthorizeAsync(User, "AdminOnly")).Succeeded;
+        var isManager = (await AuthorizationService.AuthorizeAsync(User, "ManagerOnly")).Succeeded;
+    }
+
     <body>
         <script>
             window.addEventListener("DOMContentLoaded", function () {
@@ -75,6 +81,7 @@
                 }
             });
         </script>
+
         <div class="header-fixed">
             <nav class="navbar navbar-expand-lg navbar-custom">
                 <div class="container">
@@ -87,12 +94,6 @@
                     </button>
                     <div class="collapse navbar-collapse" id="mainNavbar">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                            @{
-                                var isAdmin = (await AuthorizationService.AuthorizeAsync(User, "AdminOnly")).Succeeded;
-                                var isManager = (await AuthorizationService.AuthorizeAsync(User, "ManagerOnly")).Succeeded;
-                            }
-
                             @if (isAdmin)
                             {
                                 <li class="nav-item dropdown">

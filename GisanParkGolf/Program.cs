@@ -53,6 +53,7 @@ public class Program
                 // 쿠키 이름과 유효시간 설정
                 options.Cookie.Name = "GisanParkGolf.AuthCookie";
                 options.ExpireTimeSpan = TimeSpan.FromHours(8); // 8시간 동안 로그인 유지
+                options.SlidingExpiration = true;
             });
 
         // '관리자' 정책

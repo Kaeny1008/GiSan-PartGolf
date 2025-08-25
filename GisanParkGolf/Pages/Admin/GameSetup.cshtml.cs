@@ -19,12 +19,12 @@ namespace GiSanParkGolf.Pages.Admin
     public class GameSetupModel : PageModel
     {
         private readonly IGameService _gameService;
-        private readonly MyDbContext _context;
+        private readonly MyDbContext _dbContext;
 
         public GameSetupModel(MyDbContext context, IGameService gameService)
         {
             _gameService = gameService;
-            _context = context;
+            _dbContext = context;
             Competitions = new PaginatedList<CompetitionViewModel>(new List<CompetitionViewModel>(), 0, 1, 10);
             Participants = new PaginatedList<ParticipantViewModel>(new List<ParticipantViewModel>(), 0, 1, 10);
             Assignments = new PaginatedList<CourseAssignmentResultViewModel>(new List<CourseAssignmentResultViewModel>(), 0, 1, 10);
@@ -78,7 +78,7 @@ namespace GiSanParkGolf.Pages.Admin
             if (results == null || results.Count == 0)
             {
                 // DB에서 불러오기
-                var dbResults = _context.GameUserAssignments
+                var dbResults = _dbContext.GameUserAssignments
                     .Include(a => a.Handicap)
                     .Include(a => a.User)
                     .Include(a => a.Game)
@@ -89,7 +89,7 @@ namespace GiSanParkGolf.Pages.Admin
                     .Where(id => !string.IsNullOrEmpty(id))
                     .Distinct().ToList();
 
-                var awardDict = _context.GameAwardHistories
+                var awardDict = _dbContext.GameAwardHistories
                     .Where(a => !string.IsNullOrEmpty(a.UserId) && userIds.Contains(a.UserId))
                     .GroupBy(a => a.UserId)
                     .ToDictionary(g => g.Key ?? "", g => g.Count());
@@ -128,7 +128,7 @@ namespace GiSanParkGolf.Pages.Admin
             if (string.IsNullOrEmpty(gameCode)) return new List<ParticipantViewModel>();
 
             // DB에서 참가자(취소되지 않은) 로드
-            var participants = _context.GameParticipants
+            var participants = _dbContext.GameParticipants
                 .Include(p => p.User)
                 .ThenInclude(u => u == null ? null : u.Handicap)
                 .Where(p => p.GameCode == gameCode && !p.IsCancelled)
@@ -143,7 +143,7 @@ namespace GiSanParkGolf.Pages.Admin
 
             // 수상기록 카운트(가능하면)
             var userIds = participants.Select(p => p.UserId ?? "").Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
-            var awardDict = _context.GameAwardHistories
+            var awardDict = _dbContext.GameAwardHistories
                 .Where(a => !string.IsNullOrEmpty(a.UserId) && userIds.Contains(a.UserId))
                 .GroupBy(a => a.UserId)
                 .ToDictionary(g => g.Key ?? "", g => g.Count());
@@ -216,12 +216,12 @@ namespace GiSanParkGolf.Pages.Admin
                 gameCode, ParticipantSearchQuery, ParticipantPageIndex, ParticipantPageSize);
 
             // 참가자수 변수 저장
-            JoinedCount = await _context.GameParticipants.CountAsync(gp => !gp.IsCancelled);
+            JoinedCount = await _dbContext.GameParticipants.CountAsync(gp => !gp.IsCancelled);
 
-            var query = _context.GameParticipants.Include(gp => gp.Game).AsQueryable();
+            var query = _dbContext.GameParticipants.Include(gp => gp.Game).AsQueryable();
             TotalCount = await query.CountAsync();
-            CancelledCount = await _context.GameParticipants.CountAsync(gp => gp.IsCancelled);
-            JoinedCount = await _context.GameParticipants.CountAsync(gp => !gp.IsCancelled);
+            CancelledCount = await _dbContext.GameParticipants.CountAsync(gp => gp.IsCancelled);
+            JoinedCount = await _dbContext.GameParticipants.CountAsync(gp => !gp.IsCancelled);
 
             // 배치 옵션 세션 -> 변수
             GenderSort = HttpContext.Session.GetString("GenderSort");
@@ -229,12 +229,12 @@ namespace GiSanParkGolf.Pages.Admin
             AgeSort = HttpContext.Session.GetString("AgeSort");
             AwardSort = HttpContext.Session.GetString("AwardSort");
 
-            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (game != null)
             {
                 AssignmentLocked = game.AssignmentLocked;
 
-                Courses = await _context.Courses
+                Courses = await _dbContext.Courses
                     .Where(c => c.StadiumCode == game.StadiumCode)
                     .Select(c => new CourseViewModel { CourseName = c.CourseName, HoleCount = c.HoleCount })
                     .ToListAsync();
@@ -265,7 +265,7 @@ namespace GiSanParkGolf.Pages.Admin
                - HistorySearchQuery: ChangeType, ChangedBy, Details(JSON)에 대해 단순 contains 검색
                - HistoryPageIndex/HistoryPageSize 로 페이징
             */
-            var historyQuery = _context.Set<GameAssignmentHistory>()
+            var historyQuery = _dbContext.Set<GameAssignmentHistory>()
                 .Where(h => h.GameCode == gameCode);
 
             // 검색어가 있으면 ChangeType, ChangedBy, Details 에 대해 contains 검색
@@ -358,17 +358,17 @@ namespace GiSanParkGolf.Pages.Admin
             RenumberCourseOrders(assignmentResults);
 
             // 2. DB에서 코스배치 기록 삭제
-            var userAssignments = await _context.GameUserAssignments
+            var userAssignments = await _dbContext.GameUserAssignments
                 .Where(a => a.GameCode == gameCode && a.UserId == userId)
                 .ToListAsync();
             if (userAssignments.Any())
             {
-                _context.GameUserAssignments.RemoveRange(userAssignments);
-                await _context.SaveChangesAsync();
+                _dbContext.GameUserAssignments.RemoveRange(userAssignments);
+                await _dbContext.SaveChangesAsync();
             }
 
             // 3. 참가자 상태 취소 처리 (참가취소)
-            var participant = await _context.GameParticipants
+            var participant = await _dbContext.GameParticipants
                 .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.GameCode == gameCode && p.UserId == userId);
             if (participant != null)
@@ -377,8 +377,8 @@ namespace GiSanParkGolf.Pages.Admin
                 participant.CancelDate = DateTime.Now;
                 participant.CancelReason = cancelReason;
                 participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
-                _context.GameParticipants.Update(participant);
-                await _context.SaveChangesAsync();
+                _dbContext.GameParticipants.Update(participant);
+                await _dbContext.SaveChangesAsync();
 
                 HttpContext.Session.SetString($"CancelReason_{userId}", cancelReason ?? "");
             }
@@ -503,7 +503,7 @@ namespace GiSanParkGolf.Pages.Admin
             }
 
             // 서버측 잠금 검사 (추가 안전장치)
-            var gameForCheck = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            var gameForCheck = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (gameForCheck == null)
             {
                 TempData["ErrorMessage"] = "대회 정보를 찾을 수 없습니다.";
@@ -526,7 +526,7 @@ namespace GiSanParkGolf.Pages.Admin
             var settingJson = JsonConvert.SerializeObject(gameSettingObj);
 
             // 2. 트랜잭션 시작 (원자성 보장)
-            using var tx = await _context.Database.BeginTransactionAsync();
+            using var tx = await _dbContext.Database.BeginTransactionAsync();
             try
             {
                 // 3. 게임 엔티티 업데이트(상태, 세팅, 잠금)
@@ -534,11 +534,11 @@ namespace GiSanParkGolf.Pages.Admin
                 game.GameSetting = settingJson;
                 game.GameStatus = "Assigned";
                 game.AssignmentLocked = true; // 자동 확정 정책일 경우
-                _context.Games.Update(game);
-                await _context.SaveChangesAsync();
+                _dbContext.Games.Update(game);
+                await _dbContext.SaveChangesAsync();
 
                 // 4. 이전 배정 로드 (DB)
-                var prevAssignments = await _context.GameUserAssignments
+                var prevAssignments = await _dbContext.GameUserAssignments
                     .Where(a => a.GameCode == gameCode)
                     .ToListAsync();
 
@@ -553,7 +553,7 @@ namespace GiSanParkGolf.Pages.Admin
                 // 6. 참가자(취소) 업데이트
                 if (cancelledUsers.Any())
                 {
-                    var participantsToCancel = await _context.GameParticipants
+                    var participantsToCancel = await _dbContext.GameParticipants
                         .Where(p => p.GameCode == gameCode && cancelledUsers.Contains(p.UserId))
                         .ToListAsync();
 
@@ -564,16 +564,16 @@ namespace GiSanParkGolf.Pages.Admin
                         participant.CancelDate = DateTime.Now;
                         participant.CancelReason = !string.IsNullOrWhiteSpace(cancelReason) ? cancelReason : "코스 배치 취소";
                         participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
-                        _context.GameParticipants.Update(participant);
+                        _dbContext.GameParticipants.Update(participant);
                     }
-                    await _context.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync();
                 }
 
                 // 7. 기존 배정 삭제
                 if (prevAssignments.Any())
                 {
-                    _context.GameUserAssignments.RemoveRange(prevAssignments);
-                    await _context.SaveChangesAsync();
+                    _dbContext.GameUserAssignments.RemoveRange(prevAssignments);
+                    await _dbContext.SaveChangesAsync();
                 }
 
                 // 8. 새 배정 레코드 준비 및 대량 삽입
@@ -592,8 +592,8 @@ namespace GiSanParkGolf.Pages.Admin
 
                 if (newAssignments.Any())
                 {
-                    await _context.GameUserAssignments.AddRangeAsync(newAssignments);
-                    await _context.SaveChangesAsync();
+                    await _dbContext.GameUserAssignments.AddRangeAsync(newAssignments);
+                    await _dbContext.SaveChangesAsync();
                 }
 
                 // 9. 히스토리 기록 (요약)
@@ -629,44 +629,123 @@ namespace GiSanParkGolf.Pages.Admin
         // --- 참가취소, 재참가 등 기존 기능은 그대로 ---
         public async Task<IActionResult> OnPostApproveCancelAsync(string id)
         {
-            var participant = await _context.GameParticipants.FirstOrDefaultAsync(p => p.UserId == id);
-            if (participant == null)
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                var participant = await _dbContext.GameParticipants
+                    .Include(p => p.Game)
+                    .FirstOrDefaultAsync(p => p.UserId == id);
+
+                if (participant != null && participant.IsCancelled && string.IsNullOrEmpty(participant.Approval))
+                {
+                    participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
+                    _dbContext.GameParticipants.Update(participant);
+                    await _dbContext.SaveChangesAsync();
+
+                    // ClearAssignmentSession() 호출 필요 시 여기에 추가
+                    ClearAssignmentSession();
+
+                    // 알림 메시지에 대회명 추가
+                    var gameName = participant.Game?.GameName ?? "";
+                    var notification = new Notification
+                    {
+                        UserId = participant.UserId ?? "",
+                        Type = NotificationTypes.CancelApproved,
+                        Title = "참가 취소 승인",
+                        Message = $"회원님의 {(string.IsNullOrEmpty(gameName) ? "" : $"[{gameName}] ")} 참가 취소가 승인되었습니다.",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now
+                    };
+
+                    _dbContext.Notifications.Add(notification);
+                    await _dbContext.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+
+                    TempData["SuccessTitle"] = "취소 승인 완료";
+                    TempData["SuccessMessage"] = "취소 승인이 완료되었습니다.";
+                    if (participant.Game?.GameStatus == "Assigned")
+                    {
+                        TempData["SuccessMessage"] += "\n코스배치가 완료 되어 있으므로 <strong style='color:red; font-size:1.2em;'>코스 재배치</strong>가 필요합니다.";
+                    }
+                    return RedirectToPage(new { gameCode = participant.GameCode });
+                }
+                else
+                {
+                    TempData["ErrorTitle"] = "오류";
+                    TempData["ErrorMessage"] = "취소 승인 처리에 실패했습니다.";
+                    await transaction.RollbackAsync();
+                }
+            }
+            catch (Exception ex)
             {
                 TempData["ErrorTitle"] = "오류";
-                TempData["ErrorMessage"] = "참가자를 찾을 수 없습니다.";
-                return RedirectToPage();
+                TempData["ErrorMessage"] = $"취소 승인 중 오류가 발생했습니다: {ex.Message}";
+                // (선택) 예외 로깅 추가
+                await transaction.RollbackAsync();
             }
-            participant.Approval = User.FindFirstValue(ClaimTypes.Name) ?? "UnknownAdmin";
-            
-            _context.GameParticipants.Update(participant);
-            await _context.SaveChangesAsync();
-            ClearAssignmentSession();
 
-            TempData["SuccessTitle"] = "취소 승인 완료";
-            TempData["SuccessMessage"] = "참가자 취소가 승인되었습니다. 코스배치 재실행 필요.";
-            return RedirectToPage(new { gameCode = participant.GameCode });
+            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostRejoinAsync(string id)
         {
-            var participant = await _context.GameParticipants.FirstOrDefaultAsync(p => p.UserId == id);
-            if (participant == null)
+            // 트랜잭션 시작
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
             {
+                var participant = await _dbContext.GameParticipants
+                    .Include(p => p.Game)
+                    .FirstOrDefaultAsync(p => p.UserId == id);
+
+                if (participant == null)
+                {
+                    TempData["ErrorTitle"] = "오류";
+                    TempData["ErrorMessage"] = "참가자를 찾을 수 없습니다.";
+                    await transaction.RollbackAsync();
+                    return RedirectToPage();
+                }
+
+                participant.IsCancelled = false;
+                participant.CancelDate = null;
+                participant.CancelReason = null;
+                participant.Approval = null;
+                _dbContext.GameParticipants.Update(participant);
+                await _dbContext.SaveChangesAsync();
+
+                var gameName = participant.Game?.GameName ?? "";
+                var notification = new Notification
+                {
+                    UserId = participant.UserId ?? "",
+                    Type = NotificationTypes.RejoinApproved,
+                    Title = "재참가 처리 완료",
+                    Message = $"회원님이 {(string.IsNullOrEmpty(gameName) ? "" : $"[{gameName}] ")} 대회에 다시 참가 처리 되었습니다.",
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                };
+                _dbContext.Notifications.Add(notification);
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                TempData["SuccessTitle"] = "재참가 완료";
+                TempData["SuccessMessage"] = "재참가 처리되었습니다.";
+                if (participant.Game?.GameStatus == "Assigned")
+                {
+                    TempData["SuccessMessage"] += "\n코스배치가 완료 되어 있으므로 <strong style='color:red; font-size:1.2em;'>코스 재배치</strong>가 필요합니다.";
+                }
+                return RedirectToPage(new { gameCode = participant.GameCode, tab = "tab-course" });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
                 TempData["ErrorTitle"] = "오류";
-                TempData["ErrorMessage"] = "참가자를 찾을 수 없습니다.";
+                TempData["ErrorMessage"] = $"재참가 처리 중 오류가 발생했습니다: {ex.Message}";
+                // 필요시 예외 로깅 추가
                 return RedirectToPage();
             }
-            participant.IsCancelled = false;
-            participant.CancelDate = null;
-            participant.CancelReason = null;
-            participant.Approval = null;
-
-            _context.GameParticipants.Update(participant);
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessTitle"] = "재참가 완료";
-            TempData["SuccessMessage"] = "재참가 처리되었습니다.\n반드시 코스배치를 다시 실행해야 참가자가 배정됩니다.";
-            return RedirectToPage(new { gameCode = participant.GameCode, tab = "tab-course" });
         }
 
         // ------------------- 코스배치 옵션/실행 부분 -------------------
@@ -679,7 +758,7 @@ namespace GiSanParkGolf.Pages.Admin
             int maxPerHole = 4; // default
 
             // game 먼저 조회
-            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (game == null)
             {
                 TempData["ErrorTitle"] = "오류";
@@ -695,7 +774,7 @@ namespace GiSanParkGolf.Pages.Admin
             }
 
             // User는 항상 존재한다고 전제 → null-억제 연산자 사용
-            var participants = await _context.GameParticipants
+            var participants = await _dbContext.GameParticipants
                 .Where(p => p.GameCode == gameCode && !p.IsCancelled)
                 .Include(p => p.User!)
                 .ThenInclude(u => u.Handicap)
@@ -707,7 +786,7 @@ namespace GiSanParkGolf.Pages.Admin
                 .Distinct()
                 .ToList();
 
-            var awardDict = await _context.GameAwardHistories
+            var awardDict = await _dbContext.GameAwardHistories
                 .Where(a => !string.IsNullOrEmpty(a.UserId) && userIds.Contains(a.UserId))
                 .GroupBy(a => a.UserId)
                 .ToDictionaryAsync(g => g.Key ?? "", g => g.Count());
@@ -716,7 +795,7 @@ namespace GiSanParkGolf.Pages.Admin
             bool useHandicap = Handicapped == "true";
 
             // 여기서 game.StadiumCode 안전하게 접근 가능
-            var courses = await _context.Courses
+            var courses = await _dbContext.Courses
                 .Where(c => c.StadiumCode == game.StadiumCode)
                 .ToListAsync();
 
@@ -917,7 +996,7 @@ namespace GiSanParkGolf.Pages.Admin
         private async Task AssignTeamNumbers(List<CourseAssignmentResultViewModel> assignmentResults, string gameCode)
         {
             int maxPerHole = 4; // default
-            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (!string.IsNullOrEmpty(game?.GameSetting))
             {
                 var setting = JsonConvert.DeserializeObject<dynamic>(game.GameSetting);
@@ -977,14 +1056,14 @@ namespace GiSanParkGolf.Pages.Admin
             }
 
             // 우선적으로 DB의 Game 엔티티에서 정보를 가져오고, 없으면 results에서 보완
-            var game = _context.Games.FirstOrDefault(g => g.GameCode == gameCode);
+            var game = _dbContext.Games.FirstOrDefault(g => g.GameCode == gameCode);
             string gameName = game?.GameName ?? results.FirstOrDefault()?.GameName ?? "게임명";
             string gameDate = game?.GameDate.ToString("yyyy-MM-dd") ?? results.FirstOrDefault()?.GameDate ?? "게임일자";
             string stadiumName = game?.StadiumName ?? results.FirstOrDefault()?.StadiumName ?? "경기장명";
 
             // 안전한 방식: AssignedDate가 non-nullable이더라도 레코드 자체가 없을 수 있으니 null 체크
             // 방법 선택: 여기서는 nullable 프로젝션(옵션 B)을 사용
-            var latestAssignedDate = _context.GameUserAssignments
+            var latestAssignedDate = _dbContext.GameUserAssignments
                 .Where(a => a.GameCode == gameCode)
                 .OrderByDescending(a => a.AssignedDate)
                 .Select(a => (DateTime?)a.AssignedDate) // nullable로 변환
@@ -1030,13 +1109,13 @@ namespace GiSanParkGolf.Pages.Admin
             }
 
             // 1. 게임/대회 정보 (PDF 상단)
-            var game = _context.Games.FirstOrDefault(g => g.GameCode == gameCode);
+            var game = _dbContext.Games.FirstOrDefault(g => g.GameCode == gameCode);
             string gameName = results.FirstOrDefault()?.GameName ?? (game?.GameName ?? "경기명");
             string gameDate = results.FirstOrDefault()?.GameDate ?? (game?.GameDate.ToString("yyyy-MM-dd") ?? "날짜없음");
             string stadiumName = results.FirstOrDefault()?.StadiumName ?? (game?.StadiumName ?? "경기장");
 
             // --- 새로 추가: 코스배치 완료 시간 조회 (GameUserAssignments.AssignedDate 최신값)
-            var latestAssignedDate = _context.GameUserAssignments
+            var latestAssignedDate = _dbContext.GameUserAssignments
                 .Where(a => a.GameCode == gameCode)
                 .OrderByDescending(a => a.AssignedDate)
                 .Select(a => (DateTime?)a.AssignedDate) // nullable로 안전하게 프로젝션
@@ -1050,7 +1129,7 @@ namespace GiSanParkGolf.Pages.Admin
             var courseDefs = new List<(string CourseName, int HoleCount)>();
             if (game != null)
             {
-                courseDefs = _context.Courses
+                courseDefs = _dbContext.Courses
                     .Where(c => c.StadiumCode == game.StadiumCode)
                     .Select(c => new { c.CourseName, c.HoleCount })
                     .AsEnumerable()
@@ -1131,15 +1210,15 @@ namespace GiSanParkGolf.Pages.Admin
                 Details = jsonDetails,
                 ChangedAt = DateTime.Now
             };
-            _context.Add(history);
-            await _context.SaveChangesAsync();
+            _dbContext.Add(history);
+            await _dbContext.SaveChangesAsync();
         }
 
         private async Task<IActionResult?> RejectIfAssignmentLockedAsync(string gameCode)
         {
             if (string.IsNullOrEmpty(gameCode)) return null;
 
-            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (game != null && game.AssignmentLocked)
             {
                 TempData["ErrorMessage"] = "코스배치는 확정되어 변경할 수 없습니다. 우선 잠금을 해제하세요.";
@@ -1165,7 +1244,7 @@ namespace GiSanParkGolf.Pages.Admin
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
 
-            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (game == null)
             {
                 TempData["ErrorMessage"] = "해당 대회를 찾을 수 없습니다.";
@@ -1180,11 +1259,11 @@ namespace GiSanParkGolf.Pages.Admin
 
             // 명시적으로 속성만 수정 표시
             game.AssignmentLocked = false;
-            _context.Entry(game).Property(g => g.AssignmentLocked).IsModified = true;
+            _dbContext.Entry(game).Property(g => g.AssignmentLocked).IsModified = true;
 
             try
             {
-                var affected = await _context.SaveChangesAsync();
+                var affected = await _dbContext.SaveChangesAsync();
                 // 로깅/디버그용: affected는 변경된 row 수
                 if (affected <= 0)
                 {
@@ -1281,7 +1360,7 @@ namespace GiSanParkGolf.Pages.Admin
                 // 간단한 요약 생성 (ChangeType 기반)
                 string summary;
                 var t = (h.ChangeType ?? "").ToLowerInvariant();
-                if (t.Contains("save"))
+                if (t == "saveandfinalize")
                 {
                     var savedBy = dict.ContainsKey("SavedBy") ? dict["SavedBy"] : (h.ChangedBy ?? "-");
                     var totalAssigned = dict.ContainsKey("TotalAssigned") ? dict["TotalAssigned"] : (dict.ContainsKey("TotalAssignedCount") ? dict["TotalAssignedCount"] : "-");
@@ -1289,16 +1368,31 @@ namespace GiSanParkGolf.Pages.Admin
                     var removed = dict.ContainsKey("RemovedUserIds") ? dict["RemovedUserIds"] : "-";
                     summary = $"{savedBy} 님이 배치를 저장(확정)했습니다. 배정: {totalAssigned}명, 미배정: {unassigned}명, 제거: {removed}";
                 }
-                else if (t == "unlock" || t.Contains("unlock"))
+                else if (t == "unlock")
                 {
                     var by = dict.ContainsKey("UnlockedBy") ? dict["UnlockedBy"] : (h.ChangedBy ?? "-");
                     summary = $"{by} 님이 잠금을 해제했습니다.";
                 }
-                else if (t.Contains("cancel") || t.Contains("approve"))
+                else if (t == "cancelrequest")
                 {
                     var who = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : (h.ChangedBy ?? "-");
                     var reason = dict.ContainsKey("CancelReason") ? dict["CancelReason"] : dict.ContainsKey("Reason") ? dict["Reason"] : "";
-                    summary = $"{h.ChangedBy} 님이 참가자 {who} 에 대해 취소 처리{(string.IsNullOrWhiteSpace(reason) ? "" : $"(사유: {reason})")}";
+                    summary = $"참가자 {who}가 대회참가 취소 요청{(string.IsNullOrWhiteSpace(reason) ? "" : $"(사유: {reason})")}";
+                }
+                else if (t == "cancelapproval")
+                {
+                    var who = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : (h.ChangedBy ?? "-");
+                    summary = $"{h.ChangedBy} 님이 참가자 {who} 에 대해 대회 참가취소 처리(승인)";
+                }
+                else if (t == "rejoinrequest")
+                {
+                    var who = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : (h.ChangedBy ?? "-");
+                    summary = $"참가자 {who}가 대회 재참가 요청";
+                }
+                else if (t == "rejoinapproval")
+                {
+                    var who = dict.ContainsKey("UserId") ? dict["UserId"] : dict.ContainsKey("UserName") ? dict["UserName"] : (h.ChangedBy ?? "-");
+                    summary = $"{h.ChangedBy} 님이 참가자 {who} 에 대해 대회 재참가 처리(승인)";
                 }
                 else if (t.Contains("forceassign") || t.Contains("assign"))
                 {
@@ -1335,14 +1429,14 @@ namespace GiSanParkGolf.Pages.Admin
             }
 
             // 3) 선택한 코스가 해당 게임(경기장)에 존재하는지 확인하고 해당 코스의 HoleCount 검증
-            var game = await _context.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
             if (game == null)
             {
                 TempData["ErrorMessage"] = "대회 정보를 찾을 수 없습니다.";
                 return RedirectToPage(new { gameCode = gameCode, tab = "tab-result" });
             }
 
-            var courseEntity = await _context.Courses.FirstOrDefaultAsync(c => c.CourseName == courseName && c.StadiumCode == game.StadiumCode);
+            var courseEntity = await _dbContext.Courses.FirstOrDefaultAsync(c => c.CourseName == courseName && c.StadiumCode == game.StadiumCode);
             if (courseEntity == null)
             {
                 TempData["ErrorMessage"] = "선택한 코스가 존재하지 않습니다.";

@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Spreadsheet;
 using GisanParkGolf.Data;
 using GisanParkGolf.Helpers;
 using GisanParkGolf.Pages.Player.ViewModels;
@@ -6,6 +7,7 @@ using GisanParkGolf.ViewModels.Player;
 using GiSanParkGolf.Pages.Player;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Security.Claims;
 
 namespace GisanParkGolf.Services.Player
@@ -257,7 +259,8 @@ namespace GisanParkGolf.Services.Player
                     StartRecruiting = gp.Game != null ? gp.Game.StartRecruiting : DateTime.MinValue,
                     EndRecruiting = gp.Game != null ? gp.Game.EndRecruiting : DateTime.MinValue,
                     GameStatus = gp.Game != null ? gp.Game.GameStatus : "",
-                    IsCancelledText = gp.IsCancelled ? "취소됨" : "참가"
+                    IsCancelled = gp.IsCancelled,
+                    Approval = gp.Approval
                 });
 
             if (!string.IsNullOrWhiteSpace(searchQuery) && !string.IsNullOrWhiteSpace(searchField))
@@ -279,6 +282,21 @@ namespace GisanParkGolf.Services.Player
 
             query = query.OrderByDescending(g => g.GameDate);
             return await PaginatedList<MyGameListModel>.CreateAsync(query.AsNoTracking(), pageIndex, pageSize);
+        }
+
+        private async Task AddAssignmentHistoryAsync(string gameCode, string userId, string changeType, object detailsObj)
+        {
+            var jsonDetails = JsonConvert.SerializeObject(detailsObj ?? new { });
+            var history = new GameAssignmentHistory
+            {
+                GameCode = gameCode,
+                ChangedBy = userId,
+                ChangeType = changeType,
+                Details = jsonDetails,
+                ChangedAt = DateTime.Now
+            };
+            _dbContext.Add(history);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<MyGameDetailViewModel?> GetMyGameInformationAsync(string gameCode, string? userId)
@@ -331,7 +349,7 @@ namespace GisanParkGolf.Services.Player
                 CancelDate = participant.CancelDate,
                 CancelReason = participant.CancelReason,
                 Approval = participant.Approval,
-                AssignmentStatus = null,
+                AssignmentStatus = game.GameStatus,
                 AssignedCourseName = assignment?.CourseName,
                 AssignedHoleNumber = assignment?.HoleNumber,
                 AssignedTeamNumber = assignment?.TeamNumber,
@@ -359,31 +377,135 @@ namespace GisanParkGolf.Services.Player
             if (participant == null)
                 return new JoinGameResult { Success = false, ErrorMessage = "참가 내역이 없습니다." };
 
-            participant.IsCancelled = true;
-            participant.CancelDate = DateTime.Now;
-            participant.CancelReason = cancelReason;
-            participant.JoinStatus = "Cancel";
-            participant.Approval = null;
-
-            if (game.ParticipantNumber > 0)
-                game.ParticipantNumber -= 1;
+            // 트랜잭션 시작
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
             try
             {
+                participant.IsCancelled = true;
+                participant.CancelDate = DateTime.Now;
+                participant.CancelReason = cancelReason;
+                participant.JoinStatus = "Cancel";
+                participant.Approval = userId;
+
+                if (game.ParticipantNumber > 0)
+                    game.ParticipantNumber -= 1;
+
                 await _dbContext.SaveChangesAsync();
-                await LogGameJoinHistoryAsync(
-                    gameCode,
-                    userId,
-                    "Cancel",
-                    userId,
-                    cancelReason,
-                    participant.JoinId,
-                    "참가자가 직접 참가취소"
-                );
+
+                //await LogGameJoinHistoryAsync(
+                //    gameCode,
+                //    userId,
+                //    "Cancel",
+                //    userId,
+                //    cancelReason,
+                //    participant.JoinId,
+                //    "참가자가 직접 참가취소"
+                //);
+
+                await AddAssignmentHistoryAsync(gameCode, userId, "Cancel", new
+                {
+                    UserId = userId,
+                    ActionType = "Cancel",
+                    ActionBy = userId,
+                    CancelReason = cancelReason,
+                    ParticipantId = participant.JoinId,
+                    Memo = "참가자가 직접 참가취소"
+                });
+
+                await transaction.CommitAsync();
+
                 return new JoinGameResult { Success = true };
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
+                return new JoinGameResult { Success = false, ErrorMessage = "DB 오류: " + ex.Message };
+            }
+        }
+
+        public async Task<JoinGameResult> MyGameCancelRequestlAsync(string gameCode, string? userId, string cancelReason)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return new JoinGameResult { Success = false, ErrorMessage = "로그인 정보가 없습니다." };
+
+            var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            if (game == null)
+                return new JoinGameResult { Success = false, ErrorMessage = "해당 대회를 찾을 수 없습니다." };
+
+            var participant = await _dbContext.GameParticipants
+                .FirstOrDefaultAsync(gp => gp.GameCode == gameCode && gp.UserId == userId && !gp.IsCancelled);
+
+            if (participant == null)
+                return new JoinGameResult { Success = false, ErrorMessage = "참가 내역이 없습니다." };
+
+            // 트랜잭션 시작
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                participant.IsCancelled = true;
+                participant.CancelDate = DateTime.Now;
+                participant.CancelReason = cancelReason;
+                participant.JoinStatus = "Cancel";
+                participant.Approval = null;
+
+                if (game.ParticipantNumber > 0)
+                    game.ParticipantNumber -= 1;
+
+                await _dbContext.SaveChangesAsync();
+
+                // 관리자(슈퍼관리자 포함) 전체 조회
+                var adminUsers = await _dbContext.Players
+                    .Where(m => m.UserClass <= 1)
+                    .ToListAsync();
+
+                // 관리자에게 알림 생성
+                var message = $"{userId}님이 [{game.GameName}] 대회 참가취소를 요청했습니다.";
+
+                foreach (var admin in adminUsers)
+                {
+                    var notification = new Notification
+                    {
+                        UserId = admin.UserId,       // 각 관리자에게 알림
+                        Title = "참가취소",
+                        Message = message,
+                        IsRead = false,
+                        CreatedAt = DateTime.Now,
+                        LinkUrl = "/Admin/AdminGameParticipants",
+                        Type = NotificationTypes.CancelRequest
+                    };
+                    _dbContext.Notifications.Add(notification);
+                }
+                await _dbContext.SaveChangesAsync();
+
+                //await LogGameJoinHistoryAsync(
+                //    gameCode,
+                //    userId,
+                //    "Cancel",
+                //    userId,
+                //    cancelReason,
+                //    participant.JoinId,
+                //    "참가자가 직접 참가취소 요청"
+                //);
+
+                await AddAssignmentHistoryAsync(gameCode, userId, "CancelRequest", new
+                {
+                    UserId = userId,
+                    ActionType = "Cancel",
+                    ActionBy = userId,
+                    CancelReason = cancelReason,
+                    ParticipantId = participant.JoinId,
+                    Memo = "참가자가 직접 참가취소 요청"
+                });
+
+                await transaction.CommitAsync();
+
+                return new JoinGameResult { Success = true };
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
                 return new JoinGameResult { Success = false, ErrorMessage = "DB 오류: " + ex.Message };
             }
         }
@@ -410,34 +532,134 @@ namespace GisanParkGolf.Services.Player
                 return new JoinGameResult { Success = false, ErrorMessage = "관리자가 취소요청을 승인하여 재참가 할 수 없습니다." };
             }
 
-            // 재참가 처리
-            participant.IsCancelled = false;
-            participant.CancelDate = null;
-            participant.CancelReason = null;
-            participant.Approval = null;
-            participant.JoinDate = DateTime.Now;
-            participant.JoinIp = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "0.0.0.0";
-            participant.JoinStatus = "Join";
-
-            // 참가자 수 증가
-            game.ParticipantNumber += 1;
+            // 트랜잭션 시작
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
             try
             {
+                // 재참가 처리
+                participant.IsCancelled = false;
+                participant.CancelDate = null;
+                participant.CancelReason = null;
+                participant.Approval = null;
+                participant.JoinDate = DateTime.Now;
+                participant.JoinIp = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "0.0.0.0";
+                participant.JoinStatus = "Join";
+
+                // 참가자 수 증가
+                game.ParticipantNumber += 1;
+
                 await _dbContext.SaveChangesAsync();
-                await LogGameJoinHistoryAsync(
-                    gameCode,
-                    userId,
-                    "Join",
-                    userId,
-                    "참가자 요청",
-                    participant.JoinId,
-                    "참가 취소 이력 복구(재참가)"
-                );
+
+                //await LogGameJoinHistoryAsync(
+                //    gameCode,
+                //    userId,
+                //    "Join",
+                //    userId,
+                //    "참가자 요청",
+                //    participant.JoinId,
+                //    "참가 취소 이력 복구(재참가)"
+                //);
+
+                await AddAssignmentHistoryAsync(gameCode, userId, "Rejoin", new
+                {
+                    UserId = userId,
+                    ActionType = "Rejoin",
+                    ActionBy = userId,
+                    ParticipantId = participant.JoinId,
+                    Memo = "참가 취소 이력 복구(재참가)"
+                });
+
+                await transaction.CommitAsync();
+
                 return new JoinGameResult { Success = true };
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
+                return new JoinGameResult { Success = false, ErrorMessage = "DB 오류: " + ex.Message };
+            }
+        }
+
+        public async Task<JoinGameResult> MyGameRejoinRequestAsync(string gameCode, string? userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return new JoinGameResult { Success = false, ErrorMessage = "로그인 정보가 없습니다." };
+
+            var game = await _dbContext.Games.FirstOrDefaultAsync(g => g.GameCode == gameCode);
+            if (game == null)
+                return new JoinGameResult { Success = false, ErrorMessage = "해당 대회를 찾을 수 없습니다." };
+
+            // 기존 참가 엔터티 찾기 (취소된 것만)
+            var participant = await _dbContext.GameParticipants
+                .FirstOrDefaultAsync(gp => gp.GameCode == gameCode && gp.UserId == userId && gp.IsCancelled);
+
+            if (participant == null)
+                return new JoinGameResult { Success = false, ErrorMessage = "재참가 가능한 이력이 없습니다." };
+
+            // 트랜잭션 시작
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                // 재참가 요청 처리
+                participant.Approval = userId;
+
+                // 참가자 수 증가
+                game.ParticipantNumber += 1;
+
+                await _dbContext.SaveChangesAsync();
+
+                // 관리자(슈퍼관리자 포함) 전체 조회
+                var adminUsers = await _dbContext.Players
+                    .Where(m => m.UserClass <= 1)
+                    .ToListAsync();
+
+                // 관리자에게 알림 생성
+                var message = $"{userId}님이 [{game.GameName}] 대회 재참가를 요청했습니다.";
+
+                foreach (var admin in adminUsers)
+                {
+                    var notification = new Notification
+                    {
+                        UserId = admin.UserId,
+                        Title = "재참가",
+                        Message = message,
+                        IsRead = false,
+                        CreatedAt = DateTime.Now,
+                        LinkUrl = "/Admin/AdminGameParticipants",
+                        Type = NotificationTypes.RejoinRequest
+                    };
+                    _dbContext.Notifications.Add(notification);
+                }
+                await _dbContext.SaveChangesAsync();
+
+                //await LogGameJoinHistoryAsync(
+                //    gameCode,
+                //    userId,
+                //    "Join",
+                //    userId,
+                //    "참가자 요청",
+                //    participant.JoinId,
+                //    "참가 취소 이력 복구(재참가)"
+                //);
+
+                await AddAssignmentHistoryAsync(gameCode, userId, "RejoinRequest", new
+                {
+                    UserId = userId,
+                    ActionType = "Rejoin",
+                    ActionBy = userId,
+                    ParticipantId = participant.JoinId,
+                    Memo = "참가 취소 이력 복구(재참가) 요청"
+                });
+
+                await transaction.CommitAsync();
+
+                return new JoinGameResult { Success = true };
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
                 return new JoinGameResult { Success = false, ErrorMessage = "DB 오류: " + ex.Message };
             }
         }

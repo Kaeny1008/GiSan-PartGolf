@@ -71,7 +71,22 @@
                             <td>@game.StartRecruiting.ToString("yyyy-MM-dd")</td>
                             <td>@game.EndRecruiting.ToString("yyyy-MM-dd")</td>
                             <td>@GisanParkGolf.Helpers.GameStatusHelper.ToDisplay(game.GameStatus)</td>
-                            <td>@game.IsCancelledText</td>
+                            @if (game.IsCancelled == false)
+                            {
+                                <td class="text-success">참가중</td>
+                            }
+                            else if (game.IsCancelled == true)
+                            {
+                                if (game.Approval == null)
+                                {
+                                    <td class="text-danger">참가취소 요청중</td>
+                                }
+                                else
+                                {
+                                    <td class="text-danger">참가취소</td>
+
+                                }
+                            }
                             <td>
                                 <a asp-page="MyGameDetail" asp-route-GameCode="@game.GameCode"
                                    class="btn btn-outline-primary btn-sm">

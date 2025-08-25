@@ -28,7 +28,7 @@ public class NotificationsController : Controller
         return Ok(notifications);
     }
 
-    [HttpPost]
+    [HttpPost("MarkRead")]
     public async Task<IActionResult> MarkRead(int id)
     {
         var notification = await _dbContext.Notifications
@@ -40,7 +40,6 @@ public class NotificationsController : Controller
         notification.IsRead = true;
         await _dbContext.SaveChangesAsync();
 
-        // Redirect to home or reload current page
-        return RedirectToAction("Index", "Home");
+        return Ok();
     }
 }

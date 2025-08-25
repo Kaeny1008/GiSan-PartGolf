@@ -30,6 +30,9 @@ namespace GisanParkGolf.Services.Player
         Task<JoinGameResult> MyGameRejoinAsync(string gameCode, string? userId);
         Task<bool> IsAssignmentLockedAsync(string gameCode);
 
+        Task<JoinGameResult> MyGameCancelRequestlAsync(string gameCode, string? userId, string cancelReason);
+        Task<JoinGameResult> MyGameRejoinRequestAsync(string gameCode, string? userId);
+
         Task<PaginatedList<AssignmentResultModel>> GetAssignmentResultAsync(
             string gameCode,
             string? searchField,

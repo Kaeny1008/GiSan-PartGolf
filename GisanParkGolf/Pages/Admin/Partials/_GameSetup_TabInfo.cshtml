@@ -88,7 +88,7 @@
                         <th>아이디</th>
                         <th>참가일자</th>
                         <th>참가상태</th>
-                        <th>관리</th>
+                        @* <th>관리</th> *@
                     </tr>
                 </thead>
                 <tbody>
@@ -112,7 +112,7 @@
                                         <span class="badge bg-success">참가</span>
                                     }
                                 </td>
-                                <td>
+                                @* <td>
                                     @if (p.IsCancelled && string.IsNullOrEmpty(p.Approval))
                                     {
                                         var modalId = $"approveCancelModal_{p.UserId}";
@@ -179,7 +179,7 @@
                                             </div>
                                         </div>
                                     }
-                                </td>
+                                </td> *@
                             </tr>
                         }
                     }

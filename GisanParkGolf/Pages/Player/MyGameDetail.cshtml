@@ -49,6 +49,43 @@
                 };
                 okBtn.textContent = "예(재참가)";
                 okBtn.className = "btn btn-success";
+            } else if (actionType === 'cancelrequest') {
+                modalTitle.textContent = "참가취소 확인";
+                modalBody.innerHTML = `
+                    정말 참가 취소요청 하시겠습니까?
+                    <div class="mt-2">
+                      <label for="cancelReasonInput2" class="form-label">취소 사유 <span style="color:red">*</span></label>
+                      <textarea id="cancelReasonInput2" class="form-control" rows="2" maxlength="200" placeholder="사유를 입력하세요."></textarea>
+                      <div id="cancelReasonError2" class="text-danger mt-1" style="display:none;">취소 사유를 입력하세요.</div>
+                    </div>
+                    <span class="text-danger">※ 관리자가 승인하여야 참가취소가 완료 됩니다.</span>
+                `;
+                okBtn.onclick = function() {
+                    var reason = document.getElementById('cancelReasonInput2').value || '';
+                    if (!reason.trim()) {
+                        document.getElementById('cancelReasonError2').style.display = '';
+                        return;
+                    }
+                    document.getElementById('CancelRequestReason').value = reason;
+                    modal.hide();
+                    document.getElementById('cancelRequestForm').submit();
+                };
+                okBtn.textContent = "예(요청)";
+                okBtn.className = "btn btn-danger";
+            } else if (actionType === 'rejoinrequest') {
+                modalTitle.textContent = "재참가 안내";
+                modalBody.innerHTML = `
+                    <div>
+                        재참가를 요청하시겠습니까?<br>
+                        <span class="text-danger">※ 관리자가 승인하여야 재참가 됩니다.</span>
+                    </div>
+                `;
+                okBtn.onclick = function() {
+                    modal.hide();
+                    document.getElementById('rejoinRequestForm').submit();
+                };
+                okBtn.textContent = "예(요청)";
+                okBtn.className = "btn btn-success";
             }
             modal.show();
         }
@@ -68,7 +105,7 @@
                 </div>
                 <hr class="mt-2 mb-3" />
                 <div class="row g-3">
-                    <!-- ...대회 정보 내용... -->
+                    <!-- 대회 정보 내용 -->
                     <div class="col-12">
                         <label class="form-label">대회명</label>
                         <input class="form-control" value="@Model.Game?.GameName" disabled />
@@ -158,9 +195,18 @@
                                                disabled />
                                     </div>
                                     <div class="col-12 mt-3">
-                                        <span class="badge bg-danger" style="font-size:1.2em;">
-                                            <i class="bi bi-x-circle-fill"></i> 현재 <strong>대회 참가 취소됨</strong>
-                                        </span>
+                                        @if (Model.Game?.Approval == null)
+                                        {
+                                            <span class="badge bg-danger" style="font-size:1.2em;">
+                                                <i class="bi bi-x-circle-fill"></i> 현재 <strong>대회 참가 취소요청됨</strong>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger" style="font-size:1.2em;">
+                                                <i class="bi bi-x-circle-fill"></i> 현재 <strong>대회 참가 취소됨</strong>
+                                            </span>
+                                        }
                                     </div>
                                 }
                             </div>
@@ -303,26 +349,53 @@
         </div>
         <div class="text-center mt-4">
             <a asp-page="MyGame" class="btn btn-secondary btn-lg">목록으로</a>
-            @if ((Model?.Game?.IsCancelled ?? 1) == 0)
+            @if (Model?.Game?.AssignmentStatus == "Assigned")
             {
-                <form id="cancelForm"
-                      method="post"
-                      asp-page-handler="Cancel"
-                      asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
-                      class="d-inline">
-                    <input type="hidden" id="CancelReason" name="CancelReason" />
-                    <button type="button" class="btn btn-danger btn-lg" onclick="showCustomModal('cancel')">참가취소</button>
-                </form>
+                @if ((Model?.Game?.IsCancelled ?? 1) == 0)
+                {
+                    <form id="cancelRequestForm"
+                          method="post"
+                          asp-page-handler="CancelRequest"
+                          asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
+                          class="d-inline">
+                        <input type="hidden" id="CancelRequestReason" name="CancelRequestReason" />
+                        <button type="button" class="btn btn-danger btn-lg" onclick="showCustomModal('cancelrequest')">참가취소 요청</button>
+                    </form>
+                }
+                else if ((Model?.Game?.IsCancelled ?? 1) == 1 && (Model?.Game?.Approval != null))
+                {
+                    <form id="rejoinRequestForm"
+                          method="post"
+                          asp-page-handler="RejoinRequest"
+                          asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
+                          class="d-inline">
+                        <button type="button" class="btn btn-success btn-lg" onclick="showCustomModal('rejoinrequest')">재참가 요청</button>
+                    </form>
+                }
             }
             else
             {
-                <form id="rejoinForm"
-                      method="post"
-                      asp-page-handler="Rejoin"
-                      asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
-                      class="d-inline">
-                    <button type="button" class="btn btn-success btn-lg" onclick="showCustomModal('rejoin')">재참가</button>
-                </form>
+                @if ((Model?.Game?.IsCancelled ?? 1) == 0)
+                {
+                    <form id="cancelForm"
+                          method="post"
+                          asp-page-handler="Cancel"
+                          asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
+                          class="d-inline">
+                        <input type="hidden" id="CancelReason" name="CancelReason" />
+                        <button type="button" class="btn btn-danger btn-lg" onclick="showCustomModal('cancel')">참가취소</button>
+                    </form>
+                }
+                else
+                {
+                    <form id="rejoinForm"
+                          method="post"
+                          asp-page-handler="Rejoin"
+                          asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
+                          class="d-inline">
+                        <button type="button" class="btn btn-success btn-lg" onclick="showCustomModal('rejoin')">재참가</button>
+                    </form>
+                }
             }
         </div>
     </div>

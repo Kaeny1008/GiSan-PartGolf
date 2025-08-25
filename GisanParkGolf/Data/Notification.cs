@@ -52,5 +52,7 @@ namespace GisanParkGolf.Data
     {
         public const string CancelApproved = "참가취소 승인";
         public const string RejoinApproved = "재참가 승인";
+        public const string CancelRequest = "참가취소 요청";
+        public const string RejoinRequest = "재참가 요청";
     }
 }

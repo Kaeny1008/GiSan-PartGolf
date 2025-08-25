@@ -106,8 +106,8 @@
                                             </div>
                                         </div>
                                     }
-                                    @* 취소승인된 경우: "재참가" 버튼 *@
-                                    else if (p.IsCancelled && !string.IsNullOrEmpty(p.Approval))
+                                    @* 재참가 요청의 경우: "재참가" 버튼 *@
+                                    else if (p.IsCancelled && (!string.IsNullOrEmpty(p.Approval) && p.Approval == p.UserId))
                                     {
                                         var rejoinModalId = $"rejoinModal_{p.UserId}";
                                         <button type="button"
