@@ -1,5 +1,6 @@
 ﻿using GisanParkGolf.Data;
 using GisanParkGolf.Pages.Admin.Admin;
+using GisanParkGolf.Pages.Manager.Services;
 using GisanParkGolf.Security;
 using GisanParkGolf.Services.Account;
 using GisanParkGolf.Services.Player;
@@ -35,6 +36,7 @@ public class Program
         builder.Services.AddScoped<IStadiumService, StadiumService>();
         builder.Services.AddScoped<IGameService, GameService>();
         builder.Services.AddScoped<IJoinGameService, JoinGameService>();
+        builder.Services.AddScoped<ITeamScoreInputService, TeamScoreInputService>();
 
         builder.Services.AddDbContext<MyDbContext>(options =>
             options.UseSqlServer(connectionString));
@@ -62,7 +64,9 @@ public class Program
             options.AddPolicy("AdminOnly", policy =>
                 policy.RequireClaim("IsAdmin", "true"));
             options.AddPolicy("ManagerOnly", policy =>
-                policy.RequireClaim("IsManager", "true"));
+                policy.RequireAssertion(context =>
+                    context.User.HasClaim("IsManager", "true") ||
+                    context.User.HasClaim("IsAdmin", "true")));
             options.AddPolicy("MemberOnly", policy =>
                 policy.RequireClaim("IsMember", "true"));
         });
