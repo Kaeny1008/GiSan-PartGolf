@@ -4,57 +4,89 @@
     ViewData["Title"] = "점수 입력 누락 현황";
 }
 
-<div class="container mt-4 mb-5">
-    <h2 class="mb-4 fw-bold text-primary">@ViewData["Title"]</h2>
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (
+    ViewData["Title"] as string ?? "제목 없음",
+    "대회를 선택하여 스코어 입력이 누락된 참가자를 확인하세요."
+))
 
-    <div class="alert alert-info" role="alert">
-        <span class="fw-bold">※ 안내:</span>
-        아래 명단은 점수 입력이 누락된 팀/참가자 현황입니다. 빠른 입력을 부탁드립니다.
-    </div>
-
-    @if (Model.MissingScoreList == null || !Model.MissingScoreList.Any())
-    {
-        <div class="alert alert-success text-center my-5" role="alert">
-            모든 팀/참가자의 점수가 정상적으로 입력되었습니다.
+<div class="container mt-4">
+    <div class="custom-card mb-4" style="margin-left:auto;margin-right:auto;">
+        <!-- 대회 선택 폼 -->
+        <form method="get" class="row gx-2 align-items-center mb-3">
+            <div class="col-auto">
+                <label for="gameCode" class="fw-bold" style="color:#215d21;">대회 선택</label>
+            </div>
+            <div class="col-auto">
+                <select id="gameCode" name="gameCode" class="form-select" style="min-width:180px;">
+                    <option value="">전체</option>
+                    @foreach (var game in Model.GameList)
+                    {
+                        if (Model.SelectedGameCode == game.GameCode)
+                        {
+                            <option value="@game.GameCode" selected>@game.GameName</option>
+                        }
+                        else
+                        {
+                            <option value="@game.GameCode">@game.GameName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary px-4">확인</button>
+            </div>
+        </form>
+        <div class="alert alert-info mb-3" style="font-size:1.05em;">
+            <span class="fw-bold">※ 안내:</span>
+            아래 명단은 점수 입력이 누락된 팀/참가자 현황입니다. 빠른 입력을 부탁드립니다.
         </div>
-    }
-    else
-    {
-        <table class="table table-bordered align-middle mt-4">
-            <thead class="table-light">
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">게임코드</th>
-                    <th scope="col">대회명</th>
-                    <th scope="col">팀번호</th>
-                    <th scope="col">참가자명</th>
-                    <th scope="col">참가자ID</th>
-                    <th scope="col">미입력 코스/홀</th>
-                    <th scope="col">점수 입력</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < Model.MissingScoreList.Count; i++)
-                {
-                    var item = Model.MissingScoreList[i];
-                    <tr>
-                        <th scope="row">@(@i + 1)</th>
-                        <td>@item.GameCode</td>
-                        <td>@item.GameName</td>
-                        <td>@item.TeamNumber</td>
-                        <td>@item.ParticipantName</td>
-                        <td>@item.ParticipantId</td>
-                        <td>
-                            @string.Join(", ", item.MissingCoursesAndHoles)
-                        </td>
-                        <td>
-                            <a href="@Url.Page("/Manager/TeamScoreInput", new { GameCode = item.GameCode, TeamNumber = item.TeamNumber })" class="btn btn-sm btn-primary">
-                                점수 입력 바로가기
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+
+        @if (Model.MissingScoreList == null || !Model.MissingScoreList.Any())
+        {
+            <div class="alert alert-success text-center my-5" role="alert" style="font-size:1.15em;">
+                모든 팀/참가자의 점수가 정상적으로 입력되었습니다.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle" style="background:#f9fafb;">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:60px;">#</th>
+                            <th style="width:110px;">게임코드</th>
+                            <th style="width:170px;">대회명</th>
+                            <th style="width:90px;">팀번호</th>
+                            <th style="width:120px;">참가자명</th>
+                            <th style="width:110px;">참가자ID</th>
+                            <th style="min-width:180px;">미입력 코스/홀</th>
+                            <th style="width:120px;">점수 입력</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.MissingScoreList.Count; i++)
+                        {
+                            var item = Model.MissingScoreList[i];
+                            <tr>
+                                <th scope="row">@(@i + 1)</th>
+                                <td>@item.GameCode</td>
+                                <td>@item.GameName</td>
+                                <td>@item.TeamNumber</td>
+                                <td>@item.ParticipantName</td>
+                                <td>@item.ParticipantId</td>
+                                <td>
+                                    @string.Join(", ", item.MissingCoursesAndHoles ?? new List<string>())
+                                </td>
+                                <td>
+                                    <a href="@Url.Page("/Manager/TeamScoreInput", new { GameCode = item.GameCode, TeamNumber = item.TeamNumber })" class="btn btn-sm btn-primary">
+                                        점수 입력 바로가기
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 </div>
