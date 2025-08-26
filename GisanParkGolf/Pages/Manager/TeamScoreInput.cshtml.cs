@@ -21,6 +21,9 @@ namespace GiSanParkGolf.Pages.Manager
 
         public string? ScanMessage { get; set; }
         public bool ScanFound { get; set; } = false;
+        [BindProperty(SupportsGet = true)] public string? TeamNumber { get; set; }
+        [BindProperty(SupportsGet = true)] public string? GameCode { get; set; }
+        [BindProperty(SupportsGet = true)] public string? GameName { get; set; }
 
         public void OnGet()
         {
@@ -59,11 +62,56 @@ namespace GiSanParkGolf.Pages.Manager
             else
             {
                 //TempData["SuccessMessage"] = $"게임코드: {gameCode}, 팀번호: {teamNumber} 데이터 불러옴";
+                GameCode = gameCode;
+                GameName = teamScoreCourses.First().GameInformations?.GameName;
+                TeamNumber = teamNumber;
                 ScanFound = true;
                 TeamScoreCourses = teamScoreCourses;
             }
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostSaveAsync()
+        {
+            if (GameCode == null || TeamNumber == null)
+            {
+                TempData["ErrorMessage"] = "저장할 데이터가 없습니다. 먼저 스캔해 주세요.";
+                return RedirectToPage();
+            }
+
+            var form = Request.Form;
+            var inputBy = User.Identity?.Name ?? "admin";
+
+            // 점수 데이터 Dictionary 생성: key = "courseCode_userId_holeId", value = 점수
+            var scores = new Dictionary<string, int>();
+
+            foreach (var key in form.Keys)
+            {
+                if (key.StartsWith("Score_"))
+                {
+                    var parts = key.Split('_');
+                    if (parts.Length == 4)
+                    {
+                        // parts[1] = courseCode, parts[2] = userId, parts[3] = holeId
+                        var courseCode = parts[1];
+                        var userId = parts[2];
+                        var holeId = parts[3];
+                        var scoreStr = form[key];
+                        if (int.TryParse(scoreStr, out int score))
+                        {
+                            scores[$"{courseCode}_{userId}_{holeId}"] = score;
+                        }
+                    }
+                }
+            }
+
+            // 서비스 DI 받아서 저장
+            await _teamScoreInpuService.SaveScoresAsync(GameCode, inputBy, scores);
+
+            TempData["SuccessMessage"] = $"게임코드: {GameCode}, 팀번호: {TeamNumber} 데이터를 저장했습니다.";
+            // 저장 후 원래 페이지로 리디렉션
+            return RedirectToPage();
         }
     }
 }

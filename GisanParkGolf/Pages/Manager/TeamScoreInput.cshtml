@@ -5,103 +5,164 @@
 }
 
 @await Html.PartialAsync("Shared/Components/_HeaderCard", (
-    ViewData["Title"] as string ?? "제목 없음",
-        "스코어 카드의 QR을 스캔하여 팀별 스코어를 입력 할 수 있습니다."
+ViewData["Title"] as string ?? "제목 없음",
+    "스코어 카드의 QR을 스캔하여 팀별 스코어를 입력 할 수 있습니다."
 ))
 
 <div class="container mt-4">
 
     <div class="custom-card mb-4" style="margin-left:auto;margin-right:auto;">
-        <div class="card-title fw-bold fs-5 mb-2" style="color:#1d4a1d;">바코드 스캔</div>
-        <form method="post" asp-page-handler="Scan" autocomplete="off">
-            <div class="d-flex align-items-center mb-2">
-                <input id="barcodeInput" name="ScannedCode" type="text" class="form-control me-2"
-                       placeholder="바코드 스캔 후 엔터"
-                       style="max-width:500px;" autofocus autocomplete="off" value="250810-T01" />
-                <button id="scanBtn" type="submit" class="btn btn-primary">스캔 처리</button>
-            </div>
-            @if (!string.IsNullOrEmpty(Model.ScanMessage))
-            {
-                <div>
-                    <span class="@(Model.ScanFound ? "text-success" : "text-danger")">@Model.ScanMessage</span>
+        <!-- 바코드 스캔 입력 구역 (박스 분리) -->
+        <div class="p-3 rounded shadow-sm" style="background:#e9f5ee;">
+            <div class="card-title fw-bold fs-5 mb-2" style="color:#1d4a1d;">바코드 스캔</div>
+            <form method="post" asp-page-handler="Scan" autocomplete="off">
+                <div class="d-flex align-items-center mb-2">
+                    <input id="barcodeInput" name="ScannedCode" type="text" class="form-control me-2"
+                           placeholder="바코드 스캔 후 엔터"
+                           style="max-width:500px;" autofocus autocomplete="off" value="250810-T01" />
+                    <button id="scanBtn" type="submit" class="btn btn-primary">스캔 처리</button>
                 </div>
-            }
-        </form>
+                @if (!string.IsNullOrEmpty(Model.ScanMessage))
+                {
+                    <div>
+                        <span class="@(Model.ScanFound ? "text-success" : "text-danger")">@Model.ScanMessage</span>
+                    </div>
+                }
+            </form>
+        </div>
+        <!-- 팀/게임 정보 표시 구역 (박스 분리) -->
+        <div class="p-3 rounded shadow-sm mb-4" style="background:#f6f8f7;">
+            <div class="fw-bold fs-6 mb-3" style="color:#215d21;">팀/게임 정보</div>
+            <div class="row mb-2">
+                <div class="col-md-4 mb-2">
+                    <label for="GameCode" class="form-label fw-bold" style="color:#215d21;">게임코드</label>
+                    <input id="GameCode" name="GameCode" type="text" class="form-control" value="@Model.GameCode" disabled />
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label for="GameName" class="form-label fw-bold" style="color:#215d21;">대회명</label>
+                    <input id="GameName" name="GameName" type="text" class="form-control" value="@Model.GameName" disabled />
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label for="TeamNumber" class="form-label fw-bold" style="color:#215d21;">팀번호</label>
+                    <input id="TeamNumber" name="TeamNumber" type="text" class="form-control" value="@Model.TeamNumber" disabled />
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="custom-card p-3 mb-4">
-        <div class="card-title fw-bold fs-4 mb-3" style="color:#184c27;">
-            대회 스코어 입력
-        </div>
-        <div class="mb-4 text-end">
-            <button type="submit" class="btn btn-success px-5 py-2"
-                    style="font-weight:bold; font-size:1.1em; border-radius:0.6rem;">
-                저장
-            </button>
-        </div>
-
-        @if (Model.TeamScoreCourses == null || Model.TeamScoreCourses.Count == 0)
-        {
-            <div class="alert alert-warning text-center my-5" role="alert" style="font-size:1.15em;">
-                데이터를 찾을 수 없습니다.
+    <!-- 수정된 부분: form 태그로 점수 입력 전체 감싸기 -->
+    <form method="post" asp-page-handler="Save" autocomplete="off">
+        <div class="custom-card p-3 mb-4">
+            <div class="card-title fw-bold fs-4 mb-3" style="color:#184c27;">
+                대회 스코어 입력
             </div>
-        }
-        else
-        {
-            @foreach (var course in Model.TeamScoreCourses)
+            <div class="mb-4 text-end">
+                <input type="hidden" name="GameCode" value="@Model.GameCode" />
+                <input type="hidden" name="TeamNumber" value="@Model.TeamNumber" />
+                <input type="hidden" name="GameName" value="@Model.GameName" />
+                <button type="submit" class="btn btn-success px-5 py-2"
+                        style="font-weight:bold; font-size:1.1em; border-radius:0.6rem;">
+                    저장
+                </button>
+            </div>
+
+            @if (Model.TeamScoreCourses == null || Model.TeamScoreCourses.Count == 0)
             {
-                <div class="mb-5">
-                    <div class="fw-bold fs-5 mb-2" style="color:#297b37;">
-                        코스명: @course.CourseName
-                    </div>
-                    <div class="table-responsive" style="overflow-x:auto;">
-                        <table class="table table-bordered align-middle scorecard-table" style="background:#f9fafb;">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width:90px;">팀번호</th>
-                                    <th style="width:100px;">코스순번</th>
-                                    <th style="width:120px;">참가자명</th>
-                                    <th style="width:120px;">참가자ID</th>
-                                    @foreach (var h in course.HoleNumbers)
-                                    {
-                                        <th style="width:68px;">@h 홀</th>
-                                    }
-                                    <th style="width:60px;">합계</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (int i = 0; i < course.TeamRows.Count; i++)
-                                {
-                                    var row = course.TeamRows[i];
-                                    <tr id="row-@course.CourseName-@row.ParticipantId">
-                                        <td>@row.TeamNumber</td>
-                                        <td>@row.CourseOrder</td>
-                                        <td>@row.ParticipantName</td>
-                                        <td>@row.ParticipantId</td>
+                <div class="alert alert-warning text-center my-5" role="alert" style="font-size:1.15em;">
+                    데이터를 찾을 수 없습니다.
+                </div>
+            }
+            else
+            {
+                @foreach (var course in Model.TeamScoreCourses)
+                {
+                    <div class="mb-5">
+                        <div class="fw-bold fs-5 mb-2" style="color:#297b37;">
+                            코스명: @course.CourseName
+                        </div>
+
+                        @{
+                            int fixedWidth = 90 + 100 + 120 + 120 + 80;
+                            int tableTotalWidth = 1200;
+                            int holeCount = course.HoleNumbers.Count;
+                            int dynamicWidth = tableTotalWidth - fixedWidth;
+                            int holeCellWidth = (int)Math.Floor((double)dynamicWidth / holeCount);
+                        }
+
+                        <div class="table-responsive" style="overflow-x:auto;">
+                            <table class="table table-bordered align-middle scorecard-table" style="background:#f9fafb; width:@tableTotalWidth px;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width:90px;">팀번호</th>
+                                        <th style="width:100px;">코스순번</th>
+                                        <th style="width:120px;">참가자명</th>
+                                        <th style="width:120px;">참가자ID</th>
                                         @foreach (var h in course.HoleNumbers)
                                         {
-                                            <td>
-                                                <input type="number"
-                                                       name="Score_@course.CourseName@row.TeamNumber@row.ParticipantId@h"
-                                                       value="@(row.Scores.ContainsKey(h) ? row.Scores[h].ToString() : "")"
-                                                       min="1" max="20"
-                                                       class="form-control text-center"
-                                                       style="width:48px;" />
-                                            </td>
+                                            <th style="width:@holeCellWidth px; min-width:60px;">@h 홀</th>
                                         }
-                                        <td>
-                                            @{
-                                                int total = course.HoleNumbers.Sum(h => row.Scores.ContainsKey(h) ? row.Scores[h] : 0);
-                                            }
-                                            <span>@total</span>
-                                        </td>
+                                        <th style="width:80px;">합계</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < course.TeamRows.Count; i++)
+                                    {
+                                        var row = course.TeamRows[i];
+                                        <tr id="row-@course.CourseName-@row.ParticipantId">
+                                            <td>@row.TeamNumber</td>
+                                            <td>@row.CourseOrder</td>
+                                            <td>@row.ParticipantName</td>
+                                            <td>@row.ParticipantId</td>
+                                            @foreach (var h in course.HoleNumbers)
+                                            {
+                                                var safeKey = $"Score_{course.CourseCode}_{row.ParticipantId}_{h}";
+                                                <td>
+                                                    <input type="number"
+                                                           id="@safeKey"
+                                                           name="@safeKey"
+                                                           value="@(row.Scores.ContainsKey(h) ? row.Scores[h].ToString() : "")"
+                                                           min="0" max="20"
+                                                           class="form-control text-center score-input"
+                                                           data-course="@course.CourseName"
+                                                           data-participant="@row.ParticipantId"
+                                                           data-rowid="row-@course.CourseName-@row.ParticipantId"
+                                                           data-hole="@h"
+                                                           style="width:90%; font-size:1.1em; padding:4px 0;" />
+                                                </td>
+                                            }
+                                            <td>
+                                                @{
+                                                    int total = course.HoleNumbers.Sum(h => row.Scores.ContainsKey(h) ? row.Scores[h] : 0);
+                                                }
+                                                <span>@total</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                }
             }
-        }
-    </div>
+        </div>
+    </form>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.score-input').forEach(function(input) {
+            input.addEventListener('input', function() {
+                var rowId = input.getAttribute('data-rowid');
+                var row = document.getElementById(rowId);
+                if (!row) return;
+                var sum = 0;
+                row.querySelectorAll('.score-input').forEach(function(inp) {
+                    var val = parseInt(inp.value, 10);
+                    if (!isNaN(val)) sum += val;
+                });
+                var sumTd = row.querySelector('td:last-child span');
+                if (sumTd) sumTd.textContent = sum;
+            });
+        });
+    });
+</script>
