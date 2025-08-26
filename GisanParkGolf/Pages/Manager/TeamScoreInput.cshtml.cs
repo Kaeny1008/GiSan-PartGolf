@@ -1,4 +1,4 @@
-using GisanParkGolf.Pages.Manager.Services;
+ï»¿using GisanParkGolf.Pages.Manager.Services;
 using GisanParkGolf.Pages.Manager.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +34,7 @@ namespace GiSanParkGolf.Pages.Manager
         {
             if (string.IsNullOrWhiteSpace(ScannedCode) || !ScannedCode.Contains('-'))
             {
-                TempData["ErrorMessage"] = "¹ÙÄÚµå Çü½ÄÀÌ ¿Ã¹Ù¸£Áö ¾Ê½À´Ï´Ù.";
+                TempData["ErrorMessage"] = "ë°”ì½”ë“œ í˜•ì‹ì´ ì˜¬ë°”ë¥´ì§€ ì•ŠìŠµë‹ˆë‹¤.";
                 ScanFound = false;
                 return Page();
             }
@@ -42,7 +42,7 @@ namespace GiSanParkGolf.Pages.Manager
             var parts = ScannedCode.Split('-', 2); // "gamecode-teamnumber"
             if (parts.Length < 2)
             {
-                TempData["ErrorMessage"] = "¹ÙÄÚµå Çü½ÄÀÌ ¿Ã¹Ù¸£Áö ¾Ê½À´Ï´Ù.";
+                TempData["ErrorMessage"] = "ë°”ì½”ë“œ í˜•ì‹ì´ ì˜¬ë°”ë¥´ì§€ ì•ŠìŠµë‹ˆë‹¤.";
                 ScanFound = false;
                 return Page();
             }
@@ -50,18 +50,18 @@ namespace GiSanParkGolf.Pages.Manager
             var gameCode = parts[0];
             var teamNumber = parts[1];
 
-            // ¼­ºñ½º¿¡¼­ µ¥ÀÌÅÍ Á¶È¸
+            // ì„œë¹„ìŠ¤ì—ì„œ ë°ì´í„° ì¡°íšŒ
             var teamScoreCourses = _teamScoreInpuService.GetTeamScoreCourses(gameCode, teamNumber);
 
             if (teamScoreCourses == null || teamScoreCourses.Count == 0)
             {
-                TempData["ErrorMessage"] = "ÇØ´ç Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.";
+                TempData["ErrorMessage"] = "í•´ë‹¹ ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.";
                 ScanFound = false;
                 TeamScoreCourses = new();
             }
             else
             {
-                //TempData["SuccessMessage"] = $"°ÔÀÓÄÚµå: {gameCode}, ÆÀ¹øÈ£: {teamNumber} µ¥ÀÌÅÍ ºÒ·¯¿È";
+                //TempData["SuccessMessage"] = $"ê²Œì„ì½”ë“œ: {gameCode}, íŒ€ë²ˆí˜¸: {teamNumber} ë°ì´í„° ë¶ˆëŸ¬ì˜´";
                 GameCode = gameCode;
                 GameName = teamScoreCourses.First().GameInformations?.GameName;
                 TeamNumber = teamNumber;
@@ -76,14 +76,14 @@ namespace GiSanParkGolf.Pages.Manager
         {
             if (GameCode == null || TeamNumber == null)
             {
-                TempData["ErrorMessage"] = "ÀúÀåÇÒ µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù. ¸ÕÀú ½ºÄµÇØ ÁÖ¼¼¿ä.";
+                TempData["ErrorMessage"] = "ì €ì¥í•  ë°ì´í„°ê°€ ì—†ìŠµë‹ˆë‹¤. ë¨¼ì € ìŠ¤ìº”í•´ ì£¼ì„¸ìš”.";
                 return RedirectToPage();
             }
 
             var form = Request.Form;
             var inputBy = User.Identity?.Name ?? "admin";
 
-            // Á¡¼ö µ¥ÀÌÅÍ Dictionary »ı¼º: key = "courseCode_userId_holeId", value = Á¡¼ö
+            // ì ìˆ˜ ë°ì´í„° Dictionary ìƒì„±: key = "courseCode_userId_holeId", value = ì ìˆ˜
             var scores = new Dictionary<string, int>();
 
             foreach (var key in form.Keys)
@@ -106,11 +106,16 @@ namespace GiSanParkGolf.Pages.Manager
                 }
             }
 
-            // ¼­ºñ½º DI ¹Ş¾Æ¼­ ÀúÀå
+            // ì„œë¹„ìŠ¤ DI ë°›ì•„ì„œ ì €ì¥
             await _teamScoreInpuService.SaveScoresAsync(GameCode, inputBy, scores);
 
-            TempData["SuccessMessage"] = $"°ÔÀÓÄÚµå: {GameCode}, ÆÀ¹øÈ£: {TeamNumber} µ¥ÀÌÅÍ¸¦ ÀúÀåÇß½À´Ï´Ù.";
-            // ÀúÀå ÈÄ ¿ø·¡ ÆäÀÌÁö·Î ¸®µğ·º¼Ç
+            TempData["SuccessMessage"] = $@"<span>
+                    <strong>âœ… ì €ì¥ ì„±ê³µ!</strong><br>
+                    <strong>ëŒ€íšŒëª… :</strong> <span style='color:#176d37;'>{GameName}</span>,
+                    <strong>íŒ€ë²ˆí˜¸ :</strong> <span style='color:#0a5c1a;'>{TeamNumber}</span><br>
+                    ë°ì´í„°ë¥¼ <strong>ì €ì¥í–ˆìŠµë‹ˆë‹¤.</strong></span>";
+
+            // ì €ì¥ í›„ ì›ë˜ í˜ì´ì§€ë¡œ ë¦¬ë””ë ‰ì…˜
             return RedirectToPage();
         }
     }
