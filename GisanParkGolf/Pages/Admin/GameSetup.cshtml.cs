@@ -1193,7 +1193,7 @@ namespace GiSanParkGolf.Pages.Admin
 
             using var ms = new MemoryStream();
             // assignmentCompletedAt을 전달
-            ScoreCardPdfGenerator.GeneratePdfByTeamLandscape(gameName, gameDate, stadiumName, coursesTemplate, teams, ms, assignmentCompletedAt);
+            ScoreCardPdfGenerator.GeneratePdfByTeamLandscape(gameName, gameDate, stadiumName, coursesTemplate, teams, ms, assignmentCompletedAt, gameCode);
             ms.Position = 0;
             var fileName = $"Scorecard_{gameCode}_ByTeam_{DateTime.Now:yyyyMMddHHmmss}.pdf";
             return File(ms.ToArray(), "application/pdf", fileName);
