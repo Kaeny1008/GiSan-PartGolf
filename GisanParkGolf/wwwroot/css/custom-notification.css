@@ -1,0 +1,146 @@
+﻿/* 알림 드롭다운 */
+.notification-dropdown {
+    min-width: 700px;
+    max-width: 1500px;
+    width: auto;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    background: #fff;
+    border-radius: 14px;
+    padding: 0;
+    word-break: keep-all;
+    white-space: normal;
+}
+
+/* 알림 헤더 */
+.dropdown-header {
+    background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+    color: #fff;
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 12px 18px;
+    border-radius: 14px 14px 0 0;
+    letter-spacing: 1px;
+}
+
+/* 알림 항목 */
+.notification-item {
+    transition: background 0.2s;
+    border-bottom: 1px solid #f2f2f2;
+    padding: 16px 22px;
+    display: flex;
+    align-items: flex-start;
+    background: #f8f9fa;
+}
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-item:hover {
+        background: #e0e7ff;
+    }
+
+/* 알림 내용 배치 */
+.notification-message.message-wide {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+/* 타입 배지 */
+.notification-type-badge {
+    flex-shrink: 0;
+    min-width: 55px;
+    padding: 4px 14px;
+    font-size: 1em;
+    font-weight: bold;
+    border-radius: 12px;
+    margin-right: 10px;
+    color: #fff;
+    letter-spacing: 0.5px;
+    background: #7b8baf; /* 기본 배경 */
+    opacity: 1;
+}
+
+/* 메시지 */
+.msg {
+    flex: 1;
+    font-size: 1rem;
+    color: #222;
+    white-space: normal; /* 줄바꿈 없이 한 줄, 길면 자동 줄바꿈 */
+    word-break: break-word; /* 영어, 한글 모두 자연스럽게 자동 줄바꿈 */
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* 날짜 */
+.date {
+    font-size: 0.9rem;
+    color: #8e99ad;
+    margin-left: 16px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-top: 2px;
+}
+
+/* 확인 버튼 */
+.notification-actions-horizontal {
+    margin-left: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.btn-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s;
+    border: none;
+    background: #e2e8f0;
+}
+
+    .btn-circle:hover {
+        background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(78,84,200,0.12);
+    }
+
+/* 알림 수 배지 */
+.notification-badge {
+    position: absolute;
+    top: 6px;
+    right: 2px;
+    background: #e53935;
+    color: #fff;
+    font-size: 0.85rem;
+    padding: 3px 8px;
+    border-radius: 16px;
+    font-weight: bold;
+    box-shadow: 0 1px 4px rgba(229,57,53,0.18);
+}
+
+/* 알림 없음 안내 */
+.dropdown-item.text-center.text-muted {
+    background: #f0f2f7;
+    color: #999;
+    font-size: 1rem;
+    padding: 16px 0;
+    border-radius: 0 0 14px 14px;
+    text-align: center;
+}
+
+.notification-link {
+    color: #222;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+    .notification-link:hover {
+        color: #1565c0;
+        text-decoration: underline;
+    }

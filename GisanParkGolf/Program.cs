@@ -1,8 +1,9 @@
 ﻿using GisanParkGolf.Data;
-using GisanParkGolf.Pages.AdminPage.AdminPage;
+using GisanParkGolf.Pages.Admin.Admin;
+using GisanParkGolf.Pages.Manager.Services;
 using GisanParkGolf.Security;
 using GisanParkGolf.Services.Account;
-using GisanParkGolf.Services.PlayerPage;
+using GisanParkGolf.Services.Player;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Drawing;
 using QuestPDF.Infrastructure;
@@ -35,6 +36,10 @@ public class Program
         builder.Services.AddScoped<IStadiumService, StadiumService>();
         builder.Services.AddScoped<IGameService, GameService>();
         builder.Services.AddScoped<IJoinGameService, JoinGameService>();
+        builder.Services.AddScoped<ITeamScoreInputService, TeamScoreInputService>();
+
+        builder.Services.AddDbContext<MyDbContext>(options =>
+            options.UseSqlServer(connectionString));
 
         // 로그인 시스템 설정
         // 복잡한 Identity 시스템 대신, 간단하고 빠른 '쿠키 인증' 시스템을 사용
@@ -50,6 +55,7 @@ public class Program
                 // 쿠키 이름과 유효시간 설정
                 options.Cookie.Name = "GisanParkGolf.AuthCookie";
                 options.ExpireTimeSpan = TimeSpan.FromHours(8); // 8시간 동안 로그인 유지
+                options.SlidingExpiration = true;
             });
 
         // '관리자' 정책
@@ -58,7 +64,9 @@ public class Program
             options.AddPolicy("AdminOnly", policy =>
                 policy.RequireClaim("IsAdmin", "true"));
             options.AddPolicy("ManagerOnly", policy =>
-                policy.RequireClaim("IsManager", "true"));
+                policy.RequireAssertion(context =>
+                    context.User.HasClaim("IsManager", "true") ||
+                    context.User.HasClaim("IsAdmin", "true")));
             options.AddPolicy("MemberOnly", policy =>
                 policy.RequireClaim("IsMember", "true"));
         });

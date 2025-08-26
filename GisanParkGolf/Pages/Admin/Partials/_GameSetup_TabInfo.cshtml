@@ -1,0 +1,196 @@
+﻿@model GiSanParkGolf.Pages.Admin.GameSetupModel
+@using GisanParkGolf.Helpers
+@using GisanParkGolf.Pages.Admin.Admin
+@using GisanParkGolf.Pages.Admin.ViewModels
+@using Newtonsoft.Json
+
+@{
+    // 부모 ViewData로 전달된 값 우선 사용 (없으면 모델의 값)
+    var gameCode = (ViewData["gameCode"] as string) ?? Model.GameCode;
+    var activeTab = (ViewData["activeTab"] as string) ?? "tab-info";
+    var selectedGame = Model.Competitions.FirstOrDefault(c => c.GameCode == gameCode);
+
+    var participantSearchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
+    {
+        PageSize = Model.ParticipantPageSize,
+        PageSizeName = "ParticipantPageSize",
+        QueryName = "ParticipantSearchQuery",
+        SearchField = Model.ParticipantSearchQuery ?? "UserName",
+        SearchQuery = Model.ParticipantSearchQuery,
+        ResetPageName = "./GameSetup",
+        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+        {
+            new() { Value = "UserName", Text = "이름" },
+            new() { Value = "UserId", Text = "아이디" },
+            new() { Value = "JoinId", Text = "참가코드" }
+        }
+    };
+    var participantPageModel = new GisanParkGolf.Pages.Shared.PaginationModel
+    {
+        PageIndex = Model.ParticipantPageIndex,
+        TotalPages = Model.Participants?.TotalPages ?? 1,
+        GetPageUrl = i => Url.Page(
+            "./GameSetup",
+            null,
+            new
+            {
+                gameCode = gameCode,
+                ParticipantSearchQuery = Model.ParticipantSearchQuery,
+                ParticipantPageIndex = i,
+                ParticipantPageSize = Model.ParticipantPageSize,
+                tab = "tab-info"
+            }, null) ?? ""
+    };
+}
+
+
+<div class="competition-detail-flex">
+    <!-- 대회 정보 카드 -->
+    <div class="competition-card-modern" style="flex: 0 0 340px; min-width: 280px; max-width:400px;">
+        <div class="competition-title-modern">@((selectedGame?.GameName) ?? "대회명")</div>
+        <div class="competition-divider"></div>
+        <dl class="competition-list">
+            <dt>일자</dt>
+            <dd>@((selectedGame?.GameDate.ToString("yyyy-MM-dd")) ?? "")</dd>
+            <dt>상태</dt>
+            <dd><span class="status-badge">@((GameStatusHelper.ToDisplay(selectedGame?.Status)) ?? "")</span></dd>
+            <dt>참가자</dt>
+            <dd>@(selectedGame?.TotalParticipants ?? 0)명 참가</dd>
+            <dt>경기장</dt>
+            <dd>@((selectedGame?.StadiumName) ?? "")</dd>
+            <dt>주최자</dt>
+            <dd>@((selectedGame?.GameHost) ?? "")</dd>
+            <dt>방식</dt>
+            <dd><span class="mode-badge">@((selectedGame?.PlayMode) ?? "")</span></dd>
+            <dt>비고</dt>
+            <dd>
+                <div class="competition-note-modern">
+                    @(Html.Raw((selectedGame?.GameNote ?? "").Replace("\r\n", "<br>").Replace("\n", "<br>").Replace("\r", "<br>")))
+                </div>
+            </dd>
+        </dl>
+    </div>
+    <!-- 참가자 정보 카드 -->
+    <div class="participant-card-modern participant-wide">
+        <div class="participant-title">참가자 정보</div>
+        @{
+            var vdSearch = new ViewDataDictionary(ViewData);
+            vdSearch["activeTab"] = activeTab;
+            vdSearch["gameCode"] = gameCode;
+        }
+        @await Html.PartialAsync("_SearchControl", participantSearchModel, vdSearch)
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="participantTable">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:4rem">No</th>
+                        <th>이름</th>
+                        <th>아이디</th>
+                        <th>참가일자</th>
+                        <th>참가상태</th>
+                        @* <th>관리</th> *@
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Participants != null)
+                    {
+                        for (int i = 0; i < Model.Participants.Count; i++)
+                        {
+                            var p = Model.Participants[i];
+                            <tr class="@(p.IsCancelled ? "table-danger" : "")">
+                                <td>@((Model.Participants.PageIndex - 1) * Model.Participants.PageSize + i + 1)</td>
+                                <td>@p.Name</td>
+                                <td>@p.UserId</td>
+                                <td>@p.JoinDateText</td>
+                                <td>
+                                    @if (p.IsCancelled)
+                                    {
+                                        <span class="badge bg-danger">취소</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">참가</span>
+                                    }
+                                </td>
+                                @* <td>
+                                    @if (p.IsCancelled && string.IsNullOrEmpty(p.Approval))
+                                    {
+                                        var modalId = $"approveCancelModal_{p.UserId}";
+                                        <button type="button"
+                                                class="badge rounded-pill bg-danger border-0"
+                                                style="font-size:0.88rem; padding:0.22em 0.75em; line-height:1.3; vertical-align:middle; min-height:1.7em;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#@modalId">
+                                            취소 승인
+                                        </button>
+                                        <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="approveCancelModalLabel_@p.UserId" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <form method="post" asp-page-handler="ApproveCancel" asp-route-id="@p.UserId" class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title fw-bold" id="approveCancelModalLabel_@p.UserId">취소 승인 확인</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="mb-2">
+                                                            <span class="fw-bold text-danger">정말 이 참가자(@(p.Name ?? p.UserId))의 취소를 승인하시겠습니까?</span>
+                                                        </p>
+                                                        <div class="alert alert-warning mb-0" role="alert" style="font-size:0.95em;">
+                                                            <span class="fw-bold">※ 경고:</span> 취소 승인할 경우 <span class="text-danger">참가자 임의의 재참가는 불가</span>합니다.
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                                        <button type="submit" class="btn btn-danger">승인</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (p.IsCancelled && !string.IsNullOrEmpty(p.Approval))
+                                    {
+                                        var rejoinModalId = $"rejoinModal_{p.UserId}";
+                                        <button type="button"
+                                                class="badge rounded-pill bg-primary border-0"
+                                                style="font-size:0.88rem; padding:0.22em 0.75em; line-height:1.3; vertical-align:middle; min-height:1.7em;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#@rejoinModalId">
+                                            재참가
+                                        </button>
+                                        <div class="modal fade" id="@rejoinModalId" tabindex="-1" aria-labelledby="rejoinModalLabel_@p.UserId" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <form method="post" asp-page-handler="Rejoin" asp-route-id="@p.UserId" class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title fw-bold" id="rejoinModalLabel_@p.UserId">재참가 확인</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="mb-2">
+                                                            <span class="fw-bold text-primary">정말 이 참가자(@(p.Name ?? p.UserId))를 재참가 처리하시겠습니까?</span>
+                                                        </p>
+                                                        <div class="alert alert-info mb-0" role="alert" style="font-size:0.95em;">
+                                                            <span class="fw-bold">※ 안내:</span> 재참가 처리 시 해당 참가자는 다시 대회에 참가하게 됩니다.
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                                        <button type="submit" class="btn btn-primary">재참가</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    }
+                                </td> *@
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            <div class="d-flex flex-wrap align-items-center gap-3 p-3 pb-0">
+                <span>전체 참가내역: <span class="fw-bold">@Model.TotalCount</span></span>
+                <span class="text-success">참가중: <span class="fw-bold">@Model.JoinedCount</span></span>
+                <span class="text-danger">취소: <span class="fw-bold">@Model.CancelledCount</span></span>
+            </div>
+            @await Html.PartialAsync("_Pagination", participantPageModel)
+        </div>
+    </div>
+</div>

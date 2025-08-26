@@ -47,6 +47,6 @@ namespace GisanParkGolf.Data
 
         // SYS_Users 테이블과 연결될 Navigation Property
         [ForeignKey("UserId")]
-        public virtual Player? User { get; set; }
+        public virtual Member? User { get; set; }
     }
 }

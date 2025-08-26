@@ -50,6 +50,6 @@ namespace GisanParkGolf.Data
 
         // --- Navigation Property ---
         [ForeignKey("UserId")]
-        public virtual Player User { get; set; } = null!;
+        public virtual Member User { get; set; } = null!;
     }
 }

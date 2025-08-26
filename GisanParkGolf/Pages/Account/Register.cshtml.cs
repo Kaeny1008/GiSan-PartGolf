@@ -56,7 +56,7 @@ namespace GisanParkGolf.Pages.Account
             }
 
             // 모든 검사를 통과했으니, 새 사용자를 생성
-            var newUser = new Player
+            var newUser = new Member
             {
                 UserId = Input.UserId,
                 UserPassword = _hasher.Hash(Input.Password),

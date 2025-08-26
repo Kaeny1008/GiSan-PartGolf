@@ -1,11 +1,7 @@
-﻿using QuestPDF.Drawing;
-using QuestPDF.Fluent;
+﻿using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System;
+using QRCoder;
 
 public class ScoreCardRow
 {
@@ -37,7 +33,9 @@ public class ScoreCardPdfGenerator
         List<CourseScoreCardData> coursesTemplate,
         List<TeamScoreCardData> teams,
         Stream outputStream,
-        string? assignmentCompletedAt = null)
+        string? assignmentCompletedAt = null,
+        string? gameCode = null
+    )
     {
         string assignmentTimeText = !string.IsNullOrEmpty(assignmentCompletedAt) ? assignmentCompletedAt : "미등록";
 
@@ -45,12 +43,26 @@ public class ScoreCardPdfGenerator
         {
             foreach (var team in teams)
             {
+                // QR코드 이미지 생성
+                string qrText = $"{gameCode ?? "GAME"}-{team.TeamNumber}";
+                byte[]? qrBytes;
+                try
+                {
+                    var qrGen = new QRCodeGenerator();
+                    var qrData = qrGen.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
+                    var qrCode = new PngByteQRCode(qrData);
+                    qrBytes = qrCode.GetGraphic(12);
+                }
+                catch
+                {
+                    qrBytes = null;
+                }
+
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4.Landscape());
                     page.Margin(18);
 
-                    // 상단 — 수정: PaddingTop은 Item() 컨테이너에 적용합니다.
                     page.Header().Column(col =>
                     {
                         col.Item()
@@ -60,7 +72,6 @@ public class ScoreCardPdfGenerator
                             .FontFamily("NanumGothic")
                             .FontSize(20).Bold();
 
-                        // 대회일자(왼쪽) / 코스배치 완료시각(오른쪽)
                         col.Item().Row(r =>
                         {
                             r.RelativeItem()
@@ -75,17 +86,24 @@ public class ScoreCardPdfGenerator
                                 .FontSize(10);
                         });
 
-                        // 여기서 PaddingTop은 컨테이너에 적용
                         col.Item().PaddingTop(2)
                             .Text($"대회장소: {stadiumName}")
                             .FontFamily("NanumGothic")
                             .FontSize(12).Bold();
 
-                        // 팀 텍스트도 PaddingTop을 Item()에 적용
                         col.Item().PaddingTop(2)
                             .Text($"팀: {team.TeamNumber}")
                             .FontFamily("NanumGothic")
                             .FontSize(12).Bold();
+
+                        // QR 코드 삽입
+                        if (qrBytes != null)
+                        {
+                            col.Item().PaddingTop(4)
+                                .AlignRight()
+                                .Width(64).Height(64)       // 컨테이너 크기 지정
+                                .Image(qrBytes);            // byte[] 직접 전달
+                        }
                     });
 
                     page.Content().Column(contentCol =>

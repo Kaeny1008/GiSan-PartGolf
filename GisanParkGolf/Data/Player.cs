@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace GisanParkGolf.Data
 {
     [Table("sys_users")]
-    public class Player
+    public class Member
     {
         [Key]
         [StringLength(15)]

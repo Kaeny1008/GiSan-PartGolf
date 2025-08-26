@@ -1,0 +1,92 @@
+﻿@model List<GisanParkGolf.Data.Notification>
+<link rel="stylesheet" href="~/css/custom-notification.css" />
+
+<div class="position-relative d-inline-block">
+    <button type="button" class="btn btn-link position-relative" data-bs-toggle="dropdown" aria-expanded="false" title="알림">
+        <i class="bi bi-bell" style="font-size:1.3rem;"></i>
+        @if (Model.Count > 0)
+        {
+            <span class="badge bg-danger notification-badge">@Model.Count</span>
+        }
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end notification-dropdown wide-notification-dropdown">
+        <li class="dropdown-header">알림 목록</li>
+        <li><hr class="dropdown-divider" /></li>
+        @if (Model.Count == 0)
+        {
+            <li class="dropdown-item text-center text-muted">알림이 없습니다.</li>
+        }
+        @foreach (var n in Model)
+        {
+            <li class="notification-item horizontal-notification">
+                <div class="notification-message message-wide">
+                    <span class="notification-type-badge type-@n.Type">@n.Type</span>
+                    @if (!string.IsNullOrEmpty(n.LinkUrl))
+                    {
+                        <a href="javascript:void(0);"
+                           class="msg notification-link"
+                           onclick="handleNotificationClick(@n.NotificationId, '@n.LinkUrl', this, event)">
+                            @n.Message
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="msg">@n.Message</span>
+                    }
+                    <div class="date">@n.CreatedAt.ToString("yyyy-MM-dd HH:mm")</div>
+                    <div class="notification-actions-horizontal">
+                        <button type="button"
+                                class="btn btn-outline-success btn-circle"
+                                title="확인"
+                                onclick="markNotificationRead(@n.NotificationId, this, event)">
+                            <i class="bi bi-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </li>
+        }
+    </ul>
+</div>
+
+<script>
+    // 알림 링크 클릭 시
+    function handleNotificationClick(notificationId, linkUrl, el, event) {
+        if (event) event.preventDefault();
+        $.post('/api/Notifications/MarkRead', { id: notificationId })
+            .done(function() {
+                var $item = $(el).closest('.notification-item');
+                var $ul = $item.closest('ul');
+                $item.fadeOut(200, function() {
+                    $item.remove();
+                    updateNotificationBadgeAndEmpty($ul);
+                    window.location.href = linkUrl;
+                });
+            });
+    }
+
+    // 확인 버튼 클릭 시
+    function markNotificationRead(notificationId, btn, event) {
+        if (event) event.stopPropagation();
+        $.post('/api/Notifications/MarkRead', { id: notificationId })
+            .done(function() {
+                var $item = $(btn).closest('.notification-item');
+                var $ul = $item.closest('ul');
+                $item.fadeOut(200, function() {
+                    $item.remove();
+                    updateNotificationBadgeAndEmpty($ul);
+                });
+            });
+    }
+
+    // 뱃지 및 빈 알림 안내 처리 공통 함수
+    function updateNotificationBadgeAndEmpty($ul) {
+        var badge = $('.notification-badge');
+        var count = parseInt(badge.text());
+        badge.text(count > 1 ? count - 1 : '');
+        $ul.find('.dropdown-item.text-center.text-muted').remove();
+        if ($ul.find('.notification-item').length === 0) {
+            var $divider = $ul.find('.dropdown-divider');
+            $('<li class="dropdown-item text-center text-muted">알림이 없습니다.</li>').insertAfter($divider);
+        }
+    }
+</script>

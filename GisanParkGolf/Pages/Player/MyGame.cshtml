@@ -1,0 +1,136 @@
+﻿@page
+@using System.Security.Claims
+@model GiSanParkGolf.Pages.Player.MyGameModel
+@{
+    ViewData["Title"] = "참여 대회 목록";
+    var myId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음"
+    , "내 대회의 결과 및 참가여부 수정을 할 수 있습니다."))
+
+<div class="container mt-4">
+    <div class="custom-card">
+        <!-- 필터 및 버튼 영역 -->
+        @{
+            var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
+            {
+                PageSize = Model.PageSize,
+                SearchField = Model.SearchField,
+                SearchQuery = Model.SearchQuery,
+                ResetPageName = "./MyGame",
+                FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+                {
+                new() { Value = "GameName", Text = "대회명" },
+                new() { Value = "StadiumName", Text = "경기장" },
+                new() { Value = "GameHost", Text = "주최자" }
+                }
+            };
+        }
+        @await Html.PartialAsync("_SearchControl", searchModel)
+
+        <!-- 목록 테이블 -->
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>No</th>
+                    <th>대회명</th>
+                    <th>경기장</th>
+                    <th>주최자</th>
+                    <th>대회일자</th>
+                    <th>모집시작</th>
+                    <th>모집종료</th>
+                    <th>상태</th>
+                    <th>참가여부</th>
+                    <th>대회확인</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.GameList != null && Model.GameList.Any())
+                {
+                    int no = (Model.PageIndex - 1) * Model.PageSize;
+                    foreach (var game in Model.GameList)
+                    {
+                        <tr>
+                            <td>@(++no)</td>
+                            <td>@game.GameName</td>
+                            <td>@game.StadiumName</td>
+                            <td>@game.GameHost</td>
+                            <td>@game.GameDate.ToString("yyyy-MM-dd")</td>
+                            <td>@game.StartRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@game.EndRecruiting.ToString("yyyy-MM-dd")</td>
+                            <td>@GisanParkGolf.Helpers.GameStatusHelper.ToDisplay(game.GameStatus)</td>
+                            @if (game.IsCancelled == false)
+                            {
+                                <td class="text-success">참가중</td>
+                            }
+                            else if (game.IsCancelled == true)
+                            {
+                                @if (game.Approval == null)
+                                {
+                                    <td>
+                                        <span class="badge bg-info text-dark" style="font-size:1em;">
+                                            참가취소 요청중
+                                        </span>
+                                    </td>
+                                }
+                                else if (game.Approval == myId)
+                                {
+                                    <td>
+                                        <span class="badge bg-warning text-dark" style="font-size:1em;">
+                                            재참가 요청중
+                                        </span>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        <span class="badge bg-danger" style="font-size:1em;">
+                                            참가취소
+                                        </span>
+                                    </td>
+                                }
+                            }
+                            <td>
+                                <a asp-page="MyGameDetail" asp-route-GameCode="@game.GameCode"
+                                   class="btn btn-outline-primary btn-sm">
+                                    대회확인
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">참가 신청 또는 참가한 데이터가 없습니다.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <!-- 총 건수 -->
+        <div style="text-align:right; font-style:italic; font-size:8pt;">
+            총 건수: <span>@(Model.GameList?.TotalCount ?? 0)</span>
+        </div>
+
+        <!-- 페이지네이션 컨트롤 -->
+        @{
+            var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
+            {
+                PageIndex = Model.PageIndex,
+                TotalPages = Model.GameList?.TotalPages ?? 1,
+                GetPageUrl = i => Url.Page(
+                "./MyGame",
+                null,
+                new
+                {
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    PageIndex = i,
+                    PageSize = Model.PageSize
+                }, null) ?? ""
+            };
+        }
+        @await Html.PartialAsync("_Pagination", pagemodel)
+    </div>
+</div>

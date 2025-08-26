@@ -1,0 +1,425 @@
+﻿@page "{stadiumCode?}/{courseCode:int?}"
+@model GiSanParkGolf.Pages.Admin.StadiumManagerModel
+@{
+    ViewData["Title"] = "경기장 및 코스 관리";
+}
+
+@section Scripts {
+    <script>
+        // 페이지 로드 시, '신규 등록 폼 보이기' 신호가 있는지 확인
+        document.addEventListener("DOMContentLoaded", function () {
+            const shouldShowForm = '@ViewData["ShowNewStadiumForm"]' === 'True';
+            if (shouldShowForm) {
+                const form = document.getElementById("newStadiumForm");
+                if (form) {
+                    form.classList.remove("d-none"); // 폼을 보이게 함
+                    // 폼으로 부드럽게 스크롤
+                    form.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }
+
+            const modalType = '@TempData["ModalType"]';
+            const modalTitle = '@Html.Raw(TempData["ModalTitle"])';
+            const modalBody = '@Html.Raw(TempData["ModalBody"])';
+
+            if (modalBody && modalBody.trim() !== "") {
+                const modalLabel = document.getElementById("statusModalLabel");
+                const modalContent = document.getElementById("statusModalContent");
+                const modalHeader = document.getElementById("statusModalHeader");
+                const modalBodyText = document.getElementById("statusModalBody");
+
+                modalLabel.innerHTML = modalTitle || "알림";
+                modalBodyText.innerHTML = modalBody;
+
+                // 스타일 적용
+                modalContent.classList.remove("border-success", "border-danger");
+                modalHeader.classList.remove("bg-success", "bg-danger");
+
+                if (modalType === "success") {
+                    modalContent.classList.add("border-success");
+                    modalHeader.classList.add("bg-success", "text-white");
+                } else if (modalType === "error") {
+                    modalContent.classList.add("border-danger");
+                    modalHeader.classList.add("bg-danger", "text-white");
+                }
+
+                const modal = new bootstrap.Modal(document.getElementById("statusModal"));
+                modal.show();
+            }
+        });
+
+        function addHoleRow() {
+            const tbody = document.getElementById("holeTableBody");
+            const idx = tbody.querySelectorAll("tr").length;
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td class="text-center align-middle">
+                    <input type="checkbox" class="form-check-input delete-checkbox" />
+                    <span class="row-no">${idx + 1}</span>
+                    <input type="hidden" name="HoleDetails[${idx}].HoleId" value="0" />
+                </td>
+                <td><input type="text" name="HoleDetails[${idx}].HoleName" class="form-control form-control-sm" /></td>
+                <td><input type="number" name="HoleDetails[${idx}].Distance" class="form-control form-control-sm" /></td>
+                <td><input type="number" name="HoleDetails[${idx}].Par" class="form-control form-control-sm" value="3" /></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function deleteSelectedHoles() {
+            const tbody = document.getElementById("holeTableBody");
+            [...tbody.querySelectorAll("tr")].forEach(tr => {
+                const cb = tr.querySelector(".delete-checkbox");
+                if (cb && cb.checked) tr.remove();
+            });
+            renumberHoleRows();
+        }
+
+        function renumberHoleRows() {
+            const tbody = document.getElementById("holeTableBody");
+            [...tbody.querySelectorAll("tr")].forEach((tr, i) => {
+                // 표시 번호 업데이트
+                const no = tr.querySelector(".row-no");
+                if (no) no.textContent = i + 1;
+
+                // name 속성의 인덱스 재설정
+                tr.querySelectorAll("input, select, textarea").forEach(input => {
+                    if (!input.name) return;
+                    input.name = input.name.replace(/HoleDetails\[\d+\]/, `HoleDetails[${i}]`);
+                    // id는 바인딩에 필수는 아니라 생략 가능; 필요하면 동일한 방식으로 치환
+                });
+            });
+        }
+    </script>
+}
+
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="statusModalContent">
+            <!-- 클래스 동적 변경 -->
+            <div class="modal-header" id="statusModalHeader">
+                <!-- 배경색 동적 변경 -->
+                <h5 class="modal-title" id="statusModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body" id="statusModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <!-- 상단 카드 -->
+    @await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음"
+        , "경기장을 추가, 수정, 삭제 할 수 있습니다."))
+
+    <!-- 단계 안내 뱃지 -->
+    <div class="step-indicator text-center mb-3">
+        <span class="badge @(Model.SelectedStadium == null && ViewData["ShowNewStadiumForm"] as string != "True" ? "bg-primary" : "bg-secondary") me-2">① 경기장 목록</span>
+        <span class="badge @(ViewData["ShowNewStadiumForm"] as string == "True" ? "bg-primary" : "bg-secondary") me-2">② 신규 등록</span>
+        <span class="badge @(Model.SelectedStadium != null ? "bg-primary" : "bg-secondary") me-2">③ 코스/홀 관리</span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="custom-card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">경기장 목록</h5>
+                    <div class="d-flex gap-2">
+                        <a asp-page="/Admin/StadiumManager" class="btn btn-sm btn-outline-secondary">전체목록</a>
+                        <a asp-page-handler="NewStadium" class="btn btn-sm btn-primary">신규 등록</a>
+                    </div>
+                </div>
+
+                <!-- 필터 및 버튼 영역 -->
+                @{
+                    var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
+                    {
+                        PageSize = Model.PageSize,
+                        SearchField = Model.SearchField,
+                        SearchQuery = Model.SearchQuery,
+                        ResetPageName = "./StadiumManager",
+                        FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+                                {
+                                new() { Value = "StadiumName", Text = "경기장 이름" },
+                                new() { Value = "StadiumCode", Text = "경기장 코드" },
+                                new() { Value = "RegionName", Text = "지역명" },
+                                new() { Value = "CityName", Text = "시/군" }
+                                }
+                    };
+                }
+                @await Html.PartialAsync("_SearchControl", searchModel)
+
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>경기장 이름</th>
+                            <th>지역명</th>
+                            <th>도시/군</th>
+                            <th>코스 수</th>
+                            <th>비고</th>
+                            <th>상태</th>
+                            <th>삭제</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            // 페이징을 위한 시작 번호 계산
+                            var index = (Model.PageIndex - 1) * 10 + 1;
+                        }
+                        @foreach (var stadium in Model.StadiumList)
+                        {
+                            <tr class="@(stadium.StadiumCode == Model.SelectedStadium?.StadiumCode ? "table-primary" : "")">
+                                <td>@index</td>
+                                <td>
+                                    <a asp-page="/Admin/StadiumManager" asp-route-stadiumCode="@stadium.StadiumCode"
+                                       class="text-decoration-none text-dark fw-bold">
+                                        @stadium.StadiumName
+                                    </a>
+                                </td>
+                                <td>@stadium.RegionName</td>
+                                <td>@stadium.CityName</td>
+                                <td>@stadium.Courses.Count</td>
+                                <td>@stadium.Note</td>
+                                <td>
+                                    @if (stadium.IsActive)
+                                    {
+                                        <span class="badge bg-success">사용 중</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span class="badge bg-secondary">비활성</span>
+                                    }
+                                </td>
+                                <td>
+                                    <form method="post" asp-page-handler="DeleteStadium" asp-route-stadiumCode="@stadium.StadiumCode"
+                                          onsubmit="return confirm('이 경기장과 관련된 모든 코스, 홀 정보가 삭제됩니다. 정말 삭제하시겠습니까?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0">🗑️</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+
+                <!-- 페이지네이션 컨트롤 -->
+                @{
+                    var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
+                    {
+                        PageIndex = Model.PageIndex,
+                        TotalPages = Model.StadiumList?.TotalPages ?? 1,
+                        GetPageUrl = i => Url.Page(
+                        "./StadiumManager",
+                        null,
+                        new
+                        {
+                            SearchField = Model.SearchField,
+                            SearchQuery = Model.SearchQuery,
+                            PageIndex = i,
+                            PageSize = Model.PageSize
+                        }, null) ?? ""
+                    };
+                }
+                @await Html.PartialAsync("_Pagination", pagemodel)
+            </div>
+        </div>
+    </div>
+
+    <!-- 경기장 등록 (id와 d-none 클래스는 JS 제어를 위해 유지) -->
+    <div class="row @(ViewData["ShowNewStadiumForm"] as string == "True" ? "" : "d-none")" id="newStadiumForm">
+        <div class="col-md-12">
+            <div class="custom-card">
+                <h5 class="card-title">신규 경기장 등록</h5>
+                <hr />
+                <form method="post" asp-page-handler="CreateStadium">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label asp-for="NewStadium.StadiumName" class="form-label">경기장 이름 <span class="text-danger">*</span></label>
+                            <input asp-for="NewStadium.StadiumName" class="form-control" />
+                            <span asp-validation-for="NewStadium.StadiumName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label asp-for="NewStadium.RegionName" class="form-label">지역명</label>
+                            <input asp-for="NewStadium.RegionName" class="form-control" />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label asp-for="NewStadium.CityName" class="form-label">도시/군</label>
+                            <input asp-for="NewStadium.CityName" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="NewStadium.Note" class="form-label">비고</label>
+                        <textarea asp-for="NewStadium.Note" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input asp-for="NewStadium.IsActive" class="form-check-input" type="checkbox" checked />
+                        <label asp-for="NewStadium.IsActive" class="form-check-label">사용함</label>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">경기장 등록</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 코스 및 홀 정보 (선택된 경기장이 있을 때만 표시) -->
+    @if (Model.SelectedStadium != null)
+    {
+        <div class="row">
+            <div class="col-md-12">
+                <!-- 코스 영역 -->
+                <div class="custom-card mb-4">
+                    <h5 class="card-title">@Model.SelectedStadium.StadiumName - 코스 관리</h5>
+                    <hr />
+                    <div class="row">
+                        <!-- 등록된 코스 목록 -->
+                        <div class="col-md-6">
+                            <h6>등록된 코스</h6>
+                            @if (Model.SelectedStadium.Courses.Any())
+                            {
+                                <table class="table table-hover align-middle mt-2">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>코스 이름</th>
+                                            <th>홀 수</th>
+                                            <th>상태</th>
+                                            <th>삭제</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var courseIndex = 1;
+                                        }
+                                        @foreach (var course in Model.SelectedStadium.Courses.OrderBy(c => c.CourseName))
+                                        {
+                                            <tr class="@(course.CourseCode == Model.SelectedCourse?.CourseCode ? "table-primary" : "")">
+                                                <td>@courseIndex</td>
+                                                <td>
+                                                    <a asp-page="/Admin/StadiumManager"
+                                                       asp-route-stadiumCode="@Model.SelectedStadium.StadiumCode"
+                                                       asp-route-courseCode="@course.CourseCode"
+                                                       class="text-decoration-none text-dark fw-bold">
+                                                        @course.CourseName
+                                                    </a>
+                                                </td>
+                                                <td>@course.HoleCount</td>
+                                                <td>
+                                                    @if (course.IsActive)
+                                                    {
+                                                        <span class="badge bg-success">사용 중</span>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <span class="badge bg-secondary">비활성</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <form method="post"
+                                                          asp-page-handler="DeleteCourse"
+                                                          asp-route-stadiumCode="@Model.SelectedStadium.StadiumCode"
+                                                          asp-route-courseCode="@course.CourseCode"
+                                                          onsubmit="return confirm('정말 이 코스를 삭제하시겠습니까?');">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0">🗑️</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            courseIndex++;
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            {
+                                <p class="text-muted mt-3">등록된 코스가 없습니다.</p>
+                            }
+                        </div>
+                        <!-- 신규 코스 등록 -->
+                        <div class="col-md-6">
+                            <h6>신규 코스 등록</h6>
+                            <form method="post" asp-page-handler="CreateCourse" asp-route-stadiumCode="@Model.SelectedStadium.StadiumCode" class="mt-2">
+                                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                                <div class="mb-2">
+                                    <label asp-for="NewCourse.CourseName" class="form-label">
+                                        코스명 <span class="text-danger">*</span>
+                                    </label>
+                                    <small class="form-text text-muted">예: A코스는 A만 입력하세요!, 1코스는 1만 입력하세요!</small>
+                                    <input asp-for="NewCourse.CourseName" class="form-control" placeholder="예: A" />
+                                    <span asp-validation-for="NewCourse.CourseName" class="text-danger"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <label asp-for="NewCourse.HoleCount" class="form-label">기본 홀 수 <span class="text-danger">*</span></label>
+                                    <input asp-for="NewCourse.HoleCount" class="form-control" type="number" value="9" />
+                                    <span asp-validation-for="NewCourse.HoleCount" class="text-danger"></span>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input asp-for="NewCourse.IsActive" class="form-check-input" type="checkbox" checked />
+                                    <label asp-for="NewCourse.IsActive" class="form-check-label">사용함</label>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-success">코스 등록</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 홀 정보 영역 -->
+                @if (Model.SelectedCourse != null)
+                {
+                    <div class="custom-card">
+                        <h5 class="card-title">@Model.SelectedCourse.CourseName - 홀 정보 입력</h5>
+                        <hr />
+                        <form method="post" asp-page-handler="SaveHoles"
+                              asp-route-courseCode="@Model.SelectedCourse.CourseCode"
+                              asp-route-stadiumCode="@Model.SelectedStadium.StadiumCode">
+                            <table class="table table-bordered table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width:10%">홀 번호</th>
+                                        <th>홀명</th>
+                                        <th>거리(m)</th>
+                                        <th>Par</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="holeTableBody">
+                                    @for (int i = 0; i < Model.HoleDetails.Count; i++)
+                                    {
+                                        <tr>
+                                            <td class="text-center align-middle">
+                                                <input type="checkbox" class="form-check-input delete-checkbox" />
+                                                <span class="row-no">@(i + 1)</span>
+                                                <input type="hidden" asp-for="HoleDetails[i].HoleId" />
+                                            </td>
+                                            <td><input type="text" asp-for="HoleDetails[i].HoleName" class="form-control form-control-sm" /></td>
+                                            <td><input type="number" asp-for="HoleDetails[i].Distance" class="form-control form-control-sm" /></td>
+                                            <td><input type="number" asp-for="HoleDetails[i].Par" class="form-control form-control-sm" /></td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                            <div class="d-flex justify-content-end gap-2 mb-2">
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="addHoleRow()">홀 추가</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSelectedHoles()">선택 삭제</button>
+                            </div>
+
+                            <div class="text-end mt-3">
+                                <!-- mt-3로 약간의 거리 확보 -->
+                                <button type="submit" class="btn btn-warning">홀 정보 저장</button>
+                            </div>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

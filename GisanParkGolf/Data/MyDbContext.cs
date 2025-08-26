@@ -7,7 +7,7 @@ namespace GisanParkGolf.Data
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options) { }
 
         // 모델 이름을 반영하여 DbSet 속성명도 규칙에 맞게 변경 (복수형)
-        public DbSet<Player> Players { get; set; } = null!;
+        public DbSet<Member> Players { get; set; } = null!;
         public DbSet<Player_Handicap> PlayerHandicaps { get; set; } = null!;
         public DbSet<Player_Handicap_ChangeLog> HandicapChangeLogs { get; set; } = null!;
         public DbSet<Stadium> Stadiums { get; set; }
@@ -19,12 +19,14 @@ namespace GisanParkGolf.Data
         public DbSet<GameUserAssignment> GameUserAssignments { get; set; }
         public DbSet<GameAssignmentHistory> GameAssignmentHistory { get; set; }
         public DbSet<GameJoinHistory> GameJoinHistories { get; set; } = null!;
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<GameResultScore> GameResultScores { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Player>()
+            modelBuilder.Entity<Member>()
                 .HasOne(u => u.Handicap)
                 .WithOne(h => h.User)
                 .HasForeignKey<Player_Handicap>(h => h.UserId)

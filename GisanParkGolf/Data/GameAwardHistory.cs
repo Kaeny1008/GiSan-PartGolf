@@ -36,6 +36,6 @@ namespace GisanParkGolf.Data
         public virtual Game? Game { get; set; }
 
         [ForeignKey("UserId")]
-        public virtual Player? User { get; set; }
+        public virtual Member? User { get; set; }
     }
 }
