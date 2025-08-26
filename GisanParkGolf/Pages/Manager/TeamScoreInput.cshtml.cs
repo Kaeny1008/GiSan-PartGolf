@@ -109,8 +109,7 @@ namespace GiSanParkGolf.Pages.Manager
             // 서비스 DI 받아서 저장
             await _teamScoreInpuService.SaveScoresAsync(GameCode, inputBy, scores);
 
-            TempData["SuccessMessage"] = $@"<span>
-                    <strong>✅ 저장 성공!</strong><br>
+            TempData["SuccessMessage"] = $@"<span><strong>✅ 저장 성공!</strong><br>
                     <strong>대회명 :</strong> <span style='color:#176d37;'>{GameName}</span>,
                     <strong>팀번호 :</strong> <span style='color:#0a5c1a;'>{TeamNumber}</span><br>
                     데이터를 <strong>저장했습니다.</strong></span>";

@@ -60,10 +60,34 @@ ViewData["Title"] as string ?? "제목 없음",
                 <input type="hidden" name="GameCode" value="@Model.GameCode" />
                 <input type="hidden" name="TeamNumber" value="@Model.TeamNumber" />
                 <input type="hidden" name="GameName" value="@Model.GameName" />
-                <button type="submit" class="btn btn-success px-5 py-2"
+                <button type="button" class="btn btn-success px-5 py-2"
+                        id="openSaveConfirmModal"
                         style="font-weight:bold; font-size:1.1em; border-radius:0.6rem;">
                     저장
                 </button>
+            </div>
+            <!-- 저장 확인 모달 -->
+            <div class="modal fade" id="saveConfirmModal" tabindex="-1" aria-labelledby="saveConfirmModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="saveConfirmModalLabel">저장 확인</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-2">
+                                <span class="fw-bold text-primary">저장 하시겠습니까?</span>
+                            </p>
+                            <div class="alert alert-info mb-0" role="alert" style="font-size:0.95em;">
+                                <span class="fw-bold">※ 안내:</span> 저장된 데이터가 있다면 덮어씌어 집니다.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="submit" class="btn btn-primary">저장</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             @if (Model.TeamScoreCourses == null || Model.TeamScoreCourses.Count == 0)
@@ -163,6 +187,12 @@ ViewData["Title"] as string ?? "제목 없음",
                 var sumTd = row.querySelector('td:last-child span');
                 if (sumTd) sumTd.textContent = sum;
             });
+        });
+
+        // 저장 버튼 클릭 → 저장 확인 모달 띄움
+        document.getElementById('openSaveConfirmModal').addEventListener('click', function() {
+            var modal = new bootstrap.Modal(document.getElementById('saveConfirmModal'));
+            modal.show();
         });
     });
 </script>
