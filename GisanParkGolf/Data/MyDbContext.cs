@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GisanParkGolf.Pages.Manager.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace GisanParkGolf.Data
 {
@@ -21,6 +22,7 @@ namespace GisanParkGolf.Data
         public DbSet<GameJoinHistory> GameJoinHistories { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<GameResultScore> GameResultScores { get; set; }
+        public DbSet<MissingScoreInfoViewModel> MissingScoreInfoViewModel { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -72,6 +74,8 @@ namespace GisanParkGolf.Data
                 .HasOne(g => g.Stadium)
                 .WithMany()
                 .HasForeignKey(g => g.StadiumCode);
+
+            modelBuilder.Entity<MissingScoreInfoViewModel>().HasNoKey();
         }
     }
 }
