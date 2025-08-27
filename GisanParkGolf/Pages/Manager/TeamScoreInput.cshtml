@@ -108,7 +108,7 @@ ViewData["Title"] as string ?? "제목 없음",
                         @{
                             int fixedWidth = 90 + 100 + 120 + 120 + 80;
                             int tableTotalWidth = 1200;
-                            int holeCount = course.HoleNumbers.Count;
+                            int holeCount = course.Holes.Count;
                             int dynamicWidth = tableTotalWidth - fixedWidth;
                             int holeCellWidth = (int)Math.Floor((double)dynamicWidth / holeCount);
                         }
@@ -121,9 +121,9 @@ ViewData["Title"] as string ?? "제목 없음",
                                         <th style="width:100px;">코스순번</th>
                                         <th style="width:120px;">참가자명</th>
                                         <th style="width:120px;">참가자ID</th>
-                                        @foreach (var h in course.HoleNumbers)
+                                        @foreach (var hole in course.Holes)
                                         {
-                                            <th style="width:@holeCellWidth px; min-width:60px;">@h 홀</th>
+                                            <th style="width:@holeCellWidth px; min-width:60px;">@hole.HoleName</th>
                                         }
                                         <th style="width:80px;">합계</th>
                                     </tr>
@@ -137,26 +137,26 @@ ViewData["Title"] as string ?? "제목 없음",
                                             <td>@row.CourseOrder</td>
                                             <td>@row.ParticipantName</td>
                                             <td>@row.ParticipantId</td>
-                                            @foreach (var h in course.HoleNumbers)
+                                            @foreach (var hole in course.Holes)
                                             {
-                                                var safeKey = $"Score_{course.CourseCode}_{row.ParticipantId}_{h}";
+                                                var safeKey = $"Score_{course.CourseCode}_{row.ParticipantId}_{hole.HoleId}";
                                                 <td>
                                                     <input type="number"
                                                            id="@safeKey"
                                                            name="@safeKey"
-                                                           value="@(row.Scores.ContainsKey(h) ? row.Scores[h].ToString() : "")"
+                                                           value="@(row.Scores.ContainsKey(hole.HoleId) ? row.Scores[hole.HoleId].ToString() : "")"
                                                            min="0" max="20"
                                                            class="form-control text-center score-input"
                                                            data-course="@course.CourseName"
                                                            data-participant="@row.ParticipantId"
                                                            data-rowid="row-@course.CourseName-@row.ParticipantId"
-                                                           data-hole="@h"
+                                                           data-hole="@hole.HoleId"
                                                            style="width:90%; font-size:1.1em; padding:4px 0;" />
                                                 </td>
                                             }
                                             <td>
                                                 @{
-                                                    int total = course.HoleNumbers.Sum(h => row.Scores.ContainsKey(h) ? row.Scores[h] : 0);
+                                                    int total = course.Holes.Sum(hole => row.Scores.ContainsKey(hole.HoleId) ? row.Scores[hole.HoleId] : 0);
                                                 }
                                                 <span>@total</span>
                                             </td>

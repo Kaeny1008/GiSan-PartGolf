@@ -8,7 +8,7 @@ namespace GisanParkGolf.Pages.Manager.ViewModels
         public string? GameName { get; set; }
         public string? TeamNumber { get; set; }
         public string? UserId { get; set; }
-        public string? ParticipantName { get; set; }
+        public string? UserName { get; set; }
         public string? MissingCoursesAndHolesRaw { get; set; }
         [NotMapped]
         public List<string>? MissingCoursesAndHoles { get; set; }

@@ -38,7 +38,7 @@ namespace GisanParkGolf.Pages.Manager.Services
                     g.game_name AS GameName,
                     u.team_number AS TeamNumber,
                     u.user_id AS UserId,
-                    m.user_name AS ParticipantName,
+                    m.user_name AS UserName,
                     GROUP_CONCAT(CONCAT(c.course_name, '-', h.hole_name)) AS MissingCoursesAndHolesRaw
                 FROM game_list g
                 JOIN game_user_assignments u ON u.game_code = g.game_code

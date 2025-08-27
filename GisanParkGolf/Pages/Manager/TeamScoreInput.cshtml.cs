@@ -20,6 +20,7 @@ namespace GiSanParkGolf.Pages.Manager
         [BindProperty] public string ScannedCode { get; set; } = "";
 
         public string? ScanMessage { get; set; }
+        public List<HoleInfo> Holes { get; set; } = new();
         public bool ScanFound { get; set; } = false;
         [BindProperty(SupportsGet = true)] public string? TeamNumber { get; set; }
         [BindProperty(SupportsGet = true)] public string? GameCode { get; set; }
