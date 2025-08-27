@@ -132,7 +132,10 @@ ViewData["Title"] as string ?? "제목 없음",
                                     @for (int i = 0; i < course.TeamRows.Count; i++)
                                     {
                                         var row = course.TeamRows[i];
-                                        <tr id="row-@course.CourseName-@row.ParticipantId">
+                                        var highlight = (Model.HighlightUserId?.Trim() == row.ParticipantId?.Trim());
+
+                                        <tr id="row-@course.CourseName-@row.ParticipantId"
+                                            class="@(highlight ? "table-warning" : "")">
                                             <td>@row.TeamNumber</td>
                                             <td>@row.CourseOrder</td>
                                             <td>@row.ParticipantName</td>
@@ -156,12 +159,15 @@ ViewData["Title"] as string ?? "제목 없음",
                                             }
                                             <td>
                                                 @{
-                                                    int total = course.Holes.Sum(hole => row.Scores.ContainsKey(hole.HoleId) ? row.Scores[hole.HoleId] : 0);
+                                                    int total = course.Holes.Sum(hole =>
+                                                    row.Scores.ContainsKey(hole.HoleId) ? row.Scores[hole.HoleId] ?? 0 : 0
+                                                    );
                                                 }
                                                 <span>@total</span>
                                             </td>
                                         </tr>
                                     }
+
                                 </tbody>
                             </table>
                         </div>

@@ -17,7 +17,7 @@ namespace GisanParkGolf.Pages.Manager.ViewModels
         public string? TeamNumber { get; set; }
         public string? ParticipantName { get; set; }
         public string? ParticipantId { get; set; }
-        public Dictionary<int, int> Scores { get; set; } = new(); // key: 홀번호, value: 점수
+        public Dictionary<int, int?> Scores { get; set; } = new(); // 반드시 int?로!
     }
 
     public class GameInformation

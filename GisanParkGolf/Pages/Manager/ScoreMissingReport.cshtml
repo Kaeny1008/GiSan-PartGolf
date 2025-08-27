@@ -6,34 +6,31 @@
 
 @await Html.PartialAsync("Shared/Components/_HeaderCard", (
     ViewData["Title"] as string ?? "제목 없음",
-    "대회를 선택하여 스코어 입력이 누락된 참가자를 확인하세요."
+    "선택한 대회(또는 전체)의 스코어 입력이 누락된 참가자 목록을 확인하고 바로 점수 입력 페이지로 이동하세요."
 ))
 
 <div class="container mt-4">
     <div class="custom-card mb-4" style="margin-left:auto;margin-right:auto;">
-        <!-- 대회 선택 폼 -->
         <form method="get" class="row gx-2 align-items-center mb-3">
             <div class="col-auto">
                 <label for="gameCode" class="fw-bold" style="color:#215d21;">대회 선택</label>
             </div>
             <div class="col-auto">
-                <select id="gameCode" name="gameCode" class="form-select" style="min-width:180px;">
-                    <option value="">전체</option>
+                <select id="gameCode" name="SelectedGameCode" class="form-select" style="min-width:250px;">
+                    <option value="">-- 전체 경기에 대해 조회 --</option>
                     @foreach (var game in Model.GameList)
                     {
-                        if (Model.SelectedGameCode == game.GameCode)
-                        {
-                            <option value="@game.GameCode" selected>@game.GameName</option>
-                        }
-                        else
-                        {
-                            <option value="@game.GameCode">@game.GameName</option>
-                        }
+                        <option value="@game.GameCode" selected="@(Model.SelectedGameCode == game.GameCode ? "selected" : null)">
+                            @game.GameName (@game.GameCode)
+                        </option>
                     }
                 </select>
             </div>
             <div class="col-auto">
-                <button type="submit" class="btn btn-primary px-4">확인</button>
+                <button type="submit" class="btn btn-primary px-4">조회</button>
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-outline-secondary" href="@Url.Page("/Manager/ScoreMissingReport", new { SelectedGameCode = Model.SelectedGameCode })">새로고침</a>
             </div>
         </form>
 
@@ -45,23 +42,22 @@
         }
         else
         {
-            <div class="alert alert-info mb-3" style="font-size:1.05em;">
-                <span class="fw-bold">※ 안내:</span>
-                아래 명단은 점수 입력이 누락된 팀/참가자 현황입니다. 빠른 입력을 부탁드립니다.
+            <div class="alert alert-info mb-3">
+                <strong>안내:</strong> 아래 목록은 스코어 입력이 누락된 참가자(팀)입니다. 링크를 눌러 점수 입력 화면으로 이동하세요.
             </div>
 
             <div class="table-responsive">
                 <table class="table table-bordered align-middle" style="background:#f9fafb;">
                     <thead class="table-light">
                         <tr>
-                            <th style="width:60px;">#</th>
-                            <th style="width:110px;">게임코드</th>
-                            <th style="width:170px;">대회명</th>
+                            <th style="width:50px;">#</th>
+                            <th style="width:120px;">게임코드</th>
+                            <th style="min-width:220px;">대회명</th>
                             <th style="width:90px;">팀번호</th>
-                            <th style="width:120px;">참가자명</th>
-                            <th style="width:110px;">참가자ID</th>
-                            <th style="min-width:180px;">미입력 코스/홀</th>
-                            <th style="width:120px;">점수 입력</th>
+                            <th style="width:140px;">참가자명</th>
+                            <th style="width:120px;">참가자ID</th>
+                            <th style="min-width:240px;">미입력 코스/홀</th>
+                            <th style="width:140px;">동작</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -76,10 +72,21 @@
                                 <td>@item.UserName</td>
                                 <td>@item.UserId</td>
                                 <td>
-                                    @string.Join(", ", item.MissingCoursesAndHoles ?? new List<string>())
+                                    @if (item.MissingCoursesAndHoles != null && item.MissingCoursesAndHoles.Any())
+                                    {
+                                        <span>@string.Join(", ", item.MissingCoursesAndHoles)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
                                 </td>
                                 <td>
-                                    <a href="@Url.Page("/Manager/TeamScoreInput", new { GameCode = item.GameCode, TeamNumber = item.TeamNumber })" class="btn btn-sm btn-primary">
+                                    <a asp-page="/Manager/TeamScoreInput"
+                                       asp-route-GameCode="@item.GameCode"
+                                       asp-route-TeamNumber="@item.TeamNumber"
+                                       asp-route-HighlightUserId="@item.UserId"
+                                       class="btn btn-sm btn-primary">
                                         점수 입력 바로가기
                                     </a>
                                 </td>
