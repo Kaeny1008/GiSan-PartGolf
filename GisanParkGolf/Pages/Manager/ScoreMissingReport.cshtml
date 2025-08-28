@@ -42,6 +42,10 @@
         }
         else
         {
+            <div class="alert alert-danger text-center">
+                <strong>경고:</strong> 총 <strong>@Model.MissingScoreList.Count</strong>명의 참가자가 점수 입력이 누락되었습니다.
+            </div>
+
             <div class="alert alert-info mb-3">
                 <strong>안내:</strong> 아래 목록은 스코어 입력이 누락된 참가자(팀)입니다. 링크를 눌러 점수 입력 화면으로 이동하세요.
             </div>
@@ -64,7 +68,7 @@
                         @for (int i = 0; i < Model.MissingScoreList.Count; i++)
                         {
                             var item = Model.MissingScoreList[i];
-                            <tr>
+                            <tr class="@(item.MissingCoursesAndHoles != null && item.MissingCoursesAndHoles.Any() ? "table-danger" : "")">
                                 <th scope="row">@(@i + 1)</th>
                                 <td>@item.GameCode</td>
                                 <td>@item.GameName</td>
@@ -74,7 +78,49 @@
                                 <td>
                                     @if (item.MissingCoursesAndHoles != null && item.MissingCoursesAndHoles.Any())
                                     {
-                                        <span>@string.Join(", ", item.MissingCoursesAndHoles)</span>
+                                        var groupedHoles = item.MissingCoursesAndHoles
+                                            .GroupBy(h => h.Split('-')[0]) // 코스 이름(A, B 등)으로 그룹화
+                                            .ToDictionary(g => g.Key, g => g.ToList());
+
+                                        <!-- 툴팁으로 간략히 표시 -->
+                                        <span class="text-danger fw-bold" data-bs-toggle="tooltip" title="@string.Join(", ", item.MissingCoursesAndHoles)">
+                                            @item.MissingCoursesAndHoles.Count 개 누락
+                                        </span>
+
+                                        <!-- 모달 팝업 트리거 -->
+                                        <a href="#" class="text-primary ms-2" data-bs-toggle="modal" data-bs-target="#missingModal-@item.UserId">
+                                            상세보기
+                                        </a>
+
+                                        <!-- 모달 팝업 -->
+                                        <div class="modal fade" id="missingModal-@item.UserId" tabindex="-1" aria-labelledby="missingModalLabel-@item.UserId" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered"> <!-- 화면 가운데 정렬 -->
+                                                <div class="modal-content shadow-lg border-0"> <!-- 약간의 그림자와 테두리 제거 -->
+                                                    <div class="modal-header bg-light">
+                                                        <h5 class="modal-title text-primary" id="missingModalLabel-@item.UserId">누락된 코스/홀 상세</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <ul class="list-unstyled">
+                                                            @foreach (var group in groupedHoles)
+                                                            {
+                                                                <li>
+                                                                    <strong>@group.Key 코스:</strong>
+                                                                    @string.Join(", ", group.Value.Select(h => {
+                                                                        var holeNumber = h.Split('-')[1];
+                                                                        holeNumber = holeNumber.Replace("번 홀", ""); // 중복 방지
+                                                                        return holeNumber + "홀";
+                                                                    }))
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                    <div class="modal-footer bg-light">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     }
                                     else
                                     {
@@ -98,3 +144,12 @@
         }
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
