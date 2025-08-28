@@ -19,7 +19,7 @@ ViewData["Title"] as string ?? "제목 없음",
                 <div class="d-flex align-items-center mb-2">
                     <input id="barcodeInput" name="ScannedCode" type="text" class="form-control me-2"
                            placeholder="바코드 스캔 후 엔터"
-                           style="max-width:500px;" autofocus autocomplete="off" value="250810-T01" />
+                           style="max-width:500px;" autofocus autocomplete="off" />
                     <button id="scanBtn" type="submit" class="btn btn-primary">스캔 처리</button>
                 </div>
                 @if (!string.IsNullOrEmpty(Model.ScanMessage))

@@ -24,6 +24,14 @@ namespace GisanParkGolf.Data
         public DbSet<GameResultScore> GameResultScores { get; set; }
         public DbSet<MissingScoreInfoViewModel> MissingScoreInfoViewModel { get; set; }
 
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder
+        //        .UseSqlServer("MariaDb")
+        //        .EnableSensitiveDataLogging() // 민감한 데이터 포함
+        //        .LogTo(Console.WriteLine, LogLevel.Information); // 로그 출력
+        //}
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

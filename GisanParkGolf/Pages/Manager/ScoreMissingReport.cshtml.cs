@@ -29,7 +29,32 @@ namespace GisanParkGolf.Pages.Manager
             }
             else
             {
-                MissingScoreList = _reportService.GetMissingScoreList(SelectedGameCode);
+                MissingScoreList = _reportService.GetMissingScoreList(SelectedGameCode) ?? new List<MissingScoreInfoViewModel>();
+            }
+        }
+
+        public async Task OnPostConfirmScoreAsync()
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(SelectedGameCode))
+                {
+                    _reportService.ConfirmGameScore(SelectedGameCode);
+
+                    await _reportService.SendNotificationToParticipantsAsync(SelectedGameCode);
+
+                    TempData["SuccessMessage"] = "점수 확정이 완료되었으며, 참가자들에게 알림이 전송되었습니다.";
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = $"점수 확정 중 오류: {ex.Message}";
+                Console.WriteLine($"InvalidOperationException: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "점수 확정 중 알 수 없는 오류가 발생했습니다.";
+                Console.WriteLine($"Unexpected Error: {ex.Message}");
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using GisanParkGolf.Data;
 using GisanParkGolf.Pages.Admin.Admin;
+using GisanParkGolf.Pages.Admin.Services;
 using GisanParkGolf.Pages.Manager.Services;
 using GisanParkGolf.Security;
 using GisanParkGolf.Services.Account;
@@ -38,6 +39,7 @@ public class Program
         builder.Services.AddScoped<IJoinGameService, JoinGameService>();
         builder.Services.AddScoped<ITeamScoreInputService, TeamScoreInputService>();
         builder.Services.AddScoped<IScoreMissingReportServece, ScoreMissingReportServece>();
+        builder.Services.AddScoped<IGameResultService, GameResultService>();
 
         builder.Services.AddDbContext<MyDbContext>(options =>
             options.UseSqlServer(connectionString));

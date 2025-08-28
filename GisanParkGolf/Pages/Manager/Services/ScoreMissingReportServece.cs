@@ -1,4 +1,6 @@
-﻿using GisanParkGolf.Data;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using GisanParkGolf.Data;
+using GisanParkGolf.Pages.Admin.ViewModels;
 using GisanParkGolf.Pages.Manager.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
@@ -109,6 +111,61 @@ namespace GisanParkGolf.Pages.Manager.Services
                 return $"{course}-{hole:D2}";
             }
             return value;
+        }
+
+        public void ConfirmGameScore(string gameCode)
+        {
+            var game = _dbContext.Games.FirstOrDefault(g => g.GameCode == gameCode);
+            if (game != null)
+            {
+                game.GameStatus = "Score Confirmed"; // game_status 컬럼 업데이트
+                _dbContext.SaveChanges(); // 변경 사항 저장
+            }
+        }
+
+        public List<ParticipantViewModel> GetParticipantsByGameCode(string gameCode)
+        {
+            return _dbContext.GameParticipants
+                .Where(p => p.GameCode == gameCode)
+                .Select(p => new ParticipantViewModel
+                {
+                    UserId = p.UserId ?? "",
+                    Name = p.User != null ? p.User.UserName : "Unknown"
+                })
+                .ToList();
+        }
+
+        public async Task SendNotificationToParticipantsAsync(string gameCode)
+        {
+            var participants = GetParticipantsByGameCode(gameCode);
+
+            if (participants == null || !participants.Any())
+            {
+                throw new ArgumentException("참가자 목록이 비어 있습니다.", nameof(participants));
+            }
+
+            foreach (var participant in participants)
+            {
+                if (string.IsNullOrWhiteSpace(participant.UserId))
+                {
+                    Console.WriteLine("참가자의 UserId가 비어 있습니다. 알림을 건너뜁니다.");
+                    continue;
+                }
+
+                var notification = new Notification
+                {
+                    UserId = participant.UserId,
+                    Type = "점수확정",
+                    Title = "점수 확정 알림",
+                    Message = "대회의 점수가 확정되었습니다. 결과를 확인하세요.",
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                };
+
+                _dbContext.Notifications.Add(notification);
+            }
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

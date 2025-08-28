@@ -1,4 +1,5 @@
-﻿using GisanParkGolf.Pages.Manager.ViewModels;
+﻿using GisanParkGolf.Pages.Admin.ViewModels;
+using GisanParkGolf.Pages.Manager.ViewModels;
 
 namespace GisanParkGolf.Pages.Manager.Services
 {
@@ -13,5 +14,13 @@ namespace GisanParkGolf.Pages.Manager.Services
         /// 선택한 대회(또는 전체)의 점수 입력 누락 명단 조회
         /// </summary>
         List<MissingScoreInfoViewModel> GetMissingScoreList(string? gameCode);
+
+        /// <summary>
+        /// 선택한 대회의 game_status를 'Score Confirmed'로 업데이트
+        /// </summary>
+        void ConfirmGameScore(string gameCode);
+
+        List<ParticipantViewModel> GetParticipantsByGameCode(string gameCode);
+        Task SendNotificationToParticipantsAsync(string gameCode);
     }
 }
