@@ -32,8 +32,6 @@ namespace GisanParkGolf.Pages.Manager.Services
 
         public List<MissingScoreInfoViewModel> GetMissingScoreList(string? gameCode)
         {
-            // SQL: CROSS JOIN 제거, stadium의 코스와 그 홀을 기준으로 누락 체크
-            // 주의: 여기서는 FromSqlInterpolated를 사용하므로 {gameCode}가 자동으로 파라미터화 됩니다.
             var results = _dbContext.MissingScoreInfoViewModel
                 .FromSqlInterpolated($@"
                 SELECT
