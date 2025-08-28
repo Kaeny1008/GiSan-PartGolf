@@ -39,9 +39,9 @@ namespace GisanParkGolf.Data
         [ForeignKey("HoleId")]
         public virtual Hole? Hole { get; set; }
 
-        [Required]
+        
         [Column("score")]
-        public int Score { get; set; }
+        public int? Score { get; set; }
 
         [Required]
         [Column("input_date")]

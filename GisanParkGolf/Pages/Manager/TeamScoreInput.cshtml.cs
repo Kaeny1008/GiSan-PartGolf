@@ -20,14 +20,27 @@ namespace GiSanParkGolf.Pages.Manager
         [BindProperty] public string ScannedCode { get; set; } = "";
 
         public string? ScanMessage { get; set; }
+        public List<HoleInfo> Holes { get; set; } = new();
         public bool ScanFound { get; set; } = false;
         [BindProperty(SupportsGet = true)] public string? TeamNumber { get; set; }
         [BindProperty(SupportsGet = true)] public string? GameCode { get; set; }
         [BindProperty(SupportsGet = true)] public string? GameName { get; set; }
+        [BindProperty(SupportsGet = true)] public string? HighlightUserId { get; set; }
+
 
         public void OnGet()
         {
+            if (!string.IsNullOrWhiteSpace(GameCode) && !string.IsNullOrWhiteSpace(TeamNumber))
+            {
+                var teamScoreCourses = _teamScoreInpuService.GetTeamScoreCourses(GameCode, TeamNumber);
 
+                if (teamScoreCourses != null && teamScoreCourses.Count > 0)
+                {
+                    GameName = teamScoreCourses.First().GameInformations?.GameName;
+                    TeamScoreCourses = teamScoreCourses;
+                    ScanFound = true;
+                }
+            }
         }
 
         public IActionResult OnPostScan()
@@ -84,7 +97,7 @@ namespace GiSanParkGolf.Pages.Manager
             var inputBy = User.Identity?.Name ?? "admin";
 
             // 점수 데이터 Dictionary 생성: key = "courseCode_userId_holeId", value = 점수
-            var scores = new Dictionary<string, int>();
+            var scores = new Dictionary<string, int?>();
 
             foreach (var key in form.Keys)
             {
@@ -98,7 +111,12 @@ namespace GiSanParkGolf.Pages.Manager
                         var userId = parts[2];
                         var holeId = parts[3];
                         var scoreStr = form[key];
-                        if (int.TryParse(scoreStr, out int score))
+                        if (string.IsNullOrWhiteSpace(scoreStr))
+                        {
+                            // 빈칸이면 null로 저장해야 하므로, 따로 기록
+                            scores[$"{courseCode}_{userId}_{holeId}"] = null; // Dictionary<string, int?>로 바꾸는게 더 좋음
+                        }
+                        else if (int.TryParse(scoreStr, out int score))
                         {
                             scores[$"{courseCode}_{userId}_{holeId}"] = score;
                         }

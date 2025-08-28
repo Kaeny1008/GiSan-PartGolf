@@ -1,0 +1,192 @@
+﻿@page
+@model GisanParkGolf.Pages.Admin.GameResultsModel
+@{
+    ViewData["Title"] = "대회 결과";
+}
+
+@await Html.PartialAsync("Shared/Components/_HeaderCard", (
+    ViewData["Title"] as string ?? "제목 없음",
+    "대회의 최종 결과와 상위 3명의 순위를 확인하세요."
+))
+
+<div class="container mt-4">
+    <div class="custom-card mb-4">
+        <div class="card-header py-3">
+            <h5 class="card-title mb-0">대회 선택</h5>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                <div class="mb-3">
+                    <label for="gameCode" class="form-label">대회 선택</label>
+                    <select id="gameCode" name="SelectedGameCode" class="form-select">
+                        <option value="">-- 대회를 선택하세요 --</option>
+                        @foreach (var game in Model.ScoreConfirmedGames)
+                        {
+                            if (Model.SelectedGameCode == game.GameCode)
+                            {
+                                <option value="@game.GameCode" selected="selected">
+                                    @game.GameName (@game.GameCode)
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@game.GameCode">
+                                    @game.GameName (@game.GameCode)
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">결과 보기</button>
+            </form>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.SelectedGameCode) && Model.Participants.Any())
+    {
+        <div class="custom-card mb-4">
+            <div class="card-header py-3">
+                <h5 class="card-title mb-0">상위 3명</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @for (int i = 0; i < Model.Top3.Count; i++)
+                    {
+                        var rank = i + 1;
+                        var participant = Model.Top3[i];
+                        <div class="col-md-4">
+                            <div class="card text-center shadow-sm">
+                                <div class="card-header bg-@(rank == 1 ? "warning" : rank == 2 ? "secondary" : "info") text-white">
+                                    <h6 class="mb-0">@rank 등</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">@participant.UserName</h5>
+                                    <p class="card-text text-muted">점수: @participant.UserScore</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-card">
+            <div class="card-header py-3">
+                <h5 class="card-title mb-0">전체 참가자 결과</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>순위</th>
+                            <th>ID</th>
+                            <th>이름</th>
+                            <th>토탈 점수</th>
+                            <th>자세히 보기</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Participants.Count; i++)
+                        {
+                            var participant = Model.Participants[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@participant.UserId</td>
+                                <td>@participant.UserName</td>
+                                <td>@participant.UserScore</td>
+                                <td>
+                                    <!-- 모달 트리거 버튼 -->
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal-@participant.UserId">
+                                        자세히 보기
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.SelectedGameCode))
+    {
+        <div class="alert alert-warning text-center">
+            선택한 대회의 결과가 없습니다.
+        </div>
+    }
+</div>
+
+<!-- 모달 -->
+@foreach (var participant in Model.Participants)
+{
+    <div class="modal fade" id="detailsModal-@participant.UserId" tabindex="-1" aria-labelledby="detailsModalLabel-@participant.UserId" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel-@participant.UserId">@participant.UserName 님의 점수 상세</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @foreach (var courseGroup in participant.ScoreDetails.GroupBy(d => d.CourseName))
+                    {
+                        <h5 class="mt-3">@courseGroup.Key</h5> <!-- 코스 이름 -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center">
+                                <thead class="table-light">
+                                    <tr>
+                                        @foreach (var detail in courseGroup)
+                                        {
+                                            <th>@detail.HoleName</th> <!-- 홀 번호 -->
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        @foreach (var detail in courseGroup)
+                                        {
+                                            <td>@detail.Score 점</td> <!-- 점수 -->
+                                        }
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="text-center mt-4">
+    <!-- 대회 종료 버튼 -->
+    <button type="button" class="btn btn-danger px-4"
+            @(string.IsNullOrWhiteSpace(Model.SelectedGameCode) ? "disabled" : "")
+            data-bs-toggle="modal" data-bs-target="#endGameModal">
+        대회 종료
+    </button>
+</div>
+
+<!-- 대회 종료 확인 모달 -->
+<div class="modal fade" id="endGameModal" tabindex="-1" aria-labelledby="endGameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="endGameModalLabel">대회 종료 확인</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                정말로 선택한 대회를 <strong>종료</strong>하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </div>
+            <div class="modal-footer">
+                <form method="post" asp-page-handler="EndGame">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="SelectedGameCode" value="@Model.SelectedGameCode" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="submit" class="btn btn-danger">종료</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
