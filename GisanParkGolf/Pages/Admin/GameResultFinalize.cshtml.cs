@@ -6,11 +6,11 @@ using GisanParkGolf.Pages.Admin.ViewModels;
 
 namespace GisanParkGolf.Pages.Admin
 {
-    public class GameResultsModel : PageModel
+    public class GameResultFinalizeModel : PageModel
     {
-        private readonly IGameResultService _gameResultService;
+        private readonly IGameResultFinalizeService _gameResultService;
 
-        public GameResultsModel(IGameResultService gameResultService)
+        public GameResultFinalizeModel(IGameResultFinalizeService gameResultService)
         {
             _gameResultService = gameResultService;
         }
@@ -18,16 +18,41 @@ namespace GisanParkGolf.Pages.Admin
         [BindProperty(SupportsGet = true)]
         public string? SelectedGameCode { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public string? SearchField { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string? SearchQuery { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public int PageIndex { get; set; } = 1;
+
+        [BindProperty(SupportsGet = true)]
+        public int PageSize { get; set; } = 10;
+
+        public int TotalPages { get; set; }
+        public List<GameInfoViewModel> PagedGames { get; set; } = new();
         public List<GameInfoViewModel> ScoreConfirmedGames { get; set; } = new();
         public List<ParticipantResultViewModel> Participants { get; set; } = new();
         public List<ParticipantResultViewModel> Top3 => Participants.OrderByDescending(p => p.UserScore).Take(3).ToList();
 
         public void OnGet()
         {
-            // "Score Confirmed" 상태의 대회 리스트 가져오기
-            ScoreConfirmedGames = _gameResultService.GetScoreConfirmedGames();
+            // 검색 및 페이징 처리
+            var allGames = _gameResultService.GetScoreConfirmedGames();
 
-            // 선택된 대회 결과 가져오기
+            if (!string.IsNullOrWhiteSpace(SearchField) && !string.IsNullOrWhiteSpace(SearchQuery))
+            {
+                allGames = allGames.Where(game =>
+                    (SearchField == "GameName" && (game.GameName?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false)) ||
+                    (SearchField == "GameCode" && (game.GameCode?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false))
+                ).ToList();
+            }
+
+            TotalPages = (int)Math.Ceiling(allGames.Count / (double)PageSize);
+            PagedGames = allGames.Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+
+            // 선택된 대회의 결과 가져오기
             if (!string.IsNullOrWhiteSpace(SelectedGameCode))
             {
                 Participants = _gameResultService.GetGameResults(SelectedGameCode);

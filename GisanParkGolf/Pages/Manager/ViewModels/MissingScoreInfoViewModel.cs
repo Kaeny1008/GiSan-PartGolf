@@ -18,5 +18,6 @@ namespace GisanParkGolf.Pages.Manager.ViewModels
     {
         public string? GameCode { get; set; }
         public string? GameName { get; set; }
+        public DateTime GameDate { get; set; }
     }
 }

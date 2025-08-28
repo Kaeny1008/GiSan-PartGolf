@@ -3,7 +3,7 @@ using GisanParkGolf.Pages.Manager.ViewModels;
 
 namespace GisanParkGolf.Pages.Admin.Services
 {
-    public interface IGameResultService
+    public interface IGameResultFinalizeService
     {
         List<GameInfoViewModel> GetScoreConfirmedGames();
         List<ParticipantResultViewModel> GetGameResults(string gameCode);

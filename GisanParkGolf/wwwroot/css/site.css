@@ -315,3 +315,37 @@ textarea.form-control {
     background-color: #e6f0fa !important;
 }
 /* 블루+그레이 조합 */
+
+.highlight-card {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef); /* 은은한 회색 그라데이션 */
+    border: 1px solid #ced4da; /* 연한 회색 테두리 */
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 */
+    padding: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .highlight-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* 강조된 그림자 */
+    }
+
+    .highlight-card .card-header {
+        background-color: #6c757d; /* 중간 톤의 회색 */
+        color: #ffffff; /* 흰색 텍스트 */
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #adb5bd; /* 연한 회색 테두리 */
+        border-radius: 0.5rem 0.5rem 0 0;
+        font-weight: bold;
+    }
+
+    .highlight-card .card-body {
+        padding: 1rem;
+        color: #495057; /* 차분한 텍스트 색상 */
+    }
+
+    .highlight-card .card-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }

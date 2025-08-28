@@ -39,7 +39,7 @@ public class Program
         builder.Services.AddScoped<IJoinGameService, JoinGameService>();
         builder.Services.AddScoped<ITeamScoreInputService, TeamScoreInputService>();
         builder.Services.AddScoped<IScoreMissingReportServece, ScoreMissingReportServece>();
-        builder.Services.AddScoped<IGameResultService, GameResultService>();
+        builder.Services.AddScoped<IGameResultFinalizeService, GameResultFinalizeService>();
 
         builder.Services.AddDbContext<MyDbContext>(options =>
             options.UseSqlServer(connectionString));
