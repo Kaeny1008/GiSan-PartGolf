@@ -1,5 +1,5 @@
 ﻿@page
-@model GisanParkGolf.Pages.Admin.GameResultsModel
+@model GisanParkGolf.Pages.Admin.GameResultFinalizeModel
 @{
     ViewData["Title"] = "대회 결과";
 }
@@ -10,68 +10,132 @@
 ))
 
 <div class="container mt-4">
-    <div class="custom-card mb-4">
+    <div class="custom-card">
+        <!-- 검색 컨트롤 -->
         <div class="card-header py-3">
-            <h5 class="card-title mb-0">대회 선택</h5>
+            @await Html.PartialAsync("_SearchControl", new GisanParkGolf.Pages.Shared.SearchControlModel
+            {
+                PageSize = Model.PageSize,
+                SearchField = Model.SearchField,
+                SearchQuery = Model.SearchQuery,
+                ResetPageName = "./GameResultFinalize",
+                FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+                {
+                    new() { Value = "GameName", Text = "대회명" },
+                    new() { Value = "GameCode", Text = "대회코드" },
+                    new() { Value = "GameDate", Text = "대회일자" }
+                }
+            })
         </div>
-        <div class="card-body">
-            <form method="get">
-                <div class="mb-3">
-                    <label for="gameCode" class="form-label">대회 선택</label>
-                    <select id="gameCode" name="SelectedGameCode" class="form-select">
-                        <option value="">-- 대회를 선택하세요 --</option>
-                        @foreach (var game in Model.ScoreConfirmedGames)
-                        {
-                            if (Model.SelectedGameCode == game.GameCode)
-                            {
-                                <option value="@game.GameCode" selected="selected">
-                                    @game.GameName (@game.GameCode)
-                                </option>
-                            }
-                            else
-                            {
-                                <option value="@game.GameCode">
-                                    @game.GameName (@game.GameCode)
-                                </option>
-                            }
-                        }
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">결과 보기</button>
-            </form>
-        </div>
+
+        <!-- 대회 목록 테이블 -->
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>No</th>
+                    <th>대회 코드</th>
+                    <th>대회 일자</th>
+                    <th>대회 이름</th>
+                    <th>선택</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.PagedGames != null && Model.PagedGames.Any())
+                {
+                    var rowIndex = 0;
+                    foreach (var game in Model.PagedGames)
+                    {
+                        <tr>
+                            <td>@(++rowIndex + (Model.PageIndex - 1) * Model.PageSize)</td>
+                            <td>@game.GameCode</td>
+                            <td>@game.GameDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>@game.GameName</td>
+                            <td>
+                                <form method="get">
+                                    <input type="hidden" name="SelectedGameCode" value="@game.GameCode" />
+                                    <button type="submit" class="btn btn-sm btn-primary">선택</button>
+                                </form>
+                            </td>
+                        </tr>
+                        rowIndex++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">데이터가 없습니다.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- 페이지네이션 컨트롤 -->
+        @await Html.PartialAsync("_Pagination", new GisanParkGolf.Pages.Shared.PaginationModel
+        {
+            PageIndex = Model.PageIndex,
+            TotalPages = Model.TotalPages,
+            GetPageUrl = i => Url.Page(
+                "./GameResultFinalize",
+                null,
+                new
+                {
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    PageIndex = i,
+                    PageSize = Model.PageSize
+                },
+                null) ?? ""
+        })
     </div>
 
     @if (!string.IsNullOrWhiteSpace(Model.SelectedGameCode) && Model.Participants.Any())
     {
-        <div class="custom-card mb-4">
-            <div class="card-header py-3">
+        <!-- 상위 3명 카드 -->
+        <div class="highlight-card mb-4">
+            <div class="card-header">
                 <h5 class="card-title mb-0">상위 3명</h5>
             </div>
             <div class="card-body">
                 <div class="row">
-                    @for (int i = 0; i < Model.Top3.Count; i++)
+                    @* 시상식 순서: 2등, 1등, 3등 *@
+                    @foreach (var rank in new[] { 2, 1, 3 })
                     {
-                        var rank = i + 1;
-                        var participant = Model.Top3[i];
-                        <div class="col-md-4">
-                            <div class="card text-center shadow-sm">
-                                <div class="card-header bg-@(rank == 1 ? "warning" : rank == 2 ? "secondary" : "info") text-white">
-                                    <h6 class="mb-0">@rank 등</h6>
-                                </div>
-                                <div class="card-body">
-                                    <h5 class="card-title">@participant.UserName</h5>
-                                    <p class="card-text text-muted">점수: @participant.UserScore</p>
+                        var participant = Model.Top3.ElementAtOrDefault(rank - 1);
+                        if (participant != null)
+                        {
+                            <div class="col-md-4">
+                                <div class="card text-center shadow-sm">
+                                    <div class="card-header bg-@(rank == 1 ? "warning" : rank == 2 ? "secondary" : "info") text-white">
+                                        <h6 class="mb-0">
+                                            @if (rank == 1)
+                                            {
+                                                <i class="bi bi-trophy-fill me-2"></i><span>1등</span>
+                                            }
+                                            else if (rank == 2)
+                                            {
+                                                <i class="bi bi-award me-2"></i><spana>2등</spana>
+                                            }
+                                            else if (rank == 3)
+                                            {
+                                                <i class="bi bi-star-fill me-2"></i><span>3등</span>
+                                            }
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">@participant.UserName</h5>
+                                        <p class="card-text text-muted">점수: @participant.UserScore</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     }
                 </div>
             </div>
         </div>
 
-        <div class="custom-card">
-            <div class="card-header py-3">
+        <!-- 전체 참가자 결과 카드 -->
+        <div class="highlight-card">
+            <div class="card-header">
                 <h5 class="card-title mb-0">전체 참가자 결과</h5>
             </div>
             <div class="table-responsive">

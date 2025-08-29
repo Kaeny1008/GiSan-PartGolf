@@ -19,7 +19,7 @@ namespace GisanParkGolf.Data
         public virtual Game? Game { get; set; } // Navigation property
 
         [Required]
-        [Column("user_id", TypeName = "varchar(15)")]
+        [Column("user_id", TypeName = "varchar(50)")]
         public string UserId { get; set; } = string.Empty;
 
         [ForeignKey("UserId")]

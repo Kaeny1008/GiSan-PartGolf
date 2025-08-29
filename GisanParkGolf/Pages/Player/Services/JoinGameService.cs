@@ -361,7 +361,8 @@ namespace GisanParkGolf.Services.Player
                 AssignedHoleNumber = assignment?.HoleNumber,
                 AssignedTeamNumber = assignment?.TeamNumber,
                 AssignedCourseOrder = assignment?.CourseOrder,
-                AllAssignments = allAssignments
+                AllAssignments = allAssignments,
+                GameStatus = game.GameStatus
             };
         }
 

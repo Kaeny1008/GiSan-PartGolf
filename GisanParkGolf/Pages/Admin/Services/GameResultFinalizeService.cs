@@ -4,11 +4,11 @@ using GisanParkGolf.Pages.Manager.ViewModels;
 
 namespace GisanParkGolf.Pages.Admin.Services
 {
-    public class GameResultService : IGameResultService
+    public class GameResultFinalizeService : IGameResultFinalizeService
     {
         private readonly MyDbContext _dbContext;
 
-        public GameResultService(MyDbContext dbContext)
+        public GameResultFinalizeService(MyDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -16,12 +16,13 @@ namespace GisanParkGolf.Pages.Admin.Services
         public List<GameInfoViewModel> GetScoreConfirmedGames()
         {
             return _dbContext.Games
-                .Where(g => g.GameStatus == "Score Confirmed")
+                .Where(g => g.GameStatus == "Score Confirmed" || g.GameStatus == "GameEnd")
                 .OrderByDescending(g => g.GameDate)
                 .Select(g => new GameInfoViewModel
                 {
                     GameCode = g.GameCode,
-                    GameName = g.GameName
+                    GameName = g.GameName,
+                    GameDate = g.GameDate
                 })
                 .ToList();
         }

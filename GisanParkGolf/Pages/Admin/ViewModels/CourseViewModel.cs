@@ -4,5 +4,6 @@
     {
         public string CourseName { get; set; } = "";
         public int HoleCount { get; set; }
+        public int TotalHoles { get; set; }
     }
 }

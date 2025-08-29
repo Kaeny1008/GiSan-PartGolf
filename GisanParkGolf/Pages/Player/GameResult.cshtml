@@ -1,0 +1,225 @@
+﻿@page "{GameCode}"
+@model GisanParkGolf.Pages.Player.GameResultModel
+@{
+    ViewData["Title"] = "대회 결과";
+}
+
+<div class="container mt-4">
+    @await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음", "대회의 최종 결과를 확인하세요."))
+
+    <!-- 뒤로 가기 버튼 -->
+    <div class="mb-3 text-end">
+        <button class="btn btn-secondary" onclick="history.back()">뒤로 돌아가기</button>
+    </div>
+
+    <!-- 본인 결과 -->
+    <div class="custom-card shadow-sm mb-4">
+        <div class="card-header bg-gradient text-white d-flex align-items-center justify-content-start" style="background: linear-gradient(90deg, #007bff, #0056b3);">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-bar-chart-fill me-2"></i>내 대회 결과
+            </h5>
+        </div>
+
+        <div class="card-body mt-4">
+            @if (Model.MyResult == null)
+            {
+                <p class="text-danger text-center mt-4 mb-4">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>결과가 없습니다.
+                </p>
+            }
+            else
+            {
+                <div class="row text-center justify-content-center align-items-center">
+                    <div class="col-6 col-md-3 mb-3 mb-md-0">
+                        <div class="mb-2">
+                            <i class="bi bi-person-fill fs-2 text-primary"></i>
+                        </div>
+                        <div class="fw-semibold small text-secondary">이름</div>
+                        <div class="fw-bold fs-5">@Model.MyResult.UserName</div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3 mb-md-0">
+                        <div class="mb-2">
+                            <i class="bi bi-calculator-fill fs-2 text-info"></i>
+                        </div>
+                        <div class="fw-semibold small text-secondary">총 점수</div>
+                        <div class="fw-bold fs-5">@Model.MyResult.TotalScore</div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3 mb-md-0">
+                        <div class="mb-2">
+                            <i class="bi bi-trophy-fill fs-2 text-warning"></i>
+                        </div>
+                        <div class="fw-semibold small text-secondary">순위</div>
+                        <div class="fw-bold fs-5">
+                            @if (Model.MyResult.Rank == 1)
+                            {
+                                <span class="text-warning" title="축하합니다!">🎉 1위</span>
+                            }
+                            else if (Model.MyResult.Rank == 2)
+                            {
+                                <span class="text-secondary" title="축하합니다!">🎉 2위</span>
+                            }
+                            else if (Model.MyResult.Rank == 3)
+                            {
+                                <span class="text-success" title="축하합니다!">🎉 3위</span>
+                            }
+                            else
+                            {
+                                @Model.MyResult.Rank
+                            }
+                        </div>
+                    </div>
+                    @* 
+                    <div class="col-6 col-md-3 mb-3 mb-md-0">
+                        <div class="mb-2">
+                            <i class="bi bi-award-fill fs-2 text-success"></i>
+                        </div>
+                        <div class="fw-semibold small text-secondary">상</div>
+                        <div class="fw-bold fs-5">@(string.IsNullOrWhiteSpace(Model.MyResult.Award) ? "없음" : Model.MyResult.Award)</div>
+                    </div>
+                    *@
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- 홀별 결과 -->
+    <div class="custom-card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">홀별 결과</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>코스</th>
+                        @if (Model.Courses != null && Model.Courses.Any())
+                        {
+                            for (int i = 1; i <= Model.Courses.Max(c => c.HoleCount); i++)
+                            {
+                                <th>@i</th> <!-- 홀 번호를 1부터 시작하여 표시 -->
+                            }
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.HoleResults != null && Model.HoleResults.Any())
+                    {
+                        @if (Model.Courses != null && Model.Courses.Any())
+                        {
+                            foreach (var course in Model.Courses)
+                            {
+                                <tr>
+                                    <td>@course.CourseName</td>
+                                    @for (int i = 1; i <= course.HoleCount; i++)
+                                    {
+                                        var holeResult = Model.HoleResults
+                                            .FirstOrDefault(h => h.CourseName == course.CourseName && h.HoleName == $"{i}번 홀");
+
+                                        if (holeResult != null)
+                                        {
+                                            <td>@holeResult.Score</td>
+                                        }
+                                        else
+                                        {
+                                            <td>-</td> <!-- 점수가 없는 경우 빈 값 표시 -->
+                                        }
+                                    }
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td class="text-center">코스 정보가 없습니다.</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="text-center">홀별 결과가 없습니다.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 전체 결과 -->
+    <div class="custom-card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">전체 대회 결과</h5>
+        </div>
+        <div class="table-responsive">
+            <!-- Search Control -->
+            @{
+                var searchModel = new GisanParkGolf.Pages.Shared.SearchControlModel
+                {
+                    PageSize = Model.PageSize,
+                    SearchField = Model.SearchField,
+                    SearchQuery = Model.SearchQuery,
+                    ResetPageName = "./MyResult",
+                    FieldOptions = new List<GisanParkGolf.Pages.Shared.SearchFieldOption>
+                    {
+                        new() { Value = "UserName", Text = "이름" },
+                        new() { Value = "Rank", Text = "순위" }
+                    }
+                };
+            }
+            @await Html.PartialAsync("_SearchControl", searchModel)
+
+            <!-- Results Table -->
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>순위</th>
+                        <th>이름</th>
+                        <th>총 점수</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.AllResults != null && Model.AllResults.Any())
+                    {
+                        foreach (var result in Model.AllResults)
+                        {
+                            var isMe = Model.MyResult != null && result.UserName == Model.MyResult.UserName;
+                            <tr class="@(isMe ? "table-primary" : "")">
+                                <td>@result.Rank</td>
+                                <td>@result.UserName</td>
+                                <td>@result.TotalScore</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center">결과가 없습니다.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Pagination Control -->
+            @{
+                var pagemodel = new GisanParkGolf.Pages.Shared.PaginationModel
+                {
+                    PageIndex = Model.PageIndex,
+                    TotalPages = Model.AllResults?.TotalPages ?? 1,
+                    GetPageUrl = i => Url.Page(
+                        "./GameResult",
+                        null,
+                        new
+                        {
+                            SearchField = Model.SearchField,
+                            SearchQuery = Model.SearchQuery,
+                            PageIndex = i,
+                            PageSize = Model.PageSize
+                        },
+                        null
+                    ) ?? ""
+                };
+            }
+            @await Html.PartialAsync("_Pagination", pagemodel)
+        </div>
+    </div>
+</div>
