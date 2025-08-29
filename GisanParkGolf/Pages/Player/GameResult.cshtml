@@ -1,0 +1,72 @@
+﻿@page "{GameCode}"
+@model GisanParkGolf.Pages.Player.GameResultModel
+@{
+    ViewData["Title"] = "대회 결과";
+}
+
+<div class="container mt-4">
+    @await Html.PartialAsync("Shared/Components/_HeaderCard", (ViewData["Title"] as string ?? "제목 없음", "대회의 최종 결과를 확인하세요."))
+
+    <!-- 뒤로 가기 버튼 -->
+    <div class="mb-3 text-end">
+        <button class="btn btn-secondary" onclick="history.back()">뒤로 돌아가기</button>
+    </div>
+
+    <!-- 본인 결과 -->
+    <div class="custom-card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">내 대회 결과</h5>
+        </div>
+        <br />
+        <div class="card-body">
+            @if (Model.MyResult == null)
+            {
+                <p class="text-danger">결과가 없습니다.</p>
+            }
+            else
+            {
+                <p><strong>이름:</strong> @Model.MyResult.UserName</p>
+                <p><strong>총 점수:</strong> @Model.MyResult.TotalScore</p>
+                <p><strong>순위:</strong> @Model.MyResult.Rank</p>
+                <p><strong>상:</strong> @(string.IsNullOrWhiteSpace(Model.MyResult.Award) ? "없음" : Model.MyResult.Award)</p>
+            }
+        </div>
+    </div>
+
+    <!-- 전체 결과 -->
+    <div class="custom-card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">전체 대회 결과</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>순위</th>
+                        <th>이름</th>
+                        <th>총 점수</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.AllResults != null && Model.AllResults.Any())
+                    {
+                        @foreach (var result in Model.AllResults)
+                        {
+                            <tr>
+                                <td>@result.Rank</td>
+                                <td>@result.UserName</td>
+                                <td>@result.TotalScore</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center">결과가 없습니다.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -356,52 +356,61 @@
         </div>
         <div class="text-center mt-4">
             <a asp-page="MyGame" class="btn btn-secondary btn-lg">목록으로</a>
-            @if (Model?.Game?.AssignmentStatus == "Assigned")
+            @if (Model?.Game?.GameStatus == "GameEnd") // GameEnd 상태일 때만 버튼 활성화
             {
-                @if ((Model?.Game?.IsCancelled ?? 1) == 0)
-                {
-                    <form id="cancelRequestForm"
-                          method="post"
-                          asp-page-handler="CancelRequest"
-                          asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
-                          class="d-inline">
-                        <input type="hidden" id="CancelRequestReason" name="CancelRequestReason" />
-                        <button type="button" class="btn btn-danger btn-lg" onclick="showCustomModal('cancelrequest')">참가취소 요청</button>
-                    </form>
-                }
-                else if ((Model?.Game?.IsCancelled ?? 1) == 1 && (Model?.Game?.Approval != null && Model?.Game?.Approval != myId))
-                {
-                    <form id="rejoinRequestForm"
-                          method="post"
-                          asp-page-handler="RejoinRequest"
-                          asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
-                          class="d-inline">
-                        <button type="button" class="btn btn-success btn-lg" onclick="showCustomModal('rejoinrequest')">재참가 요청</button>
-                    </form>
-                }
+                <a asp-page="GameResult" asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)" class="btn btn-primary btn-lg">
+                    대회결과 확인하기
+                </a>
             }
             else
             {
-                @if ((Model?.Game?.IsCancelled ?? 1) == 0)
+                @if (Model?.Game?.AssignmentStatus == "Assigned")
                 {
-                    <form id="cancelForm"
-                          method="post"
-                          asp-page-handler="Cancel"
-                          asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
-                          class="d-inline">
-                        <input type="hidden" id="CancelReason" name="CancelReason" />
-                        <button type="button" class="btn btn-danger btn-lg" onclick="showCustomModal('cancel')">참가취소</button>
-                    </form>
+                    @if ((Model?.Game?.IsCancelled ?? 1) == 0)
+                    {
+                        <form id="cancelRequestForm"
+                              method="post"
+                              asp-page-handler="CancelRequest"
+                              asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
+                              class="d-inline">
+                            <input type="hidden" id="CancelRequestReason" name="CancelRequestReason" />
+                            <button type="button" class="btn btn-danger btn-lg" onclick="showCustomModal('cancelrequest')">참가취소 요청</button>
+                        </form>
+                    }
+                    else if ((Model?.Game?.IsCancelled ?? 1) == 1 && (Model?.Game?.Approval != null && Model?.Game?.Approval != myId))
+                    {
+                        <form id="rejoinRequestForm"
+                              method="post"
+                              asp-page-handler="RejoinRequest"
+                              asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
+                              class="d-inline">
+                            <button type="button" class="btn btn-success btn-lg" onclick="showCustomModal('rejoinrequest')">재참가 요청</button>
+                        </form>
+                    }
                 }
                 else
                 {
-                    <form id="rejoinForm"
-                          method="post"
-                          asp-page-handler="Rejoin"
-                          asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
-                          class="d-inline">
-                        <button type="button" class="btn btn-success btn-lg" onclick="showCustomModal('rejoin')">재참가</button>
-                    </form>
+                    @if ((Model?.Game?.IsCancelled ?? 1) == 0)
+                    {
+                        <form id="cancelForm"
+                              method="post"
+                              asp-page-handler="Cancel"
+                              asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
+                              class="d-inline">
+                            <input type="hidden" id="CancelReason" name="CancelReason" />
+                            <button type="button" class="btn btn-danger btn-lg" onclick="showCustomModal('cancel')">참가취소</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form id="rejoinForm"
+                              method="post"
+                              asp-page-handler="Rejoin"
+                              asp-route-GameCode="@(Model?.Game?.GameCode ?? string.Empty)"
+                              class="d-inline">
+                            <button type="button" class="btn btn-success btn-lg" onclick="showCustomModal('rejoin')">재참가</button>
+                        </form>
+                    }
                 }
             }
         </div>

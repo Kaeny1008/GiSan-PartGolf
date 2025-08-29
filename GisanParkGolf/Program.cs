@@ -36,6 +36,7 @@ public class Program
         builder.Services.AddScoped<IPlayerService, PlayerService>();
         builder.Services.AddScoped<IStadiumService, StadiumService>();
         builder.Services.AddScoped<IGameService, GameService>();
+        builder.Services.AddScoped<IGameResutService, GameResultService>();
         builder.Services.AddScoped<IJoinGameService, JoinGameService>();
         builder.Services.AddScoped<ITeamScoreInputService, TeamScoreInputService>();
         builder.Services.AddScoped<IScoreMissingReportServece, ScoreMissingReportServece>();
